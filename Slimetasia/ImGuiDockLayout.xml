@@ -1,0 +1,20 @@
+<DockSpaces>
+    <Docking1 Size.x="860" Size.y="889.84998" Pos.x="0" Pos.y="18" topSize.x="0" topSize.y="0" btmSize.x="0" btmSize.y="0" leftSize.x="0" leftSize.y="0" RightSize.x="0" RightSize.y="0"/>
+    <Docking2 Size.x="438.60001" Size.y="1348.465" Pos.x="3001" Pos.y="18" topSize.x="0" topSize.y="669.97345" btmSize.x="0" btmSize.y="643.49152" leftSize.x="0" leftSize.y="0" RightSize.x="0" RightSize.y="0"/>
+    <Docking3 Size.x="2141.3999" Size.y="889.84998" Pos.x="860" Pos.y="18" topSize.x="0" topSize.y="0" btmSize.x="0" btmSize.y="0" leftSize.x="0" leftSize.y="0" RightSize.x="0" RightSize.y="0"/>
+    <Docking4 Size.x="3001.3999" Size.y="458.61502" Pos.x="0" Pos.y="907" topSize.x="0" topSize.y="0" btmSize.x="0" btmSize.y="0" leftSize.x="0" leftSize.y="0" RightSize.x="1540.5658" RightSize.y="0"/>
+</DockSpaces>
+
+<Docks>
+    <Console Pos.x="8" Pos.y="934" Size.x="30" Size.y="30" parent="Docking4" Active="true" Status="0" Slot="0"/>
+    <Outliner Pos.x="3009" Pos.y="45" Size.x="60" Size.y="180" parent="Docking2" Active="true" Status="0" Slot="0"/>
+    <Inspector Pos.x="8" Pos.y="45" Size.x="30" Size.y="30" parent="Docking1" Active="true" Status="0" Slot="0"/>
+    <ViewPort Pos.x="868" Pos.y="45" Size.x="30" Size.y="30" parent="Docking3" Active="true" Status="0" Slot="0"/>
+    <Archetype Pos.x="1456" Pos.y="934" Size.x="30" Size.y="30" parent="Docking4" Active="true" Status="0" Slot="3"/>
+    <LayerEditor Pos.x="3009" Pos.y="718" Size.x="30" Size.y="30" parent="Docking2" Active="true" Status="0" Slot="1"/>
+    <Profiler Pos.x="868" Pos.y="45" Size.x="30" Size.y="30" parent="Docking3" Active="false" Status="0" Slot="0"/>
+    <TextEditor Pos.x="868" Pos.y="45" Size.x="30" Size.y="30" parent="Docking3" Active="false" Status="0" Slot="0"/>
+    <Tags Pos.x="1456" Pos.y="934" Size.x="30" Size.y="30" parent="Docking4" Active="false" Status="0" Slot="3"/>
+    <Physics Pos.x="868" Pos.y="45" Size.x="30" Size.y="30" parent="Docking3" Active="false" Status="0" Slot="0"/>
+    <ResourceManager Pos.x="1436" Pos.y="166" Size.x="30" Size.y="30" Active="true" Status="1" Slot="4"/>
+</Docks>

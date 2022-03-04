@@ -1,0 +1,914 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="External Libraries">
+      <UniqueIdentifier>{54725fc6-a2a1-4a93-bd4a-a25280214414}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\imgui">
+      <UniqueIdentifier>{93fcaf28-1e12-4d28-9ba6-c6e330a1d7db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\tinyxml2">
+      <UniqueIdentifier>{25204636-06ef-4512-a02e-0c8f61bd21e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files">
+      <UniqueIdentifier>{1a9b9443-8de6-4dcf-9085-f4b941fee16f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Math">
+      <UniqueIdentifier>{b6388b5c-4b4e-4514-bfce-f210836d1002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core">
+      <UniqueIdentifier>{7ee737ca-8ece-4383-a894-f4c94286b97c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components">
+      <UniqueIdentifier>{197fb5dc-d40d-4bf8-a6b3-dbe000f73cb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{92b61d4a-7618-4138-9140-0536e2f26660}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Editor">
+      <UniqueIdentifier>{be1ab7de-1f5a-48d1-9a7a-e81a26c462aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\imgui\Holy Bible">
+      <UniqueIdentifier>{f0c5491b-0eff-4a40-bc0e-eaeee9889663}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\LuaBinding">
+      <UniqueIdentifier>{1340a3b4-b058-4596-b115-955689ce9d37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Physics">
+      <UniqueIdentifier>{db72b21d-e04d-4773-823f-ed2eab893b6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Resource">
+      <UniqueIdentifier>{038c123c-f016-47a2-bbbe-86f38896a4e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Resource\ResourceTypes">
+      <UniqueIdentifier>{ff28037e-5392-4351-9dd2-362f6ad1f6ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Utilities">
+      <UniqueIdentifier>{9a5ab739-eb5f-4024-9740-50920167d4e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Utilities\MemoryAllocators">
+      <UniqueIdentifier>{2b4483eb-9daf-4ca4-b146-c9920a93fb38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Utilities\Containers">
+      <UniqueIdentifier>{ee55b64f-ba2a-4439-866c-437d83a23b43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Audio">
+      <UniqueIdentifier>{52c21894-d225-45fe-a737-6d31302cb7cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Graphics">
+      <UniqueIdentifier>{58369cba-d2e4-476c-aa2b-0c9260523bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Physics">
+      <UniqueIdentifier>{ad00f007-570c-4101-baf1-9986d2ae59ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Graphics">
+      <UniqueIdentifier>{aa8ba1c9-102b-40e5-88e5-25b48ab4de3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Graphics\RenderPasses">
+      <UniqueIdentifier>{066a11ad-51f9-42d8-a0a4-280ab6ce748c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Physics\Ray">
+      <UniqueIdentifier>{9711d362-f27b-4e32-9d6d-9ba12cc3ec67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Physics\2D Collision Meshes">
+      <UniqueIdentifier>{8632c678-e41a-47e5-9919-e5f5c3ef4a4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Physics\Reactive">
+      <UniqueIdentifier>{0832d77f-98ce-4af0-ada7-7592f498b840}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Physics\Rigidbody">
+      <UniqueIdentifier>{3d44d2cd-1784-4933-bd35-023adef787a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\ParticleSystem">
+      <UniqueIdentifier>{2bd7fcc4-b0d2-4e1f-b496-01f7c468cb3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Physics\Physics Material">
+      <UniqueIdentifier>{d7b8da70-0ace-491c-ad51-4e2d617dd0f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Components\Physics\3D Collision Meshes">
+      <UniqueIdentifier>{9f4006eb-d6de-4ec9-a3cc-3d5bc8b14e97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Physics\Collision Dispatch">
+      <UniqueIdentifier>{9fe4e830-b5c0-4543-84f6-db3cb0111665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Physics\Manifold">
+      <UniqueIdentifier>{2b882372-7739-484e-a5d9-841d8ca92d5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Physics\Collision Detection Algorithms">
+      <UniqueIdentifier>{5aa17680-5902-402e-8560-50528c0270f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Utilities\AABB Tree">
+      <UniqueIdentifier>{3bfc385d-5375-49cd-bf6c-25c98e1d0955}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\PlayerPref">
+      <UniqueIdentifier>{3faed5f5-1f15-4bf4-8108-767a97912599}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="External Libraries\tinyxml2\tinyxml2.cpp">
+      <Filter>External Libraries\tinyxml2</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Engine Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="IComponent.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Engine Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Engine Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions.cpp">
+      <Filter>Engine Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="AppConsole.cpp">
+      <Filter>Engine Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Serializer.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceBase.cpp">
+      <Filter>Engine Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Engine Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="luascript.cpp">
+      <Filter>Engine Files\Core\LuaBinding</Filter>
+    </ClCompile>
+    <ClCompile Include="luascript_defines.cpp">
+      <Filter>Engine Files\Core\LuaBinding</Filter>
+    </ClCompile>
+    <ClCompile Include="Dock.cpp">
+      <Filter>Engine Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiRenderer.cpp">
+      <Filter>Engine Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioSystem.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Factory.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsSystem.cpp">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceImporter.cpp">
+      <Filter>Engine Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioResource.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClCompile>
+    <ClCompile Include="PoolAllocator.cpp">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Engine Files\Core\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="LightBase.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderer.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLight.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioEmitter.cpp">
+      <Filter>Engine Files\Components\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioListener.cpp">
+      <Filter>Engine Files\Components\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometryPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="LightPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshAnimator.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationSystem.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RaycastInfo.cpp">
+      <Filter>Engine Files\Core\Physics\Ray</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionMesh_2D.cpp">
+      <Filter>Engine Files\Components\Physics\2D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="ReactiveComponent.cpp">
+      <Filter>Engine Files\Components\Physics\Reactive</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidbodyComponent.cpp">
+      <Filter>Engine Files\Components\Physics\Rigidbody</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceHandle.cpp">
+      <Filter>Engine Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="FinalPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Engine Files\Core\ParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticlePass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="SingleFrameAllocator.cpp">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsMaterial.cpp">
+      <Filter>Engine Files\Core\Physics\Physics Material</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\ImGuizmo.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\ImSequencer.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\ImCurveEdit.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_draw.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_demo.cpp">
+      <Filter>External Libraries\imgui\Holy Bible</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorCamera.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderLayer.cpp">
+      <Filter>Engine Files\Core\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionMesh_3D.cpp">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollider.cpp">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider.cpp">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="PECollisionDispatch.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Dispatch</Filter>
+    </ClCompile>
+    <ClCompile Include="Octree.cpp">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="ConvexPolygonVsConvexPolygon.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereVsConvexPolygon.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Pathfinding.cpp">
+      <Filter>Engine Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="AISystem.cpp">
+      <Filter>Engine Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="CapsuleVsCapsule.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="CapsuleVsConvexPolygon.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereVsCapsule.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereVsSphere.cpp">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Manifold.cpp">
+      <Filter>Engine Files\Core\Physics\Manifold</Filter>
+    </ClCompile>
+    <ClCompile Include="ConvexCollider.cpp">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="EdgeData.cpp">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="CapsuleCollider.cpp">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsWorldSettings.cpp">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceEntry.cpp">
+      <Filter>Engine Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="AABB.cpp">
+      <Filter>Engine Files\Utilities\AABB Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRenderer.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerPref.cpp">
+      <Filter>Engine Files\Core\PlayerPref</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Plane.cpp">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterSimulator.cpp">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterPass.cpp">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoPlayer.cpp">
+      <Filter>Engine Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Engine Files\Core\Physics\Ray</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="External Libraries\tinyxml2\tinyxml2.h">
+      <Filter>External Libraries\tinyxml2</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.h">
+      <Filter>Engine Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>Engine Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Engine Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="IComponent.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Engine Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CorePrerequisites.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Engine Files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>Engine Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="any.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions.h">
+      <Filter>Engine Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="AppConsole.h">
+      <Filter>Engine Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializer.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceBase.h">
+      <Filter>Engine Files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="luascript.h">
+      <Filter>Engine Files\Core\LuaBinding</Filter>
+    </ClInclude>
+    <ClInclude Include="Dock.h">
+      <Filter>Engine Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiRenderer.h">
+      <Filter>Engine Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioSystem.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Factory.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsSystem.h">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceImporter.h">
+      <Filter>Engine Files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceHandle.h">
+      <Filter>Engine Files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioResource.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>Engine Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultMemAllocator.h">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolAllocator.h">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>Engine Files\Utilities\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Pair.h">
+      <Filter>Engine Files\Utilities\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="LightBase.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshAnimator.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRenderer.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioEmitter.h">
+      <Filter>Engine Files\Components\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioListener.h">
+      <Filter>Engine Files\Components\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_enums.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="PEVector.h">
+      <Filter>Engine Files\Utilities\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="LightPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Engine Files\Core\Physics\Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationSystem.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RaycastInfo.h">
+      <Filter>Engine Files\Core\Physics\Ray</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionMesh_2D.h">
+      <Filter>Engine Files\Components\Physics\2D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="ReactiveComponent.h">
+      <Filter>Engine Files\Components\Physics\Reactive</Filter>
+    </ClInclude>
+    <ClInclude Include="RigidbodyComponent.h">
+      <Filter>Engine Files\Components\Physics\Rigidbody</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FinalPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Engine Files\Core\ParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Engine Files\Core\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticlePass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsDefs.h">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="SingleFrameAllocator.h">
+      <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
+    </ClInclude>
+    <ClInclude Include="PEList.h">
+      <Filter>Engine Files\Utilities\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsMaterial.h">
+      <Filter>Engine Files\Core\Physics\Physics Material</Filter>
+    </ClInclude>
+    <ClInclude Include="DDS.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui_internal.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\ImGuizmo.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\ImSequencer.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_rectpack.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_textedit.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imconfig.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\ImCurveEdit.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="MathDefs.h">
+      <Filter>Engine Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorCamera.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderLayer.h">
+      <Filter>Engine Files\Core\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsWorldSettings.h">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionMesh_3D.h">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollider.h">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxCollider.h">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="PECollisionDispatch.h">
+      <Filter>Engine Files\Core\Physics\Collision Dispatch</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionDispatch.h">
+      <Filter>Engine Files\Core\Physics\Collision Dispatch</Filter>
+    </ClInclude>
+    <ClInclude Include="IntersectionData.h">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Octree.h">
+      <Filter>Engine Files\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="ConvexPolygonVsConvexPolygon.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereVsConvexPolygon.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereVsSphere.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereVsCapsule.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsuleVsCapsule.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsuleVsConvexPolygon.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetectionAlgorithm.h">
+      <Filter>Engine Files\Core\Physics\Collision Detection Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Pathfinding.h">
+      <Filter>Engine Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="AISystem.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Manifold.h">
+      <Filter>Engine Files\Core\Physics\Manifold</Filter>
+    </ClInclude>
+    <ClInclude Include="ConvexCollider.h">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="EdgeData.h">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsuleCollider.h">
+      <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_truetype.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceEntry.h">
+      <Filter>Engine Files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="ISystem.h">
+      <Filter>Engine Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Engine Files\Utilities\AABB Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicAABBTree.h">
+      <Filter>Engine Files\Utilities\AABB Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Engine Files\Resource\ResourceTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="TextRenderer.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLight.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerPref.h">
+      <Filter>Engine Files\Core\PlayerPref</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Plane.h">
+      <Filter>Engine Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterPass.h">
+      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoPlayer.h">
+      <Filter>Engine Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\DebugLine.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\DebugOutline.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\DebugOutline.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\FinalPass.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\GeometryPass.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\GeometryPass.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\LightAmbient.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\LightDirectional.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\LightPoint.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\LightSpot.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ParticleBillboard.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ParticleBillboard.geom">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ParticleBillboard.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\PostProcess.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ShadowPoint.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ShadowPoint.geom">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ShadowTransform.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\Skybox.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\Skybox.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\BasicDraw.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\BasicEmpty.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\BasicTransform.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\BloomPrePass.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\DebugGizmos.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\DebugGizmos.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\DebugLine.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\TextRender.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\TextRender.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\GaussianBlur.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\SSAO.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\SimpleBlur.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="WaterSimulator.h">
+      <Filter>Engine Files\Components\Graphics</Filter>
+    </None>
+    <None Include="Shaders\WaterShader.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\WaterShader.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\VideoShader.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\VideoShader.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\LightEmissive.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ShadowDirectional.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ParticleStencil.geom">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\ParticleStencil.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ApplicationIcon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Slimetasia.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

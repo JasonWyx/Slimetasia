@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release with Asserts|x64">
+      <Configuration>Release with Asserts</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release without Editor|x64">
+      <Configuration>Release without Editor</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}</ProjectGuid>
+    <RootNamespace>Slimetasia</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Slimetasia</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <TargetName>Slimetasia</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <TargetName>Slimetasia</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">
+    <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <TargetName>Slimetasia</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">
+    <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <TargetName>Slimetasia</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR_ENABLED;USE_PASSERT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR_ENABLED;USE_PASSERT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="AISystem.cpp" />
+    <ClCompile Include="AnimationSystem.cpp" />
+    <ClCompile Include="BoxCollider.cpp" />
+    <ClCompile Include="CapsuleCollider.cpp" />
+    <ClCompile Include="CapsuleVsCapsule.cpp" />
+    <ClCompile Include="CapsuleVsConvexPolygon.cpp" />
+    <ClCompile Include="CollisionMesh_2D.cpp" />
+    <ClCompile Include="CollisionMesh_3D.cpp" />
+    <ClCompile Include="Actions.cpp" />
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AppConsole.cpp" />
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="AudioEmitter.cpp" />
+    <ClCompile Include="AudioListener.cpp" />
+    <ClCompile Include="AudioResource.cpp" />
+    <ClCompile Include="AudioSystem.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ConvexCollider.cpp" />
+    <ClCompile Include="ConvexPolygonVsConvexPolygon.cpp" />
+    <ClCompile Include="DebugPass.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="Dock.cpp" />
+    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="EditorCamera.cpp" />
+    <ClCompile Include="External Libraries\imgui\ImCurveEdit.cpp" />
+    <ClCompile Include="External Libraries\imgui\imgui.cpp" />
+    <ClCompile Include="External Libraries\imgui\ImGuizmo.cpp" />
+    <ClCompile Include="External Libraries\imgui\imgui_demo.cpp" />
+    <ClCompile Include="External Libraries\imgui\imgui_draw.cpp" />
+    <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="External Libraries\imgui\ImSequencer.cpp" />
+    <ClCompile Include="External Libraries\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="Factory.cpp" />
+    <ClCompile Include="FinalPass.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GeometryPass.cpp" />
+    <ClCompile Include="EdgeData.cpp" />
+    <ClCompile Include="IComponent.cpp" />
+    <ClCompile Include="ImGuiRenderer.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Layer.cpp" />
+    <ClCompile Include="LightBase.cpp" />
+    <ClCompile Include="LightPass.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="luascript.cpp" />
+    <ClCompile Include="luascript_defines.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Manifold.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshAnimator.cpp" />
+    <ClCompile Include="Octree.cpp" />
+    <ClCompile Include="ParticlePass.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="Pathfinding.cpp" />
+    <ClCompile Include="PECollisionDispatch.cpp" />
+    <ClCompile Include="PhysicsMaterial.cpp" />
+    <ClCompile Include="PhysicsSystem.cpp" />
+    <ClCompile Include="PhysicsWorldSettings.cpp" />
+    <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="PlayerPref.cpp" />
+    <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="PoolAllocator.cpp" />
+    <ClCompile Include="PostProcessPass.cpp" />
+    <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="RaycastInfo.cpp" />
+    <ClCompile Include="ReactiveComponent.cpp" />
+    <ClCompile Include="Reflection.cpp" />
+    <ClCompile Include="MeshRenderer.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderLayer.cpp" />
+    <ClCompile Include="RenderPass.cpp" />
+    <ClCompile Include="ResourceBase.cpp" />
+    <ClCompile Include="ResourceEntry.cpp" />
+    <ClCompile Include="ResourceHandle.cpp" />
+    <ClCompile Include="ResourceImporter.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="RigidbodyComponent.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">false</PreprocessToFile>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Serializer.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShadowPass.cpp" />
+    <ClCompile Include="SingleFrameAllocator.cpp" />
+    <ClCompile Include="SkyboxPass.cpp" />
+    <ClCompile Include="SphereCollider.cpp" />
+    <ClCompile Include="SphereVsCapsule.cpp" />
+    <ClCompile Include="SphereVsConvexPolygon.cpp" />
+    <ClCompile Include="SphereVsSphere.cpp" />
+    <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="TextRenderer.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="VideoPlayer.cpp" />
+    <ClCompile Include="WaterPass.cpp" />
+    <ClCompile Include="WaterSimulator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AABB.h" />
+    <ClInclude Include="AISystem.h" />
+    <ClInclude Include="AnimationSystem.h" />
+    <ClInclude Include="BaseDetectionAlgorithm.h" />
+    <ClInclude Include="BoxCollider.h" />
+    <ClInclude Include="CapsuleCollider.h" />
+    <ClInclude Include="CapsuleVsCapsule.h" />
+    <ClInclude Include="CapsuleVsConvexPolygon.h" />
+    <ClInclude Include="CollisionDispatch.h" />
+    <ClInclude Include="CollisionMesh_2D.h" />
+    <ClInclude Include="CollisionMesh_3D.h" />
+    <ClInclude Include="Actions.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="any.h" />
+    <ClInclude Include="AppConsole.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="AudioEmitter.h" />
+    <ClInclude Include="AudioListener.h" />
+    <ClInclude Include="AudioResource.h" />
+    <ClInclude Include="AudioSystem.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConvexCollider.h" />
+    <ClInclude Include="ConvexPolygonVsConvexPolygon.h" />
+    <ClInclude Include="DDS.h" />
+    <ClInclude Include="DebugPass.h" />
+    <ClInclude Include="DefaultMemAllocator.h" />
+    <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="DynamicAABBTree.h" />
+    <ClInclude Include="External Libraries\imgui\imconfig.h" />
+    <ClInclude Include="External Libraries\imgui\ImCurveEdit.h" />
+    <ClInclude Include="External Libraries\imgui\imgui.h" />
+    <ClInclude Include="External Libraries\imgui\ImGuizmo.h" />
+    <ClInclude Include="External Libraries\imgui\imgui_internal.h" />
+    <ClInclude Include="External Libraries\imgui\ImSequencer.h" />
+    <ClInclude Include="External Libraries\imgui\imstb_rectpack.h" />
+    <ClInclude Include="External Libraries\imgui\imstb_textedit.h" />
+    <ClInclude Include="External Libraries\imgui\imstb_truetype.h" />
+    <ClInclude Include="FinalPass.h" />
+    <ClInclude Include="EdgeData.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="Frustum.h" />
+    <ClInclude Include="Manifold.h" />
+    <ClInclude Include="ParticlePass.h" />
+    <ClInclude Include="ParticleSystem.h" />
+    <ClInclude Include="Pathfinding.h" />
+    <ClInclude Include="PECollisionDispatch.h" />
+    <ClInclude Include="PEList.h" />
+    <ClInclude Include="PhysicsDefs.h" />
+    <ClInclude Include="GeometryPass.h" />
+    <ClInclude Include="LightBase.h" />
+    <ClInclude Include="LightPass.h" />
+    <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="MemoryAllocator.h" />
+    <ClInclude Include="MemoryManager.h" />
+    <ClInclude Include="Pair.h" />
+    <ClInclude Include="PEVector.h" />
+    <ClInclude Include="PhysicsMaterial.h" />
+    <ClInclude Include="PhysicsWorldSettings.h" />
+    <ClInclude Include="Plane.h" />
+    <ClInclude Include="PlayerPref.h" />
+    <ClInclude Include="PointLight.h" />
+    <ClInclude Include="PoolAllocator.h" />
+    <ClInclude Include="PostProcessPass.h" />
+    <ClInclude Include="RaycastInfo.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderLayer.h" />
+    <ClInclude Include="RenderPass.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ResourceEntry.h" />
+    <ClInclude Include="ShadowPass.h" />
+    <ClInclude Include="SingleFrameAllocator.h" />
+    <ClInclude Include="SkyboxPass.h" />
+    <ClInclude Include="smart_enums.h" />
+    <ClInclude Include="SphereCollider.h" />
+    <ClInclude Include="SphereVsCapsule.h" />
+    <ClInclude Include="SphereVsConvexPolygon.h" />
+    <ClInclude Include="SphereVsSphere.h" />
+    <ClInclude Include="SpotLight.h" />
+    <ClInclude Include="TextRenderer.h" />
+    <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="CorePrerequisites.h" />
+    <ClInclude Include="Dock.h" />
+    <ClInclude Include="Editor.h" />
+    <ClInclude Include="EditorCamera.h" />
+    <ClInclude Include="External Libraries\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="ImGuiRenderer.h" />
+    <ClInclude Include="IntersectionData.h" />
+    <ClInclude Include="luascript.h" />
+    <ClInclude Include="MathDefs.h" />
+    <ClInclude Include="MeshAnimator.h" />
+    <ClInclude Include="IComponent.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="ISystem.h" />
+    <ClInclude Include="Layer.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="Math.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Octree.h" />
+    <ClInclude Include="PhysicsSystem.h" />
+    <ClInclude Include="Quaternion.h" />
+    <ClInclude Include="Ray.h" />
+    <ClInclude Include="ReactiveComponent.h" />
+    <ClInclude Include="Reflection.h" />
+    <ClInclude Include="MeshRenderer.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="ResourceBase.h" />
+    <ClInclude Include="ResourceHandle.h" />
+    <ClInclude Include="ResourceImporter.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="RigidbodyComponent.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Serializer.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Transform.h" />
+    <ClInclude Include="Vector.h" />
+    <ClInclude Include="VideoPlayer.h" />
+    <ClInclude Include="WaterPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\BasicDraw.frag" />
+    <None Include="Shaders\BasicEmpty.frag" />
+    <None Include="Shaders\BasicTransform.vert" />
+    <None Include="Shaders\GaussianBlur.frag" />
+    <None Include="Shaders\BloomPrePass.frag" />
+    <None Include="Shaders\DebugGizmos.frag" />
+    <None Include="Shaders\DebugGizmos.vert" />
+    <None Include="Shaders\DebugLine.frag" />
+    <None Include="Shaders\DebugLine.vert" />
+    <None Include="Shaders\DebugOutline.frag" />
+    <None Include="Shaders\DebugOutline.vert" />
+    <None Include="Shaders\FinalPass.frag" />
+    <None Include="Shaders\GeometryPass.frag" />
+    <None Include="Shaders\GeometryPass.vert" />
+    <None Include="Shaders\LightAmbient.frag" />
+    <None Include="Shaders\LightDirectional.frag" />
+    <None Include="Shaders\LightEmissive.frag" />
+    <None Include="Shaders\LightPoint.frag" />
+    <None Include="Shaders\LightSpot.frag" />
+    <None Include="Shaders\ParticleBillboard.frag" />
+    <None Include="Shaders\ParticleBillboard.geom" />
+    <None Include="Shaders\ParticleBillboard.vert" />
+    <None Include="Shaders\ParticleStencil.geom" />
+    <None Include="Shaders\ParticleStencil.vert" />
+    <None Include="Shaders\PostProcess.frag" />
+    <None Include="Shaders\ShadowDirectional.frag" />
+    <None Include="Shaders\ShadowPoint.frag" />
+    <None Include="Shaders\ShadowPoint.geom" />
+    <None Include="Shaders\ShadowTransform.vert" />
+    <None Include="Shaders\SimpleBlur.frag" />
+    <None Include="Shaders\Skybox.frag" />
+    <None Include="Shaders\Skybox.vert" />
+    <None Include="Shaders\SSAO.frag" />
+    <None Include="Shaders\TextRender.frag" />
+    <None Include="Shaders\TextRender.vert" />
+    <None Include="Shaders\VideoShader.frag" />
+    <None Include="Shaders\VideoShader.vert" />
+    <None Include="Shaders\WaterShader.frag" />
+    <None Include="Shaders\WaterShader.vert" />
+    <None Include="WaterSimulator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ApplicationIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Slimetasia.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

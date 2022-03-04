@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Slimetasia", "Slimetasia\Slimetasia.vcxproj", "{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release with Asserts|x64 = Release with Asserts|x64
+		Release without Editor|x64 = Release without Editor|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Debug|x64.ActiveCfg = Debug|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Debug|x64.Build.0 = Debug|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release with Asserts|x64.ActiveCfg = Release with Asserts|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release with Asserts|x64.Build.0 = Release with Asserts|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release without Editor|x64.ActiveCfg = Release without Editor|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release without Editor|x64.Build.0 = Release without Editor|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release|x64.ActiveCfg = Release|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF96D83C-EDAE-48FE-9BB2-62C86BF9D924}
+	EndGlobalSection
+EndGlobal
