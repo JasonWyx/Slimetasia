@@ -105,7 +105,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR_ENABLED;USE_PASSERT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -160,7 +160,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR_ENABLED;USE_PASSERT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -199,13 +199,19 @@
     <ClCompile Include="Dock.cpp" />
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="EditorCamera.cpp" />
-    <ClCompile Include="External Libraries\imgui\ImCurveEdit.cpp" />
+    <ClCompile Include="External Libraries\ImGuizmo\GraphEditor.cpp" />
+    <ClCompile Include="External Libraries\ImGuizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="External Libraries\ImGuizmo\ImGradient.cpp" />
+    <ClCompile Include="External Libraries\ImGuizmo\ImGuizmo.cpp" />
+    <ClCompile Include="External Libraries\ImGuizmo\ImSequencer.cpp" />
+    <ClCompile Include="External Libraries\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="External Libraries\imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="External Libraries\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui.cpp" />
-    <ClCompile Include="External Libraries\imgui\ImGuizmo.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_demo.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_draw.cpp" />
+    <ClCompile Include="External Libraries\imgui\imgui_tables.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="External Libraries\imgui\ImSequencer.cpp" />
     <ClCompile Include="External Libraries\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="FinalPass.cpp" />
@@ -215,7 +221,6 @@
     <ClCompile Include="GeometryPass.cpp" />
     <ClCompile Include="EdgeData.cpp" />
     <ClCompile Include="IComponent.cpp" />
-    <ClCompile Include="ImGuiRenderer.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="LightBase.cpp" />
@@ -292,7 +297,7 @@
     <ClInclude Include="CollisionMesh_3D.h" />
     <ClInclude Include="Actions.h" />
     <ClInclude Include="Animation.h" />
-    <ClInclude Include="any.h" />
+    <ClInclude Include="Any.h" />
     <ClInclude Include="AppConsole.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="AudioEmitter.h" />
@@ -307,15 +312,23 @@
     <ClInclude Include="DefaultMemAllocator.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="DynamicAABBTree.h" />
+    <ClInclude Include="External Libraries\ImGuizmo\GraphEditor.h" />
+    <ClInclude Include="External Libraries\ImGuizmo\ImCurveEdit.h" />
+    <ClInclude Include="External Libraries\ImGuizmo\ImGradient.h" />
+    <ClInclude Include="External Libraries\ImGuizmo\ImGuizmo.h" />
+    <ClInclude Include="External Libraries\ImGuizmo\ImSequencer.h" />
+    <ClInclude Include="External Libraries\ImGuizmo\ImZoomSlider.h" />
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="External Libraries\imgui\imconfig.h" />
-    <ClInclude Include="External Libraries\imgui\ImCurveEdit.h" />
     <ClInclude Include="External Libraries\imgui\imgui.h" />
-    <ClInclude Include="External Libraries\imgui\ImGuizmo.h" />
     <ClInclude Include="External Libraries\imgui\imgui_internal.h" />
-    <ClInclude Include="External Libraries\imgui\ImSequencer.h" />
     <ClInclude Include="External Libraries\imgui\imstb_rectpack.h" />
     <ClInclude Include="External Libraries\imgui\imstb_textedit.h" />
     <ClInclude Include="External Libraries\imgui\imstb_truetype.h" />
+    <ClInclude Include="External Libraries\tinyxml2\tinyxml2.h" />
     <ClInclude Include="FinalPass.h" />
     <ClInclude Include="EdgeData.h" />
     <ClInclude Include="Font.h" />
@@ -365,10 +378,8 @@
     <ClInclude Include="Dock.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="EditorCamera.h" />
-    <ClInclude Include="External Libraries\tinyxml2\tinyxml2.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="ImGuiRenderer.h" />
     <ClInclude Include="IntersectionData.h" />
     <ClInclude Include="luascript.h" />
     <ClInclude Include="MathDefs.h" />

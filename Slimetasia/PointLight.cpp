@@ -5,7 +5,7 @@
 PointLight::PointLight(GameObject* parentObject)
     : LightBase(parentObject, "PointLight")
 {
-    p_assert(m_Transform);
+    ASSERT(m_Transform);
     BuildShadowMap();
 }
 

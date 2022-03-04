@@ -96,12 +96,12 @@ void Renderer::BuildRenderTargets()
 
     // Check framebuffer creation is a success
     GLenum status = glCheckNamedFramebufferStatus(m_Framebuffer, GL_FRAMEBUFFER);
-    p_assert(status == GL_FRAMEBUFFER_COMPLETE);
+    ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 }
 
 void Renderer::Update(float dt)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     if (Input::Instance().GetKeyUp(KEY_O)) m_IsDebugDrawOn = !m_IsDebugDrawOn;
 #endif
     // Update light positions
@@ -387,7 +387,7 @@ void Renderer::Update(float dt)
     }
 
     // Clear framebuffer for window
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -403,7 +403,7 @@ void Renderer::Update(float dt)
 
 void Renderer::DrawLine(const Vector3& s, const Vector3& e, Color4 color)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
     std::vector<Vector3> pts;
     pts.push_back(s);
@@ -414,14 +414,14 @@ void Renderer::DrawLine(const Vector3& s, const Vector3& e, Color4 color)
 
 void Renderer::DrawDebug(unsigned layerId, std::vector<Vector3> const& geometry, Color4 color, DebugPrimitiveType type)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     m_DebugPass.DrawDebug(layerId, geometry, color, type);
 #endif
 }
 
 void Renderer::DrawCube(float w, Vector3 pos)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     std::vector<Vector3> pts;
     float halfWidth = w;
     float halfHeight = w;
@@ -472,7 +472,7 @@ void Renderer::DrawCube(float w, Vector3 pos)
 
 void Renderer::Draw2DBox(float w, float h, Vector3 pos, Color4 col)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
 
     std::vector<Vector3> pts;
     float halfWidth = w;
@@ -499,7 +499,7 @@ void Renderer::Draw2DBox(float w, float h, Vector3 pos, Color4 col)
 
 void Renderer::DrawDebugBox(unsigned layerId, Color4 color)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     DrawDebug(layerId, gWireBoxMesh, color, DebugPrimitiveType::Lines);
 #endif
 }
@@ -537,7 +537,7 @@ iVector2 Renderer::GetWindowSize() const
 
 GLuint Renderer::GetRenderTexture() const
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     if (m_RenderIndex == 1) return m_GeometryPass.GetGBuffers()[(int)GBuffer::Diffuse];
     if (m_RenderIndex == 2) return m_GeometryPass.GetGBuffers()[(int)GBuffer::WorldNormal];
     if (m_RenderIndex == 3) return m_GeometryPass.GetGBuffers()[(int)GBuffer::Specular];

@@ -103,7 +103,7 @@ void RenderLayer::AddLight(LightBase* light)
     }
     else
     {
-        p_assert(false);  // Invalid light type
+        ASSERT(false);  // Invalid light type
     }
 }
 
@@ -127,7 +127,7 @@ void RenderLayer::RemoveLight(LightBase* light)
     }
     else
     {
-        p_assert(false);  // Invalid light type
+        ASSERT(false);  // Invalid light type
     }
 }
 

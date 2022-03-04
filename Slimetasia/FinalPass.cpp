@@ -105,5 +105,5 @@ void FinalPass::BuildRenderTargets()
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT0, m_RenderTarget, 0);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    p_assert(status == GL_FRAMEBUFFER_COMPLETE);
+    ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 }

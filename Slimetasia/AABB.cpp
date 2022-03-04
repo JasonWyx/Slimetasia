@@ -129,7 +129,7 @@ Vector3 AABB::GetHalfSize() const
 
 void AABB::DebugDraw(const unsigned int& parentID) const
 {
-#if EDITOR_ENABLED
+#if EDITOR
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
     if (parentID != currentLayerID) return;
 

@@ -100,7 +100,7 @@ void Mesh::Load()
 
     if (!inFile.is_open()) return;
 
-    p_assert(inFile.is_open());
+    ASSERT(inFile.is_open());
 
     while (!inFile.eof())
     {
@@ -351,7 +351,7 @@ void Mesh::Load()
         glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointWeight, m_VertexBuffers[(int)MeshBufferID::JointWeight], 0, sizeof(m_JointWeights[0]));
     }
 
-#ifndef EDITOR_ENABLED
+#ifndef EDITOR
 
     m_Indices.clear();
     m_Vertices.clear();
@@ -935,7 +935,7 @@ void Mesh::ParseNodes(aiNode* currNode)
         std::string nodeName = currNode->mName.C_Str();
         std::replace_if(
             nodeName.begin(), nodeName.end(), [](const auto& c) { return c == ' '; }, '_');
-        p_assert(m_NodesIDMap.try_emplace(nodeName, static_cast<unsigned>(m_NodesIDMap.size())).second);
+        ASSERT(m_NodesIDMap.try_emplace(nodeName, static_cast<unsigned>(m_NodesIDMap.size())).second);
 
         m_Nodes.push_back(MeshNode());
         MeshNode& newNode = m_Nodes.back();

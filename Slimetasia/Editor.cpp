@@ -8,8 +8,7 @@
 
 #include "AudioEmitter.h"
 #include "AudioSystem.h"
-#include "External Libraries/imgui/ImGuizmo.h"
-#include "ImGuiRenderer.h"
+#include "External Libraries/ImGuizmo/ImGuizmo.h"
 #include "MeshAnimator.h"
 #include "MeshRenderer.h"
 #include "ParticleSystem.h"
@@ -26,7 +25,8 @@ bool Editor::s_ShowDebug = false;
 bool Editor::s_lockMousePosition = false;
 bool Editor::s_isPlaying = false;
 
-static auto vector_getter = [](void* vec, int idx, const char** out_text) {
+static auto vector_getter = [](void* vec, int idx, const char** out_text)
+{
     auto& vector = *static_cast<std::vector<std::string>*>(vec);
     if (idx < 0 || idx >= static_cast<int>(vector.size()))
     {
@@ -36,7 +36,8 @@ static auto vector_getter = [](void* vec, int idx, const char** out_text) {
     return true;
 };
 
-static auto enums_getter = [](void* vec, int idx, const char** out_text) {
+static auto enums_getter = [](void* vec, int idx, const char** out_text)
+{
     auto& vector = *static_cast<std::vector<const char*>*>(vec);
     if (idx < 0 || idx >= static_cast<int>(vector.size()))
     {
@@ -3872,58 +3873,66 @@ void Editor::UpdateMeshArray()
     std::vector<HAnimationSet> anims = ResourceManager::Instance().GetResources<AnimationSet>();
     std::vector<HFont> fonts = ResourceManager::Instance().GetResources<Font>();
 
-    std::sort(textures.begin(), textures.end(), [](HTexture& first, HTexture& second) {
-        std::string tmp_first, tmp_second;
-        for (auto& elem : first->m_Name)
-        {
-            tmp_first += std::toupper(elem);
-        }
+    std::sort(textures.begin(), textures.end(),
+              [](HTexture& first, HTexture& second)
+              {
+                  std::string tmp_first, tmp_second;
+                  for (auto& elem : first->m_Name)
+                  {
+                      tmp_first += std::toupper(elem);
+                  }
 
-        for (auto& elem : second->m_Name)
-        {
-            tmp_second += std::toupper(elem);
-        }
-        return tmp_first < tmp_second;
-    });
-    std::sort(meshes.begin(), meshes.end(), [](HMesh& first, HMesh& second) {
-        std::string tmp_first, tmp_second;
-        for (auto& elem : first->m_Name)
-        {
-            tmp_first += std::toupper(elem);
-        }
+                  for (auto& elem : second->m_Name)
+                  {
+                      tmp_second += std::toupper(elem);
+                  }
+                  return tmp_first < tmp_second;
+              });
+    std::sort(meshes.begin(), meshes.end(),
+              [](HMesh& first, HMesh& second)
+              {
+                  std::string tmp_first, tmp_second;
+                  for (auto& elem : first->m_Name)
+                  {
+                      tmp_first += std::toupper(elem);
+                  }
 
-        for (auto& elem : second->m_Name)
-        {
-            tmp_second += std::toupper(elem);
-        }
-        return tmp_first < tmp_second;
-    });
-    std::sort(anims.begin(), anims.end(), [](HAnimationSet& first, HAnimationSet& second) {
-        std::string tmp_first, tmp_second;
-        for (auto& elem : first->m_Name)
-        {
-            tmp_first += std::toupper(elem);
-        }
+                  for (auto& elem : second->m_Name)
+                  {
+                      tmp_second += std::toupper(elem);
+                  }
+                  return tmp_first < tmp_second;
+              });
+    std::sort(anims.begin(), anims.end(),
+              [](HAnimationSet& first, HAnimationSet& second)
+              {
+                  std::string tmp_first, tmp_second;
+                  for (auto& elem : first->m_Name)
+                  {
+                      tmp_first += std::toupper(elem);
+                  }
 
-        for (auto& elem : second->m_Name)
-        {
-            tmp_second += std::toupper(elem);
-        }
-        return tmp_first < tmp_second;
-    });
-    std::sort(fonts.begin(), fonts.end(), [](HFont& first, HFont& second) {
-        std::string tmp_first, tmp_second;
-        for (auto& elem : first->m_Name)
-        {
-            tmp_first += std::toupper(elem);
-        }
+                  for (auto& elem : second->m_Name)
+                  {
+                      tmp_second += std::toupper(elem);
+                  }
+                  return tmp_first < tmp_second;
+              });
+    std::sort(fonts.begin(), fonts.end(),
+              [](HFont& first, HFont& second)
+              {
+                  std::string tmp_first, tmp_second;
+                  for (auto& elem : first->m_Name)
+                  {
+                      tmp_first += std::toupper(elem);
+                  }
 
-        for (auto& elem : second->m_Name)
-        {
-            tmp_second += std::toupper(elem);
-        }
-        return tmp_first < tmp_second;
-    });
+                  for (auto& elem : second->m_Name)
+                  {
+                      tmp_second += std::toupper(elem);
+                  }
+                  return tmp_first < tmp_second;
+              });
 
     for (auto& r : textures)
     {

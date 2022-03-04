@@ -32,7 +32,7 @@ VideoPlayer::VideoPlayer(GameObject* parentObject, const char* componentName)
     , m_LoadedCount()
     , m_Frames()
 {
-    p_assert(m_Transform != nullptr);
+    ASSERT(m_Transform != nullptr);
 }
 
 VideoPlayer::~VideoPlayer()

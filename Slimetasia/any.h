@@ -5,65 +5,65 @@
 #include <type_traits>
 #include <typeinfo>
 
-class any;
+class Any;
 
-template <class Type> Type any_cast(any&);
-template <class Type> Type any_cast(const any&);
-template <class Type> Type* any_cast(any*);
-template <class Type> const Type* any_cast(const any*);
+template <class Type> Type any_cast(Any&);
+template <class Type> Type any_cast(const Any&);
+template <class Type> Type* any_cast(Any*);
+template <class Type> const Type* any_cast(const Any*);
 
 struct bad_any_cast : public std::bad_cast
 {
 };
 
-class any
+class Any
 {
 public:
-    template <class Type> friend Type any_cast(any&);
-    template <class Type> friend Type any_cast(const any&);
-    template <class Type> friend Type* any_cast(any*);
-    template <class Type> friend const Type* any_cast(const any*);
+    template <class Type> friend Type any_cast(Any&);
+    template <class Type> friend Type any_cast(const Any&);
+    template <class Type> friend Type* any_cast(Any*);
+    template <class Type> friend const Type* any_cast(const Any*);
 
-    any()
+    Any()
         : ptr(nullptr)
     {
     }
 
-    any(any&& x) noexcept
+    Any(Any&& x) noexcept
         : ptr(std::move(x.ptr))
     {
     }
 
-    any(const any& x)
+    Any(const Any& x)
     {
         if (x.ptr) ptr = x.ptr->clone();
     }
 
     template <class Type>
-    any(const Type& x)
+    Any(const Type& x)
         : ptr(new concrete<typename std::decay<const Type>::type>(x))
     {
     }
 
-    any& operator=(any&& rhs) noexcept
+    Any& operator=(Any&& rhs) noexcept
     {
         ptr = std::move(rhs.ptr);
         return (*this);
     }
 
-    any& operator=(const any& rhs)
+    Any& operator=(const Any& rhs)
     {
-        ptr = std::move(any(rhs).ptr);
+        ptr = std::move(Any(rhs).ptr);
         return (*this);
     }
 
-    template <class T> any& operator=(T&& x)
+    template <class T> Any& operator=(T&& x)
     {
         ptr.reset(new concrete<typename std::decay<T>::type>(typename std::decay<T>::type(x)));
         return (*this);
     }
 
-    template <class T> any& operator=(const T& x)
+    template <class T> Any& operator=(const T& x)
     {
         ptr.reset(new concrete<typename std::decay<T>::type>(typename std::decay<T>::type(x)));
         return (*this);
@@ -105,21 +105,21 @@ private:
     std::unique_ptr<placeholder> ptr;
 };
 
-template <class Type> Type any_cast(any& val)
+template <class Type> Type any_cast(Any& val)
 {
     if (val.ptr->type() != typeid(Type)) throw bad_any_cast();
-    return static_cast<any::concrete<Type>*>(val.ptr.get())->value;
+    return static_cast<Any::concrete<Type>*>(val.ptr.get())->value;
 }
 
-template <class Type> Type any_cast(const any& val)
+template <class Type> Type any_cast(const Any& val)
 {
-    return any_cast<Type>(any(val));
+    return any_cast<Type>(Any(val));
 }
-template <class Type> Type* any_cast(any* ptr)
+template <class Type> Type* any_cast(Any* ptr)
 {
     return dynamic_cast<Type*>(ptr->ptr.get());
 }
-template <class Type> const Type* any_cast(const any* ptr)
+template <class Type> const Type* any_cast(const Any* ptr)
 {
     return dynamic_cast<const Type*>(ptr->ptr.get());
 }

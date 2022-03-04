@@ -8,19 +8,19 @@ template <typename System> class ISystem
 public:
     static System& Instance()
     {
-        p_assert(IsInitialized());
+        ASSERT(IsInitialized());
         return *_Instance();
     }
 
     static System* InstancePtr()
     {
-        // p_assert(IsInitialized());
+        // ASSERT(IsInitialized());
         return _Instance();
     }
 
     template <typename... Args> static void Initialize(Args... args)
     {
-        p_assert(!IsInitialized());
+        ASSERT(!IsInitialized());
         IsInitializedInternally() = true;
         _Instance() = new System(args...);
         IsInitialized() = true;
@@ -29,14 +29,14 @@ public:
 
     static void Shutdown()
     {
-        p_assert(IsInitialized() && !IsShutdown());
+        ASSERT(IsInitialized() && !IsShutdown());
         delete _Instance();
         IsShutdown() = true;
     }
 
 protected:
     // Default constructor & destructor
-    ISystem() { p_assert(IsInitializedInternally()); }
+    ISystem() { ASSERT(IsInitializedInternally()); }
     virtual ~ISystem() = default;
 
     // Prevent remove copy construct/assignment

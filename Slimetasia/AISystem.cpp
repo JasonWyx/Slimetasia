@@ -338,7 +338,7 @@ AISystem::~AISystem()
 
 void AISystem::Update(const float& dt)
 {
-    //#ifdef EDITOR_ENABLED
+    //#ifdef EDITOR
     //  if (Editor::s_isPlaying == false)
     //  {
     //    Init();

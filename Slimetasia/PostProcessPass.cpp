@@ -162,5 +162,5 @@ void PostProcessPass::BuildRenderTargets()
     glTextureParameteri(m_BloomPostProcessTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    // p_assert(status == GL_FRAMEBUFFER_COMPLETE);
+    // ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 }

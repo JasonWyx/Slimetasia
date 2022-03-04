@@ -9,7 +9,7 @@ SpotLight::SpotLight(GameObject* parentObject)
     , m_OuterAngle(20.0f)
     , m_FalloffExponent(1.0f)
 {
-    p_assert(m_Transform);
+    ASSERT(m_Transform);
     BuildShadowMap();
 }
 

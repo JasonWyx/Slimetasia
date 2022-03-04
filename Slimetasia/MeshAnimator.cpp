@@ -24,7 +24,7 @@ MeshAnimator::MeshAnimator(GameObject* ownerObject)
     , m_BoneTransforms()
 {
     // Check mesh renderer component present
-    p_assert(m_MeshRenderer != nullptr);
+    ASSERT(m_MeshRenderer != nullptr);
 }
 
 MeshAnimator::~MeshAnimator() {}
@@ -236,7 +236,7 @@ void MeshAnimator::UpdateBoneTransforms(std::vector<MeshNode> const& nodes, std:
         if (m_IsCrossFading)
         {
             float crossFadeFactor = m_CrossFadeTimer / m_CrossFadeDuration;
-            p_assert(crossFadeFactor >= 0.0f && crossFadeFactor <= 1.0f);
+            ASSERT(crossFadeFactor >= 0.0f && crossFadeFactor <= 1.0f);
 
             const Pose& transitionPose = m_TransitionPose[currNodeAnimIt->second];
             nextPose = {Math::Lerp(transitionPose.scaling, currNodeAnim.GetInterpolatedScale(m_CurrentAnimationTick), crossFadeFactor),

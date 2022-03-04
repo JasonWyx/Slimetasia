@@ -32,7 +32,7 @@ WaterSimulator::WaterSimulator(GameObject* parentObject, const char* componentNa
     , m_RefractionTexture(GL_NONE)
     , m_WaveFactor(0.0f)
 {
-    p_assert(m_Transform);
+    ASSERT(m_Transform);
 }
 
 WaterSimulator::~WaterSimulator()

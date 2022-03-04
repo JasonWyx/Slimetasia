@@ -47,7 +47,7 @@ void PhysicsSystem::Close()
 
 void PhysicsSystem::Update(const float& dt)
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     DrawDebugMeshes();
     // DrawAABBTreeMesh();
 #endif
@@ -203,9 +203,9 @@ PhysicsSystem::PhysicsSystem()
 {
     // m_Octree = OctreeCreate();
     // read from the settings file.
-#ifndef EDITOR_ENABLED
+#ifndef EDITOR
     Init();
-#endif  // !EDITOR_ENABLED
+#endif  // !EDITOR
 }
 
 void PhysicsSystem::DeregisterRigidbody(RigidbodyComponent* rigid)

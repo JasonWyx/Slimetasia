@@ -36,7 +36,7 @@ GeometryPass::GeometryPass(const iVector2& viewportSize)
     BuildRenderTargets();
 
     GLuint drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4,
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
                             GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6
 #endif
     };
@@ -472,7 +472,7 @@ void GeometryPass::BuildRenderTargets()
     glTextureParameteri(m_GBuffers[(int)GBuffer::WorldPosition], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::WorldPosition], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     glTextureStorage2D(m_GBuffers[(int)GBuffer::TexCoords], 1, GL_RG16F, m_ViewportSize.x, m_ViewportSize.y);
     glTextureParameteri(m_GBuffers[(int)GBuffer::TexCoords], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::TexCoords], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -488,14 +488,14 @@ void GeometryPass::BuildRenderTargets()
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT2, m_GBuffers[(int)GBuffer::Emissive], 0);
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT3, m_GBuffers[(int)GBuffer::WorldNormal], 0);
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT4, m_GBuffers[(int)GBuffer::WorldPosition], 0);
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT5, m_GBuffers[(int)GBuffer::TexCoords], 0);
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT6, m_GBuffers[(int)GBuffer::PickingID], 0);
 #endif
 
     // Check framebuffer creation is a success
     // GLenum status = glCheckNamedFramebufferStatus(m_Framebuffer, GL_FRAMEBUFFER);
-    // p_assert(status == GL_FRAMEBUFFER_COMPLETE);
+    // ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 }
 
 const GBuffers& GeometryPass::GetGBuffers() const
@@ -515,7 +515,7 @@ GLuint GeometryPass::GetDepthBuffer() const
 
 GLint GeometryPass::GetPickedID(iVector2 mousePosition) const
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffer);
     glReadBuffer(GL_COLOR_ATTACHMENT6);
 

@@ -7,10 +7,10 @@
 #include <fstream>
 #include <iostream>
 
-#ifdef USE_PASSERT
-#define p_assert(expr) Logger::LogAssert((!!(expr)), __FILE__, __func__, __LINE__)
+#ifdef ENABLE_ASSERTS
+#define ASSERT(expr) Logger::LogAssert((!!(expr)), __FILE__, __func__, __LINE__)
 #else
-#define p_assert(expr) true
+#define ASSERT(expr) true
 #endif
 
 namespace Logger

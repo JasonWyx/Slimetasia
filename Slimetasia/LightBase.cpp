@@ -96,7 +96,7 @@ void LightBase::SetShadowBias(float bias)
 
 GLuint LightBase::GetShadowMapTexture()
 {
-    //#ifdef EDITOR_ENABLED
+    //#ifdef EDITOR
     // Detect change in shadow resolution size. Should only change in editor mode.
     if (m_ShadowResolution != m_ShadowResolutionPrev)
     {

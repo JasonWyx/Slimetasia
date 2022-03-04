@@ -85,7 +85,7 @@ public:
             {
                 if (component->GetName() != "LuaScript")
                 {
-                    p_assert(true);
+                    ASSERT(true);
                 }
             }
         }

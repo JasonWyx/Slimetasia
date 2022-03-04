@@ -19,7 +19,7 @@ enum class GBuffer
     Emissive,
     WorldPosition,
     WorldNormal,
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     TexCoords,
     PickingID,
 #endif

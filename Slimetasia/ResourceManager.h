@@ -173,7 +173,7 @@ public:
     template <typename ResourceType> ResourceHandle<ResourceType> CreateResource(const std::string resourceName = "", const filesystem::path& filePath = "", const ResourceGUID guid = 0)
     {
         // No more free slots
-        p_assert(!m_FreeIndices.empty());
+        ASSERT(!m_FreeIndices.empty());
 
         unsigned short index = m_FreeIndices.top();
         m_FreeIndices.pop();
@@ -202,7 +202,7 @@ public:
     template <typename ResourceType> ResourceHandle<ResourceType> CreateResource(ResourceType* resource)
     {
         // No more free slots
-        p_assert(!m_FreeIndices.empty());
+        ASSERT(!m_FreeIndices.empty());
 
         unsigned short index = m_FreeIndices.top();
         m_FreeIndices.pop();

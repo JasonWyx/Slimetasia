@@ -32,7 +32,7 @@ AnimationSet::~AnimationSet() {}
 
 void AnimationSet::ImportFromAssimp(aiScene const* scene)
 {
-    p_assert(scene != nullptr);
+    ASSERT(scene != nullptr);
 
     // For each anim data...
     for (unsigned i = 0; i < scene->mNumAnimations; ++i)
@@ -40,7 +40,7 @@ void AnimationSet::ImportFromAssimp(aiScene const* scene)
         aiAnimation* currAnim = scene->mAnimations[i];
 
         // Register anim name with anim id map, asserting if duplicate anim found
-        p_assert(m_AnimationsMap.try_emplace(currAnim->mName.C_Str(), static_cast<unsigned>(m_Animations.size())).second);
+        ASSERT(m_AnimationsMap.try_emplace(currAnim->mName.C_Str(), static_cast<unsigned>(m_Animations.size())).second);
 
         m_AnimationsNames.push_back(currAnim->mName.C_Str());
 
@@ -60,7 +60,7 @@ void AnimationSet::ImportFromAssimp(aiScene const* scene)
             std::replace_if(
                 animNodeName.begin(), animNodeName.end(), [](const auto& c) { return c == ' '; }, '_');
 
-            p_assert(newAnim.m_NodeAnimationsMap.try_emplace(animNodeName, static_cast<unsigned>(newAnim.m_NodeAnimations.size())).second);
+            ASSERT(newAnim.m_NodeAnimationsMap.try_emplace(animNodeName, static_cast<unsigned>(newAnim.m_NodeAnimations.size())).second);
 
             // Create new joint/node anim
             newAnim.m_NodeAnimations.push_back(NodeAnimation());

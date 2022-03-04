@@ -32,9 +32,6 @@
     <Filter Include="Engine Files\Editor">
       <UniqueIdentifier>{be1ab7de-1f5a-48d1-9a7a-e81a26c462aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Libraries\imgui\Holy Bible">
-      <UniqueIdentifier>{f0c5491b-0eff-4a40-bc0e-eaeee9889663}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine Files\Core\LuaBinding">
       <UniqueIdentifier>{1340a3b4-b058-4596-b115-955689ce9d37}</UniqueIdentifier>
     </Filter>
@@ -107,11 +104,14 @@
     <Filter Include="Engine Files\Core\PlayerPref">
       <UniqueIdentifier>{3faed5f5-1f15-4bf4-8108-767a97912599}</UniqueIdentifier>
     </Filter>
+    <Filter Include="External Libraries\imgui\imguizmo">
+      <UniqueIdentifier>{6e5f2ee2-ffb4-49c7-823d-3c4463b1047a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\imgui\impl">
+      <UniqueIdentifier>{af06397d-7772-4524-a1d5-7d619ebc6c8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="External Libraries\tinyxml2\tinyxml2.cpp">
-      <Filter>External Libraries\tinyxml2</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Engine Files</Filter>
     </ClCompile>
@@ -167,9 +167,6 @@
       <Filter>Engine Files\Core\LuaBinding</Filter>
     </ClCompile>
     <ClCompile Include="Dock.cpp">
-      <Filter>Engine Files\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiRenderer.cpp">
       <Filter>Engine Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="AudioSystem.cpp">
@@ -292,27 +289,6 @@
     <ClCompile Include="PhysicsMaterial.cpp">
       <Filter>Engine Files\Core\Physics\Physics Material</Filter>
     </ClCompile>
-    <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp">
-      <Filter>External Libraries\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External Libraries\imgui\ImGuizmo.cpp">
-      <Filter>External Libraries\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External Libraries\imgui\ImSequencer.cpp">
-      <Filter>External Libraries\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External Libraries\imgui\ImCurveEdit.cpp">
-      <Filter>External Libraries\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External Libraries\imgui\imgui.cpp">
-      <Filter>External Libraries\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External Libraries\imgui\imgui_draw.cpp">
-      <Filter>External Libraries\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External Libraries\imgui\imgui_demo.cpp">
-      <Filter>External Libraries\imgui\Holy Bible</Filter>
-    </ClCompile>
     <ClCompile Include="EditorCamera.cpp">
       <Filter>Engine Files\Components\Graphics</Filter>
     </ClCompile>
@@ -409,11 +385,50 @@
     <ClCompile Include="Ray.cpp">
       <Filter>Engine Files\Core\Physics\Ray</Filter>
     </ClCompile>
+    <ClCompile Include="External Libraries\tinyxml2\tinyxml2.cpp">
+      <Filter>External Libraries\tinyxml2</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_demo.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_draw.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_tables.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp">
+      <Filter>External Libraries\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\ImGuizmo\GraphEditor.cpp">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\ImGuizmo\ImCurveEdit.cpp">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\ImGuizmo\ImGradient.cpp">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\ImGuizmo\ImGuizmo.cpp">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\ImGuizmo\ImSequencer.cpp">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="External Libraries\tinyxml2\tinyxml2.h">
-      <Filter>External Libraries\tinyxml2</Filter>
-    </ClInclude>
     <ClInclude Include="Math.h">
       <Filter>Engine Files\Math</Filter>
     </ClInclude>
@@ -459,7 +474,7 @@
     <ClInclude Include="Reflection.h">
       <Filter>Engine Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="any.h">
+    <ClInclude Include="Any.h">
       <Filter>Engine Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="Actions.h">
@@ -478,9 +493,6 @@
       <Filter>Engine Files\Core\LuaBinding</Filter>
     </ClInclude>
     <ClInclude Include="Dock.h">
-      <Filter>Engine Files\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiRenderer.h">
       <Filter>Engine Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="AudioSystem.h">
@@ -639,30 +651,6 @@
     <ClInclude Include="DDS.h">
       <Filter>Engine Files\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="External Libraries\imgui\imgui_internal.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\ImGuizmo.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\ImSequencer.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\imstb_rectpack.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\imstb_textedit.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\imconfig.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\ImCurveEdit.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External Libraries\imgui\imgui.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
     <ClInclude Include="MathDefs.h">
       <Filter>Engine Files\Math</Filter>
     </ClInclude>
@@ -735,9 +723,6 @@
     <ClInclude Include="CapsuleCollider.h">
       <Filter>Engine Files\Components\Physics\3D Collision Meshes</Filter>
     </ClInclude>
-    <ClInclude Include="External Libraries\imgui\imstb_truetype.h">
-      <Filter>External Libraries\imgui</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceEntry.h">
       <Filter>Engine Files\Resource</Filter>
     </ClInclude>
@@ -778,6 +763,57 @@
       <Filter>Engine Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="External Libraries\tinyxml2\tinyxml2.h">
+      <Filter>External Libraries\tinyxml2</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imconfig.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui_internal.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_rectpack.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_textedit.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_truetype.h">
+      <Filter>External Libraries\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\ImGuizmo\GraphEditor.h">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\ImGuizmo\ImCurveEdit.h">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\ImGuizmo\ImGradient.h">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\ImGuizmo\ImGuizmo.h">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\ImGuizmo\ImSequencer.h">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\ImGuizmo\ImZoomSlider.h">
+      <Filter>External Libraries\imgui\imguizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_vulkan.h">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\backends\imgui_impl_win32.h">
+      <Filter>External Libraries\imgui\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugLine.vert">

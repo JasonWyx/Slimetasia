@@ -376,7 +376,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
 
-#ifndef EDITOR_ENABLED
+#ifndef EDITOR
 
     // Get screen resolution
     m_MaxWindowWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -457,7 +457,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
                             WGL_CONTEXT_MINOR_VERSION_ARB,
                             minorMin,
                             WGL_CONTEXT_FLAGS_ARB,
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
                             WGL_CONTEXT_DEBUG_BIT_ARB,
 #else
                             WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
@@ -496,7 +496,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
 
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     wglSwapIntervalEXT(1);
     DragAcceptFiles(m_Window, true);
     std::cout.rdbuf(os.rdbuf());
@@ -593,7 +593,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
 
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     wglSwapIntervalEXT(0);
 
     DragAcceptFiles(m_Window, true);
@@ -705,7 +705,7 @@ void Application::ToggleFullScreen(bool isFullscreen)
 
 void Application::RunMainLoop()
 {
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
     NewScene("NewScene");
     Layer* layer = m_CurrentScene->CreateLayer("NewLayer");
     Renderer::Instance().SetCurrentLayer(layer);
@@ -782,7 +782,7 @@ void Application::RunMainLoop()
         Renderer::Instance().Update(scaledFrameTime);
         renderTime = m_ComputeTimer.GetTimePassed();
 
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
         m_ComputeTimer.StartTimer();
         Editor::Instance().Update(actualFrameTime);
         editorTime = m_ComputeTimer.GetTimePassed();
@@ -796,7 +796,7 @@ void Application::RunMainLoop()
             scaledFrameTime -= physicsFrameTime;
         }
 
-#ifdef EDITOR_ENABLED
+#ifdef EDITOR
         Editor::Instance().SystemTimer(inputTime, physicsTime, gameobjTime, renderTime, editorTime, audioTime, animationTime, ParticleTime, Aitime);
 
         GetInstance(Editor).GetConsole().AddLog(os.str().c_str());

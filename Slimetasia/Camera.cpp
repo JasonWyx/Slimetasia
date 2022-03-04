@@ -34,7 +34,7 @@ Camera::Camera(GameObject* parentObject, char const* componentName)
     , m_IsReflectionView(false)
     , m_ReflectionHeight(0.0f)
 {
-    p_assert(m_Transform);
+    ASSERT(m_Transform);
     SetViewportSize(iVector2(1, 1), true);
 }
 

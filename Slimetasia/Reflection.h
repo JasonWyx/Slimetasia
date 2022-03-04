@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include "any.h"
+#include "Any.h"
 
 class GameObject;
 
@@ -195,9 +195,9 @@ namespace registration
     struct method
     {
         std::string name;
-        any function;
+        Any function;
 
-        method(std::string n, any f)
+        method(std::string n, Any f)
             : name(n)
             , function(f)
         {
