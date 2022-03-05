@@ -12,9 +12,9 @@ void AppConsole::Draw()
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoCollapse;
-    if (ActiveWindow)
+    if (m_IsActiveWindow)
     {
-        BeginDock("Console", &ActiveWindow);
+        ImGui::BeginTabItem("Console", &m_IsActiveWindow);
         if (Button("Trigger Auto Scroll")) m_TriggerAutoScroll = !m_TriggerAutoScroll;
         SameLine();
         if (Button("Clear Log ")) ClearLog();
@@ -28,7 +28,7 @@ void AppConsole::Draw()
         PopItemWidth();
         Separator();
         const float footer_height_to_reserve = GetStyle().ItemSpacing.y + GetFrameHeightWithSpacing();
-        BeginDockChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
         for (unsigned i = 0; i < m_Items.size(); i++)
         {
             if (m_Items[i] == "") continue;
@@ -38,10 +38,15 @@ void AppConsole::Draw()
             TextUnformatted((item).c_str());
             PopStyleColor();
         }
-        if (m_ScrollToBtm && m_TriggerAutoScroll) SetScrollHere(1.0f);
+        if (m_ScrollToBtm && m_TriggerAutoScroll)
+        {
+            ImGui::SetScrollHereY(1.0f);
+        }
+
         m_ScrollToBtm = false;
-        EndDockChild();
-        EndDock();
+
+        ImGui::EndChild();
+        ImGui::EndTabItem();
     }
 }
 

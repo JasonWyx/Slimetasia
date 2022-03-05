@@ -1,13 +1,13 @@
 #pragma once
+#pragma once
 #include <Windows.h>
 
 #include <set>
 
-#include "Actions.h"
+#include "Action.h"
 #include "AppConsole.h"
 #include "Application.h"
 #include "CorePrerequisites.h"
-#include "Dock.h"
 #include "External Libraries\imgui\imgui.h"
 #include "ISystem.h"
 #include "Input.h"
@@ -17,31 +17,28 @@
 #define NUM_OF_WINDOWS 10
 #define MAX_ARCHETYPES 100
 
-using namespace ImGui;
-namespace TX = tinyxml2;
-
 class Editor : public ISystem<Editor>
 {
     friend class ISystem<Editor>;
 
-    enum WindowStates
+    enum class WindowStates
     {
-        Outliner_State = 0,
-        Inspector_State = 1,
-        Viewport_State = 2,
-        Archetype_State = 3,
-        TextEditor_State = 4,
-        LayerEditor_State = 5,
-        Profiler_State = 6,
-        Tags_State = 7,
-        Physics_State = 8,
-        Resource_State = 9
+        Outliner = 0,
+        Inspector,
+        Viewport,
+        Archetype,
+        TextEditor,
+        LayerEditor,
+        Profiler,
+        Tags,
+        Physics,
+        Resource
     };
 
     unsigned m_GlobalIDCounter;
     std::string m_Global_Spaces;
-    std::list<Actions*> m_Redo;
-    std::list<Actions*> m_Undo;
+    std::list<Action*> m_Redo;
+    std::list<Action*> m_Undo;
     unsigned m_Redo_Undo_Size;
     AppConsole m_Console;
     GameObject* m_CurrentObject;
@@ -50,38 +47,38 @@ class Editor : public ISystem<Editor>
     std::map<std::string, GameObject*> m_Archetypes;
     std::map<std::string, GameObject*> m_UpdatedArchetypes;
     Layer* m_CurrentLayer;
-    ImVec4 m_saved_palette[32];
-    ImVec4 m_mesh_drag_color;
-    char m_text[2 << 23];
-    char m_editorFile[MAX_PATH];
-    std::string m_editorFileName;
-    bool m_editorFocus;
-    char* m_currwdir;
-    float m_timings[9];
+    ImVec4 m_SavedPalettes[32];
+    ImVec4 m_MeshDragColor;
+    char m_EditorStringBuffer[2 << 23];
+    char m_EditorFile[MAX_PATH];
+    std::string m_EditorFileName;
+    bool m_IsEditorInFocus;
+    char* m_CurrentWorkingDirectory;
+    float m_Timings[9];
     std::list<Layer*> m_SavedLayers;
-    std::vector<std::string> m_texture_names;
-    std::vector<ResourceGUID> m_texture_ids;
-    std::vector<std::string> m_mesh_names;
-    std::vector<ResourceGUID> m_mesh_ids;
-    std::vector<std::string> m_anim_names;
-    std::vector<ResourceGUID> m_anim_ids;
-    std::vector<std::string> m_font_names;
-    std::vector<ResourceGUID> m_font_ids;
-    int m_timer;
-    GameObject* m_selectedOutliner;
+    std::vector<std::string> m_TextureNames;
+    std::vector<ResourceGUID> m_TextureIDs;
+    std::vector<std::string> m_MeshNames;
+    std::vector<ResourceGUID> m_MeshIDs;
+    std::vector<std::string> m_AnimationNames;
+    std::vector<ResourceGUID> m_AnimationIDs;
+    std::vector<std::string> m_FontNames;
+    std::vector<ResourceGUID> m_FontIDs;
+    int m_Timer;
+    GameObject* m_OutlinerSelectedObject;
     ImVec2 m_DeltaMousePos;
-    bool m_viewportFullScreen;
-    std::set<std::string> m_tags;
+    bool m_IsViewportFullScreen;
+    std::set<std::string> m_Tags;
     bool m_Local;
     bool m_GameCameraInVP;
-    ImFont* m_font;
-    ImFont* m_fontBold;
+    ImFont* m_ImGuiFont;
+    ImFont* m_ImGuiFontBold;
 
     void Outliner();
     void Inspector();
     void SetEditorMouse();
     void Update_Redo_Undo();
-    void Clear_Redo_Undo();
+    void ClearRedoUndo();
     void MainMenu();
     void ShortcutButtons();
     void StyleEditor();
@@ -137,7 +134,7 @@ class Editor : public ISystem<Editor>
 
     void Save();
     void Load();
-    void New();
+    void CreateNewSceneTab();
     void Duplicate();
     void ChildrenDuplicate(GameObject* original, GameObject* Clone);
 
@@ -145,11 +142,11 @@ class Editor : public ISystem<Editor>
     void SaveData();
     GameObject* CreateArchetype(const std::string& n);
 
-    void RecursionSaveArchetypeParent(const char* name, unsigned char* base, TX::XMLElement* pComponent, TX::XMLDocument& doc);
-    void RecursionSaveArchetypeStruct(registration::variant prop, unsigned char* base, TX::XMLElement* pComponent, TX::XMLDocument& doc);
+    void RecursionSaveArchetypeParent(const char* name, unsigned char* base, tinyxml2::XMLElement* pComponent, tinyxml2::XMLDocument& doc);
+    void RecursionSaveArchetypeStruct(registration::variant prop, unsigned char* base, tinyxml2::XMLElement* pComponent, tinyxml2::XMLDocument& doc);
     void SerializeArchetypes();
-    void RecursionLoadArchetypeStruct(TX::XMLElement* attribute, unsigned char* base);
-    void RecursionLoadArchetypeParent(TX::XMLElement* attribute, unsigned char* base, const char* comp);
+    void RecursionLoadArchetypeStruct(tinyxml2::XMLElement* attribute, unsigned char* base);
+    void RecursionLoadArchetypeParent(tinyxml2::XMLElement* attribute, unsigned char* base, const char* comp);
     void DeSerializeArchetypes();
 
     void UpdateMeshArray();
@@ -184,15 +181,18 @@ public:
     void SetCurrentObject(GameObject* go)
     {
         m_CurrentObject = go;
-        if (!m_CurrentObject) m_SelectedObjects.clear();
+        if (m_CurrentObject == nullptr)
+        {
+            m_SelectedObjects.clear();
+        }
     }
     GameObject* GetCurrentObject() { return m_CurrentObject; }
-    std::set<std::string> GetTags() { return m_tags; }
+    std::set<std::string> GetTags() { return m_Tags; }
     void AddTag(std::string t);
     void RemoveTag(std::string t);
 
-    static bool s_ShowDebug;
-    static bool s_ShowBV;
-    static bool s_lockMousePosition;
-    static bool s_isPlaying;
+    static bool ms_ShowDebug;
+    static bool ms_ShowBoundingVolume;
+    static bool ms_ShouldLockMousePosition;
+    static bool ms_IsGameRunning;
 };

@@ -2,7 +2,7 @@
 #include "IComponent.h"
 #include "MathDefs.h"
 #include "PhysicsDefs.h"
-#include "smart_enums.h"
+#include "SmartEnums.h"
 
 enum Bodytype;
 

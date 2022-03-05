@@ -35,7 +35,7 @@ void AnimationSystem::Update(float dt)
 
     for (unsigned i = 0; i < threadCount; ++i)
     {
-        results.push_back(threadPool.enqueue(&AnimationSystem::UpdateAnimatorsAsync, dt, animatorGroups[i]));
+        results.push_back(threadPool.enqueue(AnimationSystem::UpdateAnimatorsAsync, dt, animatorGroups[i]));
     }
 
     for (unsigned i = 0; i < threadCount; ++i)

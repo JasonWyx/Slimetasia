@@ -13,15 +13,16 @@
 // To replace all geobjectbyname to getobjectbyid
 
 // all commands/actions will inherit from this class
-class Actions
+class Action
 {
 public:
-    virtual void Execute() {}
-    virtual void UnExecute() {}
-    virtual ~Actions() {}
+    virtual ~Action() {}
+
+    virtual void Execute() = 0;
+    virtual void Revert() = 0;
 };
 
-class Name_Action : public Actions
+class ActionChangeName : public Action
 {
     std::string oldValue;
     std::string newValue;
@@ -30,7 +31,7 @@ class Name_Action : public Actions
     unsigned id;
 
 public:
-    Name_Action(std::string pv, std::string nv, Layer* l, GameObject* g)
+    ActionChangeName(std::string pv, std::string nv, Layer* l, GameObject* g)
         : oldValue(pv)
         , newValue(nv)
         , ly(l)
@@ -39,10 +40,11 @@ public:
         id = g->GetID();
     }
     void Execute() override { Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id)->SetName(newValue); }
-    void UnExecute() override { Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id)->SetName(oldValue); }
+    void Revert() override { Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id)->SetName(oldValue); }
 };
 
-template <typename T> class Input_Action : public Actions
+template <typename T>
+class ActionInput : public Action
 {
     std::string name;
     std::string comp;
@@ -54,7 +56,7 @@ template <typename T> class Input_Action : public Actions
     unsigned id;
 
 public:
-    Input_Action(T pv, T nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
+    ActionInput(T pv, T nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
         : name(o)
         , oldValue(pv)
         , newValue(nv)
@@ -66,10 +68,11 @@ public:
         id = g->GetID();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-template <typename T> inline void Input_Action<T>::Execute()
+template <typename T>
+inline void ActionInput<T>::Execute()
 {
     GameObject* obj = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     for (auto& component : obj->GetComponentList())
@@ -95,7 +98,8 @@ template <typename T> inline void Input_Action<T>::Execute()
     }
 }
 
-template <typename T> inline void Input_Action<T>::UnExecute()
+template <typename T>
+inline void ActionInput<T>::Revert()
 {
     GameObject* obj = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     for (auto& component : obj->GetComponentList())
@@ -121,7 +125,8 @@ template <typename T> inline void Input_Action<T>::UnExecute()
     }
 }
 
-template <> class Input_Action<std::string> : public Actions
+template <>
+class ActionInput<std::string> : public Action
 {
     std::string name;
     std::string comp;
@@ -133,7 +138,7 @@ template <> class Input_Action<std::string> : public Actions
     unsigned id;
 
 public:
-    Input_Action(std::string pv, std::string nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
+    ActionInput(std::string pv, std::string nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
         : name(o)
         , oldValue(pv)
         , newValue(nv)
@@ -166,7 +171,7 @@ public:
             }
         }
     }
-    void UnExecute() override
+    void Revert() override
     {
         GameObject* obj = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
         for (auto& component : obj->GetComponentList())
@@ -190,7 +195,7 @@ public:
     }
 };
 
-class Creation_Action : public Actions
+class ActionCreate : public Action
 {
     Layer* layer;
     GameObject* obj;
@@ -201,7 +206,7 @@ class Creation_Action : public Actions
     unsigned parentID;
 
 public:
-    Creation_Action(Layer* ly, std::string n)
+    ActionCreate(Layer* ly, std::string n)
         : layer(ly)
         , obj(nullptr)
         , name(n)
@@ -219,7 +224,7 @@ public:
         obj->SetIsChildren(childFlag);
         if (childFlag) Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(parentID)->AttachChild(id);
     }
-    void UnExecute() override
+    void Revert() override
     {
         childFlag = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id)->GetIsChildren();
         parentID = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id)->GetParentObject();
@@ -227,7 +232,7 @@ public:
     }
 };
 
-class Add_Component_Action : public Actions
+class ActionAddComponent : public Action
 {
     GameObject* go;
     std::string comp;
@@ -238,7 +243,7 @@ class Add_Component_Action : public Actions
     unsigned id;
 
 public:
-    Add_Component_Action(GameObject* g, std::string c, Layer* ly)
+    ActionAddComponent(GameObject* g, std::string c, Layer* ly)
         : go(g)
         , comp(c)
         , script_name{}
@@ -249,10 +254,10 @@ public:
         l_name = l->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class Remove_Component_Action : public Actions
+class ActionRemoveComponent : public Action
 {
     GameObject* go;
     std::string comp;
@@ -265,13 +270,13 @@ class Remove_Component_Action : public Actions
     void ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp);
 
 public:
-    Remove_Component_Action(GameObject* g, std::string c, Layer* l);
+    ActionRemoveComponent(GameObject* g, std::string c, Layer* l);
     void Execute() override;
-    void UnExecute() override;
-    ~Remove_Component_Action();
+    void Revert() override;
+    ~ActionRemoveComponent();
 };
 
-class CreateArchetype_Action : public Actions
+class ActionCreateArchetype : public Action
 {
     GameObject* obj;
     GameObject* uobj;
@@ -279,48 +284,48 @@ class CreateArchetype_Action : public Actions
     bool del;
 
 public:
-    CreateArchetype_Action(GameObject* go, GameObject* ugo)
+    ActionCreateArchetype(GameObject* go, GameObject* ugo)
         : obj(go)
         , uobj(ugo)
         , del(false)
     {
     }
     void Execute() override;
-    void UnExecute() override;
-    ~CreateArchetype_Action() override;
+    void Revert() override;
+    ~ActionCreateArchetype() override;
 };
 
-class RevertArchetype_Action : public Actions
+class ActionRevertArchetype : public Action
 {
     GameObject* obj;
 
 public:
-    RevertArchetype_Action(GameObject* go)
+    ActionRevertArchetype(GameObject* go)
         : obj(go)
     {
     }
     void Execute() override;
-    void UnExecute() override;
-    ~RevertArchetype_Action() override;
+    void Revert() override;
+    ~ActionRevertArchetype() override;
 };
 
-class MakeChanges_Action : public Actions
+class ActionMakeChanges : public Action
 {
     std::vector<GameObject> archetypeList;
     std::vector<GameObject*> archetypeObj;
     GameObject* obj;
 
 public:
-    MakeChanges_Action(GameObject* go)
+    ActionMakeChanges(GameObject* go)
         : obj(go)
     {
     }
     void Execute() override;
-    void UnExecute() override;
-    ~MakeChanges_Action() override;
+    void Revert() override;
+    ~ActionMakeChanges() override;
 };
 
-class CreateObjectArchetype_Action : public Actions
+class ActionCreateObjectArchetype : public Action
 {
     Layer* ly;
     std::string l_name;
@@ -330,7 +335,7 @@ class CreateObjectArchetype_Action : public Actions
     unsigned id;
 
 public:
-    CreateObjectArchetype_Action(Layer* l, std::string a, std::string n)
+    ActionCreateObjectArchetype(Layer* l, std::string a, std::string n)
         : ly(l)
         , archetype(a)
         , name(n)
@@ -340,10 +345,10 @@ public:
         l_name = ly->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class RemoveScript_Action : public Actions
+class ActionRevertScript : public Action
 {
     std::string script;
     GameObject* go;
@@ -353,7 +358,7 @@ class RemoveScript_Action : public Actions
     unsigned id;
 
 public:
-    RemoveScript_Action(GameObject* g, std::string s, Layer* ly)
+    ActionRevertScript(GameObject* g, std::string s, Layer* ly)
         : go(g)
         , script(s)
         , l(ly)
@@ -362,10 +367,10 @@ public:
         l_name = l->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class ParentStruct_InputAction : public Actions
+class ActionParentStructInput : public Action
 {
     std::string name;
     std::string comp;
@@ -378,14 +383,14 @@ class ParentStruct_InputAction : public Actions
     void ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp);
 
 public:
-    ParentStruct_InputAction(GameObject* g, std::string c, Layer* l);
+    ActionParentStructInput(GameObject* g, std::string c, Layer* l);
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
     void SetNew(GameObject*& go);
-    ~ParentStruct_InputAction();
+    ~ActionParentStructInput();
 };
 
-class HMesh_InputAction : public Actions
+class ActionMeshInput : public Action
 {
     ResourceGUID oldIndex;
     ResourceGUID newIndex;
@@ -396,7 +401,7 @@ class HMesh_InputAction : public Actions
     unsigned id;
 
 public:
-    HMesh_InputAction(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
+    ActionMeshInput(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
         : oldIndex(o)
         , newIndex(n)
         , ly(l)
@@ -407,10 +412,10 @@ public:
         name = g->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class HFont_InputAction : public Actions
+class ActionInputFont : public Action
 {
     ResourceGUID oldIndex;
     ResourceGUID newIndex;
@@ -420,7 +425,7 @@ class HFont_InputAction : public Actions
     unsigned id;
 
 public:
-    HFont_InputAction(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
+    ActionInputFont(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
         : oldIndex(o)
         , newIndex(n)
         , comp(c)
@@ -430,25 +435,25 @@ public:
         name = g->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class CreateLayer_Action : public Actions
+class ActionCreateLayer : public Action
 {
     std::string name;
     Layer* p;
 
 public:
-    CreateLayer_Action(std::string n, Layer* l)
+    ActionCreateLayer(std::string n, Layer* l)
         : name(n)
         , p(l)
     {
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class DeleteObject_Action : public Actions
+class ActionDeleteObject : public Action
 {
     std::list<GameObject> childrens;
     GameObject* go;
@@ -459,7 +464,7 @@ class DeleteObject_Action : public Actions
     void ReattachChildren(GameObject* root);
 
 public:
-    DeleteObject_Action(GameObject* g, Layer* l)
+    ActionDeleteObject(GameObject* g, Layer* l)
         : ly(l)
     {
         go = new GameObject(nullptr, 0);
@@ -472,11 +477,11 @@ public:
         DuplicateChildren(g);
     }
     void Execute() override;
-    void UnExecute() override;
-    ~DeleteObject_Action();
+    void Revert() override;
+    ~ActionDeleteObject();
 };
 
-class DeleteArchetype_Action : public Actions
+class ActionDeleteArchetype : public Action
 {
     bool del;
     GameObject* go;
@@ -484,7 +489,7 @@ class DeleteArchetype_Action : public Actions
     std::map<std::string, std::vector<unsigned>> a_go;
 
 public:
-    DeleteArchetype_Action(GameObject* g, GameObject* ug)
+    ActionDeleteArchetype(GameObject* g, GameObject* ug)
         : del(true)
         , go(g)
         , ugo(ug)
@@ -492,26 +497,26 @@ public:
     {
     }
     void Execute() override;
-    void UnExecute() override;
-    ~DeleteArchetype_Action();
+    void Revert() override;
+    ~ActionDeleteArchetype();
 };
 
-class DeleteLayer_Action : public Actions
+class ActionDeleteLayer : public Action
 {
     Layer* ly;
 
 public:
-    DeleteLayer_Action(Layer* l)
+    ActionDeleteLayer(Layer* l)
     {
         ly = new Layer(nullptr, 0, l->GetName(), false);
         l->Clone(ly);
     }
     void Execute() override;
-    void UnExecute() override;
-    ~DeleteLayer_Action();
+    void Revert() override;
+    ~ActionDeleteLayer();
 };
 
-class TextureInput_Action : public Actions
+class ActionInputTexture : public Action
 {
     ResourceGUID oldIndex;
     ResourceGUID newIndex;
@@ -523,7 +528,7 @@ class TextureInput_Action : public Actions
     std::string l_name;
 
 public:
-    TextureInput_Action(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
+    ActionInputTexture(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
         : oldIndex(o)
         , newIndex(n)
         , ly(l)
@@ -535,10 +540,10 @@ public:
         name = g->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class AnimationInput_Action : public Actions
+class ActionInputAnimation : public Action
 {
     ResourceGUID oldIndex;
     ResourceGUID newIndex;
@@ -550,7 +555,7 @@ class AnimationInput_Action : public Actions
     std::string l_name;
 
 public:
-    AnimationInput_Action(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
+    ActionInputAnimation(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
         : oldIndex(o)
         , newIndex(n)
         , ly(l)
@@ -562,10 +567,11 @@ public:
         name = g->GetName();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-template <typename T> class ScriptInput_Action : public Actions
+template <typename T>
+class ActionInputScript : public Action
 {
     unsigned id;
     std::string script;
@@ -575,7 +581,7 @@ template <typename T> class ScriptInput_Action : public Actions
     std::string var;
 
 public:
-    ScriptInput_Action(GameObject* g, std::string s, T o, T n, std::string v)
+    ActionInputScript(GameObject* g, std::string s, T o, T n, std::string v)
         : id(0)
         , script(s)
         , oldValue(o)
@@ -586,67 +592,69 @@ public:
         id = g->GetID();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-template <typename T> inline void ScriptInput_Action<T>::Execute()
+template <typename T>
+inline void ActionInputScript<T>::Execute()
 {
     Layer* ly = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     GameObject* g = ly->GetObjectById(id);
     g->GetScript(script)->set(var, newValue);
 }
 
-template <typename T> inline void ScriptInput_Action<T>::UnExecute()
+template <typename T>
+inline void ActionInputScript<T>::Revert()
 {
     Layer* ly = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     GameObject* g = ly->GetObjectById(id);
     g->GetScript(script)->set(var, oldValue);
 }
 
-class AddTag_Action : public Actions
+class ActionAddTag : public Action
 {
     std::string name;
 
 public:
-    AddTag_Action(std::string n)
+    ActionAddTag(std::string n)
         : name(n)
     {
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class DeleteTag_Action : public Actions
+class ActionDeleteTag : public Action
 {
     std::vector<std::pair<std::string, unsigned>> list;
     std::string name;
 
 public:
-    DeleteTag_Action(std::string n)
+    ActionDeleteTag(std::string n)
         : name(n)
     {
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class ChangeTag_Action : public Actions
+class ActionChangeTag : public Action
 {
     std::vector<std::pair<std::string, unsigned>> list;
     std::string oldName;
     std::string newName;
 
 public:
-    ChangeTag_Action(std::string o, std::string n)
+    ActionChangeTag(std::string o, std::string n)
         : oldName(o)
         , newName(n)
     {
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class ObjectTag_Action : public Actions
+class ActionTagObject : public Action
 {
     unsigned id;
     std::string oldTag;
@@ -654,7 +662,7 @@ class ObjectTag_Action : public Actions
     std::string layerName;
 
 public:
-    ObjectTag_Action(std::string o, std::string n, GameObject* go)
+    ActionTagObject(std::string o, std::string n, GameObject* go)
         : oldTag(o)
         , newTag(n)
     {
@@ -662,37 +670,40 @@ public:
         id = go->GetID();
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-template <class T> class PhysicsInput_Action : public Actions
+template <class T>
+class ActionInputPhysics : public Action
 {
     T oldValue;
     T newValue;
     T* value;
 
 public:
-    PhysicsInput_Action(T o, T n, T* v)
+    ActionInputPhysics(T o, T n, T* v)
         : oldValue(o)
         , newValue(n)
         , value(v)
     {
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-template <class T> inline void PhysicsInput_Action<T>::Execute()
+template <class T>
+inline void ActionInputPhysics<T>::Execute()
 {
     *value = newValue;
 }
 
-template <class T> inline void PhysicsInput_Action<T>::UnExecute()
+template <class T>
+inline void ActionInputPhysics<T>::Revert()
 {
     *value = oldValue;
 }
 
-class MultipleTransformation_Action : public Actions
+class ActionMultiTransform : public Action
 {
     Vector3 displacement;
     std::vector<unsigned> ids;
@@ -701,7 +712,7 @@ class MultipleTransformation_Action : public Actions
     std::string layer;
 
 public:
-    MultipleTransformation_Action(Vector3 d, std::vector<unsigned> id, std::string c, std::string v, Layer* ly)
+    ActionMultiTransform(Vector3 d, std::vector<unsigned> id, std::string c, std::string v, Layer* ly)
         : component(c)
         , variable(v)
         , displacement(d)
@@ -710,10 +721,10 @@ public:
         ids = id;
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class Duplicate_Action : public Actions
+class ActionDuplicate : public Action
 {
     std::string layerName;
     std::vector<unsigned> selectedObjects;
@@ -722,17 +733,17 @@ class Duplicate_Action : public Actions
     void ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* original, GameObject* Clone);
 
 public:
-    Duplicate_Action(Layer* ly, std::vector<GameObject*> selected)
+    ActionDuplicate(Layer* ly, std::vector<GameObject*> selected)
     {
         layerName = ly->GetName();
         for (auto& go : selected)
             selectedObjects.push_back(go->GetID());
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class AddAttractor_Action : public Actions
+class ActionAddAttractor : public Action
 {
     std::vector<unsigned> o_attractorList;
     unsigned id;
@@ -740,7 +751,7 @@ class AddAttractor_Action : public Actions
     unsigned attractor;
 
 public:
-    AddAttractor_Action(GameObject* go, std::vector<unsigned> list, unsigned attract)
+    ActionAddAttractor(GameObject* go, std::vector<unsigned> list, unsigned attract)
     {
         id = go->GetID();
         ly_name = go->GetParentLayer()->GetName();
@@ -748,10 +759,10 @@ public:
         o_attractorList = list;
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
-class DeleteAttractor_Action : public Actions
+class ActionDeleteAttractor : public Action
 {
     std::vector<unsigned> o_attractorList;
     unsigned id;
@@ -759,7 +770,7 @@ class DeleteAttractor_Action : public Actions
     unsigned attractor;
 
 public:
-    DeleteAttractor_Action(GameObject* go, std::vector<unsigned> list, unsigned attract)
+    ActionDeleteAttractor(GameObject* go, std::vector<unsigned> list, unsigned attract)
     {
         id = go->GetID();
         ly_name = go->GetParentLayer()->GetName();
@@ -767,7 +778,7 @@ public:
         o_attractorList = list;
     }
     void Execute() override;
-    void UnExecute() override;
+    void Revert() override;
 };
 
 // class DeleteResource_Action : public Actions

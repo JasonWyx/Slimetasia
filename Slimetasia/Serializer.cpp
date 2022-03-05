@@ -16,7 +16,7 @@
 // and add different component, then save it, make a copy and then load the saved filed and save it to
 // generate copy2 then diff the copy and copy2
 
-void Serializer::RecursionParent(const char* name, unsigned char* base, TX::XMLElement* pComponent)
+void Serializer::RecursionParent(const char* name, unsigned char* base, tinyxml2::XMLElement* pComponent)
 {
     auto parents = (*Factory::m_Reflection).at(name)->getParents();
     for (auto pare : parents)
@@ -28,7 +28,7 @@ void Serializer::RecursionParent(const char* name, unsigned char* base, TX::XMLE
             if (comp.type == typeid(std::string).name())
             {
                 // std::cout << comp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(comp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(comp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 std::string value = *reinterpret_cast<std::string*>(base + comp.offset);
                 pElem->SetAttribute("Value", value.c_str());
@@ -44,7 +44,7 @@ void Serializer::RecursionParent(const char* name, unsigned char* base, TX::XMLE
             {
                 std::string value;
                 // std::cout << comp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(comp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(comp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 unsigned char* comp_addr = base + comp.offset;
                 unsigned i = 0;
@@ -81,7 +81,7 @@ void Serializer::RecursionParent(const char* name, unsigned char* base, TX::XMLE
     }
 }
 
-void Serializer::RecursionStruct(registration::variant prop, unsigned char* base, TX::XMLElement* pComponent)
+void Serializer::RecursionStruct(registration::variant prop, unsigned char* base, tinyxml2::XMLElement* pComponent)
 {
     try
     {
@@ -96,7 +96,7 @@ void Serializer::RecursionStruct(registration::variant prop, unsigned char* base
             if (rProp.type == typeid(std::string).name())
             {
                 // std::cout << rProp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 std::string value = *reinterpret_cast<std::string*>(base + rProp.offset);
                 pElem->SetAttribute("Value", value.c_str());
@@ -112,7 +112,7 @@ void Serializer::RecursionStruct(registration::variant prop, unsigned char* base
             {
                 std::string value;
                 // std::cout << rProp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 unsigned char* rProp_addr = base + rProp.offset;
                 unsigned i = 0;
@@ -158,17 +158,17 @@ void Serializer::SaveScene(const Scene* sn)
     const Scene* CurrentScene = sn;
     std::cout << "Saving Scene : " << CurrentScene->GetName() << std::endl;
     // Saving Scene
-    TX::XMLNode* pRoot = doc.NewElement(sn->GetName().c_str());
+    tinyxml2::XMLNode* pRoot = doc.NewElement(sn->GetName().c_str());
     doc.InsertEndChild(pRoot);
     // for every layer
     for (Layer* ly : sn->GetLayers())
     {
-        TX::XMLElement* pLayer = doc.NewElement(ly->GetName().c_str());
+        tinyxml2::XMLElement* pLayer = doc.NewElement(ly->GetName().c_str());
         pRoot->InsertEndChild(pLayer);
         for (GameObject* go : ly->GetObjectsList())
         {
             if (go->GetName() == "EditorCamera") continue;
-            TX::XMLElement* pElement = doc.NewElement(go->GetName().c_str());
+            tinyxml2::XMLElement* pElement = doc.NewElement(go->GetName().c_str());
             pLayer->InsertEndChild(pElement);
             pElement->SetAttribute("Archetype", go->GetArchetype().c_str());
             pElement->SetAttribute("Tag", go->GetTag().c_str());
@@ -184,7 +184,7 @@ void Serializer::SaveScene(const Scene* sn)
             // Storing all the children
             for (IComponent* comp : go->GetComponentList())
             {
-                TX::XMLElement* pComponent = doc.NewElement(comp->GetName().c_str());
+                tinyxml2::XMLElement* pComponent = doc.NewElement(comp->GetName().c_str());
                 pElement->InsertEndChild(pComponent);
                 if (comp->GetName() == "BoxParticleEmitter" || comp->GetName() == "CircleParticleEmitter")
                 {
@@ -213,7 +213,7 @@ void Serializer::SaveScene(const Scene* sn)
                     if (prop.type == typeid(std::string).name())
                     {
                         // std::cout << prop.name << std::endl;
-                        TX::XMLElement* pElem = doc.NewElement(prop.name.c_str());
+                        tinyxml2::XMLElement* pElem = doc.NewElement(prop.name.c_str());
                         pComponent->InsertEndChild(pElem);
                         std::string value = *reinterpret_cast<std::string*>(base + prop.offset);
                         pElem->SetAttribute("Value", value.c_str());
@@ -229,7 +229,7 @@ void Serializer::SaveScene(const Scene* sn)
                     {
                         std::string value;
                         // std::cout << prop.name << std::endl;
-                        TX::XMLElement* pElem = doc.NewElement(prop.name.c_str());
+                        tinyxml2::XMLElement* pElem = doc.NewElement(prop.name.c_str());
                         pComponent->InsertEndChild(pElem);
                         unsigned char* prop_addr = base + prop.offset;
                         unsigned i = 0;
@@ -266,12 +266,12 @@ void Serializer::SaveScene(const Scene* sn)
             }
         }
     }
-    TX::XMLError result = doc.SaveFile(filename.c_str());
-    if (result != TX::XMLError::XML_SUCCESS) throw("ERROR");  // Replace with proper throw and assert
+    tinyxml2::XMLError result = doc.SaveFile(filename.c_str());
+    if (result != tinyxml2::XMLError::XML_SUCCESS) throw("ERROR");  // Replace with proper throw and assert
     std::cout << "Saving " << filename << " completed!" << std::endl;
 }
 
-void Serializer::RecursionLoadParent(TX::XMLElement* attribute, unsigned char* base, const char* comp)
+void Serializer::RecursionLoadParent(tinyxml2::XMLElement* attribute, unsigned char* base, const char* comp)
 {
     try
     {
@@ -336,13 +336,13 @@ void Serializer::RecursionLoadParent(TX::XMLElement* attribute, unsigned char* b
     }
 }
 
-void Serializer::RecursionLoadStruct(TX::XMLElement* attribute, unsigned char* base)
+void Serializer::RecursionLoadStruct(tinyxml2::XMLElement* attribute, unsigned char* base)
 {
     std::string aType = attribute->Attribute("Type");
     size_t pos = aType.find(" ");
     std::string type = aType.substr(pos + 1);
     auto sProperties = (*Factory::m_Reflection).at(type)->getProperties();
-    TX::XMLElement* sAttribute = attribute->FirstChildElement();
+    tinyxml2::XMLElement* sAttribute = attribute->FirstChildElement();
     for (; sAttribute; sAttribute = sAttribute->NextSiblingElement())
     {
         std::string sType = sAttribute->Attribute("Type");
@@ -401,22 +401,22 @@ void Serializer::LoadScene()
     // when we load, we check if the scene if offset matches, if matches we can copy the values over string to int, then cast to unsigned char
     // mental note, try the saving and loading of std library classes, the layout I am not very sure
 
-    TX::XMLDocument file;
-    if (file.LoadFile(filename.c_str()) == TX::XMLError::XML_SUCCESS)
+    tinyxml2::XMLDocument file;
+    if (file.LoadFile(filename.c_str()) == tinyxml2::XMLError::XML_SUCCESS)
     {
         std::cout << "Loading : " << filename << std::endl;
 
-        TX::XMLNode* root = file.FirstChild();
+        tinyxml2::XMLNode* root = file.FirstChild();
         std::string value(root->Value());
         Application::Instance().NewScene(value.c_str());
 
         // For each Layer
-        TX::XMLElement* pLayer = root->FirstChildElement();
+        tinyxml2::XMLElement* pLayer = root->FirstChildElement();
         for (; pLayer; pLayer = pLayer->NextSiblingElement())
         {
             // std::cout << pLayer->Value() << std::endl;
             Layer* Ly = Application::Instance().GetCurrentScene()->CreateLayerWithoutCamera(pLayer->Value());
-            TX::XMLElement* pGo = pLayer->FirstChildElement();
+            tinyxml2::XMLElement* pGo = pLayer->FirstChildElement();
             // For each GameObject
             for (; pGo; pGo = pGo->NextSiblingElement())
             {
@@ -448,7 +448,7 @@ void Serializer::LoadScene()
                     }
                     Go->SetChildrenObjects(childrenData);
                 }
-                TX::XMLElement* pComp = pGo->FirstChildElement();
+                tinyxml2::XMLElement* pComp = pGo->FirstChildElement();
                 // For each Component
                 for (; pComp; pComp = pComp->NextSiblingElement())
                 {
@@ -483,7 +483,7 @@ void Serializer::LoadScene()
                     auto cProperties = (*Factory::m_Reflection).at(pComp->Value())->getProperties();
                     // TODO: Change the Loading Scene according to the save scene, use hasChildren, if has children then take the type and
                     //       Recursion and so on and so forth
-                    TX::XMLElement* pAttribute = pComp->FirstChildElement();
+                    tinyxml2::XMLElement* pAttribute = pComp->FirstChildElement();
                     for (; pAttribute; pAttribute = pAttribute->NextSiblingElement())
                     {
                         // not std::string

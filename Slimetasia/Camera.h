@@ -5,7 +5,7 @@
 #include "Frustum.h"
 #include "IComponent.h"
 #include "Transform.h"
-#include "smart_enums.h"
+#include "SmartEnums.h"
 
 #define CameraProjectionMode_List(m) m(CameraProjectionMode, Orthographic) m(CameraProjectionMode, Perspective)
 

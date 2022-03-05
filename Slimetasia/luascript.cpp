@@ -962,7 +962,7 @@ int LuaScript::lua_setMouseIcon(lua_State* L)
 int LuaScript::lua_lockMouseToCenter(lua_State* L)
 {
     bool lockMouse = lua_toboolean(L, 1);
-    Editor::Instance().s_lockMousePosition = lockMouse;
+    Editor::Instance().ms_ShouldLockMousePosition = lockMouse;
     return 0;
 }
 

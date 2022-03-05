@@ -12,8 +12,10 @@
 struct ThreadPool
 {
     ThreadPool(size_t);
-    template <class F, class... Args> auto enqueue(F&&, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>;
     ~ThreadPool();
+
+    template <class F, class... Args>
+    auto enqueue(F&&, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>;
 
 private:
     std::vector<std::thread> workers;
@@ -48,9 +50,25 @@ inline ThreadPool::ThreadPool(size_t threads = std::thread::hardware_concurrency
     }
 }
 
-template <class F, class... Args> auto ThreadPool::enqueue(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>
+inline ThreadPool::~ThreadPool()
 {
-    using return_type = typename std::result_of<F(Args...)>::type;
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+
+    condition.notify_all();
+
+    for (std::thread& worker : workers)
+    {
+        worker.join();
+    }
+}
+
+template <class F, class... Args>
+auto ThreadPool::enqueue(F&& f, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>
+{
+    using return_type = std::invoke_result_t<F, Args...>;
 
     auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 
@@ -58,21 +76,15 @@ template <class F, class... Args> auto ThreadPool::enqueue(F&& f, Args&&... args
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
 
-        if (stop) throw std::runtime_error("enqueue on stopped ThreadPool");
+        if (stop)
+        {
+            throw std::runtime_error("enqueue on stopped ThreadPool");
+        }
 
         tasks.emplace([task]() { (*task)(); });
     }
-    condition.notify_one();
-    return res;
-}
 
-inline ThreadPool::~ThreadPool()
-{
-    {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        stop = true;
-    }
-    condition.notify_all();
-    for (std::thread& worker : workers)
-        worker.join();
+    condition.notify_one();
+
+    return res;
 }

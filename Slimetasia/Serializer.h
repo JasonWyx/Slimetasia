@@ -8,16 +8,14 @@
 #include "Reflection.h"
 #include "Scene.h"
 
-namespace TX = tinyxml2;
-
 class Serializer
 {
     std::string filename;
-    TX::XMLDocument doc;
-    void RecursionParent(const char* name, unsigned char* base, TX::XMLElement* pComponent);
-    void RecursionStruct(registration::variant prop, unsigned char* base, TX::XMLElement* pComponent);
-    void RecursionLoadParent(TX::XMLElement* attribute, unsigned char* base, const char* comp);
-    void RecursionLoadStruct(TX::XMLElement* attribute, unsigned char* base);
+    tinyxml2::XMLDocument doc;
+    void RecursionParent(const char* name, unsigned char* base, tinyxml2::XMLElement* pComponent);
+    void RecursionStruct(registration::variant prop, unsigned char* base, tinyxml2::XMLElement* pComponent);
+    void RecursionLoadParent(tinyxml2::XMLElement* attribute, unsigned char* base, const char* comp);
+    void RecursionLoadStruct(tinyxml2::XMLElement* attribute, unsigned char* base);
 
 public:
     Serializer(std::string fn)

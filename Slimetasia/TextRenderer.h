@@ -4,7 +4,7 @@
 #include "Font.h"
 #include "IComponent.h"
 #include "Transform.h"
-#include "smart_enums.h"
+#include "SmartEnums.h"
 
 enum class AnchorPoint
 {

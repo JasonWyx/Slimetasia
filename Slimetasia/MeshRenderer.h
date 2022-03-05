@@ -3,7 +3,7 @@
 #include "IComponent.h"
 #include "Mesh.h"
 #include "Transform.h"
-#include "smart_enums.h"
+#include "SmartEnums.h"
 
 #define TilingAxis_List(m) m(TilingAxis, XY) m(TilingAxis, XZ) m(TilingAxis, YZ)
 

@@ -168,7 +168,7 @@ void PhysicsSystem::RegisterRigidbody(RigidbodyComponent* rigid)
 
 void PhysicsSystem::DrawDebugMeshes()  // For now draws 3d bounding box and sphere only.
 {
-    if (!Application::s_IsGameRunning && !Editor::s_ShowDebug)
+    if (!Application::s_IsGameRunning && !Editor::ms_ShowDebug)
     {
         if (m_3DColliderList.size() > 0)
         {

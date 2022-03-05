@@ -142,7 +142,7 @@
     <ClCompile Include="Editor.cpp">
       <Filter>Engine Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Actions.cpp">
+    <ClCompile Include="Action.cpp">
       <Filter>Engine Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="Reflection.cpp">
@@ -165,9 +165,6 @@
     </ClCompile>
     <ClCompile Include="luascript_defines.cpp">
       <Filter>Engine Files\Core\LuaBinding</Filter>
-    </ClCompile>
-    <ClCompile Include="Dock.cpp">
-      <Filter>Engine Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="AudioSystem.cpp">
       <Filter>Engine Files\Core</Filter>
@@ -477,7 +474,7 @@
     <ClInclude Include="Any.h">
       <Filter>Engine Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Actions.h">
+    <ClInclude Include="Action.h">
       <Filter>Engine Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="AppConsole.h">
@@ -491,9 +488,6 @@
     </ClInclude>
     <ClInclude Include="luascript.h">
       <Filter>Engine Files\Core\LuaBinding</Filter>
-    </ClInclude>
-    <ClInclude Include="Dock.h">
-      <Filter>Engine Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="AudioSystem.h">
       <Filter>Engine Files\Core</Filter>
@@ -576,7 +570,7 @@
     <ClInclude Include="ThreadPool.h">
       <Filter>Engine Files\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="smart_enums.h">
+    <ClInclude Include="SmartEnums.h">
       <Filter>Engine Files\Utilities</Filter>
     </ClInclude>
     <ClInclude Include="PEVector.h">
@@ -936,6 +930,7 @@
     <None Include="Shaders\ParticleStencil.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="ApplicationIcon.ico">

@@ -19,7 +19,8 @@
 
 #include "Math.h"
 
-template <typename T> struct TVector2
+template <typename T>
+struct TVector2
 {
     union
     {
@@ -83,7 +84,8 @@ template <typename T> struct TVector2
     void Zero();
 };
 
-template <typename T> struct TVector3
+template <typename T>
+struct TVector3
 {
     union
     {
@@ -174,7 +176,8 @@ template <typename T> struct TVector3
     float* GetVector() { return data; }
 };
 
-template <typename T> struct TVector4
+template <typename T>
+struct TVector4
 {
     union
     {
@@ -265,165 +268,194 @@ template <typename T> struct TVector4
 /* TVector2 Definitions Start */
 
 // Negates vector.
-template <typename T> inline TVector2<T> TVector2<T>::operator-() const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator-() const
 {
     return TVector2<T>(-x, -y);
 }
 
-template <typename T> inline TVector2<T>& TVector2<T>::operator+=(TVector2<T> const& rhs)
+template <typename T>
+inline TVector2<T>& TVector2<T>::operator+=(TVector2<T> const& rhs)
 {
     x += rhs.x;
     y += rhs.y;
     return *this;
 }
 
-template <typename T> inline TVector2<T>& TVector2<T>::operator-=(TVector2<T> const& rhs)
+template <typename T>
+inline TVector2<T>& TVector2<T>::operator-=(TVector2<T> const& rhs)
 {
     x -= rhs.x;
     y -= rhs.y;
     return *this;
 }
 
-template <typename T> inline TVector2<T>& TVector2<T>::operator*=(TVector2<T> const& rhs)
+template <typename T>
+inline TVector2<T>& TVector2<T>::operator*=(TVector2<T> const& rhs)
 {
     x *= rhs.x;
     y *= rhs.y;
     return *this;
 }
 
-template <typename T> inline TVector2<T>& TVector2<T>::operator/=(TVector2<T> const& rhs)
+template <typename T>
+inline TVector2<T>& TVector2<T>::operator/=(TVector2<T> const& rhs)
 {
     x /= rhs.x;
     y /= rhs.y;
     return *this;
 }
 
-template <typename T> inline TVector2<T>& TVector2<T>::operator*=(float const& scalar)
+template <typename T>
+inline TVector2<T>& TVector2<T>::operator*=(float const& scalar)
 {
-    x *= scalar;
-    y *= scalar;
+    x = static_cast<T>(static_cast<float>(x) * scalar);
+    y = static_cast<T>(static_cast<float>(y) * scalar);
     return *this;
 }
 
-template <typename T> inline TVector2<T>& TVector2<T>::operator/=(float const& scalar)
+template <typename T>
+inline TVector2<T>& TVector2<T>::operator/=(float const& scalar)
 {
     x = static_cast<T>(static_cast<float>(x) / scalar);
     y = static_cast<T>(static_cast<float>(y) / scalar);
     return *this;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::operator+(TVector2<T> const& rhs) const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator+(TVector2<T> const& rhs) const
 {
     return TVector2<T>(*this) += rhs;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::operator-(TVector2<T> const& rhs) const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator-(TVector2<T> const& rhs) const
 {
     return TVector2<T>(*this) -= rhs;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::operator*(float const& scalar) const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator*(float const& scalar) const
 {
     return TVector2<T>(*this) *= scalar;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::operator/(float const& scalar) const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator/(float const& scalar) const
 {
     return TVector2<T>(*this) /= scalar;
 }
 
-template <typename T> inline T& TVector2<T>::operator[](unsigned index)
+template <typename T>
+inline T& TVector2<T>::operator[](unsigned index)
 {
     return data[index];
 }
 
-template <typename T> inline T TVector2<T>::operator[](unsigned index) const
+template <typename T>
+inline T TVector2<T>::operator[](unsigned index) const
 {
     return data[index];
 }
 
-template <typename T> inline bool TVector2<T>::operator!=(TVector2 const& rhs) const
+template <typename T>
+inline bool TVector2<T>::operator!=(TVector2 const& rhs) const
 {
     return x != rhs.x || y != rhs.y;
 }
 
-template <typename T> inline bool TVector2<T>::operator==(TVector2 const& rhs) const
+template <typename T>
+inline bool TVector2<T>::operator==(TVector2 const& rhs) const
 {
     return x == rhs.x && y == rhs.y;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::Normalize()
+template <typename T>
+inline TVector2<T> TVector2<T>::Normalize()
 {
     float length = Length();
     return TVector2<T>(*this) / length;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::Projection(TVector2<T> const& rhs)
+template <typename T>
+inline TVector2<T> TVector2<T>::Projection(TVector2<T> const& rhs)
 {
     TVector2<T> tmp = rhs;
     tmp.Normalize();
     return tmp *= this->Dot(tmp);
 }
 
-template <typename T> inline float TVector2<T>::Dot(TVector2<T> const& rhs) const
+template <typename T>
+inline float TVector2<T>::Dot(TVector2<T> const& rhs) const
 {
     return (x * rhs.x + y * rhs.y);
 }
 
-template <typename T> inline float TVector2<T>::Angle() const
+template <typename T>
+inline float TVector2<T>::Angle() const
 {
     return atan2f(-y, -x) * RAD_TO_DEG + 180;
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::Rotate(float angle) const
+template <typename T>
+inline TVector2<T> TVector2<T>::Rotate(float angle) const
 {
     angle = DEG_TO_RAD * angle;
     return TVector2<T>(x * cosf(angle) - y * sinf(angle), x * sinf(angle) + y * cosf(angle));
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::operator*(TVector2<T> const& rhs) const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator*(TVector2<T> const& rhs) const
 {
     return TVector2<T>(x * rhs.x, y * rhs.y);
 }
 
-template <typename T> inline TVector2<T> TVector2<T>::operator/(TVector2<T> const& rhs) const
+template <typename T>
+inline TVector2<T> TVector2<T>::operator/(TVector2<T> const& rhs) const
 {
     return TVector2<T>(x / rhs.x, y / rhs.y);
 }
 
-template <typename T> inline float TVector2<T>::Length() const
+template <typename T>
+inline float TVector2<T>::Length() const
 {
     return sqrtf(SquareLength());
 }
 
-template <typename T> inline float TVector2<T>::SquareLength() const
+template <typename T>
+inline float TVector2<T>::SquareLength() const
 {
     return this->Dot(*this);
 }
 
-template <typename T> inline float TVector2<T>::Distance(TVector2<T> const& rhs) const
+template <typename T>
+inline float TVector2<T>::Distance(TVector2<T> const& rhs) const
 {
     return sqrtf(SquareDistance(rhs));
 }
 
-template <typename T> inline float TVector2<T>::SquareDistance(TVector2<T> const& rhs) const
+template <typename T>
+inline float TVector2<T>::SquareDistance(TVector2<T> const& rhs) const
 {
     TVector2<T> tmp(rhs - *this);
     return tmp.SquareLength();
 }
 
-template <typename T> inline void TVector2<T>::Zero()
+template <typename T>
+inline void TVector2<T>::Zero()
 {
     x = 0.f;
     y = 0.f;
 }
 
-template <typename T> inline TVector2<T> operator*(float scalar, TVector2<T> const& rhs)
+template <typename T>
+inline TVector2<T> operator*(float scalar, TVector2<T> const& rhs)
 {
     return rhs * scalar;
 }
 
-template <typename T> inline std::ostream& operator<<(std::ostream& os, TVector2<T> const& rhs)
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, TVector2<T> const& rhs)
 {
     os << "Vector2[" << rhs.x << "," << rhs.y << "]" << std::endl;
     return os;
@@ -435,12 +467,14 @@ template <typename T> inline std::ostream& operator<<(std::ostream& os, TVector2
 /******************************************************************************/
 /* TVector3 Definition Start */
 
-template <typename T> inline TVector3<T> TVector3<T>::operator-() const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator-() const
 {
     return TVector3<T>(-x, -y, -z);
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::operator+=(TVector3<T> const& rhs)
+template <typename T>
+inline TVector3<T>& TVector3<T>::operator+=(TVector3<T> const& rhs)
 {
     x += rhs.x;
     y += rhs.y;
@@ -448,7 +482,8 @@ template <typename T> inline TVector3<T>& TVector3<T>::operator+=(TVector3<T> co
     return *this;
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::operator-=(TVector3<T> const& rhs)
+template <typename T>
+inline TVector3<T>& TVector3<T>::operator-=(TVector3<T> const& rhs)
 {
     x -= rhs.x;
     y -= rhs.y;
@@ -456,7 +491,8 @@ template <typename T> inline TVector3<T>& TVector3<T>::operator-=(TVector3<T> co
     return *this;
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::operator*=(TVector3<T> const& rhs)
+template <typename T>
+inline TVector3<T>& TVector3<T>::operator*=(TVector3<T> const& rhs)
 {
     x *= rhs.x;
     y *= rhs.y;
@@ -464,7 +500,8 @@ template <typename T> inline TVector3<T>& TVector3<T>::operator*=(TVector3<T> co
     return *this;
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::operator/=(TVector3<T> const& rhs)
+template <typename T>
+inline TVector3<T>& TVector3<T>::operator/=(TVector3<T> const& rhs)
 {
     x /= rhs.x;
     y /= rhs.y;
@@ -472,7 +509,8 @@ template <typename T> inline TVector3<T>& TVector3<T>::operator/=(TVector3<T> co
     return *this;
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::operator*=(float const& scalar)
+template <typename T>
+inline TVector3<T>& TVector3<T>::operator*=(float const& scalar)
 {
     x *= scalar;
     y *= scalar;
@@ -480,7 +518,8 @@ template <typename T> inline TVector3<T>& TVector3<T>::operator*=(float const& s
     return *this;
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::operator/=(float const& scalar)
+template <typename T>
+inline TVector3<T>& TVector3<T>::operator/=(float const& scalar)
 {
     x /= scalar;
     y /= scalar;
@@ -488,67 +527,80 @@ template <typename T> inline TVector3<T>& TVector3<T>::operator/=(float const& s
     return *this;
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::operator+(TVector3<T> const& rhs) const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator+(TVector3<T> const& rhs) const
 {
     return TVector3<T>(*this) += rhs;
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::operator-(TVector3<T> const& rhs) const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator-(TVector3<T> const& rhs) const
 {
     return TVector3<T>(*this) -= rhs;
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::operator*(float const& scalar) const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator*(float const& scalar) const
 {
     return TVector3<T>(*this) *= scalar;
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::operator/(float const& scalar) const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator/(float const& scalar) const
 {
     return TVector3<T>(*this) /= scalar;
 }
 
-template <typename T> inline T& TVector3<T>::operator[](unsigned index)
+template <typename T>
+inline T& TVector3<T>::operator[](unsigned index)
 {
     return data[index];
 }
 
-template <typename T> inline T TVector3<T>::operator[](unsigned index) const
+template <typename T>
+inline T TVector3<T>::operator[](unsigned index) const
 {
     return data[index];
 }
 
-template <typename T> inline bool TVector3<T>::operator!=(TVector3 const& rhs) const
+template <typename T>
+inline bool TVector3<T>::operator!=(TVector3 const& rhs) const
 {
     return x != rhs.x || y != rhs.y || z != rhs.z;
 }
 
-template <typename T> inline bool TVector3<T>::operator==(TVector3 const& rhs) const
+template <typename T>
+inline bool TVector3<T>::operator==(TVector3 const& rhs) const
 {
     return (x == rhs.x && y == rhs.y && z == rhs.z);
 }
 
-template <typename T> inline bool TVector3<T>::operator<=(TVector3 const& rhs) const
+template <typename T>
+inline bool TVector3<T>::operator<=(TVector3 const& rhs) const
 {
     return (x <= rhs.x && y <= rhs.y && z <= rhs.z);
 }
 
-template <typename T> inline bool TVector3<T>::operator<(TVector3 const& rhs) const
+template <typename T>
+inline bool TVector3<T>::operator<(TVector3 const& rhs) const
 {
     return (x < rhs.x && y < rhs.y && z < rhs.z);
 }
 
-template <typename T> inline bool TVector3<T>::operator>(TVector3 const& rhs) const
+template <typename T>
+inline bool TVector3<T>::operator>(TVector3 const& rhs) const
 {
     return (x > rhs.x && y > rhs.y && z > rhs.z);
 }
 
-template <typename T> inline bool TVector3<T>::operator>=(TVector3 const& rhs) const
+template <typename T>
+inline bool TVector3<T>::operator>=(TVector3 const& rhs) const
 {
     return (x >= rhs.x && y >= rhs.y && z >= rhs.z);
 }
 
-template <typename T> inline TVector3<T>& TVector3<T>::Normalize()
+template <typename T>
+inline TVector3<T>& TVector3<T>::Normalize()
 {
     auto len = Length();
 
@@ -563,67 +615,79 @@ template <typename T> inline TVector3<T>& TVector3<T>::Normalize()
     }
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::Normalized() const
+template <typename T>
+inline TVector3<T> TVector3<T>::Normalized() const
 {
     return TVector3<T>(*this) / Length();
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::Projection(TVector3<T> const& rhs)
+template <typename T>
+inline TVector3<T> TVector3<T>::Projection(TVector3<T> const& rhs)
 {
     TVector3<T> tmp = rhs;
     tmp.Normalize();
     return tmp * this->Dot(tmp);
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::Cross(TVector3<T> const& rhs) const
+template <typename T>
+inline TVector3<T> TVector3<T>::Cross(TVector3<T> const& rhs) const
 {
     return TVector3<T>(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
 }
 
-template <typename T> inline float TVector3<T>::Dot(TVector3<T> const& rhs) const
+template <typename T>
+inline float TVector3<T>::Dot(TVector3<T> const& rhs) const
 {
     return (x * rhs.x + y * rhs.y + z * rhs.z);
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::operator*(TVector3<T> const& rhs) const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator*(TVector3<T> const& rhs) const
 {
     return TVector3<T>(x * rhs.x, y * rhs.y, z * rhs.z);
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::operator/(TVector3<T> const& rhs) const
+template <typename T>
+inline TVector3<T> TVector3<T>::operator/(TVector3<T> const& rhs) const
 {
     return TVector3<T>(x / rhs.x, y / rhs.y, z / rhs.z);
 }
 
-template <typename T> inline float TVector3<T>::Length() const
+template <typename T>
+inline float TVector3<T>::Length() const
 {
     return sqrtf(SquareLength());
 }
 
-template <typename T> inline float TVector3<T>::SquareLength() const
+template <typename T>
+inline float TVector3<T>::SquareLength() const
 {
     return this->Dot(*this);
 }
 
-template <typename T> inline float TVector3<T>::Distance(TVector3<T> const& rhs) const
+template <typename T>
+inline float TVector3<T>::Distance(TVector3<T> const& rhs) const
 {
     return sqrtf(SquareDistance(rhs));
 }
 
-template <typename T> inline float TVector3<T>::SquareDistance(TVector3<T> const& rhs) const
+template <typename T>
+inline float TVector3<T>::SquareDistance(TVector3<T> const& rhs) const
 {
     TVector3<T> tmp(rhs - *this);
     return tmp.Dot(tmp);
 }
 
-template <typename T> inline void TVector3<T>::Zero()
+template <typename T>
+inline void TVector3<T>::Zero()
 {
     x = 0.f;
     y = 0.f;
     z = 0.f;
 }
 
-template <typename T> inline TVector2<T> TVector3<T>::PolarAngles() const
+template <typename T>
+inline TVector2<T> TVector3<T>::PolarAngles() const
 {
     TVector3<T> tmp = this->Normalized();
     TVector2<T> result;
@@ -634,7 +698,8 @@ template <typename T> inline TVector2<T> TVector3<T>::PolarAngles() const
     return result;
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::RotateX(float const& angle)
+template <typename T>
+inline TVector3<T> TVector3<T>::RotateX(float const& angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -642,7 +707,8 @@ template <typename T> inline TVector3<T> TVector3<T>::RotateX(float const& angle
     return TVector3<T>(x, y * c + -s * z, s * y + c * z);
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::RotateY(float const& angle)
+template <typename T>
+inline TVector3<T> TVector3<T>::RotateY(float const& angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -650,7 +716,8 @@ template <typename T> inline TVector3<T> TVector3<T>::RotateY(float const& angle
     return TVector3<T>(c * x + s * z, y, -s * x + c * z);
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::RotateZ(float const& angle)
+template <typename T>
+inline TVector3<T> TVector3<T>::RotateZ(float const& angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -658,7 +725,8 @@ template <typename T> inline TVector3<T> TVector3<T>::RotateZ(float const& angle
     return TVector3<T>(c * x + -s * y, s * x + c * y, z);
 }
 
-template <typename T> inline TVector3<T> TVector3<T>::OrthogonalUnitVector() const
+template <typename T>
+inline TVector3<T> TVector3<T>::OrthogonalUnitVector() const
 {
     // Get the minimum element of the vector
     TVector3<T> vectorAbs(std::fabs(x), std::fabs(y), std::fabs(z));
@@ -671,12 +739,14 @@ template <typename T> inline TVector3<T> TVector3<T>::OrthogonalUnitVector() con
     return TVector3<T>(-y, x, 0.0) / std::sqrt(x * x + y * y);
 }
 
-template <typename T> inline TVector3<T> operator*(float scalar, TVector3<T> const& rhs)
+template <typename T>
+inline TVector3<T> operator*(float scalar, TVector3<T> const& rhs)
 {
     return rhs * scalar;
 }
 
-template <typename T> inline std::ostream& operator<<(std::ostream& os, TVector3<T> const& rhs)
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, TVector3<T> const& rhs)
 {
     os << "Vector3[" << rhs.x << "," << rhs.y << "," << rhs.z << "]" << std::endl;
     return os;
@@ -688,12 +758,14 @@ template <typename T> inline std::ostream& operator<<(std::ostream& os, TVector3
 /******************************************************************************/
 /* TVector4 Definition Start */
 
-template <typename T> inline TVector4<T> TVector4<T>::operator-() const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator-() const
 {
     return TVector4<T>(-x, -y, -z, -w);
 }
 
-template <typename T> inline TVector4<T>& TVector4<T>::operator+=(TVector4<T> const& rhs)
+template <typename T>
+inline TVector4<T>& TVector4<T>::operator+=(TVector4<T> const& rhs)
 {
     x += rhs.x;
     y += rhs.y;
@@ -702,7 +774,8 @@ template <typename T> inline TVector4<T>& TVector4<T>::operator+=(TVector4<T> co
     return *this;
 }
 
-template <typename T> inline TVector4<T>& TVector4<T>::operator-=(TVector4<T> const& rhs)
+template <typename T>
+inline TVector4<T>& TVector4<T>::operator-=(TVector4<T> const& rhs)
 {
     x -= rhs.x;
     y -= rhs.y;
@@ -711,7 +784,8 @@ template <typename T> inline TVector4<T>& TVector4<T>::operator-=(TVector4<T> co
     return *this;
 }
 
-template <typename T> inline TVector4<T>& TVector4<T>::operator*=(TVector4<T> const& rhs)
+template <typename T>
+inline TVector4<T>& TVector4<T>::operator*=(TVector4<T> const& rhs)
 {
     x *= rhs.x;
     y *= rhs.y;
@@ -720,7 +794,8 @@ template <typename T> inline TVector4<T>& TVector4<T>::operator*=(TVector4<T> co
     return *this;
 }
 
-template <typename T> inline TVector4<T>& TVector4<T>::operator/=(TVector4<T> const& rhs)
+template <typename T>
+inline TVector4<T>& TVector4<T>::operator/=(TVector4<T> const& rhs)
 {
     x /= rhs.x;
     y /= rhs.y;
@@ -729,7 +804,8 @@ template <typename T> inline TVector4<T>& TVector4<T>::operator/=(TVector4<T> co
     return *this;
 }
 
-template <typename T> inline TVector4<T>& TVector4<T>::operator*=(float const& scalar)
+template <typename T>
+inline TVector4<T>& TVector4<T>::operator*=(float const& scalar)
 {
     x *= scalar;
     y *= scalar;
@@ -738,7 +814,8 @@ template <typename T> inline TVector4<T>& TVector4<T>::operator*=(float const& s
     return *this;
 }
 
-template <typename T> inline TVector4<T>& TVector4<T>::operator/=(float const& scalar)
+template <typename T>
+inline TVector4<T>& TVector4<T>::operator/=(float const& scalar)
 {
     x /= scalar;
     y /= scalar;
@@ -747,105 +824,125 @@ template <typename T> inline TVector4<T>& TVector4<T>::operator/=(float const& s
     return *this;
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::operator+(TVector4<T> const& rhs) const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator+(TVector4<T> const& rhs) const
 {
     return TVector4<T>(*this) += rhs;
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::operator-(TVector4<T> const& rhs) const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator-(TVector4<T> const& rhs) const
 {
     return TVector4<T>(*this) -= rhs;
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::operator*(float const& scalar) const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator*(float const& scalar) const
 {
     return TVector4<T>(*this) *= scalar;
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::operator/(float const& scalar) const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator/(float const& scalar) const
 {
     return TVector4<T>(*this) /= scalar;
 }
 
-template <typename T> inline T& TVector4<T>::operator[](unsigned index)
+template <typename T>
+inline T& TVector4<T>::operator[](unsigned index)
 {
     return data[index];
 }
 
-template <typename T> inline T TVector4<T>::operator[](unsigned index) const
+template <typename T>
+inline T TVector4<T>::operator[](unsigned index) const
 {
     return data[index];
 }
 
-template <typename T> inline bool TVector4<T>::operator!=(TVector4 const& rhs) const
+template <typename T>
+inline bool TVector4<T>::operator!=(TVector4 const& rhs) const
 {
     return x != rhs.x || y != rhs.y || z != rhs.z || w != rhs.w;
 }
 
-template <typename T> inline bool TVector4<T>::operator==(TVector4 const& rhs) const
+template <typename T>
+inline bool TVector4<T>::operator==(TVector4 const& rhs) const
 {
     return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::operator*(TVector4<T> const& rhs) const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator*(TVector4<T> const& rhs) const
 {
     return TVector4<T>(x * rhs.x, y * rhs.y, z * rhs.z, w * rhs.w);
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::operator/(TVector4<T> const& rhs) const
+template <typename T>
+inline TVector4<T> TVector4<T>::operator/(TVector4<T> const& rhs) const
 {
     return TVector4<T>(x / rhs.x, y / rhs.y, z / rhs.z, w / rhs.w);
 }
 
-template <typename T> inline TVector4<T> TVector4<T>::Normalize()
+template <typename T>
+inline TVector4<T> TVector4<T>::Normalize()
 {
     float length = Length();
     return TVector4<T>(*this) / length;
 }
 
-template <typename T> inline float TVector4<T>::Dot(TVector4<T> const& rhs) const
+template <typename T>
+inline float TVector4<T>::Dot(TVector4<T> const& rhs) const
 {
     return (x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w);
 }
 
-template <typename T> inline float TVector4<T>::Length() const
+template <typename T>
+inline float TVector4<T>::Length() const
 {
     return sqrtf(LengthSq());
 }
 
-template <typename T> inline float TVector4<T>::LengthSq() const
+template <typename T>
+inline float TVector4<T>::LengthSq() const
 {
     return this->Dot(*this);
 }
 
-template <typename T> inline float TVector4<T>::Distance(TVector4<T> const& rhs) const
+template <typename T>
+inline float TVector4<T>::Distance(TVector4<T> const& rhs) const
 {
     return sqrtf(SquareDistance(rhs));
 }
 
-template <typename T> inline float TVector4<T>::SquareDistance(TVector4<T> const& rhs) const
+template <typename T>
+inline float TVector4<T>::SquareDistance(TVector4<T> const& rhs) const
 {
     return this->Dot(*this);
 }
 
-template <typename T> inline void TVector4<T>::Zero()
+template <typename T>
+inline void TVector4<T>::Zero()
 {
     x = 0.f;
     y = 0.f;
     z = 0.f;
 }
 
-template <typename T> inline TVector3<T> TVector4<T>::V3()
+template <typename T>
+inline TVector3<T> TVector4<T>::V3()
 {
     return TVector3<T>(x, y, z);
 }
 
-template <typename T> inline TVector4<T> operator*(float scalar, TVector4<T> const& rhs)
+template <typename T>
+inline TVector4<T> operator*(float scalar, TVector4<T> const& rhs)
 {
     return rhs * scalar;
 }
 
-template <typename T> inline std::ostream& operator<<(std::ostream& os, TVector4<T> const& rhs)
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, TVector4<T> const& rhs)
 {
     os << "Vector4[" << rhs.x << "," << rhs.y << "," << rhs.z << "," << rhs.w << "]" << std::endl;
     return os;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -74,29 +75,29 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\rttr\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\opencv\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\rttr\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,12 +107,11 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc143-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -122,15 +122,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc143-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">
@@ -142,14 +141,13 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc143-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">
@@ -161,15 +159,14 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++17 /MP %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc142-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc143-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib;lua54.lib;opencv_world450.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -183,7 +180,7 @@
     <ClCompile Include="CapsuleVsConvexPolygon.cpp" />
     <ClCompile Include="CollisionMesh_2D.cpp" />
     <ClCompile Include="CollisionMesh_3D.cpp" />
-    <ClCompile Include="Actions.cpp" />
+    <ClCompile Include="Action.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AppConsole.cpp" />
     <ClCompile Include="Application.cpp" />
@@ -196,7 +193,6 @@
     <ClCompile Include="ConvexPolygonVsConvexPolygon.cpp" />
     <ClCompile Include="DebugPass.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
-    <ClCompile Include="Dock.cpp" />
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="EditorCamera.cpp" />
     <ClCompile Include="External Libraries\ImGuizmo\GraphEditor.cpp" />
@@ -295,7 +291,7 @@
     <ClInclude Include="CollisionDispatch.h" />
     <ClInclude Include="CollisionMesh_2D.h" />
     <ClInclude Include="CollisionMesh_3D.h" />
-    <ClInclude Include="Actions.h" />
+    <ClInclude Include="Action.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Any.h" />
     <ClInclude Include="AppConsole.h" />
@@ -364,7 +360,7 @@
     <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="SingleFrameAllocator.h" />
     <ClInclude Include="SkyboxPass.h" />
-    <ClInclude Include="smart_enums.h" />
+    <ClInclude Include="SmartEnums.h" />
     <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="SphereVsCapsule.h" />
     <ClInclude Include="SphereVsConvexPolygon.h" />
@@ -375,7 +371,6 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="CorePrerequisites.h" />
-    <ClInclude Include="Dock.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="EditorCamera.h" />
     <ClInclude Include="Factory.h" />
@@ -415,6 +410,7 @@
     <ClInclude Include="WaterPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Shaders\BasicDraw.frag" />
     <None Include="Shaders\BasicEmpty.frag" />
     <None Include="Shaders\BasicTransform.vert" />
@@ -464,5 +460,13 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.CppWinRT.2.0.220224.4\build\native\Microsoft.Windows.CppWinRT.targets'))" />
+  </Target>
 </Project>

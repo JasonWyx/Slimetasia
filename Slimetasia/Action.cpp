@@ -1,4 +1,4 @@
-#include "Actions.h"
+#include "Action.h"
 
 #include <utility>
 
@@ -9,7 +9,7 @@
 #include "ResourceManager.h"
 #include "luascript.h"
 
-void CreateArchetype_Action::Execute()
+void ActionCreateArchetype::Execute()
 {
     del = false;
     Editor::Instance().AddArchetype(obj, uobj);
@@ -18,7 +18,7 @@ void CreateArchetype_Action::Execute()
     a_go.clear();
 }
 
-void CreateArchetype_Action::UnExecute()
+void ActionCreateArchetype::Revert()
 {
     del = true;
     Editor::Instance().RemoveArchetype(obj, uobj);
@@ -37,19 +37,19 @@ void CreateArchetype_Action::UnExecute()
     }
 }
 
-CreateArchetype_Action::~CreateArchetype_Action()
+ActionCreateArchetype::~ActionCreateArchetype()
 {
     if (del) delete obj;
 }
 
-void Add_Component_Action::Execute()
+void ActionAddComponent::Execute()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     void* script = (*Factory::m_Factories).at(comp.c_str())->create(go);
     if (comp == "LuaScript") script_name = reinterpret_cast<LuaScript*>(script)->GetScript();
 }
 
-void Add_Component_Action::UnExecute()
+void ActionAddComponent::Revert()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     if (comp == "LuaScript")
@@ -58,7 +58,7 @@ void Add_Component_Action::UnExecute()
         (*Factory::m_Factories).at(comp.c_str())->remove(go);
 }
 
-void Remove_Component_Action::StructRecurrsion(unsigned char* curr, unsigned char* tmp, std::string prop)
+void ActionRemoveComponent::StructRecurrsion(unsigned char* curr, unsigned char* tmp, std::string prop)
 {
     if (!Factory::m_Reflection->at(prop)->getParents().back().get_parents().empty()) ParentRecurrsion(curr, tmp, Factory::m_Reflection->at(prop)->getParents().back().key);
     auto properties = Factory::m_Reflection->at(prop)->getProperties();
@@ -99,7 +99,7 @@ void Remove_Component_Action::StructRecurrsion(unsigned char* curr, unsigned cha
     }
 }
 
-void Remove_Component_Action::ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp)
+void ActionRemoveComponent::ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp)
 {
     if (!Factory::m_Reflection->at(comp)->getParents().back().get_parents().empty()) ParentRecurrsion(curr, tmp, Factory::m_Reflection->at(comp)->getParents().back().key);
     auto properties = Factory::m_Reflection->at(comp)->getParents().back().get_properties();
@@ -140,7 +140,7 @@ void Remove_Component_Action::ParentRecurrsion(unsigned char* curr, unsigned cha
     }
 }
 // May have to do the whole recurrsion shit again
-Remove_Component_Action::Remove_Component_Action(GameObject* g, std::string c, Layer* l)
+ActionRemoveComponent::ActionRemoveComponent(GameObject* g, std::string c, Layer* l)
     : go(g)
     , comp(c)
     , tmp(nullptr)
@@ -153,13 +153,13 @@ Remove_Component_Action::Remove_Component_Action(GameObject* g, std::string c, L
     l_name = ly->GetName();
 }
 
-void Remove_Component_Action::Execute()
+void ActionRemoveComponent::Execute()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     (*Factory::m_Factories).at(comp.c_str())->remove(go);
 }
 
-void Remove_Component_Action::UnExecute()
+void ActionRemoveComponent::Revert()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     unsigned char* Char = reinterpret_cast<unsigned char*>((*Factory::m_Factories).at(comp.c_str())->create(go));
@@ -206,27 +206,27 @@ void Remove_Component_Action::UnExecute()
     go->UpdateComponents();
 }
 
-Remove_Component_Action::~Remove_Component_Action()
+ActionRemoveComponent::~ActionRemoveComponent()
 {
     delete tmp;
 }
 
-void RevertArchetype_Action::Execute()
+void ActionRevertArchetype::Execute()
 {
     obj = Editor::Instance().RevertArchetype(obj);
 }
 
-void RevertArchetype_Action::UnExecute()
+void ActionRevertArchetype::Revert()
 {
     obj = Editor::Instance().RevertArchetype(obj);
 }
 
-RevertArchetype_Action::~RevertArchetype_Action()
+ActionRevertArchetype::~ActionRevertArchetype()
 {
     delete obj;
 }
 
-void MakeChanges_Action::Execute()
+void ActionMakeChanges::Execute()
 {
     obj = Editor::Instance().MakeChangesArchetype(obj);
     GameObject* tmp = Editor::Instance().GetArchetype(obj->GetName());
@@ -254,7 +254,7 @@ void MakeChanges_Action::Execute()
     }
 }
 
-void MakeChanges_Action::UnExecute()
+void ActionMakeChanges::Revert()
 {
     obj = Editor::Instance().MakeChangesArchetype(obj);
     int i = 0;
@@ -268,12 +268,12 @@ void MakeChanges_Action::UnExecute()
     archetypeList.clear();
 }
 
-MakeChanges_Action::~MakeChanges_Action()
+ActionMakeChanges::~ActionMakeChanges()
 {
     delete obj;
 }
 
-void CreateObjectArchetype_Action::Execute()
+void ActionCreateObjectArchetype::Execute()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->CreateObject(name);
     Editor::Instance().GetArchetype(archetype)->Clone(go);
@@ -281,24 +281,24 @@ void CreateObjectArchetype_Action::Execute()
     id = go->GetID();
 }
 
-void CreateObjectArchetype_Action::UnExecute()
+void ActionCreateObjectArchetype::Revert()
 {
     Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id)->Destroy();
 }
 
-void RemoveScript_Action::Execute()
+void ActionRevertScript::Execute()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     go->RemoveScript(script);
 }
 
-void RemoveScript_Action::UnExecute()
+void ActionRevertScript::Revert()
 {
     go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     go->AddComponent<LuaScript>()->SetScript(script);
 }
 
-void ParentStruct_InputAction::StructRecurrsion(unsigned char* curr, unsigned char* tmp, std::string prop)
+void ActionParentStructInput::StructRecurrsion(unsigned char* curr, unsigned char* tmp, std::string prop)
 {
     if (!Factory::m_Reflection->at(prop)->getParents().back().get_parents().empty()) ParentRecurrsion(curr, tmp, Factory::m_Reflection->at(prop)->getParents().back().key);
     auto properties = Factory::m_Reflection->at(prop)->getProperties();
@@ -339,7 +339,7 @@ void ParentStruct_InputAction::StructRecurrsion(unsigned char* curr, unsigned ch
     }
 }
 
-void ParentStruct_InputAction::ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp)
+void ActionParentStructInput::ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp)
 {
     if (!Factory::m_Reflection->at(comp)->getParents().back().get_parents().empty()) ParentRecurrsion(curr, tmp, Factory::m_Reflection->at(comp)->getParents().back().key);
     auto properties = Factory::m_Reflection->at(comp)->getParents().back().get_properties();
@@ -380,7 +380,7 @@ void ParentStruct_InputAction::ParentRecurrsion(unsigned char* curr, unsigned ch
     }
 }
 
-ParentStruct_InputAction::ParentStruct_InputAction(GameObject* g, std::string c, Layer* l)
+ActionParentStructInput::ActionParentStructInput(GameObject* g, std::string c, Layer* l)
     : name()
     , comp(c)
     , oldObj(nullptr)
@@ -395,7 +395,7 @@ ParentStruct_InputAction::ParentStruct_InputAction(GameObject* g, std::string c,
     l_name = l->GetName();
 }
 
-void ParentStruct_InputAction::Execute()
+void ActionParentStructInput::Execute()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     unsigned char* Char = nullptr;
@@ -444,7 +444,7 @@ void ParentStruct_InputAction::Execute()
     go->UpdateComponents();
 }
 
-void ParentStruct_InputAction::UnExecute()
+void ActionParentStructInput::Revert()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     unsigned char* Char = nullptr;
@@ -493,19 +493,19 @@ void ParentStruct_InputAction::UnExecute()
     go->UpdateComponents();
 }
 
-void ParentStruct_InputAction::SetNew(GameObject*& go)
+void ActionParentStructInput::SetNew(GameObject*& go)
 {
     newObj = new GameObject(nullptr, 0);
     go->Clone(newObj);
 }
 
-ParentStruct_InputAction::~ParentStruct_InputAction()
+ActionParentStructInput::~ActionParentStructInput()
 {
     delete oldObj;
     delete newObj;
 }
 
-void HMesh_InputAction::Execute()
+void ActionMeshInput::Execute()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     auto renderer = go->GetComponent<MeshRenderer>();
@@ -515,7 +515,7 @@ void HMesh_InputAction::Execute()
     }
 }
 
-void HMesh_InputAction::UnExecute()
+void ActionMeshInput::Revert()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     auto renderer = go->GetComponent<MeshRenderer>();
@@ -525,19 +525,19 @@ void HMesh_InputAction::UnExecute()
     }
 }
 
-void CreateLayer_Action::Execute()
+void ActionCreateLayer::Execute()
 {
     Application::Instance().GetCurrentScene()->CreateLayer(name);
 }
 
-void CreateLayer_Action::UnExecute()
+void ActionCreateLayer::Revert()
 {
     Application::Instance().GetCurrentScene()->DeleteLayer(name);
     Editor::Instance().SetLayer(Application::Instance().GetCurrentScene()->GetLayers().back());
     Editor::Instance().SetCurrentObject(nullptr);
 }
 
-void DeleteObject_Action::DuplicateChildren(GameObject* root)
+void ActionDeleteObject::DuplicateChildren(GameObject* root)
 {
     Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     if (root->GetChildrenObjects().empty()) return;
@@ -552,7 +552,7 @@ void DeleteObject_Action::DuplicateChildren(GameObject* root)
     }
 }
 
-void DeleteObject_Action::ReattachChildren(GameObject* root)
+void ActionDeleteObject::ReattachChildren(GameObject* root)
 {
     Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     for (unsigned i = 0; i < childrens.size(); ++i)
@@ -572,13 +572,13 @@ void DeleteObject_Action::ReattachChildren(GameObject* root)
     }
 }
 
-void DeleteObject_Action::Execute()
+void ActionDeleteObject::Execute()
 {
     GameObject* g = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     g->Destroy();
 }
 
-void DeleteObject_Action::UnExecute()
+void ActionDeleteObject::Revert()
 {
     GameObject* g = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->CreateObject(go->GetName());
     go->Clone(g);
@@ -586,12 +586,12 @@ void DeleteObject_Action::UnExecute()
     ReattachChildren(go);
 }
 
-DeleteObject_Action::~DeleteObject_Action()
+ActionDeleteObject::~ActionDeleteObject()
 {
     delete go;
 }
 
-void DeleteArchetype_Action::Execute()
+void ActionDeleteArchetype::Execute()
 {
     del = true;
     std::vector<unsigned> ids_;
@@ -612,7 +612,7 @@ void DeleteArchetype_Action::Execute()
     }
 }
 
-void DeleteArchetype_Action::UnExecute()
+void ActionDeleteArchetype::Revert()
 {
     del = false;
     Editor::Instance().AddArchetype(go, ugo);
@@ -636,7 +636,7 @@ void DeleteArchetype_Action::UnExecute()
     a_go.clear();
 }
 
-DeleteArchetype_Action::~DeleteArchetype_Action()
+ActionDeleteArchetype::~ActionDeleteArchetype()
 {
     if (del)
     {
@@ -645,26 +645,26 @@ DeleteArchetype_Action::~DeleteArchetype_Action()
     }
 }
 
-void DeleteLayer_Action::Execute()
+void ActionDeleteLayer::Execute()
 {
     Application::Instance().GetCurrentScene()->DeleteLayer(ly->GetName());
     Editor::Instance().SetLayer(Application::Instance().GetCurrentScene()->GetLayers().back());
     Editor::Instance().SetCurrentObject(nullptr);
 }
 
-void DeleteLayer_Action::UnExecute()
+void ActionDeleteLayer::Revert()
 {
     auto layer = Application::Instance().GetCurrentScene()->CreateLayerWithoutCamera(ly->GetName());
     ly->Clone(layer);
     auto tmp = layer;
 }
 
-DeleteLayer_Action::~DeleteLayer_Action()
+ActionDeleteLayer::~ActionDeleteLayer()
 {
     delete ly;
 }
 
-void TextureInput_Action::Execute()
+void ActionInputTexture::Execute()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     auto renderer = go->GetComponent<MeshRenderer>();
@@ -696,7 +696,7 @@ void TextureInput_Action::Execute()
     }
 }
 
-void TextureInput_Action::UnExecute()
+void ActionInputTexture::Revert()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     auto renderer = go->GetComponent<MeshRenderer>();
@@ -728,7 +728,7 @@ void TextureInput_Action::UnExecute()
     }
 }
 
-void AnimationInput_Action::Execute()
+void ActionInputAnimation::Execute()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     auto animator = go->GetComponent<MeshAnimator>();
@@ -738,7 +738,7 @@ void AnimationInput_Action::Execute()
     }
 }
 
-void AnimationInput_Action::UnExecute()
+void ActionInputAnimation::Revert()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     auto animator = go->GetComponent<MeshAnimator>();
@@ -748,17 +748,17 @@ void AnimationInput_Action::UnExecute()
     }
 }
 
-void AddTag_Action::Execute()
+void ActionAddTag::Execute()
 {
     Editor::Instance().AddTag(name);
 }
 
-void AddTag_Action::UnExecute()
+void ActionAddTag::Revert()
 {
     Editor::Instance().RemoveTag(name);
 }
 
-void DeleteTag_Action::Execute()
+void ActionDeleteTag::Execute()
 {
     auto s = Application::Instance().GetCurrentScene();
     auto lys = s->GetLayers();
@@ -777,7 +777,7 @@ void DeleteTag_Action::Execute()
     Editor::Instance().RemoveTag(name);
 }
 
-void DeleteTag_Action::UnExecute()
+void ActionDeleteTag::Revert()
 {
     auto s = Application::Instance().GetCurrentScene();
     Editor::Instance().AddTag(name);
@@ -788,7 +788,7 @@ void DeleteTag_Action::UnExecute()
     }
 }
 
-void ChangeTag_Action::Execute()
+void ActionChangeTag::Execute()
 {
     Editor::Instance().RemoveTag(oldName);
     Editor::Instance().AddTag(newName);
@@ -808,7 +808,7 @@ void ChangeTag_Action::Execute()
     }
 }
 
-void ChangeTag_Action::UnExecute()
+void ActionChangeTag::Revert()
 {
     Editor::Instance().AddTag(oldName);
     Editor::Instance().RemoveTag(newName);
@@ -820,17 +820,17 @@ void ChangeTag_Action::UnExecute()
     }
 }
 
-void ObjectTag_Action::Execute()
+void ActionTagObject::Execute()
 {
     Application::Instance().GetCurrentScene()->GetLayerByName(layerName)->GetObjectById(id)->SetTag(newTag);
 }
 
-void ObjectTag_Action::UnExecute()
+void ActionTagObject::Revert()
 {
     Application::Instance().GetCurrentScene()->GetLayerByName(layerName)->GetObjectById(id)->SetTag(oldTag);
 }
 
-void MultipleTransformation_Action::Execute()
+void ActionMultiTransform::Execute()
 {
     auto curr = Application::Instance().GetCurrentScene()->GetLayerByName(layer);
     for (auto& id : ids)
@@ -861,7 +861,7 @@ void MultipleTransformation_Action::Execute()
     }
 }
 
-void MultipleTransformation_Action::UnExecute()
+void ActionMultiTransform::Revert()
 {
     auto curr = Application::Instance().GetCurrentScene()->GetLayerByName(layer);
     for (auto& id : ids)
@@ -892,7 +892,7 @@ void MultipleTransformation_Action::UnExecute()
     }
 }
 
-void Duplicate_Action::Duplicate()
+void ActionDuplicate::Duplicate()
 {
     Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(layerName);
     if (!m_CurrentLayer) return;
@@ -906,7 +906,7 @@ void Duplicate_Action::Duplicate()
     }
 }
 
-void Duplicate_Action::ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* original, GameObject* Clone)
+void ActionDuplicate::ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* original, GameObject* Clone)
 {
     if (original->GetChildrenObjects().empty()) return;
     ChildrenList m_Childrens;
@@ -925,12 +925,12 @@ void Duplicate_Action::ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* orig
     original->SetChildrenObjects(correctChildren);
 }
 
-void Duplicate_Action::Execute()
+void ActionDuplicate::Execute()
 {
     Duplicate();
 }
 
-void Duplicate_Action::UnExecute()
+void ActionDuplicate::Revert()
 {
     Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(layerName);
     for (auto& id : duplicatedObjects)
@@ -939,21 +939,21 @@ void Duplicate_Action::UnExecute()
     }
 }
 
-void HFont_InputAction::Execute()
+void ActionInputFont::Execute()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     TextRenderer* font = go->GetComponent<TextRenderer>();
     if (font) font->m_Font = ResourceManager::Instance().GetResource<Font>(newIndex);
 }
 
-void HFont_InputAction::UnExecute()
+void ActionInputFont::Revert()
 {
     GameObject* go = Application::Instance().GetCurrentScene()->GetLayerByName(l_name)->GetObjectById(id);
     TextRenderer* font = go->GetComponent<TextRenderer>();
     if (font) font->m_Font = ResourceManager::Instance().GetResource<Font>(oldIndex);
 }
 
-void AddAttractor_Action::Execute()
+void ActionAddAttractor::Execute()
 {
     auto go = Application::Instance().GetCurrentScene()->GetLayerByName(ly_name)->GetObjectById(id);
     auto boxParticle = go->GetComponent<BoxParticleEmitter>();
@@ -968,7 +968,7 @@ void AddAttractor_Action::Execute()
     }
 }
 
-void AddAttractor_Action::UnExecute()
+void ActionAddAttractor::Revert()
 {
     auto go = Application::Instance().GetCurrentScene()->GetLayerByName(ly_name)->GetObjectById(id);
     auto boxParticle = go->GetComponent<BoxParticleEmitter>();
@@ -983,7 +983,7 @@ void AddAttractor_Action::UnExecute()
     }
 }
 
-void DeleteAttractor_Action::Execute()
+void ActionDeleteAttractor::Execute()
 {
     auto go = Application::Instance().GetCurrentScene()->GetLayerByName(ly_name)->GetObjectById(id);
     auto boxParticle = go->GetComponent<BoxParticleEmitter>();
@@ -1000,7 +1000,7 @@ void DeleteAttractor_Action::Execute()
     }
 }
 
-void DeleteAttractor_Action::UnExecute()
+void ActionDeleteAttractor::Revert()
 {
     auto go = Application::Instance().GetCurrentScene()->GetLayerByName(ly_name)->GetObjectById(id);
     auto boxParticle = go->GetComponent<BoxParticleEmitter>();

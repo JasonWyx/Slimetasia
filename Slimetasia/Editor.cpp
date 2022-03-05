@@ -20,10 +20,10 @@
 #include "luascript.h"
 #define MAX_STRING_LENGTH 100
 
-bool Editor::s_ShowBV = false;
-bool Editor::s_ShowDebug = false;
-bool Editor::s_lockMousePosition = false;
-bool Editor::s_isPlaying = false;
+bool Editor::ms_ShowBoundingVolume = false;
+bool Editor::ms_ShowDebug = false;
+bool Editor::ms_ShouldLockMousePosition = false;
+bool Editor::ms_IsGameRunning = false;
 
 static auto vector_getter = [](void* vec, int idx, const char** out_text)
 {
@@ -51,21 +51,21 @@ void Editor::Undo()
 {
     if (m_Undo.empty()) return;
     std::cout << "Undo" << std::endl;
-    Actions* act = m_Undo.back();
-    if (dynamic_cast<Creation_Action*>(act))
+    Action* act = m_Undo.back();
+    if (dynamic_cast<ActionCreate*>(act))
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
         Renderer::Instance().SetSelectedObjects({0});
     }
-    if (dynamic_cast<CreateObjectArchetype_Action*>(act))
+    if (dynamic_cast<ActionCreateObjectArchetype*>(act))
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
         Renderer::Instance().SetSelectedObjects({0});
     }
     m_Undo.pop_back();
-    act->UnExecute();
+    act->Revert();
     m_Redo.push_back(act);
 }
 
@@ -73,7 +73,7 @@ void Editor::Redo()
 {
     if (m_Redo.empty()) return;
     std::cout << "Redo" << std::endl;
-    Actions* act = m_Redo.back();
+    Action* act = m_Redo.back();
     m_Redo.pop_back();
     act->Execute();
     m_Undo.push_back(act);
@@ -83,30 +83,30 @@ void Editor::Update_Redo_Undo()
 {
     while (m_Redo.size() > m_Redo_Undo_Size)
     {
-        Actions* tmp = m_Redo.front();
+        Action* tmp = m_Redo.front();
         m_Redo.pop_front();
         delete tmp;
     }
 
     while (m_Undo.size() > m_Redo_Undo_Size)
     {
-        Actions* tmp = m_Undo.front();
+        Action* tmp = m_Undo.front();
         m_Undo.pop_front();
         delete tmp;
     }
 }
 
-void Editor::Clear_Redo_Undo()
+void Editor::ClearRedoUndo()
 {
     while (!m_Redo.empty())
     {
-        Actions* tmp = m_Redo.front();
+        Action* tmp = m_Redo.front();
         m_Redo.pop_front();
         delete tmp;
     }
     while (!m_Undo.empty())
     {
-        Actions* tmp = m_Undo.front();
+        Action* tmp = m_Undo.front();
         m_Undo.pop_front();
         delete tmp;
     }
@@ -117,200 +117,275 @@ void Editor::MainMenu()
     bool b = false;
     bool style = false;
     bool help = false;
-    BeginMainMenuBar();
-    if (BeginMenu("File"))
+
+    ImGui::BeginMainMenuBar();
+    if (ImGui::BeginMenu("File"))
     {
-        if (MenuItem("New", "CTRL+N")) b = true;
-        if (MenuItem("Save", "CTRL+S")) Save();
-        if (MenuItem("Load", "CTRL+O")) Load();
-        if (MenuItem("Exit", "ALT+X")) Application::Instance().QuitProgram();
+        if (ImGui::MenuItem("New", "CTRL+N")) b = true;
+        if (ImGui::MenuItem("Save", "CTRL+S")) Save();
+        if (ImGui::MenuItem("Load", "CTRL+O")) Load();
+        if (ImGui::MenuItem("Exit", "ALT+X")) Application::Instance().QuitProgram();
         ImGui::EndMenu();
     }
     if ((Input::Instance().GetKeyDown(KEY_LALT) || Input::Instance().GetKeyDown(KEY_RALT)) && Input::Instance().GetKeyDown(KEY_X)) Application::Instance().QuitProgram();
-    if (BeginMenu("Edit"))
+    if (ImGui::BeginMenu("Edit"))
     {
         if (m_Undo.empty())
-            MenuItem("Undo", "CTRL+Z", false, false);
-        else if (MenuItem("Undo", "CTRL+Z"))
-            Undo();
-        if (m_Redo.empty())
-            MenuItem("Redo", "CTRL+Y", false, false);
-        else if (MenuItem("Redo", "CTRL+Y"))
-            Redo();
-        if (m_SelectedObjects.empty())
-            MenuItem("Duplicate", "CTRL+D", false, false);
-        else if (MenuItem("Duplicate", "CTRL+D"))
-            Duplicate();
-        ImGui::EndMenu();
-    }
-    if (BeginMenu("Windows"))
-    {
-        if (MenuItem("Outliner", NULL, m_ActiveWindow[WindowStates::Outliner_State], !m_ActiveWindow[WindowStates::Outliner_State])) m_ActiveWindow[WindowStates::Outliner_State] = true;
-        if (MenuItem("Inspector", NULL, m_ActiveWindow[WindowStates::Inspector_State], !m_ActiveWindow[WindowStates::Inspector_State])) m_ActiveWindow[WindowStates::Inspector_State] = true;
-        if (MenuItem("Console", NULL, m_Console.ActiveWindow, !m_Console.ActiveWindow)) m_Console.ActiveWindow = true;
-        if (MenuItem("Viewport", NULL, m_ActiveWindow[WindowStates::Viewport_State], !m_ActiveWindow[WindowStates::Viewport_State])) m_ActiveWindow[WindowStates::Viewport_State] = true;
-        if (MenuItem("Archetype", NULL, m_ActiveWindow[WindowStates::Archetype_State], !m_ActiveWindow[WindowStates::Archetype_State])) m_ActiveWindow[WindowStates::Archetype_State] = true;
-        if (MenuItem("Text Editor", NULL, m_ActiveWindow[WindowStates::TextEditor_State], !m_ActiveWindow[WindowStates::TextEditor_State])) m_ActiveWindow[WindowStates::TextEditor_State] = true;
-        if (MenuItem("Layer Editor", NULL, m_ActiveWindow[WindowStates::LayerEditor_State], !m_ActiveWindow[WindowStates::LayerEditor_State])) m_ActiveWindow[WindowStates::LayerEditor_State] = true;
-        if (MenuItem("Profiler", NULL, m_ActiveWindow[WindowStates::Profiler_State], !m_ActiveWindow[WindowStates::Profiler_State])) m_ActiveWindow[WindowStates::Profiler_State] = true;
-        if (MenuItem("Tags Editor", NULL, m_ActiveWindow[WindowStates::Tags_State], !m_ActiveWindow[WindowStates::Tags_State])) m_ActiveWindow[WindowStates::Tags_State] = true;
-        if (MenuItem("Physics Editor", NULL, m_ActiveWindow[WindowStates::Physics_State], !m_ActiveWindow[WindowStates::Physics_State])) m_ActiveWindow[WindowStates::Physics_State] = true;
-        if (MenuItem("Resource Manager", NULL, m_ActiveWindow[WindowStates::Resource_State], !m_ActiveWindow[WindowStates::Resource_State])) m_ActiveWindow[WindowStates::Resource_State] = true;
-        ImGui::EndMenu();
-    }
-    if (BeginMenu("GameObject"))
-    {
-        if (MenuItem("Empty Object"))
         {
-            Creation_Action* act = new Creation_Action(m_CurrentLayer, "GameObject");
+            ImGui::MenuItem("Undo", "CTRL+Z", false, false);
+        }
+        else if (ImGui::MenuItem("Undo", "CTRL+Z"))
+        {
+            Undo();
+        }
+
+        if (m_Redo.empty())
+        {
+            ImGui::MenuItem("Redo", "CTRL+Y", false, false);
+        }
+        else if (ImGui::MenuItem("Redo", "CTRL+Y"))
+        {
+            Redo();
+        }
+
+        if (m_SelectedObjects.empty())
+        {
+            ImGui::MenuItem("Duplicate", "CTRL+D", false, false);
+        }
+        else if (ImGui::MenuItem("Duplicate", "CTRL+D"))
+        {
+            Duplicate();
+        }
+
+        ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Windows"))
+    {
+        if (ImGui::MenuItem("Outliner", NULL, m_ActiveWindow[(int)WindowStates::Outliner], !m_ActiveWindow[(int)WindowStates::Outliner]))
+        {
+            m_ActiveWindow[(int)WindowStates::Outliner] = true;
+        }
+        if (ImGui::MenuItem("Inspector", NULL, m_ActiveWindow[(int)WindowStates::Inspector], !m_ActiveWindow[(int)WindowStates::Inspector]))
+        {
+            m_ActiveWindow[(int)WindowStates::Inspector] = true;
+        }
+        if (ImGui::MenuItem("Console", NULL, m_Console.m_IsActiveWindow, !m_Console.m_IsActiveWindow))
+        {
+            m_Console.m_IsActiveWindow = true;
+        }
+        if (ImGui::MenuItem("Viewport", NULL, m_ActiveWindow[(int)WindowStates::Viewport], !m_ActiveWindow[(int)WindowStates::Viewport]))
+        {
+            m_ActiveWindow[(int)WindowStates::Viewport] = true;
+        }
+        if (ImGui::MenuItem("Archetype", NULL, m_ActiveWindow[(int)WindowStates::Archetype], !m_ActiveWindow[(int)WindowStates::Archetype]))
+        {
+            m_ActiveWindow[(int)WindowStates::Archetype] = true;
+        }
+        if (ImGui::MenuItem("ImGui::Text Editor", NULL, m_ActiveWindow[(int)WindowStates::TextEditor], !m_ActiveWindow[(int)WindowStates::TextEditor]))
+        {
+            m_ActiveWindow[(int)WindowStates::TextEditor] = true;
+        }
+        if (ImGui::MenuItem("Layer Editor", NULL, m_ActiveWindow[(int)WindowStates::LayerEditor], !m_ActiveWindow[(int)WindowStates::LayerEditor]))
+        {
+            m_ActiveWindow[(int)WindowStates::LayerEditor] = true;
+        }
+        if (ImGui::MenuItem("Profiler", NULL, m_ActiveWindow[(int)WindowStates::Profiler], !m_ActiveWindow[(int)WindowStates::Profiler]))
+        {
+            m_ActiveWindow[(int)WindowStates::Profiler] = true;
+        }
+        if (ImGui::MenuItem("Tags Editor", NULL, m_ActiveWindow[(int)WindowStates::Tags], !m_ActiveWindow[(int)WindowStates::Tags]))
+        {
+            m_ActiveWindow[(int)WindowStates::Tags] = true;
+        }
+        if (ImGui::MenuItem("Physics Editor", NULL, m_ActiveWindow[(int)WindowStates::Physics], !m_ActiveWindow[(int)WindowStates::Physics]))
+        {
+            m_ActiveWindow[(int)WindowStates::Physics] = true;
+        }
+        if (ImGui::MenuItem("Resource Manager", NULL, m_ActiveWindow[(int)WindowStates::Resource], !m_ActiveWindow[(int)WindowStates::Resource]))
+        {
+            m_ActiveWindow[(int)WindowStates::Resource] = true;
+        }
+        ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("GameObject"))
+    {
+        if (ImGui::MenuItem("Empty Object"))
+        {
+            ActionCreate* act = new ActionCreate(m_CurrentLayer, "GameObject");
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
         }
         ImGui::EndMenu();
     }
-    if (BeginMenu("Options"))
+
+    if (ImGui::BeginMenu("Options"))
     {
         // TextDisabled("Editor Style");
-        // if (MenuItem("Style Editor")) style = true;
-        Separator();
-        TextDisabled("Viewport");
-        if (MenuItem("FullScreen VP on Play", "F8", m_viewportFullScreen)) m_viewportFullScreen = !m_viewportFullScreen;
+        // if (ImGui::MenuItem("Style Editor")) style = true;
+        ImGui::Separator();
+        ImGui::TextDisabled("Viewport");
+        if (ImGui::MenuItem("FullScreen VP on Play", "F8", m_IsViewportFullScreen)) m_IsViewportFullScreen = !m_IsViewportFullScreen;
         // if (!m_GameCameraInVP){
-        // 	if (MenuItem("Enable Game Camera in Viewport")) m_GameCameraInVP = !m_GameCameraInVP;
+        // 	if (ImGui::MenuItem("Enable Game Camera in Viewport")) m_GameCameraInVP = !m_GameCameraInVP;
         // }
         // else {
-        // 	if (MenuItem("Disable Game Camera in Viewport")) m_GameCameraInVP = !m_GameCameraInVP;
+        // 	if (ImGui::MenuItem("Disable Game Camera in Viewport")) m_GameCameraInVP = !m_GameCameraInVP;
         // }
-        Separator();
-        TextDisabled("Object Transformation");
+        ImGui::Separator();
+        ImGui::TextDisabled("Object Transformation");
         if (!m_Local)
         {
-            if (MenuItem("Local Transform")) m_Local = true;
+            if (ImGui::MenuItem("Local Transform")) m_Local = true;
         }
         else
         {
-            if (MenuItem("World Transform")) m_Local = false;
+            if (ImGui::MenuItem("World Transform")) m_Local = false;
         }
-        Separator();
+        ImGui::Separator();
         // TextDisabled("Help and Troubleshoot");
-        // if (MenuItem("Help", "F1")) help = true;
+        // if (ImGui::MenuItem("Help", "F1")) help = true;
         ImGui::EndMenu();
     }
-    Text("Frame time : %f", 1.0 / Application::Instance().GetGameTimer().GetScaledFrameTime());
-    EndMainMenuBar();
-    if (style) OpenPopup("StyleEditor");
-    if (b) OpenPopup("NewScene");
-    if (help) OpenPopup("HelpScreen");
+
+    ImGui::Text("Frame time : %f", 1.0 / Application::Instance().GetGameTimer().GetScaledFrameTime());
+    ImGui::EndMainMenuBar();
+
+    if (style)
+    {
+        ImGui::OpenPopup("StyleEditor");
+    }
+    if (b)
+    {
+        ImGui::OpenPopup("NewScene");
+    }
+    if (help)
+    {
+        ImGui::OpenPopup("HelpScreen");
+    }
 }
 
 void Editor::ShortcutButtons()
 {
-    if (m_editorFocus || !Application::Instance().GetGameTimer().IsEditorPaused()) return;
-    auto& io = GetIO();
+    if (m_IsEditorInFocus || !Application::Instance().GetGameTimer().IsEditorPaused())
+    {
+        return;
+    }
+
+    ImGuiIO& io = GetIO();
     io.KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
     io.KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
     io.KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
     io.KeySuper = false;
+
     if (IsKeyDown(17))
     {
-        if (IsKeyPressed('Z'))
-            Undo();
-        else if (IsKeyPressed('Y'))
-            Redo();
-        else if (IsKeyPressed('S'))
+        if (ImGui::IsKeyPressed('Z'))
         {
-            GetIO().KeysDown[17] = false;
-            GetIO().KeysDown['S'] = false;
+            Undo();
+        }
+        else if (ImGui::IsKeyPressed('Y'))
+        {
+            Redo();
+        }
+        else if (ImGui::IsKeyPressed('S'))
+        {
+            io.KeysDown[17] = false;
+            io.KeysDown['S'] = false;
+
             Save();
         }
-        else if (IsKeyPressed('O'))
+        else if (ImGui::IsKeyPressed('O'))
         {
-            GetIO().KeysDown[17] = false;
-            GetIO().KeysDown['O'] = false;
+            io.KeysDown[17] = false;
+            io.KeysDown['O'] = false;
+
             Load();
         }
-        else if (IsKeyPressed('N'))
-            OpenPopup("NewScene");
+        else if (ImGui::IsKeyPressed('N'))
+        {
+            ImGui::OpenPopup("NewScene");
+        }
     }
-    // if (IsKeyPressed(112)) OpenPopup("HelpScreen");
-    if (IsKeyPressed(46) && m_CurrentObject && m_CurrentObject->GetName() != "EditorCamera")
+    // if (ImGui::IsKeyPressed(112)) ImGui::OpenPopup("HelpScreen");
+    if (ImGui::IsKeyPressed(46) && m_CurrentObject && m_CurrentObject->GetName() != "EditorCamera")
     {
-        DeleteObject_Action* act = new DeleteObject_Action(m_CurrentObject, m_CurrentLayer);
+        ActionDeleteObject* act = new ActionDeleteObject(m_CurrentObject, m_CurrentLayer);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
+
         Renderer::Instance().SetSelectedObjects({0});
     }
 }
 
 void Editor::StyleEditor()
 {
-    if (BeginPopupModal("StyleEditor", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+    if (ImGui::BeginPopupModal("StyleEditor", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
     {
-        SetItemDefaultFocus();
+        ImGui::SetItemDefaultFocus();
         ShowStyleEditor();
-        NewLine();
-        if (Button("Exit")) CloseCurrentPopup();
-        NewLine();
+        ImGui::NewLine();
+        if (ImGui::Button("Exit")) CloseCurrentPopup();
+        ImGui::NewLine();
         EndPopup();
     }
 }
 
 void Editor::Help()
 {
-    if (BeginPopupModal("HelpScreen", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+    if (ImGui::BeginPopupModal("HelpScreen", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
     {
         ImDrawList* draw_list = GetWindowDrawList();
         ImU32 color = GetColorU32(ImGuiCol_Text);
         ImVec2 pos = GetCursorScreenPos();
-        draw_list->AddText(GetFont(), GetFontSize() * 1.5f, ImVec2(pos.x, pos.y + 5.f), color, "Welcome to PEngine's Troubleshoot/Help Screen.");
-        NewLine();
-        NewLine();
-        Text("Please navigate the table below see the troubleshoot the problem you are currently having");
-        if (TreeNode("The book of Troubleshoot"))
+        draw_list->AddText(GetFont(), GetFontSize() * 1.5f, ImVec2(pos.x, pos.y + 5.0f), color, "Welcome to PEngine's Troubleshoot/Help Screen.");
+        ImGui::NewLine();
+        ImGui::NewLine();
+        ImGui::Text("Please navigate the table below see the troubleshoot the problem you are currently having");
+        if (ImGui::TreeNode("The book of Troubleshoot"))
         {
-            NewLine();
-            NewLine();
-            NewLine();
-            NewLine();
-            NewLine();
-            draw_list->AddText(GetFont(), GetFontSize() * 7.f, ImVec2(pos.x + 50.f, pos.y + 75.f), IM_COL32(255, 0, 0, 255), "User Error!");
-            TreePop();
-            TreePop();
+            ImGui::NewLine();
+            ImGui::NewLine();
+            ImGui::NewLine();
+            ImGui::NewLine();
+            ImGui::NewLine();
+            draw_list->AddText(GetFont(), GetFontSize() * 7.0f, ImVec2(pos.x + 50.0f, pos.y + 75.0f), IM_COL32(255, 0, 0, 255), "User Error!");
+            ImGui::TreePop();
+            ImGui::TreePop();
         }
-        NewLine();
-        if (Button("Exit")) CloseCurrentPopup();
-        NewLine();
+        ImGui::NewLine();
+        if (ImGui::Button("Exit")) CloseCurrentPopup();
+        ImGui::NewLine();
         EndPopup();
     }
 }
 
 void Editor::Viewport()
 {
-    if (Input::Instance().GetKeyPressed(KEY_F8)) m_viewportFullScreen = !m_viewportFullScreen;
+    if (Input::Instance().GetKeyPressed(KEY_F8)) m_IsViewportFullScreen = !m_IsViewportFullScreen;
     static bool deltaGizmoState = false;
     static bool over = false;
     static bool state = 0;
     static ImGuizmo::OPERATION currOperation = (ImGuizmo::OPERATION)3;
     ImGuizmo::SetDrawlist();
     auto editorCamera = m_CurrentLayer->GetEditorCamera();
-    //  if (m_CurrentObject && m_CurrentObject->GetComponent<Transform>()) Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
-    ImVec2 windowSize = ImGui::GetWindowSize();
-    ImVec2 windowOffset = ImGui::GetWindowPos();
+
+    const ImVec2 windowSize = ImGui::GetWindowSize();
+    const ImVec2 windowOffset = ImGui::GetWindowPos();
 
     float minusy = GetWindowPos().y;
     float minusx = GetWindowPos().x;
     if (Application::Instance().GetGameTimer().IsEditorPaused())
     {
-        if (Button("Play") || IsKeyPressed(116))
+        if (ImGui::Button("Play") || ImGui::IsKeyPressed(116))
         {
             std::cout << "============================================================" << std::endl;
             std::cout << "PLAY MODE START" << std::endl;
             std::cout << "============================================================" << std::endl;
-            s_isPlaying = true;
+            ms_IsGameRunning = true;
 
             // Set system instance
             Application::Instance().GetGameTimer().SetEditorPaused(false);
@@ -360,9 +435,9 @@ void Editor::Viewport()
     {
         if (Application::Instance().GetGameTimer().IsPlayModePaused())
         {
-            if (Button("Play"))
+            if (ImGui::Button("Play"))
             {
-                s_isPlaying = true;
+                ms_IsGameRunning = true;
                 while (ShowCursor(false) > 0)
                     ;
                 AudioSystem::Instance().UnPauseAudio();
@@ -371,25 +446,25 @@ void Editor::Viewport()
         }
         else
         {
-            if (Button("Pause") || Input::Instance().GetKeyPressed(KEY_F6))
+            if (ImGui::Button("Pause") || Input::Instance().GetKeyPressed(KEY_F6))
             {
-                s_isPlaying = false;
+                ms_IsGameRunning = false;
                 while (ShowCursor(true) < 0)
                     ;
                 AudioSystem::Instance().PauseAudio();
                 Application::Instance().GetGameTimer().SetPlayModePaused(true);
             }
         }
-        SameLine();
-        if (Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
+        ImGui::SameLine();
+        if (ImGui::Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
         {
             Application::Instance().GetGameTimer().SetPlayModePaused(false);
             while (ShowCursor(true) < 0)
                 ;
             std::cout << "============================================================" << std::endl;
-            std::cout << "PLAY MODE END" << std::endl;
+            std::cout << "PLAY MODE ImGui::End" << std::endl;
             std::cout << "============================================================" << std::endl;
-            s_isPlaying = false;
+            ms_IsGameRunning = false;
 
             Application::Instance().GetGameTimer().SetEditorPaused(true);
             PhysicsSystem::Instance().Close();
@@ -418,103 +493,96 @@ void Editor::Viewport()
             AISystem::Instance().RevertBase();
         }
     }
-    // Text("Window Size : %f, %f", GetWindowSize().x, GetWindowSize().y);
-    if (GetCurrentDock()->status == Docked)
-    {
-        windowSize.y -= GetCurrentDock()->parent->titleBarSz + 33.f;
-        minusy += GetCurrentDock()->parent->titleBarSz - 36.f - 9.f - 13.f;
-    }
-    else
-    {
-        windowSize.y -= 36.f - 33.f;
-        minusx += 7.f;
-        minusy -= (9.f - 53.f);  // += ImGuiStyleVar_FramePadding * 2 + GetFontSize() - 5.f;
-    }
-    if (IsWindowHovered() && (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused()))
+
+    if (ImGui::IsWindowHovered() && (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused()))
     {
         static Vector3 tmp;
         static Vector3 current;
-        if ((GetCurrentDock()->status == Floating) || (GetCurrentDock()->status == Docked && GetCurrentDock()->active))
+
+        if (ImGui::IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject)
         {
-            if (IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
-            m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
-            m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.f);
-            m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
-            float y = abs(GetIO().MousePos.y - GetWindowSize().y - minusy);
-            /*std::cout << "Input::Instance().GetKeyPressed(VK_LBUTTON) = " << Input::Instance().GetKeyPressed(VK_LBUTTON) << "\n";
-            std::cout << "!Input::Instance().GetKeyDown(KEY_LALT) = " << !Input::Instance().GetKeyDown(KEY_LALT) << "\n";
-            std::cout << "!ImGuizmo::IsUsing() = " << !ImGuizmo::IsUsing() << "\n";
-            std::cout << "!ImGuizmo::IsOver() = " << !ImGuizmo::IsOver() << "\n";*/
-            // if (/*IsMouseClicked(0)*/ Input::Instance().GetKeyPressed(VK_LBUTTON) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && ImGuizmo::IsOver())
+            m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
+        }
 
-            if (state)
-                over = ImGuizmo::IsOver();
-            else
-                over = false;
+        m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
+        m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
+        m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
 
-            // std::cout << over << std::endl;
+        float y = abs(GetIO().MousePos.y - ImGui::GetWindowSize().y - minusy);
 
-            if ((IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && !deltaGizmoState && !over) ||
-                (IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !m_CurrentObject))
+        // std::cout << "Input::Instance().GetKeyPressed(VK_LBUTTON) = " << Input::Instance().GetKeyPressed(VK_LBUTTON) << "\n";
+        // std::cout << "!Input::Instance().GetKeyDown(KEY_LALT) = " << !Input::Instance().GetKeyDown(KEY_LALT) << "\n";
+        // std::cout << "!ImGuizmo::IsUsing() = " << !ImGuizmo::IsUsing() << "\n";
+        // std::cout << "!ImGuizmo::IsOver() = " << !ImGuizmo::IsOver() << "\n";
+        //  if (/*IsMouseClicked(0)*/ Input::Instance().GetKeyPressed(VK_LBUTTON) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && ImGuizmo::IsOver())
+
+        if (state)
+        {
+            over = ImGuizmo::IsOver();
+        }
+        else
+        {
+            over = false;
+        }
+
+        // std::cout << over << std::endl;
+
+        if ((IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && !deltaGizmoState && !over) ||
+            (IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !m_CurrentObject))
+        {
+            unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(GetIO().MousePos.x - minusx), (int)y));
+            if (picked != 0)
             {
-                unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(GetIO().MousePos.x - minusx), (int)y));
-                if (picked != 0)
+                m_CurrentObject = m_CurrentLayer->GetObjectById(picked);
+                if (Input::Instance().GetKeyDown(KEY_LSHIFT))
                 {
-                    m_CurrentObject = m_CurrentLayer->GetObjectById(picked);
-                    if (Input::Instance().GetKeyDown(KEY_LSHIFT))
-                    {
-                        auto it = std::find(m_SelectedObjects.begin(), m_SelectedObjects.end(), m_CurrentObject);
-                        if (it == m_SelectedObjects.end())
-                            m_SelectedObjects.push_back(m_CurrentObject);
-                        else
-                        {
-                            m_SelectedObjects.erase(it);
-                            if (!m_SelectedObjects.empty())
-                            {
-                                m_CurrentObject = m_SelectedObjects.front();
-                                std::vector<unsigned> tmp;
-                                for (auto& o : m_SelectedObjects)
-                                    tmp.push_back(o->GetID());
-                                Renderer::Instance().SetSelectedObjects(tmp);
-                            }
-                            else
-                            {
-                                Renderer::Instance().SetSelectedObjects({0});
-                                m_CurrentObject = nullptr;
-                            }
-                        }
-                    }
+                    auto it = std::find(m_SelectedObjects.begin(), m_SelectedObjects.end(), m_CurrentObject);
+                    if (it == m_SelectedObjects.end())
+                        m_SelectedObjects.push_back(m_CurrentObject);
                     else
                     {
-                        m_SelectedObjects.clear();
-                        m_SelectedObjects.push_back(m_CurrentObject);
-                        Renderer::Instance().SetSelectedObjects({m_CurrentObject->GetID()});
+                        m_SelectedObjects.erase(it);
+                        if (!m_SelectedObjects.empty())
+                        {
+                            m_CurrentObject = m_SelectedObjects.front();
+                            std::vector<unsigned> tmp;
+                            for (auto& o : m_SelectedObjects)
+                                tmp.push_back(o->GetID());
+                            Renderer::Instance().SetSelectedObjects(tmp);
+                        }
+                        else
+                        {
+                            Renderer::Instance().SetSelectedObjects({0});
+                            m_CurrentObject = nullptr;
+                        }
                     }
-                    std::vector<unsigned> selecteds;
-                    for (auto& obj : m_SelectedObjects)
-                        selecteds.push_back(obj->GetID());
-                    Renderer::Instance().SetSelectedObjects(selecteds);
                 }
                 else
                 {
-                    Renderer::Instance().SetSelectedObjects({0});
-                    m_CurrentObject = nullptr;
                     m_SelectedObjects.clear();
+                    m_SelectedObjects.push_back(m_CurrentObject);
+                    Renderer::Instance().SetSelectedObjects({m_CurrentObject->GetID()});
                 }
+                std::vector<unsigned> selecteds;
+                for (auto& obj : m_SelectedObjects)
+                    selecteds.push_back(obj->GetID());
+                Renderer::Instance().SetSelectedObjects(selecteds);
+            }
+            else
+            {
+                Renderer::Instance().SetSelectedObjects({0});
+                m_CurrentObject = nullptr;
+                m_SelectedObjects.clear();
             }
         }
-    }
-    else
-    {
-        m_CurrentLayer->GetEditorCamera()->Cancel();
     }
 
     Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
     Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
 
     ImVec2 GameCameraSize = ImVec2((float)Application::Instance().GetWindowHeight(), (float)Application::Instance().GetWindowHeight());
-    GameCameraSize.x /= 10.f;
-    GameCameraSize.y /= 10.f;
+    GameCameraSize.x /= 10.0f;
+    GameCameraSize.y /= 10.0f;
 
     Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
@@ -522,227 +590,216 @@ void Editor::Viewport()
     {
         ImDrawList* draw_list = GetWindowDrawList();
         ImVec2 start = GetWindowPos();
-        if (GetCurrentDock()->status == Docked)
-        {
-            start.x += 20.f;
-            start.y += 60.f;
-        }
-        else
-        {
-            start.y += 70.f;
-            start.x += 20.f;
-        }
+
+        // if (GetCurrentDock()->status == Docked)
+        //{
+        //     start.x += 20.0f;
+        //     start.y += 60.0f;
+        // }
+        // else
+        //{
+        //     start.y += 70.0f;
+        //     start.x += 20.0f;
+        // }
+
         GameCameraSize.x += start.x;
         GameCameraSize.y += start.y;
         draw_list->AddImage((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), start, GameCameraSize, ImVec2(0, 1), ImVec2(1, 0));
     }
     if (Application::Instance().GetGameTimer().IsEditorPaused())
     {
-        if ((GetCurrentDock()->status == Floating) || (GetCurrentDock()->status == Docked && GetCurrentDock()->active))
+        if (m_CurrentObject)
         {
-            if (m_CurrentObject)
+            if (!m_SelectedObjects.empty())
             {
-                if (!m_SelectedObjects.empty())
+                std::vector<unsigned> selecteds;
+                for (auto& obj : m_SelectedObjects)
+                    selecteds.push_back(obj->GetID());
+                Renderer::Instance().SetSelectedObjects(selecteds);
+            }
+            Transform* t = m_CurrentObject->GetComponent<Transform>();
+            if (t)
+            {
+                static Vector3 savedTrans;
+                static Vector3 savedRot;
+                static Vector3 savedScale;
+                float m[16];
+                static float trans[3];
+                static float rot[3];
+                static float scale[3];
+
+                if (ImGui::IsKeyPressed(81))
                 {
-                    std::vector<unsigned> selecteds;
-                    for (auto& obj : m_SelectedObjects)
-                        selecteds.push_back(obj->GetID());
-                    Renderer::Instance().SetSelectedObjects(selecteds);
+                    currOperation = (ImGuizmo::OPERATION)3;
+                    state = 0;
                 }
-                Transform* t = m_CurrentObject->GetComponent<Transform>();
-                if (t)
+                if (ImGui::IsKeyPressed(87))
                 {
-                    static Vector3 savedTrans;
-                    static Vector3 savedRot;
-                    static Vector3 savedScale;
-                    float m[16];
-                    static float trans[3];
-                    static float rot[3];
-                    static float scale[3];
+                    state = 1;
+                    currOperation = ImGuizmo::TRANSLATE;
+                }
+                if (ImGui::IsKeyPressed(69))
+                {
+                    state = 1;
+                    currOperation = ImGuizmo::ROTATE;
+                }
+                if (ImGui::IsKeyPressed(82))
+                {
+                    state = 1;
+                    currOperation = ImGuizmo::SCALE;
+                }
 
-                    if (IsKeyPressed(81))
-                    {
-                        currOperation = (ImGuizmo::OPERATION)3;
-                        state = 0;
-                    }
-                    if (IsKeyPressed(87))
-                    {
-                        state = 1;
-                        currOperation = ImGuizmo::TRANSLATE;
-                    }
-                    if (IsKeyPressed(69))
-                    {
-                        state = 1;
-                        currOperation = ImGuizmo::ROTATE;
-                    }
-                    if (IsKeyPressed(82))
-                    {
-                        state = 1;
-                        currOperation = ImGuizmo::SCALE;
-                    }
+                memcpy(trans, t->GetWorldPosition().GetVector(), sizeof(float) * 3);
+                memcpy(rot, t->GetWorldRotation().GetVector(), sizeof(float) * 3);
+                memcpy(scale, t->GetWorldScale().GetVector(), sizeof(float) * 3);
 
-                    memcpy(trans, t->GetWorldPosition().GetVector(), sizeof(float) * 3);
-                    memcpy(rot, t->GetWorldRotation().GetVector(), sizeof(float) * 3);
-                    memcpy(scale, t->GetWorldScale().GetVector(), sizeof(float) * 3);
+                bool useSnap(false);
+                if (Input::Instance().GetKeyDown(KEY_LSHIFT)) useSnap = true;
+                float snap[3];
+                switch (currOperation)
+                {
+                    case ImGuizmo::TRANSLATE: snap[0] = snap[1] = snap[2] = 1.0f; break;
+                    case ImGuizmo::ROTATE: snap[0] = snap[1] = snap[2] = 45.0f; break;
+                    case ImGuizmo::SCALE: snap[0] = snap[1] = snap[2] = 1.0f; break;
+                }
 
-                    bool useSnap(false);
-                    if (Input::Instance().GetKeyDown(KEY_LSHIFT)) useSnap = true;
-                    float snap[3];
-                    switch (currOperation)
-                    {
-                        case ImGuizmo::TRANSLATE: snap[0] = snap[1] = snap[2] = 1.f; break;
-                        case ImGuizmo::ROTATE: snap[0] = snap[1] = snap[2] = 45.f; break;
-                        case ImGuizmo::SCALE: snap[0] = snap[1] = snap[2] = 1.f; break;
-                    }
-
-                    if (GetCurrentDock()->status == Docked)
-                    {
-                        if (GetCurrentDock()->slot == Slot::Right && (!GetCurrentDock()->parent->btm.empty() || !GetCurrentDock()->parent->top.empty()))
-                            ImGuizmo::SetRect(GetCurrentDock()->pos.x + 15, GetCurrentDock()->pos.y + 49, windowSize.x, windowSize.y);
-                        else
-                            ImGuizmo::SetRect(GetCurrentDock()->pos.x, GetCurrentDock()->pos.y + 49, windowSize.x, windowSize.y);
-                    }
+                ImGuizmo::RecomposeMatrixFromComponents(trans, rot, scale, m);
+                if (currOperation != (ImGuizmo::OPERATION)3)
+                {
+                    if (!m_Local)
+                        ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::WORLD, m, NULL,
+                                             useSnap ? snap : NULL);
                     else
-                        ImGuizmo::SetRect(windowOffset.x + 8, windowOffset.y + 50, windowSize.x, windowSize.y);
-
-                    ImGuizmo::RecomposeMatrixFromComponents(trans, rot, scale, m);
-                    if (currOperation != (ImGuizmo::OPERATION)3)
-                    {
-                        if (!m_Local)
-                            ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::WORLD, m, NULL,
-                                                 useSnap ? snap : NULL);
-                        else
-                            ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::LOCAL, m, NULL,
-                                                 useSnap ? snap : NULL);
-                    }
-                    ImGuizmo::DecomposeMatrixToComponents(m, trans, rot, scale);
-                    if (!deltaGizmoState && ImGuizmo::IsUsing())
-                    {
-                        savedTrans = t->GetWorldPosition();
-                        savedRot = t->GetWorldRotation();
-                        savedScale = t->GetWorldScale();
-                    }
-                    if (deltaGizmoState && ImGuizmo::IsUsing())
-                    {
-                        // for one and for many
-                        if (m_SelectedObjects.size() == 1)
-                        {
-                            Vector3 tmpTrans{trans[0], trans[1], trans[2]};
-                            Vector3 tmpRot{rot[0], rot[1], rot[2]};
-                            Vector3 tmpScale{scale[0], scale[1], scale[2]};
-                            t->SetWorldPosition(tmpTrans);
-                            t->SetWorldRotation(tmpRot);
-                            t->SetWorldScale(tmpScale);
-                        }
-                        else if (m_SelectedObjects.size() > 1)
-                        {
-                            Vector3 tmpTrans{trans[0], trans[1], trans[2]};
-                            Vector3 tmpRot{rot[0], rot[1], rot[2]};
-                            Vector3 tmpScale{scale[0], scale[1], scale[2]};
-                            Vector3 m_Trans = t->GetWorldPosition();
-                            Vector3 m_Rot = t->GetWorldRotation();
-                            Vector3 m_Scale = t->GetWorldScale();
-                            tmpTrans -= m_Trans;
-                            tmpRot -= m_Rot;
-                            tmpScale -= m_Scale;
-                            for (auto& obj : m_SelectedObjects)
-                            {
-                                Transform* pos = obj->GetComponent<Transform>();
-                                if (pos)
-                                {
-                                    Vector3 w_trans = pos->GetWorldPosition();
-                                    Vector3 w_rot = pos->GetWorldRotation();
-                                    Vector3 w_scale = pos->GetWorldScale();
-                                    pos->SetWorldPosition(w_trans + tmpTrans);
-                                    pos->SetWorldRotation(w_rot + tmpRot);
-                                    pos->SetWorldScale(w_scale + tmpScale);
-                                }
-                            }
-                        }
-                    }
-                    if (deltaGizmoState && !ImGuizmo::IsUsing())
-                    {
-                        if (m_SelectedObjects.size() == 1)
-                        {
-                            t->SetWorldPosition(savedTrans);
-                            t->SetWorldRotation(savedRot);
-                            t->SetWorldScale(savedScale);
-                            if ((trans[0] != savedTrans.x || trans[1] != savedTrans.y || trans[2] != savedTrans.z) && currOperation == ImGuizmo::TRANSLATE)
-                            {
-                                Vector3 newValue = Vector3(trans[0], trans[1], trans[2]);
-                                Vector3 oldValue = savedTrans;
-                                Input_Action<Vector3>* act = new Input_Action<Vector3>(oldValue, newValue, m_CurrentObject->GetName(), "Transform", "m_WorldPosition", m_CurrentLayer, m_CurrentObject);
-                                act->Execute();
-                                m_Undo.push_back(std::move(act));
-                                ClearRedo();
-                            }
-                            else if ((scale[0] != savedScale.x || scale[1] != savedScale.y || scale[2] != savedScale.z) && currOperation == ImGuizmo::SCALE)
-                            {
-                                Vector3 newValue = Vector3(scale[0], scale[1], scale[2]);
-                                Vector3 oldValue = savedScale;
-                                Input_Action<Vector3>* act = new Input_Action<Vector3>(oldValue, newValue, m_CurrentObject->GetName(), "Transform", "m_WorldScale", m_CurrentLayer, m_CurrentObject);
-                                act->Execute();
-                                m_Undo.push_back(std::move(act));
-                                ClearRedo();
-                            }
-                            else if ((rot[0] != savedRot.x || rot[1] != savedRot.y || rot[2] != savedRot.z) && currOperation == ImGuizmo::ROTATE)
-                            {
-                                Vector3 newValue = Vector3(rot[0], rot[1], rot[2]);
-                                Vector3 oldValue = savedRot;
-                                Input_Action<Vector3>* act = new Input_Action<Vector3>(oldValue, newValue, m_CurrentObject->GetName(), "Transform", "m_WorldRotation", m_CurrentLayer, m_CurrentObject);
-                                act->Execute();
-                                m_Undo.push_back(std::move(act));
-                                ClearRedo();
-                            }
-                        }
-                        else if (m_SelectedObjects.size() > 1)
-                        {
-                            Vector3 tmpTrans{trans[0], trans[1], trans[2]};
-                            Vector3 tmpRot{rot[0], rot[1], rot[2]};
-                            Vector3 tmpScale{scale[0], scale[1], scale[2]};
-                            Vector3 m_Trans = tmpTrans - savedTrans;
-                            Vector3 m_Rot = tmpRot - savedRot;
-                            Vector3 m_Scale = tmpScale - savedScale;
-                            std::vector<unsigned> ids;
-                            for (auto& obj : m_SelectedObjects)
-                            {
-                                Transform* pos = obj->GetComponent<Transform>();
-                                if (pos)
-                                {
-                                    Vector3 w_trans = pos->GetWorldPosition();
-                                    Vector3 w_rot = pos->GetWorldRotation();
-                                    Vector3 w_scale = pos->GetWorldScale();
-                                    pos->SetWorldPosition(w_trans - m_Trans);
-                                    pos->SetWorldRotation(w_rot - m_Rot);
-                                    pos->SetWorldScale(w_scale - m_Scale);
-                                }
-                                ids.push_back(obj->GetID());
-                            }
-                            if ((m_Trans[0] != 0.f || m_Trans[1] != 0.f || m_Trans[2] != 0.f) && currOperation == ImGuizmo::TRANSLATE)
-                            {
-                                MultipleTransformation_Action* act = new MultipleTransformation_Action(m_Trans, ids, "Transform", "m_WorldPosition", m_CurrentLayer);
-                                act->Execute();
-                                m_Undo.push_back(std::move(act));
-                                ClearRedo();
-                            }
-                            else if ((m_Scale[0] != 0.f || m_Scale[1] != 0.f || m_Scale[2] != 0.f) && currOperation == ImGuizmo::SCALE)
-                            {
-                                MultipleTransformation_Action* act = new MultipleTransformation_Action(m_Scale, ids, "Transform", "m_WorldScale", m_CurrentLayer);
-                                act->Execute();
-                                m_Undo.push_back(std::move(act));
-                                ClearRedo();
-                            }
-                            else if ((m_Rot[0] != 0.f || m_Rot[1] != 0.f || m_Rot[2] != 0.f) && currOperation == ImGuizmo::ROTATE)
-                            {
-                                MultipleTransformation_Action* act = new MultipleTransformation_Action(m_Rot, ids, "Transform", "m_WorldRotation", m_CurrentLayer);
-                                act->Execute();
-                                m_Undo.push_back(std::move(act));
-                                ClearRedo();
-                            }
-                        }
-                    }
-                    deltaGizmoState = ImGuizmo::IsUsing();
+                        ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::LOCAL, m, NULL,
+                                             useSnap ? snap : NULL);
                 }
+                ImGuizmo::DecomposeMatrixToComponents(m, trans, rot, scale);
+                if (!deltaGizmoState && ImGuizmo::IsUsing())
+                {
+                    savedTrans = t->GetWorldPosition();
+                    savedRot = t->GetWorldRotation();
+                    savedScale = t->GetWorldScale();
+                }
+                if (deltaGizmoState && ImGuizmo::IsUsing())
+                {
+                    // for one and for many
+                    if (m_SelectedObjects.size() == 1)
+                    {
+                        Vector3 tmpTrans{trans[0], trans[1], trans[2]};
+                        Vector3 tmpRot{rot[0], rot[1], rot[2]};
+                        Vector3 tmpScale{scale[0], scale[1], scale[2]};
+                        t->SetWorldPosition(tmpTrans);
+                        t->SetWorldRotation(tmpRot);
+                        t->SetWorldScale(tmpScale);
+                    }
+                    else if (m_SelectedObjects.size() > 1)
+                    {
+                        Vector3 tmpTrans{trans[0], trans[1], trans[2]};
+                        Vector3 tmpRot{rot[0], rot[1], rot[2]};
+                        Vector3 tmpScale{scale[0], scale[1], scale[2]};
+                        Vector3 m_Trans = t->GetWorldPosition();
+                        Vector3 m_Rot = t->GetWorldRotation();
+                        Vector3 m_Scale = t->GetWorldScale();
+                        tmpTrans -= m_Trans;
+                        tmpRot -= m_Rot;
+                        tmpScale -= m_Scale;
+                        for (auto& obj : m_SelectedObjects)
+                        {
+                            Transform* pos = obj->GetComponent<Transform>();
+                            if (pos)
+                            {
+                                Vector3 w_trans = pos->GetWorldPosition();
+                                Vector3 w_rot = pos->GetWorldRotation();
+                                Vector3 w_scale = pos->GetWorldScale();
+                                pos->SetWorldPosition(w_trans + tmpTrans);
+                                pos->SetWorldRotation(w_rot + tmpRot);
+                                pos->SetWorldScale(w_scale + tmpScale);
+                            }
+                        }
+                    }
+                }
+                if (deltaGizmoState && !ImGuizmo::IsUsing())
+                {
+                    if (m_SelectedObjects.size() == 1)
+                    {
+                        t->SetWorldPosition(savedTrans);
+                        t->SetWorldRotation(savedRot);
+                        t->SetWorldScale(savedScale);
+                        if ((trans[0] != savedTrans.x || trans[1] != savedTrans.y || trans[2] != savedTrans.z) && currOperation == ImGuizmo::TRANSLATE)
+                        {
+                            Vector3 newValue = Vector3(trans[0], trans[1], trans[2]);
+                            Vector3 oldValue = savedTrans;
+                            ActionInput<Vector3>* act = new ActionInput<Vector3>(oldValue, newValue, m_CurrentObject->GetName(), "Transform", "m_WorldPosition", m_CurrentLayer, m_CurrentObject);
+                            act->Execute();
+                            m_Undo.push_back(std::move(act));
+                            ClearRedo();
+                        }
+                        else if ((scale[0] != savedScale.x || scale[1] != savedScale.y || scale[2] != savedScale.z) && currOperation == ImGuizmo::SCALE)
+                        {
+                            Vector3 newValue = Vector3(scale[0], scale[1], scale[2]);
+                            Vector3 oldValue = savedScale;
+                            ActionInput<Vector3>* act = new ActionInput<Vector3>(oldValue, newValue, m_CurrentObject->GetName(), "Transform", "m_WorldScale", m_CurrentLayer, m_CurrentObject);
+                            act->Execute();
+                            m_Undo.push_back(std::move(act));
+                            ClearRedo();
+                        }
+                        else if ((rot[0] != savedRot.x || rot[1] != savedRot.y || rot[2] != savedRot.z) && currOperation == ImGuizmo::ROTATE)
+                        {
+                            Vector3 newValue = Vector3(rot[0], rot[1], rot[2]);
+                            Vector3 oldValue = savedRot;
+                            ActionInput<Vector3>* act = new ActionInput<Vector3>(oldValue, newValue, m_CurrentObject->GetName(), "Transform", "m_WorldRotation", m_CurrentLayer, m_CurrentObject);
+                            act->Execute();
+                            m_Undo.push_back(std::move(act));
+                            ClearRedo();
+                        }
+                    }
+                    else if (m_SelectedObjects.size() > 1)
+                    {
+                        Vector3 tmpTrans{trans[0], trans[1], trans[2]};
+                        Vector3 tmpRot{rot[0], rot[1], rot[2]};
+                        Vector3 tmpScale{scale[0], scale[1], scale[2]};
+                        Vector3 m_Trans = tmpTrans - savedTrans;
+                        Vector3 m_Rot = tmpRot - savedRot;
+                        Vector3 m_Scale = tmpScale - savedScale;
+                        std::vector<unsigned> ids;
+                        for (auto& obj : m_SelectedObjects)
+                        {
+                            Transform* pos = obj->GetComponent<Transform>();
+                            if (pos)
+                            {
+                                Vector3 w_trans = pos->GetWorldPosition();
+                                Vector3 w_rot = pos->GetWorldRotation();
+                                Vector3 w_scale = pos->GetWorldScale();
+                                pos->SetWorldPosition(w_trans - m_Trans);
+                                pos->SetWorldRotation(w_rot - m_Rot);
+                                pos->SetWorldScale(w_scale - m_Scale);
+                            }
+                            ids.push_back(obj->GetID());
+                        }
+                        if ((m_Trans[0] != 0.0f || m_Trans[1] != 0.0f || m_Trans[2] != 0.0f) && currOperation == ImGuizmo::TRANSLATE)
+                        {
+                            ActionMultiTransform* act = new ActionMultiTransform(m_Trans, ids, "Transform", "m_WorldPosition", m_CurrentLayer);
+                            act->Execute();
+                            m_Undo.push_back(std::move(act));
+                            ClearRedo();
+                        }
+                        else if ((m_Scale[0] != 0.0f || m_Scale[1] != 0.0f || m_Scale[2] != 0.0f) && currOperation == ImGuizmo::SCALE)
+                        {
+                            ActionMultiTransform* act = new ActionMultiTransform(m_Scale, ids, "Transform", "m_WorldScale", m_CurrentLayer);
+                            act->Execute();
+                            m_Undo.push_back(std::move(act));
+                            ClearRedo();
+                        }
+                        else if ((m_Rot[0] != 0.0f || m_Rot[1] != 0.0f || m_Rot[2] != 0.0f) && currOperation == ImGuizmo::ROTATE)
+                        {
+                            ActionMultiTransform* act = new ActionMultiTransform(m_Rot, ids, "Transform", "m_WorldRotation", m_CurrentLayer);
+                            act->Execute();
+                            m_Undo.push_back(std::move(act));
+                            ClearRedo();
+                        }
+                    }
+                }
+                deltaGizmoState = ImGuizmo::IsUsing();
             }
         }
     }
@@ -755,33 +812,33 @@ void Editor::Archetype()
     std::vector<std::string> archetypes;
     for (auto a : m_Archetypes)
         archetypes.push_back(a.first);
-    PushItemWidth(200.f);
-    ListBox(m_Global_Spaces.c_str(), &selected, vector_getter, static_cast<void*>(&archetypes), (int)archetypes.size(), 5);
-    PopItemWidth();
+    ImGui::PushItemWidth(200.0f);
+    ImGui::ListBox(m_Global_Spaces.c_str(), &selected, vector_getter, static_cast<void*>(&archetypes), (int)archetypes.size(), 5);
+    ImGui::PopItemWidth();
     static char string[MAX_STRING_LENGTH];
     // SecureZeroMemory(string, MAX_STRING_LENGTH);
-    if (Button("Create Base Archetype")) OpenPopup("ArchetypeName");
+    if (ImGui::Button("Create Base Archetype")) ImGui::OpenPopup("ArchetypeName");
 
-    Separator();
+    ImGui::Separator();
 
     if (selected > -1 && m_Archetypes.size())
     {
         GameObject* currentArchetype = m_UpdatedArchetypes[archetypes[selected]];
-        Text("Archetype Name : %s", currentArchetype->GetName().c_str());
-        // Text("Archetype ID : %d", currentArchetype->GetID());
+        ImGui::Text("Archetype Name : %s", currentArchetype->GetName().c_str());
+        // ImGui::Text("Archetype ID : %d", currentArchetype->GetID());
         // Add Archetype Inspector here
         // Idea is to have the similar thing to the inspector
         // only save changes and will affect all archetypes, and need clone
 
         // Add Tags here
-        Text("Tag:");
-        SameLine();
-        if (Selectable(currentArchetype->GetTag() == std::string{} ? "Click me to add Tag" : currentArchetype->GetTag().c_str())) OpenPopup("ArcheTagsPopUp");
+        ImGui::Text("Tag:");
+        ImGui::SameLine();
+        if (Selectable(currentArchetype->GetTag() == std::string{} ? "Click me to add Tag" : currentArchetype->GetTag().c_str())) ImGui::OpenPopup("ArcheTagsPopUp");
         if (BeginPopup("ArcheTagsPopUp"))
         {
-            Text("Tags");
+            ImGui::Text("Tags");
             ImGui::Separator();
-            for (auto& tag : m_tags)
+            for (auto& tag : m_Tags)
             {
                 if (Selectable(tag.c_str()))
                 {
@@ -819,23 +876,23 @@ void Editor::Archetype()
             }
         }
         AddComp.push_back("LuaScript");
-        Text("Num of Components : %d", list.size());
-        Separator();
-        if (Button("Add Component")) OpenPopup("AddComponentPopup");
+        ImGui::Text("Num of Components : %d", list.size());
+        ImGui::Separator();
+        if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponentPopup");
         if (BeginPopup("AddComponentPopup"))
         {
-            Text("Components");
-            Separator();
+            ImGui::Text("Components");
+            ImGui::Separator();
             for (int i = 0; i < AddComp.size(); ++i)
                 if (Selectable(AddComp[i].c_str())) Factory::m_Factories->at(AddComp[i])->create(currentArchetype);
             EndPopup();
         }
-        SameLine();
-        if (Button("Remove Component")) OpenPopup("RemoveComponentPopup");
+        ImGui::SameLine();
+        if (ImGui::Button("Remove Component")) ImGui::OpenPopup("RemoveComponentPopup");
         if (BeginPopup("RemoveComponentPopup"))
         {
-            Text("Components");
-            Separator();
+            ImGui::Text("Components");
+            ImGui::Separator();
             for (int i = 0; i < DelComp.size(); ++i)
             {
                 if (DelComp[i] == "LuaScript")
@@ -851,86 +908,86 @@ void Editor::Archetype()
             }
             EndPopup();
         }
-        if (Button("Revert"))
+        if (ImGui::Button("Revert"))
         {
             GameObject* tmp = new GameObject(nullptr, 0);
             tmp->SetName(currentArchetype->GetName());
             m_Archetypes[archetypes[selected]]->Clone(tmp);
-            RevertArchetype_Action* act = new RevertArchetype_Action(tmp);
+            ActionRevertArchetype* act = new ActionRevertArchetype(tmp);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
             return;
         }
-        SameLine();
-        if (Button("Make Changes"))
+        ImGui::SameLine();
+        if (ImGui::Button("Make Changes"))
         {
             GameObject* tmp = new GameObject(nullptr, 0);
             tmp->SetName(currentArchetype->GetName());
             currentArchetype->Clone(tmp);
-            MakeChanges_Action* act = new MakeChanges_Action(tmp);
+            ActionMakeChanges* act = new ActionMakeChanges(tmp);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
             return;
         }
-        SameLine();
-        if (Button("Create Archetype"))
+        ImGui::SameLine();
+        if (ImGui::Button("Create Archetype"))
         {
             Layer* ly = m_CurrentLayer;
-            CreateObjectArchetype_Action* act = new CreateObjectArchetype_Action(ly, currentArchetype->GetName(), currentArchetype->GetName());
+            ActionCreateObjectArchetype* act = new ActionCreateObjectArchetype(ly, currentArchetype->GetName(), currentArchetype->GetName());
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
             return;
         }
-        if (Button("Delete Archetype"))
+        if (ImGui::Button("Delete Archetype"))
         {
-            DeleteArchetype_Action* act = new DeleteArchetype_Action(m_Archetypes[archetypes[selected]], m_UpdatedArchetypes[archetypes[selected]]);
+            ActionDeleteArchetype* act = new ActionDeleteArchetype(m_Archetypes[archetypes[selected]], m_UpdatedArchetypes[archetypes[selected]]);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
             selected = -1;
             return;
         }
-        Separator();
+        ImGui::Separator();
         int i = 0;
         for (auto& comp : list)
         {
-            if (TreeNode((std::string("Comp ") + std::to_string(i) + std::string(" : ") + comp->GetName()).c_str()))
+            if (ImGui::TreeNode((std::string("Comp ") + std::to_string(i) + std::string(" : ") + comp->GetName()).c_str()))
             {
                 char* address = reinterpret_cast<char*>(comp);
-                // Text("Component Num : %d", i);
-                // Text("Component Name : %s", comp->GetName().c_str());
+                // ImGui::Text("Component Num : %d", i);
+                // ImGui::Text("Component Name : %s", comp->GetName().c_str());
                 try
                 {
                     if (!Factory::m_Reflection->at(comp->GetName())->getParents().empty())
                         ParentArchetypeInspector(address, Factory::m_Reflection->at(comp->GetName())->getParents().back().key, currentArchetype);
                     auto component = (*Factory::m_Reflection).at(comp->GetName().c_str());
                     auto properties = component->getProperties();
-                    Indent(5.f);
+                    ImGui::Indent(5.0f);
                     for (int i = 0; i < properties.size(); ++i)
                     {
-                        Text("%s : ", properties[i].name.c_str());
+                        ImGui::Text("%s : ", properties[i].name.c_str());
                         // if else for each type
                         if (properties[i].type == typeid(std::string).name())
                         {
                             char tmp[MAX_STRING_LENGTH];
                             SecureZeroMemory(tmp, MAX_STRING_LENGTH);
-                            SameLine();
+                            ImGui::SameLine();
                             m_Global_Spaces += " ";
                             std::string* string = reinterpret_cast<std::string*>(address + properties[i].offset);
                             std::copy(string->begin(), string->end(), tmp);
                             // here for textrenderer
                             if (comp->GetName() == "TextRenderer" && properties[i].name == "m_Text")
                             {
-                                InputTextMultiline(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
+                                ImGui::InputTextMultiline(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
                                 if (!IsItemActive() && *string != tmp) *string = std::string(tmp);
                             }
                             else
                             {
-                                InputText(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
-                                if (IsKeyPressed(KEY_RETURN) && *string != tmp) *string = std::string(tmp);
+                                ImGui::InputText(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
+                                if (ImGui::IsKeyPressed(KEY_RETURN) && *string != tmp) *string = std::string(tmp);
                             }
                         }
                         else if (properties[i].type == typeid(iVector2).name())
@@ -940,7 +997,7 @@ void Editor::Archetype()
                             tmp[0] = vec3->x;
                             tmp[1] = vec3->y;
                             m_Global_Spaces += " ";
-                            InputInt2(m_Global_Spaces.c_str(), tmp);
+                            ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
                             vec3->x = tmp[0];
                             vec3->y = tmp[1];
                         }
@@ -951,7 +1008,7 @@ void Editor::Archetype()
                             tmp[0] = vec3->x;
                             tmp[1] = vec3->y;
                             m_Global_Spaces += " ";
-                            InputFloat2(m_Global_Spaces.c_str(), tmp);
+                            ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
                             vec3->x = tmp[0];
                             vec3->y = tmp[1];
                         }
@@ -963,28 +1020,28 @@ void Editor::Archetype()
                             tmp[1] = vec3->y;
                             tmp[2] = vec3->z;
                             m_Global_Spaces += " ";
-                            InputFloat3(m_Global_Spaces.c_str(), tmp);
+                            ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
                             vec3->x = tmp[0];
                             vec3->y = tmp[1];
                             vec3->z = tmp[2];
                         }
                         else if (properties[i].type == typeid(float).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             float* tmp = reinterpret_cast<float*>(address + properties[i].offset);
                             m_Global_Spaces += " ";
                             InputFloat(m_Global_Spaces.c_str(), tmp);
                         }
                         else if (properties[i].type == typeid(int).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             int* tmp = reinterpret_cast<int*>(address + properties[i].offset);
                             m_Global_Spaces += " ";
-                            InputInt(m_Global_Spaces.c_str(), tmp);
+                            ImGui::InputInt(m_Global_Spaces.c_str(), tmp);
                         }
                         else if (properties[i].type == typeid(bool).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             bool* tmp = reinterpret_cast<bool*>(address + properties[i].offset);
                             m_Global_Spaces += " ";
                             Checkbox(m_Global_Spaces.c_str(), tmp);
@@ -1003,14 +1060,14 @@ void Editor::Archetype()
                             tmp[3] = clr->w;
                             ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                             m_Global_Spaces += " ";
-                            InputFloat4(m_Global_Spaces.c_str(), tmp, 3);
-                            if (IsKeyPressed(KEY_RETURN))
+                            ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
+                            if (ImGui::IsKeyPressed(KEY_RETURN))
                             {
                                 if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
                                 {
                                     Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
                                     *clr = newValue;
-                                    TreePop();
+                                    ImGui::TreePop();
                                     return;
                                 }
                             }
@@ -1018,7 +1075,7 @@ void Editor::Archetype()
                             bool open_popup = ColorButton(("Current Color" + hashes + properties[i].name).c_str(), color);
                             if (open_popup)
                             {
-                                OpenPopup(("ColorPicker" + hashes + properties[i].name).c_str());
+                                ImGui::OpenPopup(("ColorPicker" + hashes + properties[i].name).c_str());
                                 backup_color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                                 tmp_color = backup_color;
                             }
@@ -1055,11 +1112,11 @@ void Editor::Archetype()
                                 auto enums = enumsFactory->at(properties[i].type)->getEnums();
                                 int* selected = reinterpret_cast<int*>(address + properties[i].offset);
                                 m_Global_Spaces += " ";
-                                Combo(m_Global_Spaces.c_str(), selected, enums_getter, &enums, (int)enums.size());
+                                ImGui::Combo(m_Global_Spaces.c_str(), selected, enums_getter, &enums, (int)enums.size());
                             }
                             catch (...)
                             {
-                                Text("Enum not in Enum Reflection");
+                                ImGui::Text("Enum not in Enum Reflection");
                             }
                         }
                         else if (properties[i].type == typeid(HTexture).name())
@@ -1069,20 +1126,20 @@ void Editor::Archetype()
                             int selected = -1;
                             ResourceGUID currId = 0;
                             if (texture.Validate()) currId = (texture)->GetGUID();
-                            for (int i = 0; i < m_texture_ids.size(); ++i)
-                                if (currId == m_texture_ids[i])
+                            for (int i = 0; i < m_TextureIDs.size(); ++i)
+                                if (currId == m_TextureIDs[i])
                                 {
                                     selected = i;
-                                    name = m_texture_names[i];
+                                    name = m_TextureNames[i];
                                 }
                             int tmp = selected;
-                            SameLine();
-                            Text("%s", name.c_str());
+                            ImGui::SameLine();
+                            ImGui::Text("%s", name.c_str());
                             m_Global_Spaces += " ";
-                            Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_texture_names, (int)m_texture_names.size());
+                            ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_TextureNames, (int)m_TextureNames.size());
                             if (selected != tmp)
                             {
-                                *reinterpret_cast<HTexture*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Texture>(m_texture_ids[selected]);
+                                *reinterpret_cast<HTexture*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Texture>(m_TextureIDs[selected]);
                                 // ResourceGUID newIndex = m_texture_ids[selected];
                                 // auto renderer = currentArchetype->GetComponent<MeshRenderer>();
                                 // if (renderer)
@@ -1110,20 +1167,21 @@ void Editor::Archetype()
                             int selected = -1;
                             if (mesh.Validate()) currId = (mesh)->GetGUID();
                             std::string name;
-                            for (int i = 0; i < m_mesh_ids.size(); ++i)
-                                if (currId == m_mesh_ids[i])
+                            for (int i = 0; i < m_MeshIDs.size(); ++i)
+                                if (currId == m_MeshIDs[i])
                                 {
                                     selected = i;
-                                    name = m_mesh_names[i];
+                                    name = m_MeshNames[i];
                                 }
                             int tmp = selected;
-                            SameLine();
-                            Text("%s", name.c_str());
+                            ImGui::SameLine();
+                            ImGui::Text("%s", name.c_str());
                             m_Global_Spaces += " ";
-                            Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_mesh_names, (int)m_mesh_names.size());
+                            ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_MeshNames, (int)m_MeshNames.size());
                             if (selected != tmp)
                             {
-                                *reinterpret_cast<HMesh*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Mesh>(m_mesh_ids[selected]);
+                                *reinterpret_cast<HMesh*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Mesh>(m_MeshIDs[selected]);
+
                                 // ResourceGUID newIndex = m_mesh_ids[selected];
                                 // auto renderer = currentArchetype->GetComponent<MeshRenderer>();
                                 // if (renderer)
@@ -1139,20 +1197,20 @@ void Editor::Archetype()
                             int selected = -1;
                             if (anim.Validate()) currId = (anim)->GetGUID();
                             std::string name;
-                            for (int i = 0; i < m_anim_ids.size(); ++i)
-                                if (currId == m_anim_ids[i])
+                            for (int i = 0; i < m_AnimationIDs.size(); ++i)
+                                if (currId == m_AnimationIDs[i])
                                 {
                                     selected = i;
-                                    name = m_anim_names[i];
+                                    name = m_AnimationNames[i];
                                 }
                             int tmp = selected;
-                            SameLine();
-                            Text("%s", name.c_str());
+                            ImGui::SameLine();
+                            ImGui::Text("%s", name.c_str());
                             m_Global_Spaces += " ";
-                            Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_anim_names, (int)m_anim_names.size());
+                            ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_AnimationNames, (int)m_AnimationNames.size());
                             if (selected != tmp)
                             {
-                                *reinterpret_cast<HAnimationSet*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<AnimationSet>(m_anim_ids[selected]);
+                                *reinterpret_cast<HAnimationSet*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<AnimationSet>(m_AnimationIDs[selected]);
                                 // ResourceGUID newIndex = m_anim_ids[selected];
                                 // auto animator = currentArchetype->GetComponent<MeshAnimator>();
                                 // if (animator)
@@ -1168,18 +1226,18 @@ void Editor::Archetype()
                             int selected = -1;
                             if (font.Validate()) currId = font->GetGUID();
                             std::string name;
-                            for (int i = 0; i < m_font_ids.size(); ++i)
-                                if (currId == m_font_ids[i])
+                            for (int i = 0; i < m_FontIDs.size(); ++i)
+                                if (currId == m_FontIDs[i])
                                 {
                                     selected = i;
-                                    name = m_font_names[i];
+                                    name = m_FontNames[i];
                                 }
                             int tmp = selected;
-                            SameLine();
-                            Text("%s", name.c_str());
+                            ImGui::SameLine();
+                            ImGui::Text("%s", name.c_str());
                             m_Global_Spaces += " ";
-                            Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_font_names, (int)m_font_names.size());
-                            if (selected != tmp) *reinterpret_cast<HFont*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Font>(m_font_ids[selected]);
+                            ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_FontNames, (int)m_FontNames.size());
+                            if (selected != tmp) *reinterpret_cast<HFont*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Font>(m_FontIDs[selected]);
                         }
                     }
                     if (comp->GetName() == "AudioEmitter")
@@ -1195,56 +1253,56 @@ void Editor::Archetype()
                             ++i;
                         }
                         int s = currentSound;
-                        ListBox("SoundTracks", &currentSound, vector_getter, &SoundTracks, (int)SoundTracks.size(), 4);
+                        ImGui::ListBox("SoundTracks", &currentSound, vector_getter, &SoundTracks, (int)SoundTracks.size(), 4);
                         if (currentSound != s)
                         {
                             std::string newValue = SoundTracks[currentSound];
                             sound->SetAudioClip(newValue);
                         }
                     }
-                    Unindent(5.f);
+                    ImGui::Unindent(5.0f);
                 }
                 catch (...)
                 {
-                    Text("Component %s not in reflection factory!", comp->GetName().c_str());
+                    ImGui::Text("Component %s not in reflection factory!", comp->GetName().c_str());
                 }
-                TreePop();
+                ImGui::TreePop();
             }
-            Separator();
+            ImGui::Separator();
             ++i;
         }
     }
 
-    if (BeginPopupModal("ArchetypeName", NULL, ImGuiWindowFlags_NoResize))
+    if (ImGui::BeginPopupModal("ArchetypeName", NULL, ImGuiWindowFlags_NoResize))
     {
         m_Global_Spaces += " ";
-        Text("Archetype Name : ");
-        SameLine();
-        InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-        NewLine();
+        ImGui::Text("Archetype Name : ");
+        ImGui::SameLine();
+        ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+        ImGui::NewLine();
         InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
-        SameLine();
-        if (Button("OK", ImVec2(120, 0)) || IsKeyPressed(KEY_RETURN))
+        ImGui::SameLine();
+        if (ImGui::Button("OK", ImVec2(120, 0)) || ImGui::IsKeyPressed(KEY_RETURN))
         {
             if (std::string{} != string)
             {
                 auto go = CreateArchetype(string);
-                CreateArchetype_Action* act = new CreateArchetype_Action(go, m_UpdatedArchetypes[string]);
+                ActionCreateArchetype* act = new ActionCreateArchetype(go, m_UpdatedArchetypes[string]);
                 m_Undo.push_back(std::move(act));
                 ClearRedo();
                 SecureZeroMemory(string, MAX_STRING_LENGTH);
                 CloseCurrentPopup();
             }
         }
-        SameLine();
+        ImGui::SameLine();
         InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
-        SameLine();
-        if (Button("Cancel", ImVec2(120, 0)))
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             SecureZeroMemory(string, MAX_STRING_LENGTH);
             CloseCurrentPopup();
         }
-        SameLine();
+        ImGui::SameLine();
         InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
         EndPopup();
     }
@@ -1255,23 +1313,23 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
     if (parent == "IComponent" || parent == "") return;
     if (!Factory::m_Reflection->at(parent)->getParents().empty()) ParentArchetypeInspector(address, Factory::m_Reflection->at(parent)->getParents().back().key, currentArchetype);
     auto properties = Factory::m_Reflection->at(parent)->getProperties();
-    Indent(5.f);
-    if (TreeNode((std::string("Parent ") + std::string(" : ") + parent).c_str()))
+    ImGui::Indent(5.0f);
+    if (ImGui::TreeNode((std::string("Parent ") + std::string(" : ") + parent).c_str()))
     {
         for (int i = 0; i < properties.size(); ++i)
         {
-            Text("%s : ", properties[i].name.c_str());
+            ImGui::Text("%s : ", properties[i].name.c_str());
             // if else for each type
             if (properties[i].type == typeid(std::string).name())
             {
                 char tmp[MAX_STRING_LENGTH];
                 SecureZeroMemory(tmp, MAX_STRING_LENGTH);
-                SameLine();
+                ImGui::SameLine();
                 m_Global_Spaces += " ";
                 std::string* string = reinterpret_cast<std::string*>(address + properties[i].offset);
                 std::copy(string->begin(), string->end(), tmp);
-                InputText(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
-                if (IsKeyPressed(KEY_RETURN) && *string != tmp) *string = std::string(tmp);
+                ImGui::InputText(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
+                if (ImGui::IsKeyPressed(KEY_RETURN) && *string != tmp) *string = std::string(tmp);
             }
             else if (properties[i].type == typeid(iVector2).name())
             {
@@ -1280,7 +1338,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 tmp[0] = vec3->x;
                 tmp[1] = vec3->y;
                 m_Global_Spaces += " ";
-                InputInt2(m_Global_Spaces.c_str(), tmp);
+                ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
                 vec3->x = tmp[0];
                 vec3->y = tmp[1];
             }
@@ -1291,7 +1349,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 tmp[0] = vec3->x;
                 tmp[1] = vec3->y;
                 m_Global_Spaces += " ";
-                InputFloat2(m_Global_Spaces.c_str(), tmp);
+                ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
                 vec3->x = tmp[0];
                 vec3->y = tmp[1];
             }
@@ -1303,28 +1361,28 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 tmp[1] = vec3->y;
                 tmp[2] = vec3->z;
                 m_Global_Spaces += " ";
-                InputFloat3(m_Global_Spaces.c_str(), tmp);
+                ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
                 vec3->x = tmp[0];
                 vec3->y = tmp[1];
                 vec3->z = tmp[2];
             }
             else if (properties[i].type == typeid(float).name())
             {
-                SameLine();
+                ImGui::SameLine();
                 float* tmp = reinterpret_cast<float*>(address + properties[i].offset);
                 m_Global_Spaces += " ";
                 InputFloat(m_Global_Spaces.c_str(), tmp);
             }
             else if (properties[i].type == typeid(int).name())
             {
-                SameLine();
+                ImGui::SameLine();
                 int* tmp = reinterpret_cast<int*>(address + properties[i].offset);
                 m_Global_Spaces += " ";
-                InputInt(m_Global_Spaces.c_str(), tmp);
+                ImGui::InputInt(m_Global_Spaces.c_str(), tmp);
             }
             else if (properties[i].type == typeid(bool).name())
             {
-                SameLine();
+                ImGui::SameLine();
                 bool* tmp = reinterpret_cast<bool*>(address + properties[i].offset);
                 m_Global_Spaces += " ";
                 Checkbox(m_Global_Spaces.c_str(), tmp);
@@ -1343,14 +1401,14 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 tmp[3] = clr->w;
                 ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                 m_Global_Spaces += " ";
-                InputFloat4(m_Global_Spaces.c_str(), tmp, 3);
-                if (IsKeyPressed(KEY_RETURN))
+                ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
+                if (ImGui::IsKeyPressed(KEY_RETURN))
                 {
                     if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
                     {
                         Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
                         *clr = newValue;
-                        TreePop();
+                        ImGui::TreePop();
                         return;
                     }
                 }
@@ -1358,7 +1416,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 bool open_popup = ColorButton(("Current Color" + hashes + properties[i].name).c_str(), color);
                 if (open_popup)
                 {
-                    OpenPopup(("ColorPicker" + hashes + properties[i].name).c_str());
+                    ImGui::OpenPopup(("ColorPicker" + hashes + properties[i].name).c_str());
                     backup_color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                     tmp_color = backup_color;
                 }
@@ -1395,11 +1453,11 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                     auto enums = enumsFactory->at(properties[i].type)->getEnums();
                     int* selected = reinterpret_cast<int*>(address + properties[i].offset);
                     m_Global_Spaces += " ";
-                    Combo(m_Global_Spaces.c_str(), selected, enums_getter, &enums, (int)enums.size());
+                    ImGui::Combo(m_Global_Spaces.c_str(), selected, enums_getter, &enums, (int)enums.size());
                 }
                 catch (...)
                 {
-                    Text("Enum not in Enum Reflection");
+                    ImGui::Text("Enum not in Enum Reflection");
                 }
             }
             else if (properties[i].type == typeid(HTexture).name())
@@ -1409,20 +1467,20 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 int selected = -1;
                 ResourceGUID currId = 0;
                 if (texture.Validate()) currId = (texture)->GetGUID();
-                for (int i = 0; i < m_texture_ids.size(); ++i)
-                    if (currId == m_texture_ids[i])
+                for (int i = 0; i < m_TextureIDs.size(); ++i)
+                    if (currId == m_TextureIDs[i])
                     {
                         selected = i;
-                        name = m_texture_names[i];
+                        name = m_TextureNames[i];
                     }
                 int tmp = selected;
-                SameLine();
-                Text("%s", name.c_str());
+                ImGui::SameLine();
+                ImGui::Text("%s", name.c_str());
                 m_Global_Spaces += " ";
-                Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_texture_names, (int)m_texture_names.size());
+                ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_TextureNames, (int)m_TextureNames.size());
                 if (selected != tmp)
                 {
-                    *reinterpret_cast<HTexture*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Texture>(m_texture_ids[selected]);
+                    *reinterpret_cast<HTexture*>(address + properties[i].offset) = ResourceManager::Instance().GetResource<Texture>(m_TextureIDs[selected]);
                     // ResourceGUID newIndex = m_texture_ids[selected];
                     // auto renderer = currentArchetype->GetComponent<MeshRenderer>();
                     // if (renderer && parent == "MeshRenderer")
@@ -1448,9 +1506,9 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 }
             }
         }
-        TreePop();
+        ImGui::TreePop();
     }
-    Unindent(5.f);
+    ImGui::Unindent(5.0f);
 }
 
 void Editor::ParentInspector(char* address, std::string comp, std::string parent)
@@ -1458,20 +1516,20 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
     if (parent == "IComponent" || parent == "") return;
     if (!Factory::m_Reflection->at(parent)->getParents().empty()) ParentInspector(address, comp, Factory::m_Reflection->at(parent)->getParents().back().key);
     auto properties = Factory::m_Reflection->at(parent)->getProperties();
-    // Indent(5.f);
-    // if (TreeNode((std::string("Parent ") + std::string(" : ") + parent).c_str()))
+    // ImGui::Indent(5.0f);
+    // if (ImGui::TreeNode((std::string("Parent ") + std::string(" : ") + parent).c_str()))
     // {
     for (auto& prop : properties)
     {
-        Text("%s : ", prop.name.c_str());
+        ImGui::Text("%s : ", prop.name.c_str());
         if (prop.type == typeid(std::string).name())
         {
-            SameLine();
+            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<std::string*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(float).name())
         {
-            SameLine();
+            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<float*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(Vector3).name())
@@ -1482,22 +1540,22 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
             ParentStructOptions(reinterpret_cast<TVector2<int>*>(address + prop.offset), m_CurrentObject, comp);
         else if (prop.type == typeid(float).name())
         {
-            SameLine();
+            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<float*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(int).name())
         {
-            SameLine();
+            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<int*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(bool).name())
         {
-            SameLine();
+            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<bool*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(Color4).name())
         {
-            SameLine();
+            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<Color4*>(address + prop.offset), m_CurrentObject, comp, prop.name);
         }
         else if (prop.type.find("enum") != std::string::npos)
@@ -1519,7 +1577,7 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
                 bool b = *reinterpret_cast<bool*>(address + prop.offset);
                 if (!b)
                 {
-                    Text("m_attractors : ");
+                    ImGui::Text("m_attractors : ");
                     std::vector<unsigned> attractor_id;
                     std::vector<std::string> attractor_name;
                     auto& m_attractor = dynamic_cast<ParticleEmitter*>(reinterpret_cast<IComponent*>(address))->m_Attractors;
@@ -1534,15 +1592,15 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
                             attractor_name.push_back(a->GetOwner()->GetName());
                         }
                     }
-                    if (Button("Add Attractor")) OpenPopup("AddAttractorPopUp");
+                    if (ImGui::Button("Add Attractor")) ImGui::OpenPopup("AddAttractorPopUp");
                     if (BeginPopup("AddAttractorPopUp"))
                     {
-                        Text("Attractors");
-                        Separator();
+                        ImGui::Text("Attractors");
+                        ImGui::Separator();
                         for (int i = 0; i < attractor_name.size(); ++i)
                             if (Selectable(attractor_name[i].c_str()))
                             {
-                                AddAttractor_Action* act = new AddAttractor_Action(m_CurrentObject, m_attractor, attractor_id[i]);
+                                ActionAddAttractor* act = new ActionAddAttractor(m_CurrentObject, m_attractor, attractor_id[i]);
                                 act->Execute();
                                 m_Undo.push_back(std::move(act));
                                 ClearRedo();
@@ -1552,11 +1610,11 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
                     for (int i = 0; i < m_attractor.size(); ++i)
                     {
                         Bullet();
-                        Text("%s", m_CurrentLayer->GetObjectById(m_attractor[i]));
-                        SameLine();
+                        ImGui::Text("%s", m_CurrentLayer->GetObjectById(m_attractor[i]));
+                        ImGui::SameLine();
                         if (SmallButton((std::string("Delete") + "##" + std::to_string(i)).c_str()))
                         {
-                            DeleteAttractor_Action* act = new DeleteAttractor_Action(m_CurrentObject, m_attractor, m_attractor[i]);
+                            ActionDeleteAttractor* act = new ActionDeleteAttractor(m_CurrentObject, m_attractor, m_attractor[i]);
                             act->Execute();
                             m_Undo.push_back(std::move(act));
                             ClearRedo();
@@ -1566,9 +1624,9 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
             }
         }
     }
-    // TreePop();
+    // ImGui::TreePop();
     //}
-    // Unindent(5.f);
+    // ImGui::Unindent(5.0f);
 }
 
 void Editor::StructInspector(char* address, std::string comp)
@@ -1577,45 +1635,51 @@ void Editor::StructInspector(char* address, std::string comp)
     std::string type = comp.substr(pos + 1);
     try
     {
-        if (TreeNode((std::string("Struct ") + std::string(" : ") + type).c_str()))
+        if (ImGui::TreeNode((std::string("Struct ") + std::string(" : ") + type).c_str()))
         {
             if (!Factory::m_Reflection->at(type)->getParents().empty()) ParentInspector(address, type, Factory::m_Reflection->at(type.c_str())->getParents().back().key);
             auto component = (*Factory::m_Reflection).at(type);
             auto properties = component->getProperties();
-            Indent(5.f);
+            ImGui::Indent(5.0f);
             for (int i = 0; i < properties.size(); ++i)
             {
-                Text("%s : ", properties[i].name.c_str());
+                ImGui::Text("%s : ", properties[i].name.c_str());
                 // if else for each type
                 if (properties[i].type == typeid(std::string).name())
                 {
-                    SameLine();
+                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<std::string*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(Vector3).name())
+                {
                     ParentStructOptions(reinterpret_cast<Vector3*>(address + properties[i].offset), m_CurrentObject, type);
+                }
                 else if (properties[i].type == typeid(Vector2).name())
+                {
                     ParentStructOptions(reinterpret_cast<Vector2*>(address + properties[i].offset), m_CurrentObject, comp);
+                }
                 else if (properties[i].type == typeid(TVector2<int>).name())
+                {
                     ParentStructOptions(reinterpret_cast<TVector2<int>*>(address + properties[i].offset), m_CurrentObject, comp);
+                }
                 else if (properties[i].type == typeid(float).name())
                 {
-                    SameLine();
+                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<float*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(int).name())
                 {
-                    SameLine();
+                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<int*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(bool).name())
                 {
-                    SameLine();
+                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<bool*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(Color4).name())
                 {
-                    SameLine();
+                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<Color4*>(address + properties[i].offset), m_CurrentObject, type, properties[i].name);
                 }
                 else if (properties[i].type.find("enum") != std::string::npos)
@@ -1627,13 +1691,13 @@ void Editor::StructInspector(char* address, std::string comp)
                     StructInspector(address + properties[i].offset, properties[i].type);
                 }
             }
-            Unindent(5.f);
-            TreePop();
+            ImGui::Unindent(5.0f);
+            ImGui::TreePop();
         }
     }
     catch (...)
     {
-        TreePop();
+        ImGui::TreePop();
     }
 }
 
@@ -1641,7 +1705,7 @@ void Editor::ClearRedo()
 {
     while (!m_Redo.empty())
     {
-        Actions* tmp = m_Redo.front();
+        Action* tmp = m_Redo.front();
         m_Redo.pop_front();
         delete tmp;
     }
@@ -1652,138 +1716,138 @@ void Editor::TextEditor()
     // if (IsWindowFocused(ImGuiFocusedFlags_ChildWindows)) m_editorFocus = true;
     // else m_editorFocus = false;
     // if (!GetCurrentDock()->active) m_editorFocus = false;
-    if (Button("New File"))
+    if (ImGui::Button("New File"))
     {
-        ZeroMemory(&m_editorFile, sizeof(m_editorFile));
-        SecureZeroMemory(m_text, 2 << 23);
-        m_editorFileName.clear();
+        ZeroMemory(&m_EditorFile, sizeof(m_EditorFile));
+        SecureZeroMemory(m_EditorStringBuffer, 2 << 23);
+        m_EditorFileName.clear();
     }
-    SameLine();
-    if (Button("Open File"))
+    ImGui::SameLine();
+    if (ImGui::Button("Open File"))
     {
         OPENFILENAME ofn;
-        ZeroMemory(&m_editorFile, sizeof(m_editorFile));
+        ZeroMemory(&m_EditorFile, sizeof(m_EditorFile));
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = Application::Instance().GetWindowHandle();
         ofn.lpstrFilter = "Lua Files\0*.lua\0All Files\0*.*\0";
-        ofn.lpstrFile = m_editorFile;
+        ofn.lpstrFile = m_EditorFile;
         ofn.nMaxFile = MAX_PATH;
         ofn.lpstrFileTitle = (LPSTR) "Load File";
         ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
         if (GetOpenFileNameA(&ofn))
         {
-            std::ifstream input(m_editorFile);
+            std::ifstream input(m_EditorFile);
             if (input.is_open())
             {
-                SecureZeroMemory(m_text, 2 << 23);
+                SecureZeroMemory(m_EditorStringBuffer, 2 << 23);
                 std::string contents((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-                std::copy(contents.begin(), contents.end(), m_text);
+                std::copy(contents.begin(), contents.end(), m_EditorStringBuffer);
                 input.close();
-                m_editorFileName = m_editorFile;
-                auto pos = m_editorFileName.find_last_of("\\");
-                m_editorFileName.erase(0, pos + 1);
+                m_EditorFileName = m_EditorFile;
+                auto pos = m_EditorFileName.find_last_of("\\");
+                m_EditorFileName.erase(0, pos + 1);
             }
         }
     }
-    SameLine();
-    if (!m_editorFileName.empty())
+    ImGui::SameLine();
+    if (!m_EditorFileName.empty())
     {
-        if (Button("Save"))
+        if (ImGui::Button("Save"))
         {
             std::fstream pFile;
-            pFile.open(m_editorFile, std::fstream::out);
-            pFile << m_text;
+            pFile.open(m_EditorFile, std::fstream::out);
+            pFile << m_EditorStringBuffer;
             pFile.close();
             std::cout << "File Saved" << std::endl;
         }
-        SameLine();
+        ImGui::SameLine();
     }
-    if (Button("Save File"))
+    if (ImGui::Button("Save File"))
     {
         OPENFILENAME ofn;
-        ZeroMemory(&m_editorFile, sizeof(m_editorFile));
+        ZeroMemory(&m_EditorFile, sizeof(m_EditorFile));
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = Application::Instance().GetWindowHandle();
         ofn.lpstrFilter = "Lua Files\0*.lua\0All Files\0*.*\0";
-        ofn.lpstrFile = m_editorFile;
+        ofn.lpstrFile = m_EditorFile;
         ofn.nMaxFile = MAX_PATH;
         ofn.lpstrFileTitle = (LPSTR) "Save File";
         ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
         if (GetSaveFileNameA(&ofn))
         {
-            std::string file(m_editorFile);
+            std::string file(m_EditorFile);
             auto dir = file.find_last_of('\\');
             auto ext = file.find_first_of('.', dir);
             if (ext == file.npos)
             {
                 file += ".lua";
-                std::copy(file.begin(), file.end(), m_editorFile);
+                std::copy(file.begin(), file.end(), m_EditorFile);
             }
             std::fstream pFile;
             pFile.open(file, std::fstream::out);
-            pFile << m_text;
+            pFile << m_EditorStringBuffer;
             pFile.close();
-            m_editorFileName = m_editorFile;
-            auto pos = m_editorFileName.find_last_of("\\");
-            m_editorFileName.erase(0, pos + 1);
+            m_EditorFileName = m_EditorFile;
+            auto pos = m_EditorFileName.find_last_of("\\");
+            m_EditorFileName.erase(0, pos + 1);
         }
     }
-    SameLine();
-    ImVec2 sz = GetWindowSize();
+    ImGui::SameLine();
+    ImVec2 sz = ImGui::GetWindowSize();
     ImVec2 winSz = ImVec2((float)Application::Instance().GetWindowWidth(), (float)Application::Instance().GetWindowHeight());
-    Text("Filename : %s", m_editorFileName.c_str());
-    BeginDockChild("EditorText", ImVec2(-1, -1), false, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
-    InputTextMultiline("##source", m_text, IM_ARRAYSIZE(m_text), ImVec2(winSz.x, -1), ImGuiInputTextFlags_AllowTabInput);
-    EndDockChild();
+    ImGui::Text("Filename : %s", m_EditorFileName.c_str());
+    ImGui::BeginChild("EditorText", ImVec2(-1, -1), false, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    ImGui::InputTextMultiline("##source", m_EditorStringBuffer, IM_ARRAYSIZE(m_EditorStringBuffer), ImVec2(winSz.x, -1), ImGuiInputTextFlags_AllowTabInput);
+    ImGui::EndChild();
 }
 
 void Editor::LayerEditor()
 {
-    if (Button("New Layer"))
+    if (ImGui::Button("New Layer"))
     {
-        OpenPopup("AddLayer");
+        ImGui::OpenPopup("AddLayer");
     }
-    if (BeginPopupModal("AddLayer"))
+    if (ImGui::BeginPopupModal("AddLayer"))
     {
-        SetItemDefaultFocus();
+        ImGui::SetItemDefaultFocus();
         static char AddLayerName[MAX_STRING_LENGTH];
-        Text("New Layer Name : ");
+        ImGui::Text("New Layer Name : ");
         m_Global_Spaces += " ";
-        SameLine();
-        InputText(m_Global_Spaces.c_str(), AddLayerName, MAX_STRING_LENGTH);
+        ImGui::SameLine();
+        ImGui::InputText(m_Global_Spaces.c_str(), AddLayerName, MAX_STRING_LENGTH);
         std::string name(AddLayerName);
-        NewLine();
+        ImGui::NewLine();
         InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
-        SameLine();
-        if (Button("OK", ImVec2(120, 0)) && !name.empty())
+        ImGui::SameLine();
+        if (ImGui::Button("OK", ImVec2(120, 0)) && !name.empty())
         {
-            CreateLayer_Action* act = new CreateLayer_Action(name, m_CurrentLayer);
+            ActionCreateLayer* act = new ActionCreateLayer(name, m_CurrentLayer);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
             SecureZeroMemory(AddLayerName, MAX_STRING_LENGTH);
             CloseCurrentPopup();
         }
-        SameLine();
+        ImGui::SameLine();
         InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
-        SameLine();
-        if (Button("Cancel", ImVec2(120, 0)))
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             SecureZeroMemory(AddLayerName, MAX_STRING_LENGTH);
             CloseCurrentPopup();
         }
-        SameLine();
+        ImGui::SameLine();
         InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
         EndPopup();
     }
     if (Application::Instance().GetCurrentScene()->GetLayers().size() > 1)
     {
-        SameLine();
-        if (Button("Delete Layer"))
+        ImGui::SameLine();
+        if (ImGui::Button("Delete Layer"))
         {
-            DeleteLayer_Action* act = new DeleteLayer_Action(m_CurrentLayer);
+            ActionDeleteLayer* act = new ActionDeleteLayer(m_CurrentLayer);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -1812,136 +1876,136 @@ void Editor::LayerEditor()
 
 void Editor::Profiler()
 {
-    float real = 1.f / Application::Instance().GetGameTimer().GetActualFrameTime();
+    float real = 1.0f / Application::Instance().GetGameTimer().GetActualFrameTime();
     float rdt = Application::Instance().GetGameTimer().GetActualFrameTime();
-    Text("Current Frame Time : %f", real);
+    ImGui::Text("Current Frame Time : %f", real);
     // input sys
-    Text("Input System : %f", m_timings[0]);
+    ImGui::Text("Input System : %f", m_Timings[0]);
     static float input_t[60] = {0};
-    if (m_timer < 60)
-        input_t[m_timer] = (m_timings[0] / rdt) * 100.f;
+    if (m_Timer < 60)
+        input_t[m_Timer] = (m_Timings[0] / rdt) * 100.0f;
     else
     {
         memcpy(input_t, input_t + 1, 59 * sizeof(float));
-        input_t[59] = (m_timings[0] / rdt) * 100.f;
+        input_t[59] = (m_Timings[0] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), input_t, IM_ARRAYSIZE(input_t), 0, "Input", 0, 100, ImVec2(0, 50));
     // physics sys
-    Text("Physics System : %f", m_timings[1]);
+    ImGui::Text("Physics System : %f", m_Timings[1]);
     static float physics_t[60] = {0};
-    if (m_timer < 60)
-        physics_t[m_timer] = (m_timings[1] / rdt) * 100.f;
+    if (m_Timer < 60)
+        physics_t[m_Timer] = (m_Timings[1] / rdt) * 100.0f;
     else
     {
         memcpy(physics_t, physics_t + 1, 59 * sizeof(float));
-        physics_t[59] = (m_timings[1] / rdt) * 100.f;
+        physics_t[59] = (m_Timings[1] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), physics_t, IM_ARRAYSIZE(input_t), 0, "Physics", 0, 100, ImVec2(0, 50));
     // scene sys
-    Text("Scene System : %f", m_timings[2]);
+    ImGui::Text("Scene System : %f", m_Timings[2]);
     static float Logic_t[60] = {0};
-    if (m_timer < 60)
-        Logic_t[m_timer] = (m_timings[2] / rdt) * 100.f;
+    if (m_Timer < 60)
+        Logic_t[m_Timer] = (m_Timings[2] / rdt) * 100.0f;
     else
     {
         memcpy(Logic_t, Logic_t + 1, 59 * sizeof(float));
-        Logic_t[59] = (m_timings[2] / rdt) * 100.f;
+        Logic_t[59] = (m_Timings[2] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), Logic_t, IM_ARRAYSIZE(input_t), 0, "Logic", 0, 100, ImVec2(0, 50));
     // render sys
-    Text("Renderer System : %f", m_timings[3]);
+    ImGui::Text("Renderer System : %f", m_Timings[3]);
     static float Render_t[60] = {0};
-    if (m_timer < 60)
-        Render_t[m_timer] = (m_timings[3] / rdt) * 100.f;
+    if (m_Timer < 60)
+        Render_t[m_Timer] = (m_Timings[3] / rdt) * 100.0f;
     else
     {
         memcpy(Render_t, Render_t + 1, 59 * sizeof(float));
-        Render_t[59] = (m_timings[3] / rdt) * 100.f;
+        Render_t[59] = (m_Timings[3] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), Render_t, IM_ARRAYSIZE(input_t), 0, "Renderer", 0, 100, ImVec2(0, 50));
     // editor sys
-    Text("Editor System : %f", m_timings[4]);
+    ImGui::Text("Editor System : %f", m_Timings[4]);
     static float Editor_t[60] = {0};
-    if (m_timer < 60)
-        Editor_t[m_timer] = (m_timings[4] / rdt) * 100.f;
+    if (m_Timer < 60)
+        Editor_t[m_Timer] = (m_Timings[4] / rdt) * 100.0f;
     else
     {
         memcpy(Editor_t, Editor_t + 1, 59 * sizeof(float));
-        Editor_t[59] = (m_timings[4] / rdt) * 100.f;
+        Editor_t[59] = (m_Timings[4] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), Editor_t, IM_ARRAYSIZE(input_t), 0, "Editor", 0, 100, ImVec2(0, 50));
     // audio sys
-    Text("Audio System : %f", m_timings[5]);
+    ImGui::Text("Audio System : %f", m_Timings[5]);
     static float Audio_t[60] = {0};
-    if (m_timer < 60)
-        Audio_t[m_timer] = (m_timings[5] / rdt) * 100.f;
+    if (m_Timer < 60)
+        Audio_t[m_Timer] = (m_Timings[5] / rdt) * 100.0f;
     else
     {
         memcpy(Audio_t, Audio_t + 1, 59 * sizeof(float));
-        Audio_t[59] = (m_timings[5] / rdt) * 100.f;
+        Audio_t[59] = (m_Timings[5] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), Audio_t, IM_ARRAYSIZE(input_t), 0, "Audio", 0, 100, ImVec2(0, 50));
-    if (m_timer < 60) ++m_timer;
+    if (m_Timer < 60) ++m_Timer;
     // animation sys
-    Text("Animation System : %f", m_timings[6]);
+    ImGui::Text("Animation System : %f", m_Timings[6]);
     static float Anim_t[60] = {0};
-    if (m_timer < 60)
-        Anim_t[m_timer] = (m_timings[6] / rdt) * 100.f;
+    if (m_Timer < 60)
+        Anim_t[m_Timer] = (m_Timings[6] / rdt) * 100.0f;
     else
     {
         memcpy(Anim_t, Anim_t + 1, 59 * sizeof(float));
-        Anim_t[59] = (m_timings[6] / rdt) * 100.f;
+        Anim_t[59] = (m_Timings[6] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), Anim_t, IM_ARRAYSIZE(input_t), 0, "Anim", 0, 100, ImVec2(0, 50));
-    if (m_timer < 60) ++m_timer;
+    if (m_Timer < 60) ++m_Timer;
 
     // Particle System
-    Text("Particle System : %f", m_timings[7]);
+    ImGui::Text("Particle System : %f", m_Timings[7]);
     static float Part_t[60] = {0};
-    if (m_timer < 60)
-        Part_t[m_timer] = (m_timings[7] / rdt) * 100.f;
+    if (m_Timer < 60)
+        Part_t[m_Timer] = (m_Timings[7] / rdt) * 100.0f;
     else
     {
         memcpy(Part_t, Part_t + 1, 59 * sizeof(float));
-        Part_t[59] = (m_timings[7] / rdt) * 100.f;
+        Part_t[59] = (m_Timings[7] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), Part_t, IM_ARRAYSIZE(input_t), 0, "Particle", 0, 100, ImVec2(0, 50));
-    if (m_timer < 60) ++m_timer;
+    if (m_Timer < 60) ++m_Timer;
 
     // AI System
-    Text("AI System : %f", m_timings[8]);
+    ImGui::Text("AI System : %f", m_Timings[8]);
     static float AI_t[60] = {0};
-    if (m_timer < 60)
-        AI_t[m_timer] = (m_timings[8] / rdt) * 100.f;
+    if (m_Timer < 60)
+        AI_t[m_Timer] = (m_Timings[8] / rdt) * 100.0f;
     else
     {
         memcpy(AI_t, AI_t + 1, 59 * sizeof(float));
-        AI_t[59] = (m_timings[8] / rdt) * 100.f;
+        AI_t[59] = (m_Timings[8] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
     PlotLines(m_Global_Spaces.c_str(), AI_t, IM_ARRAYSIZE(input_t), 0, "AI", 0, 100, ImVec2(0, 50));
-    if (m_timer < 60) ++m_timer;
+    if (m_Timer < 60) ++m_Timer;
 }
 
 void Editor::FullScreenVP()
 {
-    if (Input::Instance().GetKeyPressed(KEY_F8)) m_viewportFullScreen = !m_viewportFullScreen;
+    if (Input::Instance().GetKeyPressed(KEY_F8)) m_IsViewportFullScreen = !m_IsViewportFullScreen;
     SetNextWindowPos(ImVec2(0, 0));
     SetNextWindowSize(ImVec2((float)Application::Instance().GetWindowWidth(), (float)Application::Instance().GetWindowHeight()));
-    Begin("FullScreen ViewPort", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+    ImGui::Begin("FullScreen ViewPort", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
     if (Application::Instance().GetGameTimer().IsPlayModePaused())
     {
-        if (Button("Play"))
+        if (ImGui::Button("Play"))
         {
-            s_isPlaying = true;
+            ms_IsGameRunning = true;
             while (ShowCursor(false) > 0)
                 ;
             AudioSystem::Instance().UnPauseAudio();
@@ -1950,7 +2014,7 @@ void Editor::FullScreenVP()
     }
     else
     {
-        if (Button("Pause") || Input::Instance().GetKeyPressed(KEY_F6))
+        if (ImGui::Button("Pause") || Input::Instance().GetKeyPressed(KEY_F6))
         {
             while (ShowCursor(true) < 0)
                 ;
@@ -1958,15 +2022,15 @@ void Editor::FullScreenVP()
             Application::Instance().GetGameTimer().SetPlayModePaused(true);
         }
     }
-    SameLine();
-    if (Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
+    ImGui::SameLine();
+    if (ImGui::Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
     {
         Application::Instance().GetGameTimer().SetPlayModePaused(false);
         while (ShowCursor(true) < 0)
             ;
         // Show cursor
         // ShowCursor(true);
-        s_isPlaying = false;
+        ms_IsGameRunning = false;
 
         Application::Instance().GetGameTimer().SetEditorPaused(true);
         PhysicsSystem::Instance().Close();
@@ -1994,31 +2058,29 @@ void Editor::FullScreenVP()
         AISystem::Instance().RevertBase();
     }
 
-    if (IsWindowHovered() && (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused()))
+    if (ImGui::IsWindowHovered() && (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused()))
     {
         static Vector3 tmp;
         static Vector3 current;
-        if ((GetCurrentDock()->status == Floating) || (GetCurrentDock()->status == Docked && GetCurrentDock()->active))
-        {
-            if (IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
-            m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
-            m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.f);
-            m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
-        }
+
+        if (ImGui::IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
+        m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
+        m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
+        m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
     }
     else
     {
         m_CurrentLayer->GetEditorCamera()->Cancel();
     }
 
-    ImVec2 windowSize = GetWindowSize();
-    windowSize.y -= ImGuiStyleVar_FramePadding * 2 + GetFontSize() + 13.f;
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    windowSize.y -= ImGuiStyleVar_FramePadding * 2 + GetFontSize() + 13.0f;
 
     Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
     Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
 
     Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
-    End();
+    ImGui::End();
 }
 
 void Editor::TagsEditor()
@@ -2026,59 +2088,59 @@ void Editor::TagsEditor()
     static int selected_tag = -1;
     m_Global_Spaces += " ";
     std::vector<std::string> tags;
-    for (auto& s : m_tags)
+    for (auto& s : m_Tags)
         tags.push_back(s);
     int height = (int)tags.size() > 33 ? 33 : (int)tags.size();
-    PushItemWidth(300.f);
-    ListBox(m_Global_Spaces.c_str(), &selected_tag, vector_getter, static_cast<void*>(&tags), (int)tags.size(), height);
-    PopItemWidth();
-    Separator();
+    ImGui::PushItemWidth(300.0f);
+    ImGui::ListBox(m_Global_Spaces.c_str(), &selected_tag, vector_getter, static_cast<void*>(&tags), (int)tags.size(), height);
+    ImGui::PopItemWidth();
+    ImGui::Separator();
     if (selected_tag >= 0)
     {
-        Text("Selected Tag : %s", tags[selected_tag].c_str());
-        NewLine();
-        Text("New Name : ");
-        SameLine();
+        ImGui::Text("Selected Tag : %s", tags[selected_tag].c_str());
+        ImGui::NewLine();
+        ImGui::Text("New Name : ");
+        ImGui::SameLine();
         m_Global_Spaces += " ";
         char newString[MAX_STRING_LENGTH];
         SecureZeroMemory(newString, MAX_STRING_LENGTH);
-        InputText(m_Global_Spaces.c_str(), newString, MAX_STRING_LENGTH);
-        if (IsKeyPressed(KEY_RETURN))
+        ImGui::InputText(m_Global_Spaces.c_str(), newString, MAX_STRING_LENGTH);
+        if (ImGui::IsKeyPressed(KEY_RETURN))
         {
             std::string s = newString;
             if (!s.empty() && std::find(tags.begin(), tags.end(), s) == tags.end())
             {
-                ChangeTag_Action* act = new ChangeTag_Action(tags[selected_tag], s);
+                ActionChangeTag* act = new ActionChangeTag(tags[selected_tag], s);
                 act->Execute();
                 m_Undo.push_back(std::move(act));
                 ClearRedo();
                 selected_tag = -1;
             }
         }
-        if (Button("Delete Tag"))
+        if (ImGui::Button("Delete Tag"))
         {
-            DeleteTag_Action* act = new DeleteTag_Action(tags[selected_tag]);
+            ActionDeleteTag* act = new ActionDeleteTag(tags[selected_tag]);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
             selected_tag = -1;
         }
-        Separator();
+        ImGui::Separator();
     }
     // Add tags here
 
-    Text("Tag Name : ");
-    SameLine();
+    ImGui::Text("Tag Name : ");
+    ImGui::SameLine();
     m_Global_Spaces += " ";
     static char string[MAX_STRING_LENGTH];
-    InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-    if (Button("Add Tag") || IsKeyPressed(KEY_RETURN))
+    ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+    if (ImGui::Button("Add Tag") || ImGui::IsKeyPressed(KEY_RETURN))
     {
         std::string s = string;
         SecureZeroMemory(string, MAX_STRING_LENGTH);
         if (!s.empty() && std::find(tags.begin(), tags.end(), s) == tags.end())
         {
-            AddTag_Action* act = new AddTag_Action(s);
+            ActionAddTag* act = new ActionAddTag(s);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2090,7 +2152,7 @@ void Editor::TagsEditor()
 void Editor::PhysicsEditor()
 {
 #define PhysicsWorld PhysicsSystem::Instance().s_PhyWorldSettings
-    if (Button("Save Physics World"))
+    if (ImGui::Button("Save Physics World"))
     {
         char filename[MAX_PATH];
         OPENFILENAME ofn;
@@ -2112,8 +2174,8 @@ void Editor::PhysicsEditor()
             PhysicsWorld.SaveToFile(file);
         }
     }
-    SameLine();
-    if (Button("Load Physics World"))
+    ImGui::SameLine();
+    if (ImGui::Button("Load Physics World"))
     {
         char filename[MAX_PATH];
         OPENFILENAME ofn;
@@ -2128,62 +2190,62 @@ void Editor::PhysicsEditor()
         ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
         if (GetOpenFileNameA(&ofn)) PhysicsWorld.LoadFromFile(filename);
     }
-    Separator();
-    Text("World Name : %s", PhysicsWorld.m_WorldName.c_str());
-    Text("Persistant Contact Distance Threshold");
-    SameLine();
+    ImGui::Separator();
+    ImGui::Text("World Name : %s", PhysicsWorld.m_WorldName.c_str());
+    ImGui::Text("Persistant Contact Distance Threshold");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_PersistantContactDistThreshold);
 
-    Text("Friction Coefficient");
-    SameLine();
+    ImGui::Text("Friction Coefficient");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_DefaultFrictCoefficient);
 
-    Text("Restitution");
-    SameLine();
+    ImGui::Text("Restitution");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_DefaultRestitution);
 
-    Text("Restitution Velocity Threshold");
-    SameLine();
+    ImGui::Text("Restitution Velocity Threshold");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_RestitutionVelThreshold);
 
-    Text("Rolling Resistance");
-    SameLine();
+    ImGui::Text("Rolling Resistance");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_DefaultRollResis);
 
-    Text("Sleeping Enabled");
-    SameLine();
+    ImGui::Text("Sleeping Enabled");
+    ImGui::SameLine();
     PhysicsOptionsBool(&PhysicsWorld.m_IsSleepingEnabled);
 
-    Text("Time Before Sleep");
-    SameLine();
+    ImGui::Text("Time Before Sleep");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_DefaultTimeBeforeSleep);
 
-    Text("Sleep Linear Velocity");
-    SameLine();
+    ImGui::Text("Sleep Linear Velocity");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_DefaultSleepLinearVel);
 
-    Text("Sleep Angular Velocity");
-    SameLine();
+    ImGui::Text("Sleep Angular Velocity");
+    ImGui::SameLine();
     PhysicsOptionsFloat(&PhysicsWorld.m_DefaultSleepAngularVel);
 
-    Text("Gravity");
+    ImGui::Text("Gravity");
     PhysicsOptionsVector3(&PhysicsWorld.m_Gravity);
 
-    Text("Velocity Solver Iterations");
-    SameLine();
+    ImGui::Text("Velocity Solver Iterations");
+    ImGui::SameLine();
     PhysicsOptionsUint(&PhysicsWorld.m_DefaultVelSolverIteration);
 
-    Text("Position Solver Iterations");
-    SameLine();
+    ImGui::Text("Position Solver Iterations");
+    ImGui::SameLine();
     PhysicsOptionsUint(&PhysicsWorld.m_DefaultPosSolverIteration);
 
-    Text("Max Convex Contact Manifold");
+    ImGui::Text("Max Convex Contact Manifold");
     PhysicsOptionsUint(&PhysicsWorld.m_MaxConvexContactManifoldCount);
 
-    Text("Max Concave Contact Manifold");
+    ImGui::Text("Max Concave Contact Manifold");
     PhysicsOptionsUint(&PhysicsWorld.m_MaxConcaveContactManifoldCount);
 
-    Text("Contact Manifold Similar Angle");
+    ImGui::Text("Contact Manifold Similar Angle");
     PhysicsOptionsFloat(&PhysicsWorld.m_ContactManifoldSimilarAngle);
 }
 
@@ -2191,20 +2253,20 @@ void Editor::ResourceManager()
 {
     static bool b = false;
     Checkbox("Debugging Resources", &b);
-    Button("Add Resource");
+    ImGui::Button("Add Resource");
     if (b)
     {
-        SameLine();
-        if (Button("Clean Resources XML"))
+        ImGui::SameLine();
+        if (ImGui::Button("Clean Resources XML"))
         {
             // Mesh
             std::string path("Resources\\Models");
             unsigned i = 1;
 
-            for (i = 1; i < m_mesh_ids.size(); ++i)
+            for (i = 1; i < m_MeshIDs.size(); ++i)
             {
                 bool b = false;
-                auto resource = ResourceManager::Instance().GetResource<Mesh>(m_mesh_ids[i]);
+                auto resource = ResourceManager::Instance().GetResource<Mesh>(m_MeshIDs[i]);
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2221,7 +2283,7 @@ void Editor::ResourceManager()
                     if (!b)
                     {
                         ResourceManager::Instance().DestroyResource<Mesh>(resource);
-                        std::cout << m_mesh_names[i] << std::endl;
+                        std::cout << m_MeshNames[i] << std::endl;
                     }
                 }
             }
@@ -2229,10 +2291,10 @@ void Editor::ResourceManager()
             // Animation Set
             path = "Resources\\Models";
 
-            for (i = 1; i < m_anim_ids.size(); ++i)
+            for (i = 1; i < m_AnimationIDs.size(); ++i)
             {
                 bool b = false;
-                auto resource = ResourceManager::Instance().GetResource<AnimationSet>(m_anim_ids[i]);
+                auto resource = ResourceManager::Instance().GetResource<AnimationSet>(m_AnimationIDs[i]);
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2249,7 +2311,7 @@ void Editor::ResourceManager()
                     if (!b)
                     {
                         ResourceManager::Instance().DestroyResource<AnimationSet>(resource);
-                        std::cout << m_anim_names[i] << std::endl;
+                        std::cout << m_AnimationNames[i] << std::endl;
                     }
                 }
             }
@@ -2257,10 +2319,10 @@ void Editor::ResourceManager()
             // texture
             path = "Resources\\Texture";
 
-            for (i = 1; i < m_texture_ids.size(); ++i)
+            for (i = 1; i < m_TextureIDs.size(); ++i)
             {
                 bool b = false;
-                auto resource = ResourceManager::Instance().GetResource<Texture>(m_texture_ids[i]);
+                auto resource = ResourceManager::Instance().GetResource<Texture>(m_TextureIDs[i]);
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2277,7 +2339,7 @@ void Editor::ResourceManager()
                     if (!b)
                     {
                         ResourceManager::Instance().DestroyResource<Texture>(resource);
-                        std::cout << m_texture_names[i] << std::endl;
+                        std::cout << m_TextureNames[i] << std::endl;
                     }
                 }
             }
@@ -2285,10 +2347,10 @@ void Editor::ResourceManager()
             // Font
             path = "Resources\\Fonts";
 
-            for (i = 1; i < m_font_ids.size(); ++i)
+            for (i = 1; i < m_FontIDs.size(); ++i)
             {
                 bool b = false;
-                auto resource = ResourceManager::Instance().GetResource<Font>(m_font_ids[i]);
+                auto resource = ResourceManager::Instance().GetResource<Font>(m_FontIDs[i]);
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2305,13 +2367,13 @@ void Editor::ResourceManager()
                     if (!b)
                     {
                         ResourceManager::Instance().DestroyResource<Font>(resource);
-                        std::cout << m_font_names[i] << std::endl;
+                        std::cout << m_FontNames[i] << std::endl;
                     }
                 }
             }
         }
-        SameLine();
-        if (Button("Clean Resources Source"))
+        ImGui::SameLine();
+        if (ImGui::Button("Clean Resources Source"))
         {
             HWND handle = Application::Instance().GetWindowHandle();
             std::string message("YOU ARE DELETING ALL THE SOURCE FILES, EVANGELION 3.5 YOU CAN(NOT) UNDO, P.S. SHINJI IS A BITCH");
@@ -2329,9 +2391,9 @@ void Editor::ResourceManager()
 
                     unsigned i = 1;
 
-                    for (i = 1; i < m_mesh_ids.size(); ++i)
+                    for (i = 1; i < m_MeshIDs.size(); ++i)
                     {
-                        auto resource = ResourceManager::Instance().GetResource<Mesh>(m_mesh_ids[i]);
+                        auto resource = ResourceManager::Instance().GetResource<Mesh>(m_MeshIDs[i]);
                         if (resource.Validate())
                         {
                             std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2339,11 +2401,11 @@ void Editor::ResourceManager()
                         }
                     }
 
-                    if (i != m_mesh_ids.size()) continue;
+                    if (i != m_MeshIDs.size()) continue;
 
-                    for (i = 1; i < m_anim_ids.size(); ++i)
+                    for (i = 1; i < m_AnimationIDs.size(); ++i)
                     {
-                        auto resource = ResourceManager::Instance().GetResource<AnimationSet>(m_anim_ids[i]);
+                        auto resource = ResourceManager::Instance().GetResource<AnimationSet>(m_AnimationIDs[i]);
                         if (resource.Validate())
                         {
                             std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2351,7 +2413,7 @@ void Editor::ResourceManager()
                         }
                     }
 
-                    if (i != m_anim_ids.size()) continue;
+                    if (i != m_AnimationIDs.size()) continue;
 
                     filesToBeDeleted.push_back(entry.path());
                 }
@@ -2365,9 +2427,9 @@ void Editor::ResourceManager()
 
                     unsigned i = 1;
 
-                    for (i = 1; i < m_texture_ids.size(); ++i)
+                    for (i = 1; i < m_TextureIDs.size(); ++i)
                     {
-                        auto resource = ResourceManager::Instance().GetResource<Texture>(m_texture_ids[i]);
+                        auto resource = ResourceManager::Instance().GetResource<Texture>(m_TextureIDs[i]);
                         if (resource.Validate())
                         {
                             std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2375,7 +2437,7 @@ void Editor::ResourceManager()
                         }
                     }
 
-                    if (i != m_texture_ids.size()) continue;
+                    if (i != m_TextureIDs.size()) continue;
 
                     filesToBeDeleted.push_back(entry.path());
                 }
@@ -2389,9 +2451,9 @@ void Editor::ResourceManager()
 
                     unsigned i = 1;
 
-                    for (i = 1; i < m_font_ids.size(); ++i)
+                    for (i = 1; i < m_FontIDs.size(); ++i)
                     {
-                        auto resource = ResourceManager::Instance().GetResource<Font>(m_font_ids[i]);
+                        auto resource = ResourceManager::Instance().GetResource<Font>(m_FontIDs[i]);
                         if (resource.Validate())
                         {
                             std::wstring res = resource->GetFilePath().stem().c_str();
@@ -2399,7 +2461,7 @@ void Editor::ResourceManager()
                         }
                     }
 
-                    if (i != m_font_ids.size()) continue;
+                    if (i != m_FontIDs.size()) continue;
 
                     filesToBeDeleted.push_back(entry.path());
                 }
@@ -2419,102 +2481,102 @@ void Editor::ResourceManager()
             }
         }
     }
-    Separator();
-    PushFont(m_fontBold);
-    Text("Meshes");
+    ImGui::Separator();
+    ImGui::PushFont(m_ImGuiFontBold);
+    ImGui::Text("Meshes");
     PopFont();
     static int mesh_selected = -1;
-    static int mesh_height = static_cast<int>(m_mesh_names.size()) > 6 ? 6 : static_cast<int>(m_mesh_names.size());
-    if (Button("Delete Mesh"))
+    static int mesh_height = static_cast<int>(m_MeshNames.size()) > 6 ? 6 : static_cast<int>(m_MeshNames.size());
+    if (ImGui::Button("Delete Mesh"))
     {
-        if (!m_mesh_names[mesh_selected].empty())
+        if (!m_MeshNames[mesh_selected].empty())
         {
-            HMesh tmp = ResourceManager::Instance().GetResource<Mesh>(m_mesh_ids[mesh_selected]);
+            HMesh tmp = ResourceManager::Instance().GetResource<Mesh>(m_MeshIDs[mesh_selected]);
             ResourceManager::Instance().DestroyResource<Mesh>(tmp);
         }
     }
-    SameLine();
-    Text("Mesh List Box Height : ");
-    PushItemWidth(100);
-    SameLine();
-    InputInt("##meshHeight", &mesh_height);
-    PopItemWidth();
+    ImGui::SameLine();
+    ImGui::Text("Mesh List Box Height : ");
+    ImGui::PushItemWidth(100);
+    ImGui::SameLine();
+    ImGui::InputInt("##meshHeight", &mesh_height);
+    ImGui::PopItemWidth();
     // int mesh_tmp = mesh_selected;
-    PushItemWidth(300);
-    ListBox("##Mesh", &mesh_selected, vector_getter, &m_mesh_names, (int)m_mesh_names.size(), mesh_height);
-    PopItemWidth();
-    Separator();
+    ImGui::PushItemWidth(300);
+    ImGui::ListBox("##Mesh", &mesh_selected, vector_getter, &m_MeshNames, (int)m_MeshNames.size(), mesh_height);
+    ImGui::PopItemWidth();
+    ImGui::Separator();
 
-    PushFont(m_fontBold);
-    Text("Animations");
+    ImGui::PushFont(m_ImGuiFontBold);
+    ImGui::Text("Animations");
     PopFont();
     static int anim_selected = -1;
-    static int anim_height = static_cast<int>(m_anim_names.size()) > 6 ? 6 : static_cast<int>(m_anim_names.size());
-    if (Button("Delete Animation"))
+    static int anim_height = static_cast<int>(m_AnimationNames.size()) > 6 ? 6 : static_cast<int>(m_AnimationNames.size());
+    if (ImGui::Button("Delete Animation"))
     {
-        if (!m_anim_names[anim_selected].empty())
+        if (!m_AnimationNames[anim_selected].empty())
         {
-            HAnimationSet tmp = ResourceManager::Instance().GetResource<AnimationSet>(m_anim_ids[anim_selected]);
+            HAnimationSet tmp = ResourceManager::Instance().GetResource<AnimationSet>(m_AnimationIDs[anim_selected]);
             ResourceManager::Instance().DestroyResource<AnimationSet>(tmp);
         }
     }
-    SameLine();
-    Text("Animation List Box Height : ");
-    PushItemWidth(100);
-    SameLine();
-    InputInt("##animHeight", &anim_height);
-    PopItemWidth();
-    PushItemWidth(300);
-    ListBox("##Animation", &anim_selected, vector_getter, &m_anim_names, (int)m_anim_names.size(), anim_height);
-    PopItemWidth();
-    Separator();
+    ImGui::SameLine();
+    ImGui::Text("Animation List Box Height : ");
+    ImGui::PushItemWidth(100);
+    ImGui::SameLine();
+    ImGui::InputInt("##animHeight", &anim_height);
+    ImGui::PopItemWidth();
+    ImGui::PushItemWidth(300);
+    ImGui::ListBox("##Animation", &anim_selected, vector_getter, &m_AnimationNames, (int)m_AnimationNames.size(), anim_height);
+    ImGui::PopItemWidth();
+    ImGui::Separator();
 
-    PushFont(m_fontBold);
-    Text("Textures");
+    ImGui::PushFont(m_ImGuiFontBold);
+    ImGui::Text("Textures");
     PopFont();
     static int tex_selected = -1;
-    static int tex_height = static_cast<int>(m_texture_names.size()) > 6 ? 6 : static_cast<int>(m_texture_names.size());
-    if (Button("Delete Texture"))
+    static int tex_height = static_cast<int>(m_TextureNames.size()) > 6 ? 6 : static_cast<int>(m_TextureNames.size());
+    if (ImGui::Button("Delete Texture"))
     {
-        if (!m_texture_names[tex_selected].empty())
+        if (!m_TextureNames[tex_selected].empty())
         {
-            HTexture tmp = ResourceManager::Instance().GetResource<Texture>(m_texture_ids[tex_selected]);
+            HTexture tmp = ResourceManager::Instance().GetResource<Texture>(m_TextureIDs[tex_selected]);
             ResourceManager::Instance().DestroyResource<Texture>(tmp);
         }
     }
-    SameLine();
-    Text("Texture List Box Height : ");
-    PushItemWidth(100);
-    SameLine();
-    InputInt("##textHeight", &tex_height);
-    PopItemWidth();
-    PushItemWidth(300);
-    ListBox("##Texture", &tex_selected, vector_getter, &m_texture_names, (int)m_texture_names.size(), tex_height);
-    PopItemWidth();
-    Separator();
+    ImGui::SameLine();
+    ImGui::Text("Texture List Box Height : ");
+    ImGui::PushItemWidth(100);
+    ImGui::SameLine();
+    ImGui::InputInt("##textHeight", &tex_height);
+    ImGui::PopItemWidth();
+    ImGui::PushItemWidth(300);
+    ImGui::ListBox("##Texture", &tex_selected, vector_getter, &m_TextureNames, (int)m_TextureNames.size(), tex_height);
+    ImGui::PopItemWidth();
+    ImGui::Separator();
 
-    PushFont(m_fontBold);
-    Text("Fonts");
+    ImGui::PushFont(m_ImGuiFontBold);
+    ImGui::Text("Fonts");
     PopFont();
     static int font_selected = -1;
-    static int font_height = static_cast<int>(m_font_names.size()) > 6 ? 6 : static_cast<int>(m_font_names.size());
-    if (Button("Delete Font"))
+    static int font_height = static_cast<int>(m_FontNames.size()) > 6 ? 6 : static_cast<int>(m_FontNames.size());
+    if (ImGui::Button("Delete Font"))
     {
-        if (!m_font_names[font_selected].empty())
+        if (!m_FontNames[font_selected].empty())
         {
-            HFont tmp = ResourceManager::Instance().GetResource<Font>(m_font_ids[font_selected]);
+            HFont tmp = ResourceManager::Instance().GetResource<Font>(m_FontIDs[font_selected]);
             ResourceManager::Instance().DestroyResource<Font>(tmp);
         }
     }
-    SameLine();
-    Text("Font List Box Height : ");
-    PushItemWidth(100);
-    SameLine();
-    InputInt("##fontHeight", &font_height);
-    PopItemWidth();
-    PushItemWidth(300);
-    ListBox("##Font", &font_selected, vector_getter, &m_font_names, (int)m_font_names.size(), font_height);
-    PopItemWidth();
+    ImGui::SameLine();
+    ImGui::Text("Font List Box Height : ");
+    ImGui::PushItemWidth(100);
+    ImGui::SameLine();
+    ImGui::InputInt("##fontHeight", &font_height);
+    ImGui::PopItemWidth();
+    ImGui::PushItemWidth(300);
+    ImGui::ListBox("##Font", &font_selected, vector_getter, &m_FontNames, (int)m_FontNames.size(), font_height);
+    ImGui::PopItemWidth();
 }
 
 void Editor::PhysicsOptionsFloat(float* f)
@@ -2522,12 +2584,12 @@ void Editor::PhysicsOptionsFloat(float* f)
     float tmp = *f;
     m_Global_Spaces += " ";
     InputFloat(m_Global_Spaces.c_str(), &tmp);
-    if (IsKeyPressed(KEY_RETURN) && tmp != *f)
+    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
     {
         // Physics Action here
         float oldValue = *f;
         float newValue = tmp;
-        PhysicsInput_Action<float>* act = new PhysicsInput_Action<float>(oldValue, newValue, f);
+        ActionInputPhysics<float>* act = new ActionInputPhysics<float>(oldValue, newValue, f);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2543,7 +2605,7 @@ void Editor::PhysicsOptionsBool(bool* b)
     {
         bool oldValue = *b;
         bool newValue = tmp;
-        PhysicsInput_Action<bool>* act = new PhysicsInput_Action<bool>(oldValue, newValue, b);
+        ActionInputPhysics<bool>* act = new ActionInputPhysics<bool>(oldValue, newValue, b);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2554,14 +2616,14 @@ void Editor::PhysicsOptionsVector3(Vector3* v)
 {
     Vector3 tmp = *v;
     m_Global_Spaces += " ";
-    InputFloat3(m_Global_Spaces.c_str(), &tmp.x);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat3(m_Global_Spaces.c_str(), &tmp.x);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp.x != v->x || tmp.y != v->y || tmp.z != v->z)
         {
             Vector3 newValue = tmp;
             Vector3 oldValue = *v;
-            PhysicsInput_Action<Vector3>* act = new PhysicsInput_Action<Vector3>(oldValue, newValue, v);
+            ActionInputPhysics<Vector3>* act = new ActionInputPhysics<Vector3>(oldValue, newValue, v);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2573,12 +2635,12 @@ void Editor::PhysicsOptionsUint(uint* u)
 {
     int tmp = (int)*u;
     m_Global_Spaces += " ";
-    InputInt(m_Global_Spaces.c_str(), &tmp, 0);
-    if (IsKeyPressed(KEY_RETURN) && tmp != (int)*u && tmp >= 0.f)
+    ImGui::InputInt(m_Global_Spaces.c_str(), &tmp, 0);
+    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != (int)*u && tmp >= 0.0f)
     {
         uint newValue = (uint)tmp;
         uint oldValue = *u;
-        PhysicsInput_Action<uint>* act = new PhysicsInput_Action<uint>(oldValue, newValue, u);
+        ActionInputPhysics<uint>* act = new ActionInputPhysics<uint>(oldValue, newValue, u);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2592,16 +2654,16 @@ void Editor::Options(std::string* s, GameObject* go, std::string c, std::string 
     std::copy(s->c_str(), s->c_str() + s->size(), string);
     m_Global_Spaces += " ";
     if (c != "TextRenderer" && p != "m_Text")
-        InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+        ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
     else
-        InputTextMultiline(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+        ImGui::InputTextMultiline(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
     if (c != "TextRenderer" && p != "m_Text")
     {
-        if (IsKeyPressed(KEY_RETURN) && *s != string)
+        if (ImGui::IsKeyPressed(KEY_RETURN) && *s != string)
         {
             std::string oldValue = *s;
             std::string newValue = string;
-            Input_Action<std::string>* act = new Input_Action<std::string>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<std::string>* act = new ActionInput<std::string>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2613,7 +2675,7 @@ void Editor::Options(std::string* s, GameObject* go, std::string c, std::string 
         {
             std::string oldValue = *s;
             std::string newValue = string;
-            Input_Action<std::string>* act = new Input_Action<std::string>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<std::string>* act = new ActionInput<std::string>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2627,12 +2689,12 @@ void Editor::Options(std::string* s)
     SecureZeroMemory(string, MAX_STRING_LENGTH);
     std::copy(s->c_str(), s->c_str() + s->size(), string);
     m_Global_Spaces += " ";
-    InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-    if (IsKeyPressed(KEY_RETURN) && *s != string)
+    ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+    if (ImGui::IsKeyPressed(KEY_RETURN) && *s != string)
     {
         std::string oldValue = *s;
         std::string newValue = string;
-        Name_Action* act = new Name_Action(oldValue, newValue, m_CurrentLayer, m_CurrentObject);
+        ActionChangeName* act = new ActionChangeName(oldValue, newValue, m_CurrentLayer, m_CurrentObject);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2645,14 +2707,14 @@ void Editor::Options(Vector2* vec2, GameObject* go, std::string c, std::string p
     tmp[0] = vec2->x;
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
-    InputFloat2(m_Global_Spaces.c_str(), tmp);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
             Vector2 newValue(tmp[0], tmp[1]);
             Vector2 oldValue = *vec2;
-            Input_Action<Vector2>* act = new Input_Action<Vector2>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<Vector2>* act = new ActionInput<Vector2>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2667,14 +2729,14 @@ void Editor::Options(Vector3* vec3, GameObject* go, std::string c, std::string p
     tmp[1] = vec3->y;
     tmp[2] = vec3->z;
     m_Global_Spaces += " ";
-    InputFloat3(m_Global_Spaces.c_str(), tmp);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != vec3->x || tmp[1] != vec3->y || tmp[2] != vec3->z)
         {
             Vector3 newValue(tmp[0], tmp[1], tmp[2]);
             Vector3 oldValue = *vec3;
-            Input_Action<Vector3>* act = new Input_Action<Vector3>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<Vector3>* act = new ActionInput<Vector3>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2687,11 +2749,11 @@ void Editor::Options(float* f, GameObject* go, std::string c, std::string p)
     float tmp = *f;
     m_Global_Spaces += " ";
     InputFloat(m_Global_Spaces.c_str(), &tmp);
-    if (IsKeyPressed(KEY_RETURN) && tmp != *f)
+    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
     {
         float oldValue = *f;
         float newValue = tmp;
-        Input_Action<float>* act = new Input_Action<float>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+        ActionInput<float>* act = new ActionInput<float>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2702,12 +2764,12 @@ void Editor::Options(int* i, GameObject* go, std::string c, std::string p)
 {
     int tmp = *i;
     m_Global_Spaces += " ";
-    InputInt(m_Global_Spaces.c_str(), &tmp);
-    if (IsKeyPressed(KEY_RETURN) && tmp != *i)
+    ImGui::InputInt(m_Global_Spaces.c_str(), &tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *i)
     {
         int oldValue = *i;
         int newValue = tmp;
-        Input_Action<int>* act = new Input_Action<int>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+        ActionInput<int>* act = new ActionInput<int>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2723,7 +2785,7 @@ void Editor::Options(bool* b, GameObject* go, std::string c, std::string p)
     {
         int oldValue = *b;
         int newValue = tmp;
-        Input_Action<bool>* act = new Input_Action<bool>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+        ActionInput<bool>* act = new ActionInput<bool>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2743,14 +2805,14 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
     tmp[3] = clr->w;
     ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
     m_Global_Spaces += " ";
-    InputFloat4(m_Global_Spaces.c_str(), tmp, 3);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
         {
             Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
             Color4 oldValue = *clr;
-            Input_Action<Color4>* act = new Input_Action<Color4>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<Color4>* act = new ActionInput<Color4>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2761,7 +2823,7 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
     bool open_popup = ColorButton(("Current Color" + hashes + p).c_str(), color);
     if (open_popup)
     {
-        OpenPopup(("ColorPicker" + hashes + p).c_str());
+        ImGui::OpenPopup(("ColorPicker" + hashes + p).c_str());
         backup_color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
         tmp_color = backup_color;
     }
@@ -2776,7 +2838,7 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
             {
                 Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                 Color4 oldValue = *clr;
-                Input_Action<Color4>* act = new Input_Action<Color4>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+                ActionInput<Color4>* act = new ActionInput<Color4>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
                 act->Execute();
                 m_Undo.push_back(std::move(act));
                 ClearRedo();
@@ -2800,22 +2862,22 @@ void Editor::Options(HMesh mesh, GameObject* go, std::string c, std::string p)
     ResourceGUID currId = 0;
     int selected = -1;
     if (mesh.Validate()) currId = mesh->GetGUID();
-    for (int i = 0; i < m_mesh_ids.size(); ++i)
-        if (currId == m_mesh_ids[i])
+    for (int i = 0; i < m_MeshIDs.size(); ++i)
+        if (currId == m_MeshIDs[i])
         {
             selected = i;
-            name = m_mesh_names[i];
+            name = m_MeshNames[i];
         }
     int tmp = selected;
-    SameLine();
-    Text("%s", name.c_str());
+    ImGui::SameLine();
+    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
-    Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_mesh_names, (int)m_mesh_names.size());
+    ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_MeshNames, (int)m_MeshNames.size());
     if (selected != tmp)
     {
-        ResourceGUID oldIndex = tmp == -1 ? 0 : m_mesh_ids[tmp];
-        ResourceGUID newIndex = m_mesh_ids[selected];
-        HMesh_InputAction* act = new HMesh_InputAction(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex);
+        ResourceGUID oldIndex = tmp == -1 ? 0 : m_MeshIDs[tmp];
+        ResourceGUID newIndex = m_MeshIDs[selected];
+        ActionMeshInput* act = new ActionMeshInput(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2828,22 +2890,22 @@ void Editor::Options(HTexture texture, GameObject* go, std::string c, std::strin
     int selected = -1;
     ResourceGUID currId = 0;
     if (texture.Validate()) currId = texture->GetGUID();
-    for (int i = 0; i < m_texture_ids.size(); ++i)
-        if (currId == m_texture_ids[i])
+    for (int i = 0; i < m_TextureIDs.size(); ++i)
+        if (currId == m_TextureIDs[i])
         {
             selected = i;
-            name = m_texture_names[i];
+            name = m_TextureNames[i];
         }
     int tmp = selected;
-    SameLine();
-    Text("%s", name.c_str());
+    ImGui::SameLine();
+    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
-    Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_texture_names, (int)m_texture_names.size());
+    ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_TextureNames, (int)m_TextureNames.size());
     if (selected != tmp)
     {
-        ResourceGUID oldIndex = tmp == -1 ? 0 : m_texture_ids[tmp];
-        ResourceGUID newIndex = m_texture_ids[selected];
-        TextureInput_Action* act = new TextureInput_Action(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex, p);
+        ResourceGUID oldIndex = tmp == -1 ? 0 : m_TextureIDs[tmp];
+        ResourceGUID newIndex = m_TextureIDs[selected];
+        ActionInputTexture* act = new ActionInputTexture(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex, p);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2856,22 +2918,22 @@ void Editor::Options(HAnimationSet anim, GameObject* go, std::string c, std::str
     int selected = -1;
     ResourceGUID currId = 0;
     if (anim.Validate()) currId = anim->GetGUID();
-    for (int i = 0; i < m_anim_ids.size(); ++i)
-        if (currId == m_anim_ids[i])
+    for (int i = 0; i < m_AnimationIDs.size(); ++i)
+        if (currId == m_AnimationIDs[i])
         {
             selected = i;
-            name = m_anim_names[i];
+            name = m_AnimationNames[i];
         }
     int tmp = selected;
-    SameLine();
-    Text("%s", name.c_str());
+    ImGui::SameLine();
+    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
-    Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_anim_names, (int)m_anim_names.size());
+    ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_AnimationNames, (int)m_AnimationNames.size());
     if (selected != tmp)
     {
-        ResourceGUID oldIndex = tmp == -1 ? 0 : m_anim_ids[tmp];
-        ResourceGUID newIndex = m_anim_ids[selected];
-        AnimationInput_Action* act = new AnimationInput_Action(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex, p);
+        ResourceGUID oldIndex = tmp == -1 ? 0 : m_AnimationIDs[tmp];
+        ResourceGUID newIndex = m_AnimationIDs[selected];
+        ActionInputAnimation* act = new ActionInputAnimation(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex, p);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2884,14 +2946,14 @@ void Editor::Options(TVector2<int>* vec2, GameObject* go, std::string c, std::st
     tmp[0] = vec2->x;
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
-    InputInt2(m_Global_Spaces.c_str(), tmp);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
             TVector2<int> newValue(tmp[0], tmp[1]);
             TVector2<int> oldValue = *vec2;
-            Input_Action<TVector2<int>>* act = new Input_Action<TVector2<int>>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<TVector2<int>>* act = new ActionInput<TVector2<int>>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2905,22 +2967,22 @@ void Editor::Options(HFont font, GameObject* go, std::string c, std::string p)
     int selected = -1;
     ResourceGUID currId = 0;
     if (font.Validate()) currId = font->GetGUID();
-    for (int i = 0; i < m_font_ids.size(); ++i)
-        if (currId == m_font_ids[i])
+    for (int i = 0; i < m_FontIDs.size(); ++i)
+        if (currId == m_FontIDs[i])
         {
             selected = i;
-            name = m_font_names[i];
+            name = m_FontNames[i];
         }
     int tmp = selected;
-    SameLine();
-    Text("%s", name.c_str());
+    ImGui::SameLine();
+    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
-    Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_font_names, (int)m_font_names.size());
+    ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_FontNames, (int)m_FontNames.size());
     if (selected != tmp)
     {
-        ResourceGUID oldIndex = tmp == -1 ? 0 : m_font_ids[tmp];
-        ResourceGUID newIndex = m_font_ids[selected];
-        HFont_InputAction* act = new HFont_InputAction(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex);
+        ResourceGUID oldIndex = tmp == -1 ? 0 : m_FontIDs[tmp];
+        ResourceGUID newIndex = m_FontIDs[selected];
+        ActionInputFont* act = new ActionInputFont(m_CurrentObject, c, m_CurrentLayer, oldIndex, newIndex);
         act->Execute();
         m_Undo.push_back(std::move(act));
         ClearRedo();
@@ -2936,12 +2998,12 @@ void Editor::EnumOptions(int* i, std::string t, GameObject* go, std::string c, s
         int selected = *i;
         int tmp = selected;
         m_Global_Spaces += " ";
-        Combo(m_Global_Spaces.c_str(), &tmp, enums_getter, &enums, (int)enums.size());
+        ImGui::Combo(m_Global_Spaces.c_str(), &tmp, enums_getter, &enums, (int)enums.size());
         if (tmp != selected)
         {
             int oldValue = selected;
             int newValue = tmp;
-            Input_Action<int>* act = new Input_Action<int>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            ActionInput<int>* act = new ActionInput<int>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -2949,7 +3011,7 @@ void Editor::EnumOptions(int* i, std::string t, GameObject* go, std::string c, s
     }
     catch (...)
     {
-        Text("Enum not in Enum Reflection");
+        ImGui::Text("Enum not in Enum Reflection");
     }
 }
 
@@ -2959,10 +3021,10 @@ void Editor::ParentStructOptions(std::string* s, GameObject* go, std::string c)
     SecureZeroMemory(string, MAX_STRING_LENGTH);
     std::copy(s->c_str(), s->c_str() + s->size(), string);
     m_Global_Spaces += " ";
-    InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-    if (IsKeyPressed(KEY_RETURN) && *s != string)
+    ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+    if (ImGui::IsKeyPressed(KEY_RETURN) && *s != string)
     {
-        ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+        ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *s = string;
         go->UpdateComponents();
         act->SetNew(go);
@@ -2976,9 +3038,9 @@ void Editor::ParentStructOptions(float* f, GameObject*& go, std::string c)
     float tmp = *f;
     m_Global_Spaces += " ";
     InputFloat(m_Global_Spaces.c_str(), &tmp);
-    if (IsKeyPressed(KEY_RETURN) && tmp != *f)
+    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
     {
-        ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+        ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *f = tmp;
         go->UpdateComponents();
         act->SetNew(go);
@@ -2992,10 +3054,10 @@ void Editor::ParentStructOptions(int* i, GameObject*& go, std::string c)
 {
     int tmp = *i;
     m_Global_Spaces += " ";
-    InputInt(m_Global_Spaces.c_str(), &tmp);
-    if (IsKeyPressed(KEY_RETURN) && tmp != *i)
+    ImGui::InputInt(m_Global_Spaces.c_str(), &tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *i)
     {
-        ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+        ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *i = tmp;
         go->UpdateComponents();
         act->SetNew(go);
@@ -3012,7 +3074,7 @@ void Editor::ParentStructOptions(bool* b, GameObject*& go, std::string c)
     Checkbox(m_Global_Spaces.c_str(), &tmp);
     if (tmp != *b)
     {
-        ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+        ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *b = tmp;
         go->UpdateComponents();
         act->SetNew(go);
@@ -3028,13 +3090,13 @@ void Editor::ParentStructOptions(Vector2* vec2, GameObject*& go, std::string c)
     tmp[0] = vec2->x;
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
-    InputFloat2(m_Global_Spaces.c_str(), tmp);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
             Vector2 newValue(tmp[0], tmp[1]);
-            ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+            ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             *vec2 = newValue;
             go->UpdateComponents();
             act->SetNew(go);
@@ -3051,13 +3113,13 @@ void Editor::ParentStructOptions(Vector3* vec3, GameObject*& go, std::string c)
     tmp[1] = vec3->y;
     tmp[2] = vec3->z;
     m_Global_Spaces += " ";
-    InputFloat3(m_Global_Spaces.c_str(), tmp);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != vec3->x || tmp[1] != vec3->y || tmp[2] != vec3->z)
         {
             Vector3 newValue(tmp[0], tmp[1], tmp[2]);
-            ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+            ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             *vec3 = newValue;
             go->UpdateComponents();
             act->SetNew(go);
@@ -3073,13 +3135,13 @@ void Editor::ParentStructOptions(TVector2<int>* vec2, GameObject*& go, std::stri
     tmp[0] = vec2->x;
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
-    InputInt2(m_Global_Spaces.c_str(), tmp);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
             TVector2<int> newValue(tmp[0], tmp[1]);
-            ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+            ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             *vec2 = newValue;
             go->UpdateComponents();
             act->SetNew(go);
@@ -3102,12 +3164,12 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
     tmp[3] = clr->w;
     ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
     m_Global_Spaces += " ";
-    InputFloat4(m_Global_Spaces.c_str(), tmp, 3);
-    if (IsKeyPressed(KEY_RETURN))
+    ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
+    if (ImGui::IsKeyPressed(KEY_RETURN))
     {
         if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
         {
-            ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+            ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
             *clr = newValue;
             go->UpdateComponents();
@@ -3121,7 +3183,7 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
     bool open_popup = ColorButton(("Current Color" + hashes + p).c_str(), color);
     if (open_popup)
     {
-        OpenPopup(("ColorPicker" + hashes + p).c_str());
+        ImGui::OpenPopup(("ColorPicker" + hashes + p).c_str());
         backup_color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
         tmp_color = backup_color;
     }
@@ -3134,7 +3196,7 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
         {
             if (tmp_color.x != clr->x || tmp_color.y != clr->y || tmp_color.z != clr->z || tmp_color.w != clr->w)
             {
-                ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+                ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
                 Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                 *clr = newValue;
                 go->UpdateComponents();
@@ -3161,21 +3223,21 @@ void Editor::ParentStructOptions(HTexture* texture, GameObject*& go, std::string
     int selected = -1;
     ResourceGUID currId = 0;
     if (texture->Validate()) currId = (*texture)->GetGUID();
-    for (int i = 0; i < m_texture_ids.size(); ++i)
-        if (currId == m_texture_ids[i])
+    for (int i = 0; i < m_TextureIDs.size(); ++i)
+        if (currId == m_TextureIDs[i])
         {
             selected = i;
-            name = m_texture_names[i];
+            name = m_TextureNames[i];
         }
     int tmp = selected;
-    SameLine();
-    Text("%s", name.c_str());
+    ImGui::SameLine();
+    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
-    Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_texture_names, (int)m_texture_names.size());
+    ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_TextureNames, (int)m_TextureNames.size());
     if (selected != tmp)
     {
-        ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
-        *texture = ResourceManager::Instance().GetResource<Texture>(m_texture_ids[selected]);
+        ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
+        *texture = ResourceManager::Instance().GetResource<Texture>(m_TextureIDs[selected]);
         go->UpdateComponents();
         act->SetNew(go);
         m_Undo.push_back(std::move(act));
@@ -3193,10 +3255,10 @@ void Editor::ParentStructEnumOptions(int* i, std::string t, GameObject*& go, std
         int selected = *i;
         int tmp = selected;
         m_Global_Spaces += " ";
-        Combo(m_Global_Spaces.c_str(), &tmp, enums_getter, &enums, (int)enums.size());
+        ImGui::Combo(m_Global_Spaces.c_str(), &tmp, enums_getter, &enums, (int)enums.size());
         if (tmp != selected)
         {
-            ParentStruct_InputAction* act = new ParentStruct_InputAction(go, c, m_CurrentLayer);
+            ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             *i = tmp;
             go->UpdateComponents();
             act->SetNew(go);
@@ -3206,7 +3268,7 @@ void Editor::ParentStructEnumOptions(int* i, std::string t, GameObject*& go, std
     }
     catch (...)
     {
-        Text("Enum not in Enum Reflection");
+        ImGui::Text("Enum not in Enum Reflection");
     }
 }
 
@@ -3251,7 +3313,7 @@ void Editor::Load()
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
         Renderer::Instance().SetSelectedObjects({0});
-        Clear_Redo_Undo();
+        ClearRedoUndo();
         Serializer{filename}.LoadScene();
     }
     m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
@@ -3260,26 +3322,26 @@ void Editor::Load()
     Application::Instance().GetGameTimer().SetEditorPaused(true);
 }
 
-void Editor::New()
+void Editor::CreateNewSceneTab()
 {
     if (ImGui::BeginPopupModal("NewScene", 0, ImGuiWindowFlags_NoResize))
     {
-        SetItemDefaultFocus();
+        ImGui::SetItemDefaultFocus();
         static char LayerName[MAX_STRING_LENGTH];
-        Text("New Layer Name : ");
+        ImGui::Text("New Layer Name : ");
         m_Global_Spaces += " ";
-        SameLine();
-        InputText(m_Global_Spaces.c_str(), LayerName, MAX_STRING_LENGTH);
+        ImGui::SameLine();
+        ImGui::InputText(m_Global_Spaces.c_str(), LayerName, MAX_STRING_LENGTH);
         std::string name(LayerName);
-        NewLine();
+        ImGui::NewLine();
         InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
-        SameLine();
-        if (Button("OK", ImVec2(120, 0)) && !name.empty())
+        ImGui::SameLine();
+        if (ImGui::Button("OK", ImVec2(120, 0)) && !name.empty())
         {
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
             Renderer::Instance().SetSelectedObjects({0});
-            Clear_Redo_Undo();
+            ClearRedoUndo();
             Application::Instance().NewScene("Scene");
             Application::Instance().GetCurrentScene()->CreateLayer(name);
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
@@ -3287,15 +3349,15 @@ void Editor::New()
             SecureZeroMemory(LayerName, MAX_STRING_LENGTH);
             CloseCurrentPopup();
         }
-        SameLine();
+        ImGui::SameLine();
         InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
-        SameLine();
-        if (Button("Cancel", ImVec2(120, 0)))
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             SecureZeroMemory(LayerName, MAX_STRING_LENGTH);
             CloseCurrentPopup();
         }
-        SameLine();
+        ImGui::SameLine();
         InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
         EndPopup();
     }
@@ -3305,7 +3367,7 @@ void Editor::Duplicate()
 {
     if (!m_CurrentLayer) return;
     if (m_SelectedObjects.empty()) return;
-    Duplicate_Action* act = new Duplicate_Action(m_CurrentLayer, m_SelectedObjects);
+    ActionDuplicate* act = new ActionDuplicate(m_CurrentLayer, m_SelectedObjects);
     act->Execute();
     m_Undo.push_back(std::move(act));
     ClearRedo();
@@ -3331,13 +3393,13 @@ void Editor::ChildrenDuplicate(GameObject* original, GameObject* Clone)
 
 void Editor::LoadData()
 {
-    TX::XMLDocument file;
-    if (file.LoadFile((std::string(m_currwdir) + "\\ImGUI_Docks.xml").c_str()) == TX::XMLError::XML_SUCCESS)
+    tinyxml2::XMLDocument file;
+    if (file.LoadFile((std::string(m_CurrentWorkingDirectory) + "\\ImGUI_Docks.xml").c_str()) == tinyxml2::XMLError::XML_SUCCESS)
     {
-        TX::XMLNode* root = file.FirstChild();
-        TX::XMLElement* Data = root->FirstChildElement();
+        tinyxml2::XMLNode* root = file.FirstChild();
+        tinyxml2::XMLElement* Data = root->FirstChildElement();
         std::string boolean = Data->Attribute("AppConsole");
-        m_Console.ActiveWindow = (bool)std::stoi(boolean);
+        m_Console.m_IsActiveWindow = (bool)std::stoi(boolean);
         for (int i = 0; i < NUM_OF_WINDOWS; ++i)
         {
             if (!Data) return;
@@ -3350,15 +3412,15 @@ void Editor::LoadData()
 
 void Editor::SaveData()
 {
-    TX::XMLDocument doc;
-    TX::XMLNode* pRoot = doc.NewElement("Activeness");
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLNode* pRoot = doc.NewElement("Activeness");
     doc.InsertEndChild(pRoot);
-    TX::XMLElement* Data = doc.NewElement("Windows");
+    tinyxml2::XMLElement* Data = doc.NewElement("Windows");
     pRoot->InsertEndChild(Data);
-    Data->SetAttribute("AppConsole", (int)m_Console.ActiveWindow);
+    Data->SetAttribute("AppConsole", (int)m_Console.m_IsActiveWindow);
     for (int i = 0; i < NUM_OF_WINDOWS; ++i)
         Data->SetAttribute(("Window" + std::to_string(i)).c_str(), (int)m_ActiveWindow[i]);
-    TX::XMLError result = doc.SaveFile((std::string(m_currwdir) + "\\ImGUI_Docks.xml").c_str());
+    tinyxml2::XMLError result = doc.SaveFile((std::string(m_CurrentWorkingDirectory) + "\\ImGUI_Docks.xml").c_str());
 }
 
 void Editor::SetUndoRedoSize(const unsigned& sz)
@@ -3397,7 +3459,7 @@ GameObject* Editor::CreateArchetype(const std::string& n)
     return go;
 }
 
-void Editor::RecursionSaveArchetypeParent(const char* name, unsigned char* base, TX::XMLElement* pComponent, TX::XMLDocument& doc)
+void Editor::RecursionSaveArchetypeParent(const char* name, unsigned char* base, tinyxml2::XMLElement* pComponent, tinyxml2::XMLDocument& doc)
 {
     auto parents = (*Factory::m_Reflection).at(name)->getParents();
     for (auto pare : parents)
@@ -3409,7 +3471,7 @@ void Editor::RecursionSaveArchetypeParent(const char* name, unsigned char* base,
             if (comp.type == typeid(std::string).name())
             {
                 // std::cout << comp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(comp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(comp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 std::string value = *reinterpret_cast<std::string*>(base + comp.offset);
                 pElem->SetAttribute("Value", value.c_str());
@@ -3425,7 +3487,7 @@ void Editor::RecursionSaveArchetypeParent(const char* name, unsigned char* base,
             {
                 std::string value;
                 // std::cout << comp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(comp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(comp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 unsigned char* comp_addr = base + comp.offset;
                 unsigned i = 0;
@@ -3462,7 +3524,7 @@ void Editor::RecursionSaveArchetypeParent(const char* name, unsigned char* base,
     }
 }
 
-void Editor::RecursionSaveArchetypeStruct(registration::variant prop, unsigned char* base, TX::XMLElement* pComponent, TX::XMLDocument& doc)
+void Editor::RecursionSaveArchetypeStruct(registration::variant prop, unsigned char* base, tinyxml2::XMLElement* pComponent, tinyxml2::XMLDocument& doc)
 {
     try
     {
@@ -3477,7 +3539,7 @@ void Editor::RecursionSaveArchetypeStruct(registration::variant prop, unsigned c
             if (rProp.type == typeid(std::string).name())
             {
                 // std::cout << rProp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 std::string value = *reinterpret_cast<std::string*>(base + rProp.offset);
                 pElem->SetAttribute("Value", value.c_str());
@@ -3493,7 +3555,7 @@ void Editor::RecursionSaveArchetypeStruct(registration::variant prop, unsigned c
             {
                 std::string value;
                 // std::cout << rProp.name << std::endl;
-                TX::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
+                tinyxml2::XMLElement* pElem = doc.NewElement(rProp.name.c_str());
                 pComponent->InsertEndChild(pElem);
                 unsigned char* rProp_addr = base + rProp.offset;
                 unsigned i = 0;
@@ -3537,21 +3599,21 @@ void Editor::RecursionSaveArchetypeStruct(registration::variant prop, unsigned c
 void Editor::SerializeArchetypes()
 {
     std::string filename = "Archetypes.xml";
-    TX::XMLDocument doc;
+    tinyxml2::XMLDocument doc;
 
-    TX::XMLNode* pRoot = doc.NewElement("Archetypes");
+    tinyxml2::XMLNode* pRoot = doc.NewElement("Archetypes");
     doc.InsertEndChild(pRoot);
 
     for (auto& pair : m_Archetypes)
     {
         GameObject* go = pair.second;
         if (go->GetName() == "EditorCamera") continue;
-        TX::XMLElement* pElement = doc.NewElement(go->GetName().c_str());
+        tinyxml2::XMLElement* pElement = doc.NewElement(go->GetName().c_str());
         pElement->SetAttribute("Tag", go->GetTag().c_str());
         pRoot->InsertEndChild(pElement);
         for (IComponent* comp : go->GetComponentList())
         {
-            TX::XMLElement* pComponent = doc.NewElement(comp->GetName().c_str());
+            tinyxml2::XMLElement* pComponent = doc.NewElement(comp->GetName().c_str());
             pElement->InsertEndChild(pComponent);
             std::vector<registration::variant> props;
             try
@@ -3572,7 +3634,7 @@ void Editor::SerializeArchetypes()
                 if (prop.type == typeid(std::string).name())
                 {
                     // std::cout << prop.name << std::endl;
-                    TX::XMLElement* pElem = doc.NewElement(prop.name.c_str());
+                    tinyxml2::XMLElement* pElem = doc.NewElement(prop.name.c_str());
                     pComponent->InsertEndChild(pElem);
                     std::string value = *reinterpret_cast<std::string*>(base + prop.offset);
                     pElem->SetAttribute("Value", value.c_str());
@@ -3588,7 +3650,7 @@ void Editor::SerializeArchetypes()
                 {
                     std::string value;
                     // std::cout << prop.name << std::endl;
-                    TX::XMLElement* pElem = doc.NewElement(prop.name.c_str());
+                    tinyxml2::XMLElement* pElem = doc.NewElement(prop.name.c_str());
                     pComponent->InsertEndChild(pElem);
                     unsigned char* prop_addr = base + prop.offset;
                     unsigned i = 0;
@@ -3624,18 +3686,18 @@ void Editor::SerializeArchetypes()
             }
         }
     }
-    TX::XMLError result = doc.SaveFile(filename.c_str());
-    if (result != TX::XMLError::XML_SUCCESS) throw("ERROR");  // Replace with proper throw and assert
+    tinyxml2::XMLError result = doc.SaveFile(filename.c_str());
+    if (result != tinyxml2::XMLError::XML_SUCCESS) throw("ERROR");  // Replace with proper throw and assert
     std::cout << "Saving " << filename << " completed!" << std::endl;
 }
 
-void Editor::RecursionLoadArchetypeStruct(TX::XMLElement* attribute, unsigned char* base)
+void Editor::RecursionLoadArchetypeStruct(tinyxml2::XMLElement* attribute, unsigned char* base)
 {
     std::string aType = attribute->Attribute("Type");
     size_t pos = aType.find(" ");
     std::string type = aType.substr(pos + 1);
     auto sProperties = (*Factory::m_Reflection).at(type)->getProperties();
-    TX::XMLElement* sAttribute = attribute->FirstChildElement();
+    tinyxml2::XMLElement* sAttribute = attribute->FirstChildElement();
     for (; sAttribute; sAttribute = sAttribute->NextSiblingElement())
     {
         std::string sType = sAttribute->Attribute("Type");
@@ -3689,7 +3751,7 @@ void Editor::RecursionLoadArchetypeStruct(TX::XMLElement* attribute, unsigned ch
     }
 }
 
-void Editor::RecursionLoadArchetypeParent(TX::XMLElement* attribute, unsigned char* base, const char* comp)
+void Editor::RecursionLoadArchetypeParent(tinyxml2::XMLElement* attribute, unsigned char* base, const char* comp)
 {
     try
     {
@@ -3757,12 +3819,12 @@ void Editor::RecursionLoadArchetypeParent(TX::XMLElement* attribute, unsigned ch
 void Editor::DeSerializeArchetypes()
 {
     std::string filename = "Archetypes.xml";
-    TX::XMLDocument file;
-    if (file.LoadFile(filename.c_str()) == TX::XMLError::XML_SUCCESS)
+    tinyxml2::XMLDocument file;
+    if (file.LoadFile(filename.c_str()) == tinyxml2::XMLError::XML_SUCCESS)
     {
-        TX::XMLNode* root = file.FirstChild();
+        tinyxml2::XMLNode* root = file.FirstChild();
 
-        TX::XMLElement* pGo = root->FirstChildElement();
+        tinyxml2::XMLElement* pGo = root->FirstChildElement();
         for (; pGo; pGo = pGo->NextSiblingElement())
         {
             GameObject* Go = new GameObject(nullptr, 0);
@@ -3771,7 +3833,7 @@ void Editor::DeSerializeArchetypes()
                 Go->SetTag(pGo->Attribute("Tag"));
             }
             Go->SetName(pGo->Value());
-            TX::XMLElement* pComp = pGo->FirstChildElement();
+            tinyxml2::XMLElement* pComp = pGo->FirstChildElement();
             // For each Component
             for (; pComp; pComp = pComp->NextSiblingElement())
             {
@@ -3782,7 +3844,7 @@ void Editor::DeSerializeArchetypes()
                 auto cProperties = (*Factory::m_Reflection).at(pComp->Value())->getProperties();
                 // TODO: Change the Loading Scene according to the save scene, use hasChildren, if has children then take the type and
                 //       Recursion and so on and so forth
-                TX::XMLElement* pAttribute = pComp->FirstChildElement();
+                tinyxml2::XMLElement* pAttribute = pComp->FirstChildElement();
                 for (; pAttribute; pAttribute = pAttribute->NextSiblingElement())
                 {
                     // not std::string
@@ -3850,23 +3912,23 @@ void Editor::DeSerializeArchetypes()
 
 void Editor::UpdateMeshArray()
 {
-    m_texture_ids.clear();
-    m_texture_names.clear();
-    m_mesh_ids.clear();
-    m_mesh_names.clear();
-    m_anim_ids.clear();
-    m_anim_names.clear();
-    m_font_ids.clear();
-    m_font_names.clear();
+    m_TextureIDs.clear();
+    m_TextureNames.clear();
+    m_MeshIDs.clear();
+    m_MeshNames.clear();
+    m_AnimationIDs.clear();
+    m_AnimationNames.clear();
+    m_FontIDs.clear();
+    m_FontNames.clear();
 
-    m_font_ids.push_back(0);
-    m_font_names.push_back(std::string{});
-    m_texture_ids.push_back(0);
-    m_texture_names.push_back(std::string{});
-    m_mesh_ids.push_back(0);
-    m_mesh_names.push_back(std::string{});
-    m_anim_ids.push_back(0);
-    m_anim_names.push_back(std::string{});
+    m_FontIDs.push_back(0);
+    m_FontNames.push_back(std::string{});
+    m_TextureIDs.push_back(0);
+    m_TextureNames.push_back(std::string{});
+    m_MeshIDs.push_back(0);
+    m_MeshNames.push_back(std::string{});
+    m_AnimationIDs.push_back(0);
+    m_AnimationNames.push_back(std::string{});
 
     std::vector<HTexture> textures = ResourceManager::Instance().GetResources<Texture>();
     std::vector<HMesh> meshes = ResourceManager::Instance().GetResources<Mesh>();
@@ -3936,26 +3998,26 @@ void Editor::UpdateMeshArray()
 
     for (auto& r : textures)
     {
-        m_texture_ids.push_back(r->GetGUID());
-        m_texture_names.push_back(r->m_Name);
+        m_TextureIDs.push_back(r->GetGUID());
+        m_TextureNames.push_back(r->m_Name);
     }
 
     for (auto& r : meshes)
     {
-        m_mesh_ids.push_back(r->GetGUID());
-        m_mesh_names.push_back(r->m_Name);
+        m_MeshIDs.push_back(r->GetGUID());
+        m_MeshNames.push_back(r->m_Name);
     }
 
     for (auto& r : anims)
     {
-        m_anim_ids.push_back(r->GetGUID());
-        m_anim_names.push_back(r->m_Name);
+        m_AnimationIDs.push_back(r->GetGUID());
+        m_AnimationNames.push_back(r->m_Name);
     }
 
     for (auto& f : fonts)
     {
-        m_font_ids.push_back(f->GetGUID());
-        m_font_names.push_back(f->m_Name);
+        m_FontIDs.push_back(f->GetGUID());
+        m_FontNames.push_back(f->m_Name);
     }
 }
 void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& selected)
@@ -3965,13 +4027,13 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
     {
         if (parent == go->GetID())
         {
-            SetNextTreeNodeOpen(true);
+            ImGui::SetNextItemOpen(true);
             break;
         }
         parent = m_CurrentLayer->GetObjectById(parent)->GetParentObject();
     }
 
-    if (TreeNode(s.c_str()))
+    if (ImGui::TreeNode(s.c_str()))
     {
         if (IsItemClicked())
         {
@@ -4040,29 +4102,29 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                     }
                     selected = *begin;
                 }
-                if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_selectedOutliner)
+                if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject)
                 {
-                    m_selectedOutliner = gameObject;
+                    m_OutlinerSelectedObject = gameObject;
                 }
-                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_selectedOutliner && IsItemHovered())
+                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && IsItemHovered())
                 {
-                    if (m_selectedOutliner != gameObject)
+                    if (m_OutlinerSelectedObject != gameObject)
                     {
                         bool tmp = false;
-                        if (m_selectedOutliner && m_selectedOutliner->GetIsChildren())
+                        if (m_OutlinerSelectedObject && m_OutlinerSelectedObject->GetIsChildren())
                         {
-                            unsigned parent = m_selectedOutliner->GetParentObject();
+                            unsigned parent = m_OutlinerSelectedObject->GetParentObject();
                             if (parent == gameObject->GetID()) tmp = true;
-                            m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_selectedOutliner->GetID());
-                            m_selectedOutliner->SetIsChildren(false);
-                            m_selectedOutliner->SetParentObject(0);
+                            m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_OutlinerSelectedObject->GetID());
+                            m_OutlinerSelectedObject->SetIsChildren(false);
+                            m_OutlinerSelectedObject->SetParentObject(0);
                         }
                         if (!tmp)
                         {
-                            gameObject->AttachChild(m_selectedOutliner->GetID());
-                            m_selectedOutliner->SetIsChildren(true);
-                            m_selectedOutliner->SetParentObject(gameObject->GetID());
-                            m_selectedOutliner = nullptr;
+                            gameObject->AttachChild(m_OutlinerSelectedObject->GetID());
+                            m_OutlinerSelectedObject->SetIsChildren(true);
+                            m_OutlinerSelectedObject->SetParentObject(gameObject->GetID());
+                            m_OutlinerSelectedObject = nullptr;
                         }
                     }
                 }
@@ -4072,28 +4134,28 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                 RecursiveParentAndChildObject(gameObject, (gameObject->GetName() + "##" + std::to_string(*begin)), selected);
             }
         }
-        TreePop();
+        ImGui::TreePop();
     }
-    if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_selectedOutliner) m_selectedOutliner = go;
-    if (Input::Instance().GetKeyUp(MOUSE_MID) && m_selectedOutliner && IsItemHovered())
+    if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject) m_OutlinerSelectedObject = go;
+    if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && IsItemHovered())
     {
-        if (m_selectedOutliner != go)
+        if (m_OutlinerSelectedObject != go)
         {
             bool tmp = false;
-            if (m_selectedOutliner && m_selectedOutliner->GetIsChildren())
+            if (m_OutlinerSelectedObject && m_OutlinerSelectedObject->GetIsChildren())
             {
-                unsigned parent = m_selectedOutliner->GetParentObject();
+                unsigned parent = m_OutlinerSelectedObject->GetParentObject();
                 if (go->GetID() == parent) tmp = true;
-                m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_selectedOutliner->GetID());
-                m_selectedOutliner->SetIsChildren(false);
-                m_selectedOutliner->SetParentObject(0);
+                m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_OutlinerSelectedObject->GetID());
+                m_OutlinerSelectedObject->SetIsChildren(false);
+                m_OutlinerSelectedObject->SetParentObject(0);
             }
             if (!tmp)
             {
-                go->AttachChild(m_selectedOutliner->GetID());
-                m_selectedOutliner->SetIsChildren(true);
-                m_selectedOutliner->SetParentObject(go->GetID());
-                m_selectedOutliner = nullptr;
+                go->AttachChild(m_OutlinerSelectedObject->GetID());
+                m_OutlinerSelectedObject->SetIsChildren(true);
+                m_OutlinerSelectedObject->SetParentObject(go->GetID());
+                m_OutlinerSelectedObject = nullptr;
             }
         }
     }
@@ -4101,15 +4163,15 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
 
 void Editor::LoadTags()
 {
-    TX::XMLDocument file;
-    if (file.LoadFile((std::string(m_currwdir) + "\\tags.xml").c_str()) == TX::XMLError::XML_SUCCESS)
+    tinyxml2::XMLDocument file;
+    if (file.LoadFile((std::string(m_CurrentWorkingDirectory) + "\\tags.xml").c_str()) == tinyxml2::XMLError::XML_SUCCESS)
     {
-        TX::XMLNode* root = file.FirstChild();
-        TX::XMLElement* Data = root->FirstChildElement();
+        tinyxml2::XMLNode* root = file.FirstChild();
+        tinyxml2::XMLElement* Data = root->FirstChildElement();
         auto a = Data->FirstAttribute();
         while (a)
         {
-            m_tags.insert(a->Name());
+            m_Tags.insert(a->Name());
             a = a->Next();
         }
     }
@@ -4117,14 +4179,14 @@ void Editor::LoadTags()
 
 void Editor::SaveTags()
 {
-    TX::XMLDocument doc;
-    TX::XMLNode* pRoot = doc.NewElement("Tags");
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLNode* pRoot = doc.NewElement("Tags");
     doc.InsertEndChild(pRoot);
-    TX::XMLElement* Data = doc.NewElement("Name");
+    tinyxml2::XMLElement* Data = doc.NewElement("Name");
     pRoot->InsertEndChild(Data);
-    for (auto& s : m_tags)
+    for (auto& s : m_Tags)
         Data->SetAttribute(s.c_str(), 1);
-    TX::XMLError result = doc.SaveFile((std::string(m_currwdir) + "\\tags.xml").c_str());
+    tinyxml2::XMLError result = doc.SaveFile((std::string(m_CurrentWorkingDirectory) + "\\tags.xml").c_str());
 }
 
 void Editor::AddArchetype(GameObject* go, GameObject* ugo)
@@ -4200,41 +4262,41 @@ void Editor::SetLayer(Layer* ly)
 
 void Editor::SystemTimer(float input, float phy, float Comps, float renderer, float editor, float audio, float anim, float particle, float ai)
 {
-    m_timings[0] = input;
-    m_timings[1] = phy;
-    m_timings[2] = Comps;
-    m_timings[3] = renderer;
-    m_timings[4] = editor;
-    m_timings[5] = audio;
-    m_timings[6] = anim;
-    m_timings[7] = particle;
-    m_timings[8] = ai;
+    m_Timings[0] = input;
+    m_Timings[1] = phy;
+    m_Timings[2] = Comps;
+    m_Timings[3] = renderer;
+    m_Timings[4] = editor;
+    m_Timings[5] = audio;
+    m_Timings[6] = anim;
+    m_Timings[7] = particle;
+    m_Timings[8] = ai;
 }
 
 void Editor::AddTag(std::string t)
 {
-    m_tags.insert(t);
+    m_Tags.insert(t);
 }
 
 void Editor::RemoveTag(std::string t)
 {
-    m_tags.erase(t);
+    m_Tags.erase(t);
 }
 
 void Editor::Outliner()
 {
     // if (m_selectedOutliner) std::cout << m_selectedOutliner->GetName() << std::endl;
-    // if (m_selectedOutliner) Text("Selected Outliner : %s", m_selectedOutliner->GetName());
+    // if (m_selectedOutliner) ImGui::Text("Selected Outliner : %s", m_selectedOutliner->GetName());
     // LayerList ly = Application::Instance().GetCurrentScene()->GetLayers();
     static int selected = -1;
     if (m_CurrentObject)
     {
         selected = m_CurrentObject->GetID();
-        SetNextTreeNodeOpen(true);
+        ImGui::SetNextItemOpen(true);
     }
     int i = 0;
     auto lyStart = m_CurrentLayer;
-    if (TreeNode(((lyStart)->GetName() + "##" + std::to_string(i)).c_str()))
+    if (ImGui::TreeNode(((lyStart)->GetName() + "##" + std::to_string(i)).c_str()))
     {
         for (auto& go : (lyStart)->GetObjectsList())
         {
@@ -4281,29 +4343,29 @@ void Editor::Outliner()
                     }
                     selected = go->GetID();
                 }
-                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_selectedOutliner && IsItemHovered())
+                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && IsItemHovered())
                 {
-                    if (m_selectedOutliner != go)
+                    if (m_OutlinerSelectedObject != go)
                     {
                         bool tmp = false;
-                        if (m_selectedOutliner && m_selectedOutliner->GetIsChildren())
+                        if (m_OutlinerSelectedObject && m_OutlinerSelectedObject->GetIsChildren())
                         {
-                            unsigned parent = m_selectedOutliner->GetParentObject();
+                            unsigned parent = m_OutlinerSelectedObject->GetParentObject();
                             if (go->GetID() == parent) tmp = true;
-                            m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_selectedOutliner->GetID());
-                            m_selectedOutliner->SetIsChildren(false);
-                            m_selectedOutliner->SetParentObject(0);
+                            m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_OutlinerSelectedObject->GetID());
+                            m_OutlinerSelectedObject->SetIsChildren(false);
+                            m_OutlinerSelectedObject->SetParentObject(0);
                         }
                         if (!tmp)
                         {
-                            go->AttachChild(m_selectedOutliner->GetID());
-                            m_selectedOutliner->SetIsChildren(true);
-                            m_selectedOutliner->SetParentObject(go->GetID());
-                            m_selectedOutliner = nullptr;
+                            go->AttachChild(m_OutlinerSelectedObject->GetID());
+                            m_OutlinerSelectedObject->SetIsChildren(true);
+                            m_OutlinerSelectedObject->SetParentObject(go->GetID());
+                            m_OutlinerSelectedObject = nullptr;
                         }
                     }
                 }
-                if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_selectedOutliner) m_selectedOutliner = go;
+                if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject) m_OutlinerSelectedObject = go;
             }
             else
             {
@@ -4312,18 +4374,18 @@ void Editor::Outliner()
 
             ++i;
         }
-        TreePop();
+        ImGui::TreePop();
     }
     if (Input::Instance().GetKeyUp(MOUSE_MID))
     {
-        if (m_selectedOutliner && m_selectedOutliner->GetIsChildren())
+        if (m_OutlinerSelectedObject && m_OutlinerSelectedObject->GetIsChildren())
         {
-            unsigned parent = m_selectedOutliner->GetParentObject();
-            m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_selectedOutliner->GetID());
-            m_selectedOutliner->SetIsChildren(false);
-            m_selectedOutliner->SetParentObject(0);
+            unsigned parent = m_OutlinerSelectedObject->GetParentObject();
+            m_CurrentLayer->GetObjectById(parent)->RemoveChild(m_OutlinerSelectedObject->GetID());
+            m_OutlinerSelectedObject->SetIsChildren(false);
+            m_OutlinerSelectedObject->SetParentObject(0);
         }
-        m_selectedOutliner = nullptr;
+        m_OutlinerSelectedObject = nullptr;
     }
 }
 
@@ -4333,25 +4395,25 @@ void Editor::Inspector()
     {
         // TODO: Reflection of Components and editable and also the pushing into the
         // deque for undo
-        Text("Chinese");
-        // Text("Name of Malay : %s", m_CurrentObject->GetName().c_str());
-        Text("Name : ");
+        ImGui::Text("Chinese");
+        // ImGui::Text("Name of Malay : %s", m_CurrentObject->GetName().c_str());
+        ImGui::Text("Name : ");
         // Need to change when we implement the destroy and undo
         Options(const_cast<std::string*>(&m_CurrentObject->GetName()));
-        Text("GuID : %d", m_CurrentObject->GetID());
-        if (!m_CurrentObject->GetArchetype().empty()) Text("Archetype : %s", m_CurrentObject->GetArchetype().c_str());
-        Text("Tag : ");
+        ImGui::Text("GuID : %d", m_CurrentObject->GetID());
+        if (!m_CurrentObject->GetArchetype().empty()) ImGui::Text("Archetype : %s", m_CurrentObject->GetArchetype().c_str());
+        ImGui::Text("Tag : ");
         ImGui::SameLine();
-        if (Selectable(m_CurrentObject->GetTag() == std::string{} ? "Click me to add Tag" : m_CurrentObject->GetTag().c_str())) OpenPopup("TagsPopUp");
+        if (Selectable(m_CurrentObject->GetTag() == std::string{} ? "Click me to add Tag" : m_CurrentObject->GetTag().c_str())) ImGui::OpenPopup("TagsPopUp");
         if (BeginPopup("TagsPopUp"))
         {
-            Text("Tags");
+            ImGui::Text("Tags");
             ImGui::Separator();
-            for (auto& tag : m_tags)
+            for (auto& tag : m_Tags)
             {
                 if (Selectable(tag.c_str()))
                 {
-                    ObjectTag_Action* act = new ObjectTag_Action(m_CurrentObject->GetTag(), tag, m_CurrentObject);
+                    ActionTagObject* act = new ActionTagObject(m_CurrentObject->GetTag(), tag, m_CurrentObject);
                     act->Execute();
                     m_Undo.push_back(std::move(act));
                     ClearRedo();
@@ -4361,7 +4423,7 @@ void Editor::Inspector()
             {
                 if (m_CurrentObject->GetTag() != "")
                 {
-                    ObjectTag_Action* act = new ObjectTag_Action(m_CurrentObject->GetTag(), "", m_CurrentObject);
+                    ActionTagObject* act = new ActionTagObject(m_CurrentObject->GetTag(), "", m_CurrentObject);
                     act->Execute();
                     m_Undo.push_back(std::move(act));
                     ClearRedo();
@@ -4390,29 +4452,29 @@ void Editor::Inspector()
             }
         }
         AddComp.push_back("LuaScript");
-        Text("Num of Components : %d", list.size());
-        Separator();
-        if (Button("Add Component")) OpenPopup("AddComponentPopup");
+        ImGui::Text("Num of Components : %d", list.size());
+        ImGui::Separator();
+        if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponentPopup");
         if (BeginPopup("AddComponentPopup"))
         {
-            Text("Components");
-            Separator();
+            ImGui::Text("Components");
+            ImGui::Separator();
             for (int i = 0; i < AddComp.size(); ++i)
                 if (Selectable(AddComp[i].c_str()))
                 {
-                    Add_Component_Action* act = new Add_Component_Action(m_CurrentObject, AddComp[i], m_CurrentLayer);
+                    ActionAddComponent* act = new ActionAddComponent(m_CurrentObject, AddComp[i], m_CurrentLayer);
                     act->Execute();
                     m_Undo.push_back(std::move(act));
                     ClearRedo();
                 }
             EndPopup();
         }
-        SameLine();
-        if (Button("Remove Component")) OpenPopup("RemoveComponentPopup");
+        ImGui::SameLine();
+        if (ImGui::Button("Remove Component")) ImGui::OpenPopup("RemoveComponentPopup");
         if (BeginPopup("RemoveComponentPopup"))
         {
-            Text("Components");
-            Separator();
+            ImGui::Text("Components");
+            ImGui::Separator();
             for (int i = 0; i < DelComp.size(); ++i)
             {
                 if (DelComp[i] == "LuaScript")
@@ -4422,7 +4484,7 @@ void Editor::Inspector()
                     {
                         if (Selectable((std::string("Script:") + scripts[j]).c_str()))
                         {
-                            RemoveScript_Action* act = new RemoveScript_Action(m_CurrentObject, scripts[j], m_CurrentLayer);
+                            ActionRevertScript* act = new ActionRevertScript(m_CurrentObject, scripts[j], m_CurrentLayer);
                             act->Execute();
                             m_Undo.push_back(std::move(act));
                             ClearRedo();
@@ -4431,7 +4493,7 @@ void Editor::Inspector()
                 }
                 else if (Selectable(DelComp[i].c_str()))
                 {
-                    Remove_Component_Action* act = new Remove_Component_Action(m_CurrentObject, DelComp[i], m_CurrentLayer);
+                    ActionRemoveComponent* act = new ActionRemoveComponent(m_CurrentObject, DelComp[i], m_CurrentLayer);
                     act->Execute();
                     m_Undo.push_back(std::move(act));
                     ClearRedo();
@@ -4439,31 +4501,31 @@ void Editor::Inspector()
             }
             EndPopup();
         }
-        SameLine();
-        if (Button("Refresh")) m_CurrentObject->UpdateComponents();
-        Separator();
+        ImGui::SameLine();
+        if (ImGui::Button("Refresh")) m_CurrentObject->UpdateComponents();
+        ImGui::Separator();
         int i = 0;
         for (auto& comp : list)
         {
-            if (TreeNode((std::string("Comp ") + std::to_string(i) + std::string(" : ") + comp->GetName()).c_str()))
+            if (ImGui::TreeNode((std::string("Comp ") + std::to_string(i) + std::string(" : ") + comp->GetName()).c_str()))
             {
                 char* address = reinterpret_cast<char*>(comp);
-                // Text("Component Num : %d", i);
-                // Text("Component Name : %s", comp->GetName().c_str());
+                // ImGui::Text("Component Num : %d", i);
+                // ImGui::Text("Component Name : %s", comp->GetName().c_str());
                 try
                 {
                     if (!Factory::m_Reflection->at(comp->GetName().c_str())->getParents().empty())
                         ParentInspector(address, comp->GetName(), Factory::m_Reflection->at(comp->GetName().c_str())->getParents().back().key);
                     auto component = (*Factory::m_Reflection).at(comp->GetName().c_str());
                     auto properties = component->getProperties();
-                    Indent(5.f);
+                    ImGui::Indent(5.0f);
                     for (int i = 0; i < properties.size(); ++i)
                     {
-                        Text("%s : ", properties[i].name.c_str());
+                        ImGui::Text("%s : ", properties[i].name.c_str());
                         // if else for each type
                         if (properties[i].type == typeid(std::string).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             Options(reinterpret_cast<std::string*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(Vector3).name())
@@ -4476,17 +4538,17 @@ void Editor::Inspector()
                             Options(reinterpret_cast<Vector4*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         else if (properties[i].type == typeid(float).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             Options(reinterpret_cast<float*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(int).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             Options(reinterpret_cast<int*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(bool).name())
                         {
-                            SameLine();
+                            ImGui::SameLine();
                             Options(reinterpret_cast<bool*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type.find("enum") != std::string::npos)
@@ -4528,7 +4590,7 @@ void Editor::Inspector()
                             ++i;
                         }
                         int s = currentSound;
-                        ListBox("SoundTracks", &currentSound, vector_getter, &SoundTracks, (int)SoundTracks.size(), 4);
+                        ImGui::ListBox("SoundTracks", &currentSound, vector_getter, &SoundTracks, (int)SoundTracks.size(), 4);
                         if (currentSound != s)
                         {
                             if (!sound->IsPlaying())
@@ -4537,8 +4599,8 @@ void Editor::Inspector()
                                 sound->SetAndPlayAudioClip(SoundTracks[currentSound]);
                             std::string oldValue = s < 0 ? std::string{} : SoundTracks[s];
                             std::string newValue = SoundTracks[currentSound];
-                            Input_Action<std::string>* act =
-                                new Input_Action<std::string>(oldValue, newValue, m_CurrentObject->GetName(), "AudioEmitter", "audioClipName_", m_CurrentLayer, m_CurrentObject);
+                            ActionInput<std::string>* act =
+                                new ActionInput<std::string>(oldValue, newValue, m_CurrentObject->GetName(), "AudioEmitter", "audioClipName_", m_CurrentLayer, m_CurrentObject);
                             // act->Execute();
                             m_Undo.push_back(std::move(act));
                             ClearRedo();
@@ -4549,9 +4611,9 @@ void Editor::Inspector()
                         std::string stop("Stop");
                         stop += "##";
                         stop += std::to_string(m_CurrentObject->GetID());
-                        if (Button(p.c_str())) sound->Play();
-                        SameLine();
-                        if (Button(stop.c_str())) sound->Stop();
+                        if (ImGui::Button(p.c_str())) sound->Play();
+                        ImGui::SameLine();
+                        if (ImGui::Button(stop.c_str())) sound->Stop();
                     }
                     if (comp->GetName() == "LuaScript")
                     {
@@ -4574,15 +4636,15 @@ void Editor::Inspector()
                             {
                                 bool b = script->get<bool>(var.first);
                                 bool tmp = b;
-                                Text("%s : ", var.first.c_str());
+                                ImGui::Text("%s : ", var.first.c_str());
                                 m_Global_Spaces += " ";
-                                SameLine();
+                                ImGui::SameLine();
                                 Checkbox(m_Global_Spaces.c_str(), &tmp);
                                 if (b != tmp)
                                 {
                                     int oldValue = b;
                                     int newValue = tmp;
-                                    ScriptInput_Action<bool>* act = new ScriptInput_Action<bool>(m_CurrentObject, filename, oldValue, newValue, var.first);
+                                    ActionInputScript<bool>* act = new ActionInputScript<bool>(m_CurrentObject, filename, oldValue, newValue, var.first);
                                     act->Execute();
                                     m_Undo.push_back(std::move(act));
                                     ClearRedo();
@@ -4592,15 +4654,15 @@ void Editor::Inspector()
                             {
                                 float f = script->get<float>(var.first);
                                 float tmp = f;
-                                Text("%s : ", var.first.c_str());
+                                ImGui::Text("%s : ", var.first.c_str());
                                 m_Global_Spaces += " ";
-                                SameLine();
+                                ImGui::SameLine();
                                 InputFloat(m_Global_Spaces.c_str(), &tmp);
-                                if (IsKeyPressed(KEY_RETURN) && f != tmp)
+                                if (ImGui::IsKeyPressed(KEY_RETURN) && f != tmp)
                                 {
                                     float oldValue = f;
                                     float newValue = tmp;
-                                    ScriptInput_Action<float>* act = new ScriptInput_Action<float>(m_CurrentObject, filename, oldValue, newValue, var.first);
+                                    ActionInputScript<float>* act = new ActionInputScript<float>(m_CurrentObject, filename, oldValue, newValue, var.first);
                                     act->Execute();
                                     m_Undo.push_back(std::move(act));
                                     ClearRedo();
@@ -4610,15 +4672,15 @@ void Editor::Inspector()
                             {
                                 int i = script->get<int>(var.first);
                                 int tmp = i;
-                                Text("%s : ", var.first.c_str());
+                                ImGui::Text("%s : ", var.first.c_str());
                                 m_Global_Spaces += " ";
-                                SameLine();
-                                InputInt(m_Global_Spaces.c_str(), &tmp);
-                                if (IsKeyPressed(KEY_RETURN) && i != tmp)
+                                ImGui::SameLine();
+                                ImGui::InputInt(m_Global_Spaces.c_str(), &tmp);
+                                if (ImGui::IsKeyPressed(KEY_RETURN) && i != tmp)
                                 {
                                     int oldValue = i;
                                     int newValue = tmp;
-                                    ScriptInput_Action<int>* act = new ScriptInput_Action<int>(m_CurrentObject, filename, oldValue, newValue, var.first);
+                                    ActionInputScript<int>* act = new ActionInputScript<int>(m_CurrentObject, filename, oldValue, newValue, var.first);
                                     act->Execute();
                                     m_Undo.push_back(std::move(act));
                                     ClearRedo();
@@ -4630,15 +4692,15 @@ void Editor::Inspector()
                                 char string[MAX_STRING_LENGTH];
                                 SecureZeroMemory(string, MAX_STRING_LENGTH);
                                 std::copy(s.c_str(), s.c_str() + s.size(), string);
-                                Text("%s : ", var.first.c_str());
+                                ImGui::Text("%s : ", var.first.c_str());
                                 m_Global_Spaces += " ";
-                                SameLine();
-                                InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-                                if (IsKeyPressed(KEY_RETURN) && s != string)
+                                ImGui::SameLine();
+                                ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
+                                if (ImGui::IsKeyPressed(KEY_RETURN) && s != string)
                                 {
                                     std::string oldValue = s;
                                     std::string newValue = string;
-                                    ScriptInput_Action<std::string>* act = new ScriptInput_Action<std::string>(m_CurrentObject, filename, oldValue, newValue, var.first);
+                                    ActionInputScript<std::string>* act = new ActionInputScript<std::string>(m_CurrentObject, filename, oldValue, newValue, var.first);
                                     act->Execute();
                                     m_Undo.push_back(std::move(act));
                                     ClearRedo();
@@ -4646,15 +4708,15 @@ void Editor::Inspector()
                             }
                         }
                     }
-                    Unindent(5.f);
+                    ImGui::Unindent(5.0f);
                 }
                 catch (...)
                 {
-                    Text("Component %s not in reflection factory!", comp->GetName().c_str());
+                    ImGui::Text("Component %s not in reflection factory!", comp->GetName().c_str());
                 }
-                TreePop();
+                ImGui::TreePop();
             }
-            Separator();
+            ImGui::Separator();
             ++i;
         }
     }
@@ -4679,23 +4741,21 @@ Editor::Editor(float x, float y)
     , m_Global_Spaces{}
     , m_GlobalIDCounter{0}
     , m_CurrentLayer(nullptr)
-    , m_editorFocus(false)
-    , m_currwdir(_getcwd(0, 0))
+    , m_IsEditorInFocus(false)
+    , m_CurrentWorkingDirectory(_getcwd(0, 0))
     , m_ActiveWindow()
-    , m_timer(0)
-    , m_selectedOutliner(nullptr)
-    , m_viewportFullScreen(false)
+    , m_Timer(0)
+    , m_OutlinerSelectedObject(nullptr)
+    , m_IsViewportFullScreen(false)
     , m_Local(false)
     , m_GameCameraInVP(false)
 {
     CreateContext();
-    CreateDockContext();
+
     ImGuiIO& io = GetIO();
     io.DisplaySize.x = x;
     io.DisplaySize.y = y;
-    io.DeltaTime = 1.f / 60.f;
-    io.RenderDrawListsFn = ImGuiRenderDrawLists;
-
+    io.DeltaTime = 1.0f / 60.0f;
     io.KeyMap[ImGuiKey_Tab] = VK_TAB;
     io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
     io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
@@ -4726,16 +4786,16 @@ Editor::Editor(float x, float y)
         m_ActiveWindow[i] = false;
     LoadData();
 
-    for (int n = 0; n < IM_ARRAYSIZE(m_saved_palette); n++)
+    for (int n = 0; n < IM_ARRAYSIZE(m_SavedPalettes); n++)
     {
-        ImGui::ColorConvertHSVtoRGB(n / 31.0f, 0.8f, 0.8f, m_saved_palette[n].x, m_saved_palette[n].y, m_saved_palette[n].z);
-        m_saved_palette[n].w = 1.0f;  // Alpha
+        ImGui::ColorConvertHSVtoRGB(n / 31.0f, 0.8f, 0.8f, m_SavedPalettes[n].x, m_SavedPalettes[n].y, m_SavedPalettes[n].z);
+        m_SavedPalettes[n].w = 1.0f;  // Alpha
     }
-    SecureZeroMemory(m_text, 2 << 23);
+    SecureZeroMemory(m_EditorStringBuffer, 2 << 23);
     DeSerializeArchetypes();
     LoadTags();
-    m_font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 13.f);
-    m_fontBold = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibrib.ttf", 23.f);
+    m_ImGuiFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 13.0f);
+    m_ImGuiFontBold = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibrib.ttf", 23.0f);
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 }
 
@@ -4744,32 +4804,27 @@ Editor::~Editor()
     SerializeArchetypes();
     SaveData();
     SaveTags();
-    Clear_Redo_Undo();
+    ClearRedoUndo();
     for (auto& a : m_Archetypes)
+    {
         delete a.second;
+    }
     for (auto& a : m_UpdatedArchetypes)
+    {
         delete a.second;
+    }
     // Need to save the archetype
-    DestroyDockContext();
-    DestroyContext();
-    free(m_currwdir);
+
+    ImGui::DestroyContext();
+    free(m_CurrentWorkingDirectory);
 }
 
 void Editor::Update(float dt)
 {
-    // GetIO().Framerate = dt;
     GetIO().DeltaTime = dt;
-    // GetIO().FontGlobalScale = 0.95f;
-    // PushFont(m_font);
-    // GetIO().FontDefault = m_font;
-    // auto & timer = Application::Instance().GetGameTimer();
-    // if (!timer.IsEditorPaused() && timer.IsPlayModePaused())
-    //	ShowCursor(true);
-    // if (timer.IsEditorPaused())
-    //	ShowCursor(true);
 
     // If not in play mode
-    if (!s_isPlaying)
+    if (!ms_IsGameRunning)
     {
         // ShowCursor(true);
         // std::cout << "EDITOR NOT PLAYING" << std::endl;
@@ -4780,7 +4835,7 @@ void Editor::Update(float dt)
         // s_lockMousePosition = false;
     }
 
-    if (s_lockMousePosition)
+    if (ms_ShouldLockMousePosition)
     {
         // float  minusy     = GetWindowPos().y      ;
         // float  minusx     = GetWindowPos().x      ;
@@ -4806,63 +4861,67 @@ void Editor::Update(float dt)
     UpdateMeshArray();
     if (!m_CurrentLayer) m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
     NewFrame();
-    if (m_ActiveWindow[WindowStates::Viewport_State])
+    if (m_ActiveWindow[(int)WindowStates::Viewport])
     {
-        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_viewportFullScreen) ImGuizmo::BeginFrame();
+        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen) ImGuizmo::BeginFrame();
     }
     GetIO().DisplaySize.x = (float)Application::Instance().GetWindowWidth();
     GetIO().DisplaySize.y = (float)Application::Instance().GetWindowHeight();
     SetEditorMouse();
     MainMenu();
     ShortcutButtons();
-    New();
+    CreateNewSceneTab();
     StyleEditor();
     Help();
     // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
     // {
-    SetNextWindowPos(ImVec2(0, 18.f));
+    SetNextWindowPos(ImVec2(0, 18.0f));
     SetNextWindowSize(ImVec2(0.25f * GetIO().DisplaySize.x, 0.65f * GetIO().DisplaySize.y));
     // }
-    Begin("Docking1", NULL, flag);
-    InitDockSpace();
-    End();
+    ImGui::Begin("Docking1", NULL, flag);
+    ImGui::BeginTabBar("docking_tab_bar_1");
+    ImGui::EndTabBar();
+    ImGui::End();
 
     // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
     // {
-    SetNextWindowPos(ImVec2(0.8725f * GetIO().DisplaySize.x, 18.f));
+    SetNextWindowPos(ImVec2(0.8725f * GetIO().DisplaySize.x, 18.0f));
     SetNextWindowSize(ImVec2(0.1275f * GetIO().DisplaySize.x, 0.985f * GetIO().DisplaySize.y));
     // }
-    Begin("Docking2", NULL, flag);
-    InitDockSpace();
-    End();
+    ImGui::Begin("Docking2", NULL, flag);
+    ImGui::BeginTabBar("docking_tab_bar_2");
+    ImGui::EndTabBar();
+    ImGui::End();
 
     // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
     // {
-    SetNextWindowPos(ImVec2(0.25f * GetIO().DisplaySize.x, 18.f));
+    SetNextWindowPos(ImVec2(0.25f * GetIO().DisplaySize.x, 18.0f));
     SetNextWindowSize(ImVec2(0.6225f * GetIO().DisplaySize.x, 0.65f * GetIO().DisplaySize.y));
     // }
-    Begin("Docking3", NULL, flag);
-    InitDockSpace();
-    End();
+    ImGui::Begin("Docking3", NULL, flag);
+    ImGui::BeginTabBar("docking_tab_bar_3");
+    ImGui::EndTabBar();
+    ImGui::End();
 
     // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
     // {
-    SetNextWindowPos(ImVec2(0, 0.65f * GetIO().DisplaySize.y + 18.f));
+    SetNextWindowPos(ImVec2(0, 0.65f * GetIO().DisplaySize.y + 18.0f));
     SetNextWindowSize(ImVec2(0.8725f * GetIO().DisplaySize.x, 0.335f * GetIO().DisplaySize.y));
     // }
-    Begin("Docking4", NULL, flag);
-    InitDockSpace();
-    End();
+    ImGui::Begin("Docking4", NULL, flag);
+    ImGui::BeginTabBar("docking_tab_bar_4");
+    ImGui::EndTabBar();
+    ImGui::End();
 
-    if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_viewportFullScreen)
+    if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
     {
-        if (m_ActiveWindow[WindowStates::Viewport_State])
+        if (m_ActiveWindow[(int)WindowStates::Viewport])
         {
             ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
             if (GetIO().KeyAlt) flag = flag | ImGuiWindowFlags_NoMove;
-            BeginDock("ViewPort", &m_ActiveWindow[2], flag);
+            ImGui::BeginTabItem("ViewPort", &m_ActiveWindow[2], flag);
             Viewport();
-            EndDock();
+            ImGui::EndTabItem();
         }
     }
     else
@@ -4871,94 +4930,77 @@ void Editor::Update(float dt)
         FullScreenVP();
     }
 
-    if (m_ActiveWindow[WindowStates::Physics_State])
+    if (m_ActiveWindow[(int)WindowStates::Physics])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("Physics", &m_ActiveWindow[WindowStates::Physics_State], flag);
+        ImGui::BeginTabItem("Physics", &m_ActiveWindow[(int)WindowStates::Physics], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         PhysicsEditor();
-        EndDock();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::Outliner_State])
+    if (m_ActiveWindow[(int)WindowStates::Outliner])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("Outliner", &m_ActiveWindow[0], flag, ImVec2(60, 180));
+        ImGui::BeginTabItem("Outliner", &m_ActiveWindow[(int)WindowStates::Outliner], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         Outliner();
-        NewLine();
-        EndDock();
+        ImGui::NewLine();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::Inspector_State])
+    if (m_ActiveWindow[(int)WindowStates::Inspector])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("Inspector", &m_ActiveWindow[1], flag);
+        ImGui::BeginTabItem("Inspector", &m_ActiveWindow[(int)WindowStates::Inspector], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         Inspector();
-        NewLine();
-        EndDock();
+        ImGui::NewLine();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::Archetype_State])
+    if (m_ActiveWindow[(int)WindowStates::Archetype])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("Archetype", &m_ActiveWindow[3], flag);
+
+        ImGui::BeginTabItem("Archetype", &m_ActiveWindow[(int)WindowStates::Archetype], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         Archetype();
-        NewLine();
-        EndDock();
+        ImGui::NewLine();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::LayerEditor_State])
+    if (m_ActiveWindow[(int)WindowStates::LayerEditor])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("LayerEditor", &m_ActiveWindow[WindowStates::LayerEditor_State], flag);
+
+        ImGui::BeginTabItem("LayerEditor", &m_ActiveWindow[(int)WindowStates::LayerEditor], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         LayerEditor();
-        NewLine();
-        EndDock();
+        ImGui::NewLine();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::Profiler_State])
+    if (m_ActiveWindow[(int)WindowStates::Profiler])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("Profiler", &m_ActiveWindow[WindowStates::Profiler_State], flag);
+
+        ImGui::BeginTabItem("Profiler", &m_ActiveWindow[(int)WindowStates::Profiler], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         Profiler();
-        EndDock();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::Tags_State])
+    if (m_ActiveWindow[(int)WindowStates::Tags])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("Tags", &m_ActiveWindow[WindowStates::Profiler_State], flag);
+
+        ImGui::BeginTabItem("Tags", &m_ActiveWindow[(int)WindowStates::Profiler], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         TagsEditor();
-        EndDock();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::TextEditor_State])
+    if (m_ActiveWindow[(int)WindowStates::TextEditor])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("TextEditor", &m_ActiveWindow[WindowStates::TextEditor_State], flag);
+        ImGui::BeginTabItem("TextEditor", &m_ActiveWindow[(int)WindowStates::TextEditor], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         TextEditor();
-        NewLine();
-        EndDock();
+        ImGui::NewLine();
+        ImGui::EndTabItem();
     }
 
-    if (m_ActiveWindow[WindowStates::Resource_State])
+    if (m_ActiveWindow[(int)WindowStates::Resource])
     {
-        ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-        BeginDock("ResourceManager", &m_ActiveWindow[WindowStates::Resource_State], flag);
+        ImGui::BeginTabItem("ResourceManager", &m_ActiveWindow[(int)WindowStates::Resource], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
         ResourceManager();
-        EndDock();
+        ImGui::EndTabItem();
     }
-
-    // Begin("Test Selected Objects");
-    // Text("Total number of Selected Objects : %d", m_SelectedObjects.size());
-    // Separator();
-    // for (auto & obj : m_SelectedObjects)
-    // {
-    //   if (Selectable(obj->GetName().c_str())) m_CurrentObject = obj;
-    //   Text("ID : %d", obj->GetID());
-    //   Separator();
-    // }
-    // End();
-    // Text("Mouse Pos : %f, %f", GetIO().MousePos.x, GetIO().MousePos.y);
 
     // DebugDockSpaces();
     m_Console.Draw();
@@ -4967,6 +5009,7 @@ void Editor::Update(float dt)
     ImGui::ShowDemoWindow();
     // Call PostFrameFunction for all archetypes
     Draw();
+
     m_DeltaMousePos = GetMousePos();
 }
 

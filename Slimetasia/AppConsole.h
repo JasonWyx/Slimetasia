@@ -2,7 +2,6 @@
 #include <deque>
 #include <iostream>
 
-#include "Dock.h"
 #include "External Libraries\imgui\imgui.h"
 
 using namespace ImGui;
@@ -19,7 +18,7 @@ public:
         : m_MaxLines(MAX_LINES)
         , m_ScrollToBtm(false)
         , m_TriggerAutoScroll(true)
-        , ActiveWindow(false)
+        , m_IsActiveWindow(false)
     {
         m_Items.resize(MAX_LINES);
     }
@@ -28,5 +27,6 @@ public:
     void AddLog(const char* log);
     void OutLog();
     void ClearLog();
-    bool ActiveWindow;
+
+    bool m_IsActiveWindow;
 };
