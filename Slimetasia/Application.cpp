@@ -36,8 +36,6 @@ bool Application::s_IsGameRunning = false;
 
 #define DESIRED_FRAME_RATE 1.f / 60.f
 
-#define CLAUSEN_TEST 0
-
 const DWORD Application::s_WindowStyles[] = {
     WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,  // windowed
     WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,                        // borderless
@@ -282,7 +280,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     , m_Pool()
     , m_focus(false)
 {
-    char const* appName = "PEngine";
+    char const* appName = "Slimetasia";
 
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(wcex);
@@ -298,12 +296,15 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     wcex.lpszClassName = appName;
     wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
-    if (!RegisterClassEx(&wcex)) MessageBox(NULL, TEXT("Program requires Windows NT!"), appName, MB_ICONERROR);
+    if (!RegisterClassEx(&wcex))
+    {
+        MessageBox(NULL, TEXT("Program requires Windows NT!"), appName, MB_ICONERROR);
+    }
 
 //#define LEGACY_GL_INIT
 #ifndef LEGACY_GL_INIT
 
-    HWND dummyWND = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "PEngine", s_WindowStyles[(int)WindowMode::Windowed], 0, 0, 1, 1, nullptr, nullptr, hInstance, nullptr);
+    HWND dummyWND = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], 0, 0, 1, 1, nullptr, nullptr, hInstance, nullptr);
 
     HDC dummyDC = GetDC(dummyWND);
 
@@ -400,7 +401,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     m_WindowWidth = wndRect.right - wndRect.left;
     m_WindowHeight = wndRect.bottom - wndRect.top;
 
-    m_Window = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "PEngine", s_WindowStyles[(int)WindowMode::Windowed], wndRect.top, wndRect.left, m_WindowWidth,
+    m_Window = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], wndRect.top, wndRect.left, m_WindowWidth,
                               m_WindowHeight,  // Let AdjustWindowRectEx calculate window size for us
                               nullptr, nullptr, hInstance, nullptr);
 
@@ -474,6 +475,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         return;
     }
 
+    // Creating a dummy context so that we can load the wrangled functions
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(dummyRC);
     ReleaseDC(dummyWND, dummyDC);
@@ -496,17 +498,6 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
 
-#ifdef EDITOR
-    wglSwapIntervalEXT(1);
-    DragAcceptFiles(m_Window, true);
-    std::cout.rdbuf(os.rdbuf());
-#else
-    wglSwapIntervalEXT(1);
-    // AllocConsole();
-    // freopen("CONOUT$", "w", stdout);
-    // freopen("CONOUT$", "w", stderr);
-#endif
-
 #else  // #ifndef MODERN_GL_INIT
 
     // Get screen resolution
@@ -528,7 +519,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     m_WindowWidth = wndRect.right - wndRect.left;
     m_WindowHeight = wndRect.bottom - wndRect.top;
 
-    m_Window = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "PEngine", s_WindowStyles[(int)WindowMode::Windowed], wndRect.top, wndRect.left, m_WindowWidth,
+    m_Window = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], wndRect.top, wndRect.left, m_WindowWidth,
                               m_WindowHeight,  // Let AdjustWindowRectEx calculate window size for us
                               nullptr, nullptr, hInstance, nullptr);
 
@@ -593,23 +584,19 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
 
-#ifdef EDITOR
-    wglSwapIntervalEXT(0);
+#endif  // #ifdef MODERN_GL_INIT
 
+
+#ifdef EDITOR
+    wglSwapIntervalEXT(1);
     DragAcceptFiles(m_Window, true);
     std::cout.rdbuf(os.rdbuf());
 #else
     wglSwapIntervalEXT(1);
-    AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#endif
-
-#endif  // #ifdef MODERN_GL_INIT
-
     // AllocConsole();
     // freopen("CONOUT$", "w", stdout);
     // freopen("CONOUT$", "w", stderr);
+#endif
 
     m_GameTimer = Timer(1.f / 60.0f);
     m_ComputeTimer = Timer();
@@ -623,14 +610,20 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     AISystem::Initialize();
     Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
     Input::Initialize();
-    Editor::Initialize(static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
+    Editor::Initialize(m_Window, static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
     ParticleSystem ::Initialize(MAXCOUNT);
 }
 
 Application::~Application()
 {
-    if (m_CurrentScene) delete m_CurrentScene;
-    if (m_CurrentSceneCopy) delete m_CurrentSceneCopy;
+    if (m_CurrentScene)
+    {
+        delete m_CurrentScene;
+    }
+    if (m_CurrentSceneCopy)
+    {
+        delete m_CurrentSceneCopy;
+    }
 
     Editor::Shutdown();
     Input::Shutdown();
@@ -646,7 +639,7 @@ Application::~Application()
     wglDeleteContext(m_GLRenderContext);
     ReleaseDC(m_Window, m_DeviceContext);
     DestroyWindow(m_Window);
-    UnregisterClass("PEngine", m_Instance);
+    UnregisterClass("Slimetasia", m_Instance);
 }
 
 void Application::ProcessWindowMessages()

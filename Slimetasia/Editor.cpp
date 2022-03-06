@@ -9,6 +9,8 @@
 #include "AudioEmitter.h"
 #include "AudioSystem.h"
 #include "External Libraries/ImGuizmo/ImGuizmo.h"
+#include "External Libraries/imgui/backends/imgui_impl_opengl3.h"
+#include "External Libraries/imgui/backends/imgui_impl_win32.h"
 #include "MeshAnimator.h"
 #include "MeshRenderer.h"
 #include "ParticleSystem.h"
@@ -79,16 +81,16 @@ void Editor::Redo()
     m_Undo.push_back(act);
 }
 
-void Editor::Update_Redo_Undo()
+void Editor::UpdateRedoUndo()
 {
-    while (m_Redo.size() > m_Redo_Undo_Size)
+    while (m_Redo.size() > m_RedoUndoCount)
     {
         Action* tmp = m_Redo.front();
         m_Redo.pop_front();
         delete tmp;
     }
 
-    while (m_Undo.size() > m_Redo_Undo_Size)
+    while (m_Undo.size() > m_RedoUndoCount)
     {
         Action* tmp = m_Undo.front();
         m_Undo.pop_front();
@@ -112,13 +114,14 @@ void Editor::ClearRedoUndo()
     }
 }
 
-void Editor::MainMenu()
+void Editor::DrawMainMenu()
 {
     bool b = false;
     bool style = false;
     bool help = false;
 
     ImGui::BeginMainMenuBar();
+
     if (ImGui::BeginMenu("File"))
     {
         if (ImGui::MenuItem("New", "CTRL+N")) b = true;
@@ -127,7 +130,12 @@ void Editor::MainMenu()
         if (ImGui::MenuItem("Exit", "ALT+X")) Application::Instance().QuitProgram();
         ImGui::EndMenu();
     }
-    if ((Input::Instance().GetKeyDown(KEY_LALT) || Input::Instance().GetKeyDown(KEY_RALT)) && Input::Instance().GetKeyDown(KEY_X)) Application::Instance().QuitProgram();
+
+    if ((Input::Instance().GetKeyDown(KEY_LALT) || Input::Instance().GetKeyDown(KEY_RALT)) && Input::Instance().GetKeyDown(KEY_X))
+    {
+        Application::Instance().QuitProgram();
+    }
+
     if (ImGui::BeginMenu("Edit"))
     {
         if (m_Undo.empty())
@@ -161,52 +169,53 @@ void Editor::MainMenu()
     }
     if (ImGui::BeginMenu("Windows"))
     {
-        if (ImGui::MenuItem("Outliner", NULL, m_ActiveWindow[(int)WindowStates::Outliner], !m_ActiveWindow[(int)WindowStates::Outliner]))
+        if (ImGui::MenuItem("Outliner", NULL, m_WindowStates[(int)EditorWindowType::Outliner], !m_WindowStates[(int)EditorWindowType::Outliner]))
         {
-            m_ActiveWindow[(int)WindowStates::Outliner] = true;
+            m_WindowStates[(int)EditorWindowType::Outliner] = true;
         }
-        if (ImGui::MenuItem("Inspector", NULL, m_ActiveWindow[(int)WindowStates::Inspector], !m_ActiveWindow[(int)WindowStates::Inspector]))
+        if (ImGui::MenuItem("Inspector", NULL, m_WindowStates[(int)EditorWindowType::Inspector], !m_WindowStates[(int)EditorWindowType::Inspector]))
         {
-            m_ActiveWindow[(int)WindowStates::Inspector] = true;
+            m_WindowStates[(int)EditorWindowType::Inspector] = true;
         }
         if (ImGui::MenuItem("Console", NULL, m_Console.m_IsActiveWindow, !m_Console.m_IsActiveWindow))
         {
             m_Console.m_IsActiveWindow = true;
         }
-        if (ImGui::MenuItem("Viewport", NULL, m_ActiveWindow[(int)WindowStates::Viewport], !m_ActiveWindow[(int)WindowStates::Viewport]))
+        if (ImGui::MenuItem("Viewport", NULL, m_WindowStates[(int)EditorWindowType::Viewport], !m_WindowStates[(int)EditorWindowType::Viewport]))
         {
-            m_ActiveWindow[(int)WindowStates::Viewport] = true;
+            m_WindowStates[(int)EditorWindowType::Viewport] = true;
         }
-        if (ImGui::MenuItem("Archetype", NULL, m_ActiveWindow[(int)WindowStates::Archetype], !m_ActiveWindow[(int)WindowStates::Archetype]))
+        if (ImGui::MenuItem("Archetype", NULL, m_WindowStates[(int)EditorWindowType::Archetype], !m_WindowStates[(int)EditorWindowType::Archetype]))
         {
-            m_ActiveWindow[(int)WindowStates::Archetype] = true;
+            m_WindowStates[(int)EditorWindowType::Archetype] = true;
         }
-        if (ImGui::MenuItem("ImGui::Text Editor", NULL, m_ActiveWindow[(int)WindowStates::TextEditor], !m_ActiveWindow[(int)WindowStates::TextEditor]))
+        if (ImGui::MenuItem("ImGui::Text Editor", NULL, m_WindowStates[(int)EditorWindowType::TextEditor], !m_WindowStates[(int)EditorWindowType::TextEditor]))
         {
-            m_ActiveWindow[(int)WindowStates::TextEditor] = true;
+            m_WindowStates[(int)EditorWindowType::TextEditor] = true;
         }
-        if (ImGui::MenuItem("Layer Editor", NULL, m_ActiveWindow[(int)WindowStates::LayerEditor], !m_ActiveWindow[(int)WindowStates::LayerEditor]))
+        if (ImGui::MenuItem("Layer Editor", NULL, m_WindowStates[(int)EditorWindowType::LayerEditor], !m_WindowStates[(int)EditorWindowType::LayerEditor]))
         {
-            m_ActiveWindow[(int)WindowStates::LayerEditor] = true;
+            m_WindowStates[(int)EditorWindowType::LayerEditor] = true;
         }
-        if (ImGui::MenuItem("Profiler", NULL, m_ActiveWindow[(int)WindowStates::Profiler], !m_ActiveWindow[(int)WindowStates::Profiler]))
+        if (ImGui::MenuItem("Profiler", NULL, m_WindowStates[(int)EditorWindowType::Profiler], !m_WindowStates[(int)EditorWindowType::Profiler]))
         {
-            m_ActiveWindow[(int)WindowStates::Profiler] = true;
+            m_WindowStates[(int)EditorWindowType::Profiler] = true;
         }
-        if (ImGui::MenuItem("Tags Editor", NULL, m_ActiveWindow[(int)WindowStates::Tags], !m_ActiveWindow[(int)WindowStates::Tags]))
+        if (ImGui::MenuItem("Tags Editor", NULL, m_WindowStates[(int)EditorWindowType::Tags], !m_WindowStates[(int)EditorWindowType::Tags]))
         {
-            m_ActiveWindow[(int)WindowStates::Tags] = true;
+            m_WindowStates[(int)EditorWindowType::Tags] = true;
         }
-        if (ImGui::MenuItem("Physics Editor", NULL, m_ActiveWindow[(int)WindowStates::Physics], !m_ActiveWindow[(int)WindowStates::Physics]))
+        if (ImGui::MenuItem("Physics Editor", NULL, m_WindowStates[(int)EditorWindowType::Physics], !m_WindowStates[(int)EditorWindowType::Physics]))
         {
-            m_ActiveWindow[(int)WindowStates::Physics] = true;
+            m_WindowStates[(int)EditorWindowType::Physics] = true;
         }
-        if (ImGui::MenuItem("Resource Manager", NULL, m_ActiveWindow[(int)WindowStates::Resource], !m_ActiveWindow[(int)WindowStates::Resource]))
+        if (ImGui::MenuItem("Resource Manager", NULL, m_WindowStates[(int)EditorWindowType::Resource], !m_WindowStates[(int)EditorWindowType::Resource]))
         {
-            m_ActiveWindow[(int)WindowStates::Resource] = true;
+            m_WindowStates[(int)EditorWindowType::Resource] = true;
         }
         ImGui::EndMenu();
     }
+
     if (ImGui::BeginMenu("GameObject"))
     {
         if (ImGui::MenuItem("Empty Object"))
@@ -234,13 +243,13 @@ void Editor::MainMenu()
         // }
         ImGui::Separator();
         ImGui::TextDisabled("Object Transformation");
-        if (!m_Local)
+        if (!m_IsTransformInLocalSpace)
         {
-            if (ImGui::MenuItem("Local Transform")) m_Local = true;
+            if (ImGui::MenuItem("Local Transform")) m_IsTransformInLocalSpace = true;
         }
         else
         {
-            if (ImGui::MenuItem("World Transform")) m_Local = false;
+            if (ImGui::MenuItem("World Transform")) m_IsTransformInLocalSpace = false;
         }
         ImGui::Separator();
         // TextDisabled("Help and Troubleshoot");
@@ -272,13 +281,13 @@ void Editor::ShortcutButtons()
         return;
     }
 
-    ImGuiIO& io = GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     io.KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
     io.KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
     io.KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
     io.KeySuper = false;
 
-    if (IsKeyDown(17))
+    if (ImGui::IsKeyDown(17))
     {
         if (ImGui::IsKeyPressed('Z'))
         {
@@ -321,30 +330,37 @@ void Editor::ShortcutButtons()
     }
 }
 
-void Editor::StyleEditor()
+void Editor::DrawStyleEditor()
 {
     if (ImGui::BeginPopupModal("StyleEditor", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
     {
         ImGui::SetItemDefaultFocus();
-        ShowStyleEditor();
+        ImGui::ShowStyleEditor();
         ImGui::NewLine();
-        if (ImGui::Button("Exit")) CloseCurrentPopup();
+
+        if (ImGui::Button("Exit"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
         ImGui::NewLine();
-        EndPopup();
+        ImGui::EndPopup();
     }
 }
 
-void Editor::Help()
+void Editor::DrawHelp()
 {
     if (ImGui::BeginPopupModal("HelpScreen", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
     {
-        ImDrawList* draw_list = GetWindowDrawList();
-        ImU32 color = GetColorU32(ImGuiCol_Text);
-        ImVec2 pos = GetCursorScreenPos();
-        draw_list->AddText(GetFont(), GetFontSize() * 1.5f, ImVec2(pos.x, pos.y + 5.0f), color, "Welcome to PEngine's Troubleshoot/Help Screen.");
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImU32 color = ImGui::GetColorU32(ImGuiCol_Text);
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 1.5f, ImVec2(pos.x, pos.y + 5.0f), color, "Welcome to Slimetasia's Troubleshoot/Help Screen.");
+
         ImGui::NewLine();
         ImGui::NewLine();
         ImGui::Text("Please navigate the table below see the troubleshoot the problem you are currently having");
+
         if (ImGui::TreeNode("The book of Troubleshoot"))
         {
             ImGui::NewLine();
@@ -352,32 +368,45 @@ void Editor::Help()
             ImGui::NewLine();
             ImGui::NewLine();
             ImGui::NewLine();
-            draw_list->AddText(GetFont(), GetFontSize() * 7.0f, ImVec2(pos.x + 50.0f, pos.y + 75.0f), IM_COL32(255, 0, 0, 255), "User Error!");
+            draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 7.0f, ImVec2(pos.x + 50.0f, pos.y + 75.0f), IM_COL32(255, 0, 0, 255), "User Error!");
             ImGui::TreePop();
             ImGui::TreePop();
         }
+
         ImGui::NewLine();
-        if (ImGui::Button("Exit")) CloseCurrentPopup();
+
+        if (ImGui::Button("Exit"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
         ImGui::NewLine();
-        EndPopup();
+        ImGui::EndPopup();
     }
 }
 
-void Editor::Viewport()
+void Editor::DrawViewport()
 {
-    if (Input::Instance().GetKeyPressed(KEY_F8)) m_IsViewportFullScreen = !m_IsViewportFullScreen;
+    if (Input::Instance().GetKeyPressed(KEY_F8))
+    {
+        m_IsViewportFullScreen = !m_IsViewportFullScreen;
+    }
+
     static bool deltaGizmoState = false;
     static bool over = false;
     static bool state = 0;
+
     static ImGuizmo::OPERATION currOperation = (ImGuizmo::OPERATION)3;
     ImGuizmo::SetDrawlist();
+
     auto editorCamera = m_CurrentLayer->GetEditorCamera();
 
     const ImVec2 windowSize = ImGui::GetWindowSize();
     const ImVec2 windowOffset = ImGui::GetWindowPos();
 
-    float minusy = GetWindowPos().y;
-    float minusx = GetWindowPos().x;
+    float minusy = ImGui::GetWindowPos().y;
+    float minusx = ImGui::GetWindowPos().x;
+
     if (Application::Instance().GetGameTimer().IsEditorPaused())
     {
         if (ImGui::Button("Play") || ImGui::IsKeyPressed(116))
@@ -400,19 +429,6 @@ void Editor::Viewport()
                 m_SavedLayers.emplace_back(l);
                 ly->Clone(m_SavedLayers.back());
             }
-
-            // Change to game camera
-            // Renderer::Instance().ChangeCamera(true);
-            // int cx = Application::Instance().GetMaxWindowWidth() / 2;
-            // int cy = Application::Instance().GetMaxWindowHeight() / 2;
-            // cx -= Application::Instance().GetWindowWidth() / 2;
-            // cy -= Application::Instance().GetWindowHeight() / 2;
-
-            // SetCursorPos(cx, cy);
-            // if(!m_viewportFullScreen)
-            //   SetCursorPos(cx + (int)minusx + (int)windowSize.x / 2, cy + (int)minusy + (int)windowSize.y / 2);
-            // else
-            //   SetCursorPos(cx + Application::Instance().GetWindowWidth() / 2, cy + Application::Instance().GetWindowHeight() / 2);
 
             // Initialize all lua scripts
             if (Application::InstancePtr())
@@ -508,7 +524,7 @@ void Editor::Viewport()
         m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
         m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
 
-        float y = abs(GetIO().MousePos.y - ImGui::GetWindowSize().y - minusy);
+        float y = abs(ImGui::GetIO().MousePos.y - ImGui::GetWindowSize().y - minusy);
 
         // std::cout << "Input::Instance().GetKeyPressed(VK_LBUTTON) = " << Input::Instance().GetKeyPressed(VK_LBUTTON) << "\n";
         // std::cout << "!Input::Instance().GetKeyDown(KEY_LALT) = " << !Input::Instance().GetKeyDown(KEY_LALT) << "\n";
@@ -527,10 +543,10 @@ void Editor::Viewport()
 
         // std::cout << over << std::endl;
 
-        if ((IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && !deltaGizmoState && !over) ||
-            (IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !m_CurrentObject))
+        if ((ImGui::IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && !deltaGizmoState && !over) ||
+            (ImGui::IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !m_CurrentObject))
         {
-            unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(GetIO().MousePos.x - minusx), (int)y));
+            unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(ImGui::GetIO().MousePos.x - minusx), (int)y));
             if (picked != 0)
             {
                 m_CurrentObject = m_CurrentLayer->GetObjectById(picked);
@@ -584,28 +600,13 @@ void Editor::Viewport()
     GameCameraSize.x /= 10.0f;
     GameCameraSize.y /= 10.0f;
 
-    Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
-    if (m_GameCameraInVP)
+    if (m_IsGameCameraAcitve)
     {
-        ImDrawList* draw_list = GetWindowDrawList();
-        ImVec2 start = GetWindowPos();
-
-        // if (GetCurrentDock()->status == Docked)
-        //{
-        //     start.x += 20.0f;
-        //     start.y += 60.0f;
-        // }
-        // else
-        //{
-        //     start.y += 70.0f;
-        //     start.x += 20.0f;
-        // }
-
-        GameCameraSize.x += start.x;
-        GameCameraSize.y += start.y;
-        draw_list->AddImage((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), start, GameCameraSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), GameCameraSize, ImVec2(0, 1), ImVec2(1, 0));
     }
+
     if (Application::Instance().GetGameTimer().IsEditorPaused())
     {
         if (m_CurrentObject)
@@ -666,7 +667,7 @@ void Editor::Viewport()
                 ImGuizmo::RecomposeMatrixFromComponents(trans, rot, scale, m);
                 if (currOperation != (ImGuizmo::OPERATION)3)
                 {
-                    if (!m_Local)
+                    if (!m_IsTransformInLocalSpace)
                         ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::WORLD, m, NULL,
                                              useSnap ? snap : NULL);
                     else
@@ -805,13 +806,17 @@ void Editor::Viewport()
     }
 }
 
-void Editor::Archetype()
+void Editor::DrawArchetype()
 {
     static int selected = -1;
     m_Global_Spaces += " ";
     std::vector<std::string> archetypes;
+
     for (auto a : m_Archetypes)
+    {
         archetypes.push_back(a.first);
+    }
+
     ImGui::PushItemWidth(200.0f);
     ImGui::ListBox(m_Global_Spaces.c_str(), &selected, vector_getter, static_cast<void*>(&archetypes), (int)archetypes.size(), 5);
     ImGui::PopItemWidth();
@@ -833,19 +838,19 @@ void Editor::Archetype()
         // Add Tags here
         ImGui::Text("Tag:");
         ImGui::SameLine();
-        if (Selectable(currentArchetype->GetTag() == std::string{} ? "Click me to add Tag" : currentArchetype->GetTag().c_str())) ImGui::OpenPopup("ArcheTagsPopUp");
-        if (BeginPopup("ArcheTagsPopUp"))
+        if (ImGui::Selectable(currentArchetype->GetTag() == std::string{} ? "Click me to add Tag" : currentArchetype->GetTag().c_str())) ImGui::OpenPopup("ArcheTagsPopUp");
+        if (ImGui::BeginPopup("ArcheTagsPopUp"))
         {
             ImGui::Text("Tags");
             ImGui::Separator();
             for (auto& tag : m_Tags)
             {
-                if (Selectable(tag.c_str()))
+                if (ImGui::Selectable(tag.c_str()))
                 {
                     currentArchetype->SetTag(tag.c_str());
                 }
             }
-            if (Selectable(""))
+            if (ImGui::Selectable(""))
             {
                 if (currentArchetype->GetTag() != "")
                 {
@@ -879,17 +884,17 @@ void Editor::Archetype()
         ImGui::Text("Num of Components : %d", list.size());
         ImGui::Separator();
         if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponentPopup");
-        if (BeginPopup("AddComponentPopup"))
+        if (ImGui::BeginPopup("AddComponentPopup"))
         {
             ImGui::Text("Components");
             ImGui::Separator();
             for (int i = 0; i < AddComp.size(); ++i)
-                if (Selectable(AddComp[i].c_str())) Factory::m_Factories->at(AddComp[i])->create(currentArchetype);
-            EndPopup();
+                if (ImGui::Selectable(AddComp[i].c_str())) Factory::m_Factories->at(AddComp[i])->create(currentArchetype);
+            ImGui::EndPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Remove Component")) ImGui::OpenPopup("RemoveComponentPopup");
-        if (BeginPopup("RemoveComponentPopup"))
+        if (ImGui::BeginPopup("RemoveComponentPopup"))
         {
             ImGui::Text("Components");
             ImGui::Separator();
@@ -900,13 +905,13 @@ void Editor::Archetype()
                     auto scripts = currentArchetype->GetScripts();
                     for (size_t j = 0; j < scripts.size(); ++j)
                     {
-                        if (Selectable((std::string("Script:") + scripts[j]).c_str())) currentArchetype->RemoveScript(scripts[j]);
+                        if (ImGui::Selectable((std::string("Script:") + scripts[j]).c_str())) currentArchetype->RemoveScript(scripts[j]);
                     }
                 }
-                else if (Selectable(DelComp[i].c_str()))
+                else if (ImGui::Selectable(DelComp[i].c_str()))
                     Factory::m_Factories->at(DelComp[i])->remove(currentArchetype);
             }
-            EndPopup();
+            ImGui::EndPopup();
         }
         if (ImGui::Button("Revert"))
         {
@@ -982,7 +987,7 @@ void Editor::Archetype()
                             if (comp->GetName() == "TextRenderer" && properties[i].name == "m_Text")
                             {
                                 ImGui::InputTextMultiline(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
-                                if (!IsItemActive() && *string != tmp) *string = std::string(tmp);
+                                if (!ImGui::IsItemActive() && *string != tmp) *string = std::string(tmp);
                             }
                             else
                             {
@@ -1030,7 +1035,7 @@ void Editor::Archetype()
                             ImGui::SameLine();
                             float* tmp = reinterpret_cast<float*>(address + properties[i].offset);
                             m_Global_Spaces += " ";
-                            InputFloat(m_Global_Spaces.c_str(), tmp);
+                            ImGui::InputFloat(m_Global_Spaces.c_str(), tmp);
                         }
                         else if (properties[i].type == typeid(int).name())
                         {
@@ -1044,7 +1049,7 @@ void Editor::Archetype()
                             ImGui::SameLine();
                             bool* tmp = reinterpret_cast<bool*>(address + properties[i].offset);
                             m_Global_Spaces += " ";
-                            Checkbox(m_Global_Spaces.c_str(), tmp);
+                            ImGui::Checkbox(m_Global_Spaces.c_str(), tmp);
                         }
                         else if (properties[i].type == typeid(Vector4).name())
                         {
@@ -1072,7 +1077,7 @@ void Editor::Archetype()
                                 }
                             }
                             // ImGui::SameLine();
-                            bool open_popup = ColorButton(("Current Color" + hashes + properties[i].name).c_str(), color);
+                            bool open_popup = ImGui::ColorButton(("Current Color" + hashes + properties[i].name).c_str(), color);
                             if (open_popup)
                             {
                                 ImGui::OpenPopup(("ColorPicker" + hashes + properties[i].name).c_str());
@@ -1090,7 +1095,7 @@ void Editor::Archetype()
                                     {
                                         Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                                         *clr = newValue;
-                                        CloseCurrentPopup();
+                                        ImGui::CloseCurrentPopup();
                                     }
                                 }
                                 ImGui::SameLine();
@@ -1280,7 +1285,7 @@ void Editor::Archetype()
         ImGui::SameLine();
         ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
         ImGui::NewLine();
-        InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
+        ImGui::InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
         ImGui::SameLine();
         if (ImGui::Button("OK", ImVec2(120, 0)) || ImGui::IsKeyPressed(KEY_RETURN))
         {
@@ -1291,20 +1296,20 @@ void Editor::Archetype()
                 m_Undo.push_back(std::move(act));
                 ClearRedo();
                 SecureZeroMemory(string, MAX_STRING_LENGTH);
-                CloseCurrentPopup();
+                ImGui::CloseCurrentPopup();
             }
         }
         ImGui::SameLine();
-        InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
+        ImGui::InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             SecureZeroMemory(string, MAX_STRING_LENGTH);
-            CloseCurrentPopup();
+            ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
-        EndPopup();
+        ImGui::InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
+        ImGui::EndPopup();
     }
 }
 
@@ -1371,7 +1376,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 ImGui::SameLine();
                 float* tmp = reinterpret_cast<float*>(address + properties[i].offset);
                 m_Global_Spaces += " ";
-                InputFloat(m_Global_Spaces.c_str(), tmp);
+                ImGui::InputFloat(m_Global_Spaces.c_str(), tmp);
             }
             else if (properties[i].type == typeid(int).name())
             {
@@ -1385,7 +1390,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 ImGui::SameLine();
                 bool* tmp = reinterpret_cast<bool*>(address + properties[i].offset);
                 m_Global_Spaces += " ";
-                Checkbox(m_Global_Spaces.c_str(), tmp);
+                ImGui::Checkbox(m_Global_Spaces.c_str(), tmp);
             }
             else if (properties[i].type == typeid(Vector4).name())
             {
@@ -1413,7 +1418,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                     }
                 }
                 // ImGui::SameLine();
-                bool open_popup = ColorButton(("Current Color" + hashes + properties[i].name).c_str(), color);
+                bool open_popup = ImGui::ColorButton(("Current Color" + hashes + properties[i].name).c_str(), color);
                 if (open_popup)
                 {
                     ImGui::OpenPopup(("ColorPicker" + hashes + properties[i].name).c_str());
@@ -1431,7 +1436,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                         {
                             Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                             *clr = newValue;
-                            CloseCurrentPopup();
+                            ImGui::CloseCurrentPopup();
                         }
                     }
                     ImGui::SameLine();
@@ -1593,26 +1598,26 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
                         }
                     }
                     if (ImGui::Button("Add Attractor")) ImGui::OpenPopup("AddAttractorPopUp");
-                    if (BeginPopup("AddAttractorPopUp"))
+                    if (ImGui::BeginPopup("AddAttractorPopUp"))
                     {
                         ImGui::Text("Attractors");
                         ImGui::Separator();
                         for (int i = 0; i < attractor_name.size(); ++i)
-                            if (Selectable(attractor_name[i].c_str()))
+                            if (ImGui::Selectable(attractor_name[i].c_str()))
                             {
                                 ActionAddAttractor* act = new ActionAddAttractor(m_CurrentObject, m_attractor, attractor_id[i]);
                                 act->Execute();
                                 m_Undo.push_back(std::move(act));
                                 ClearRedo();
                             }
-                        EndPopup();
+                        ImGui::EndPopup();
                     }
                     for (int i = 0; i < m_attractor.size(); ++i)
                     {
-                        Bullet();
+                        ImGui::Bullet();
                         ImGui::Text("%s", m_CurrentLayer->GetObjectById(m_attractor[i]));
                         ImGui::SameLine();
-                        if (SmallButton((std::string("Delete") + "##" + std::to_string(i)).c_str()))
+                        if (ImGui::SmallButton((std::string("Delete") + "##" + std::to_string(i)).c_str()))
                         {
                             ActionDeleteAttractor* act = new ActionDeleteAttractor(m_CurrentObject, m_attractor, m_attractor[i]);
                             act->Execute();
@@ -1711,7 +1716,7 @@ void Editor::ClearRedo()
     }
 }
 
-void Editor::TextEditor()
+void Editor::DrawTextEditor()
 {
     // if (IsWindowFocused(ImGuiFocusedFlags_ChildWindows)) m_editorFocus = true;
     // else m_editorFocus = false;
@@ -1803,7 +1808,7 @@ void Editor::TextEditor()
     ImGui::EndChild();
 }
 
-void Editor::LayerEditor()
+void Editor::DrawLayerEditor()
 {
     if (ImGui::Button("New Layer"))
     {
@@ -1819,7 +1824,7 @@ void Editor::LayerEditor()
         ImGui::InputText(m_Global_Spaces.c_str(), AddLayerName, MAX_STRING_LENGTH);
         std::string name(AddLayerName);
         ImGui::NewLine();
-        InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
+        ImGui::InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
         ImGui::SameLine();
         if (ImGui::Button("OK", ImVec2(120, 0)) && !name.empty())
         {
@@ -1828,19 +1833,19 @@ void Editor::LayerEditor()
             m_Undo.push_back(std::move(act));
             ClearRedo();
             SecureZeroMemory(AddLayerName, MAX_STRING_LENGTH);
-            CloseCurrentPopup();
+            ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
+        ImGui::InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             SecureZeroMemory(AddLayerName, MAX_STRING_LENGTH);
-            CloseCurrentPopup();
+            ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
-        EndPopup();
+        ImGui::InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
+        ImGui::EndPopup();
     }
     if (Application::Instance().GetCurrentScene()->GetLayers().size() > 1)
     {
@@ -1862,8 +1867,8 @@ void Editor::LayerEditor()
     for (auto& ly : lys)
     {
         if (ly == m_CurrentLayer)
-            Selectable(ly->GetName().c_str(), true);
-        else if (Selectable(ly->GetName().c_str()))
+            ImGui::Selectable(ly->GetName().c_str(), true);
+        else if (ImGui::Selectable(ly->GetName().c_str()))
         {
             m_CurrentLayer = ly;
             Renderer::Instance().SetCurrentLayer(ly);
@@ -1874,7 +1879,7 @@ void Editor::LayerEditor()
     }
 }
 
-void Editor::Profiler()
+void Editor::DrawProfiler()
 {
     float real = 1.0f / Application::Instance().GetGameTimer().GetActualFrameTime();
     float rdt = Application::Instance().GetGameTimer().GetActualFrameTime();
@@ -1890,7 +1895,7 @@ void Editor::Profiler()
         input_t[59] = (m_Timings[0] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), input_t, IM_ARRAYSIZE(input_t), 0, "Input", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), input_t, IM_ARRAYSIZE(input_t), 0, "Input", 0, 100, ImVec2(0, 50));
     // physics sys
     ImGui::Text("Physics System : %f", m_Timings[1]);
     static float physics_t[60] = {0};
@@ -1902,7 +1907,7 @@ void Editor::Profiler()
         physics_t[59] = (m_Timings[1] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), physics_t, IM_ARRAYSIZE(input_t), 0, "Physics", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), physics_t, IM_ARRAYSIZE(input_t), 0, "Physics", 0, 100, ImVec2(0, 50));
     // scene sys
     ImGui::Text("Scene System : %f", m_Timings[2]);
     static float Logic_t[60] = {0};
@@ -1914,7 +1919,7 @@ void Editor::Profiler()
         Logic_t[59] = (m_Timings[2] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), Logic_t, IM_ARRAYSIZE(input_t), 0, "Logic", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), Logic_t, IM_ARRAYSIZE(input_t), 0, "Logic", 0, 100, ImVec2(0, 50));
     // render sys
     ImGui::Text("Renderer System : %f", m_Timings[3]);
     static float Render_t[60] = {0};
@@ -1926,7 +1931,7 @@ void Editor::Profiler()
         Render_t[59] = (m_Timings[3] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), Render_t, IM_ARRAYSIZE(input_t), 0, "Renderer", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), Render_t, IM_ARRAYSIZE(input_t), 0, "Renderer", 0, 100, ImVec2(0, 50));
     // editor sys
     ImGui::Text("Editor System : %f", m_Timings[4]);
     static float Editor_t[60] = {0};
@@ -1938,7 +1943,7 @@ void Editor::Profiler()
         Editor_t[59] = (m_Timings[4] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), Editor_t, IM_ARRAYSIZE(input_t), 0, "Editor", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), Editor_t, IM_ARRAYSIZE(input_t), 0, "Editor", 0, 100, ImVec2(0, 50));
     // audio sys
     ImGui::Text("Audio System : %f", m_Timings[5]);
     static float Audio_t[60] = {0};
@@ -1950,7 +1955,7 @@ void Editor::Profiler()
         Audio_t[59] = (m_Timings[5] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), Audio_t, IM_ARRAYSIZE(input_t), 0, "Audio", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), Audio_t, IM_ARRAYSIZE(input_t), 0, "Audio", 0, 100, ImVec2(0, 50));
     if (m_Timer < 60) ++m_Timer;
     // animation sys
     ImGui::Text("Animation System : %f", m_Timings[6]);
@@ -1963,7 +1968,7 @@ void Editor::Profiler()
         Anim_t[59] = (m_Timings[6] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), Anim_t, IM_ARRAYSIZE(input_t), 0, "Anim", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), Anim_t, IM_ARRAYSIZE(input_t), 0, "Anim", 0, 100, ImVec2(0, 50));
     if (m_Timer < 60) ++m_Timer;
 
     // Particle System
@@ -1977,7 +1982,7 @@ void Editor::Profiler()
         Part_t[59] = (m_Timings[7] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), Part_t, IM_ARRAYSIZE(input_t), 0, "Particle", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), Part_t, IM_ARRAYSIZE(input_t), 0, "Particle", 0, 100, ImVec2(0, 50));
     if (m_Timer < 60) ++m_Timer;
 
     // AI System
@@ -1991,15 +1996,20 @@ void Editor::Profiler()
         AI_t[59] = (m_Timings[8] / rdt) * 100.0f;
     }
     m_Global_Spaces += " ";
-    PlotLines(m_Global_Spaces.c_str(), AI_t, IM_ARRAYSIZE(input_t), 0, "AI", 0, 100, ImVec2(0, 50));
+    ImGui::PlotLines(m_Global_Spaces.c_str(), AI_t, IM_ARRAYSIZE(input_t), 0, "AI", 0, 100, ImVec2(0, 50));
     if (m_Timer < 60) ++m_Timer;
 }
 
-void Editor::FullScreenVP()
+void Editor::DrawFullScreenViewport()
 {
-    if (Input::Instance().GetKeyPressed(KEY_F8)) m_IsViewportFullScreen = !m_IsViewportFullScreen;
-    SetNextWindowPos(ImVec2(0, 0));
-    SetNextWindowSize(ImVec2((float)Application::Instance().GetWindowWidth(), (float)Application::Instance().GetWindowHeight()));
+    if (Input::Instance().GetKeyPressed(KEY_F8))
+    {
+        m_IsViewportFullScreen = !m_IsViewportFullScreen;
+    }
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2((float)Application::Instance().GetWindowWidth(), (float)Application::Instance().GetWindowHeight()));
+
     ImGui::Begin("FullScreen ViewPort", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
     if (Application::Instance().GetGameTimer().IsPlayModePaused())
     {
@@ -2022,7 +2032,9 @@ void Editor::FullScreenVP()
             Application::Instance().GetGameTimer().SetPlayModePaused(true);
         }
     }
+
     ImGui::SameLine();
+
     if (ImGui::Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
     {
         Application::Instance().GetGameTimer().SetPlayModePaused(false);
@@ -2074,16 +2086,16 @@ void Editor::FullScreenVP()
     }
 
     ImVec2 windowSize = ImGui::GetWindowSize();
-    windowSize.y -= ImGuiStyleVar_FramePadding * 2 + GetFontSize() + 13.0f;
+    windowSize.y -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
 
     Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
     Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
 
-    Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
 
-void Editor::TagsEditor()
+void Editor::DrawTagsEditor()
 {
     static int selected_tag = -1;
     m_Global_Spaces += " ";
@@ -2149,7 +2161,7 @@ void Editor::TagsEditor()
     }
 }
 
-void Editor::PhysicsEditor()
+void Editor::DrawPhysicsEditor()
 {
 #define PhysicsWorld PhysicsSystem::Instance().s_PhyWorldSettings
     if (ImGui::Button("Save Physics World"))
@@ -2249,10 +2261,10 @@ void Editor::PhysicsEditor()
     PhysicsOptionsFloat(&PhysicsWorld.m_ContactManifoldSimilarAngle);
 }
 
-void Editor::ResourceManager()
+void Editor::DrawResourceManager()
 {
     static bool b = false;
-    Checkbox("Debugging Resources", &b);
+    ImGui::Checkbox("Debugging Resources", &b);
     ImGui::Button("Add Resource");
     if (b)
     {
@@ -2484,7 +2496,7 @@ void Editor::ResourceManager()
     ImGui::Separator();
     ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Meshes");
-    PopFont();
+    ImGui::PopFont();
     static int mesh_selected = -1;
     static int mesh_height = static_cast<int>(m_MeshNames.size()) > 6 ? 6 : static_cast<int>(m_MeshNames.size());
     if (ImGui::Button("Delete Mesh"))
@@ -2509,7 +2521,7 @@ void Editor::ResourceManager()
 
     ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Animations");
-    PopFont();
+    ImGui::PopFont();
     static int anim_selected = -1;
     static int anim_height = static_cast<int>(m_AnimationNames.size()) > 6 ? 6 : static_cast<int>(m_AnimationNames.size());
     if (ImGui::Button("Delete Animation"))
@@ -2533,7 +2545,7 @@ void Editor::ResourceManager()
 
     ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Textures");
-    PopFont();
+    ImGui::PopFont();
     static int tex_selected = -1;
     static int tex_height = static_cast<int>(m_TextureNames.size()) > 6 ? 6 : static_cast<int>(m_TextureNames.size());
     if (ImGui::Button("Delete Texture"))
@@ -2557,7 +2569,7 @@ void Editor::ResourceManager()
 
     ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Fonts");
-    PopFont();
+    ImGui::PopFont();
     static int font_selected = -1;
     static int font_height = static_cast<int>(m_FontNames.size()) > 6 ? 6 : static_cast<int>(m_FontNames.size());
     if (ImGui::Button("Delete Font"))
@@ -2583,7 +2595,7 @@ void Editor::PhysicsOptionsFloat(float* f)
 {
     float tmp = *f;
     m_Global_Spaces += " ";
-    InputFloat(m_Global_Spaces.c_str(), &tmp);
+    ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
     if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
     {
         // Physics Action here
@@ -2600,7 +2612,7 @@ void Editor::PhysicsOptionsBool(bool* b)
 {
     bool tmp = *b;
     m_Global_Spaces += " ";
-    Checkbox(m_Global_Spaces.c_str(), &tmp);
+    ImGui::Checkbox(m_Global_Spaces.c_str(), &tmp);
     if (tmp != *b)
     {
         bool oldValue = *b;
@@ -2671,7 +2683,7 @@ void Editor::Options(std::string* s, GameObject* go, std::string c, std::string 
     }
     else
     {
-        if (!IsItemActive() && *s != string)
+        if (!ImGui::IsItemActive() && *s != string)
         {
             std::string oldValue = *s;
             std::string newValue = string;
@@ -2748,7 +2760,7 @@ void Editor::Options(float* f, GameObject* go, std::string c, std::string p)
 {
     float tmp = *f;
     m_Global_Spaces += " ";
-    InputFloat(m_Global_Spaces.c_str(), &tmp);
+    ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
     if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
     {
         float oldValue = *f;
@@ -2780,7 +2792,7 @@ void Editor::Options(bool* b, GameObject* go, std::string c, std::string p)
 {
     bool tmp = *b;
     m_Global_Spaces += " ";
-    Checkbox(m_Global_Spaces.c_str(), &tmp);
+    ImGui::Checkbox(m_Global_Spaces.c_str(), &tmp);
     if (tmp != *b)
     {
         int oldValue = *b;
@@ -2820,7 +2832,7 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
         }
     }
     // ImGui::SameLine();
-    bool open_popup = ColorButton(("Current Color" + hashes + p).c_str(), color);
+    bool open_popup = ImGui::ColorButton(("Current Color" + hashes + p).c_str(), color);
     if (open_popup)
     {
         ImGui::OpenPopup(("ColorPicker" + hashes + p).c_str());
@@ -2842,7 +2854,7 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
                 act->Execute();
                 m_Undo.push_back(std::move(act));
                 ClearRedo();
-                CloseCurrentPopup();
+                ImGui::CloseCurrentPopup();
             }
         }
         ImGui::SameLine();
@@ -3037,7 +3049,7 @@ void Editor::ParentStructOptions(float* f, GameObject*& go, std::string c)
 {
     float tmp = *f;
     m_Global_Spaces += " ";
-    InputFloat(m_Global_Spaces.c_str(), &tmp);
+    ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
     if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
     {
         ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
@@ -3071,7 +3083,7 @@ void Editor::ParentStructOptions(bool* b, GameObject*& go, std::string c)
 {
     bool tmp = *b;
     m_Global_Spaces += " ";
-    Checkbox(m_Global_Spaces.c_str(), &tmp);
+    ImGui::Checkbox(m_Global_Spaces.c_str(), &tmp);
     if (tmp != *b)
     {
         ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
@@ -3180,7 +3192,7 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
         }
     }
     // ImGui::SameLine();
-    bool open_popup = ColorButton(("Current Color" + hashes + p).c_str(), color);
+    bool open_popup = ImGui::ColorButton(("Current Color" + hashes + p).c_str(), color);
     if (open_popup)
     {
         ImGui::OpenPopup(("ColorPicker" + hashes + p).c_str());
@@ -3203,7 +3215,7 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
                 act->SetNew(go);
                 m_Undo.push_back(std::move(act));
                 ClearRedo();
-                CloseCurrentPopup();
+                ImGui::CloseCurrentPopup();
             }
         }
         ImGui::SameLine();
@@ -3334,7 +3346,7 @@ void Editor::CreateNewSceneTab()
         ImGui::InputText(m_Global_Spaces.c_str(), LayerName, MAX_STRING_LENGTH);
         std::string name(LayerName);
         ImGui::NewLine();
-        InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
+        ImGui::InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
         ImGui::SameLine();
         if (ImGui::Button("OK", ImVec2(120, 0)) && !name.empty())
         {
@@ -3347,19 +3359,19 @@ void Editor::CreateNewSceneTab()
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
             Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
             SecureZeroMemory(LayerName, MAX_STRING_LENGTH);
-            CloseCurrentPopup();
+            ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
+        ImGui::InvisibleButton("OKCANCELSPACING2", ImVec2(120, 1));
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
             SecureZeroMemory(LayerName, MAX_STRING_LENGTH);
-            CloseCurrentPopup();
+            ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
-        EndPopup();
+        ImGui::InvisibleButton("OKCANCELSPACING3", ImVec2(60, 1));
+        ImGui::EndPopup();
     }
 }
 
@@ -3393,39 +3405,49 @@ void Editor::ChildrenDuplicate(GameObject* original, GameObject* Clone)
 
 void Editor::LoadData()
 {
-    tinyxml2::XMLDocument file;
-    if (file.LoadFile((std::string(m_CurrentWorkingDirectory) + "\\ImGUI_Docks.xml").c_str()) == tinyxml2::XMLError::XML_SUCCESS)
+    tinyxml2::XMLDocument document;
+
+    if (document.LoadFile((std::string(m_CurrentWorkingDirectory) + "\\imgui_editor_windows.xml").c_str()) == tinyxml2::XMLError::XML_SUCCESS)
     {
-        tinyxml2::XMLNode* root = file.FirstChild();
+        tinyxml2::XMLNode* root = document.FirstChild();
         tinyxml2::XMLElement* Data = root->FirstChildElement();
         std::string boolean = Data->Attribute("AppConsole");
+
         m_Console.m_IsActiveWindow = (bool)std::stoi(boolean);
+
         for (int i = 0; i < NUM_OF_WINDOWS; ++i)
         {
             if (!Data) return;
             if (!Data->Attribute(("Window" + std::to_string(i)).c_str())) break;
             std::string boolean = Data->Attribute(("Window" + std::to_string(i)).c_str());
-            m_ActiveWindow[i] = (bool)std::stoi(boolean);
+            m_WindowStates[i] = (bool)std::stoi(boolean);
         }
     }
 }
 
 void Editor::SaveData()
 {
-    tinyxml2::XMLDocument doc;
-    tinyxml2::XMLNode* pRoot = doc.NewElement("Activeness");
-    doc.InsertEndChild(pRoot);
-    tinyxml2::XMLElement* Data = doc.NewElement("Windows");
-    pRoot->InsertEndChild(Data);
-    Data->SetAttribute("AppConsole", (int)m_Console.m_IsActiveWindow);
+    tinyxml2::XMLDocument document;
+
+    tinyxml2::XMLNode* rootNode = document.NewElement("Activeness");
+    document.InsertEndChild(rootNode);
+
+    tinyxml2::XMLElement* dataElement = document.NewElement("Windows");
+    dataElement->SetAttribute("AppConsole", (int)m_Console.m_IsActiveWindow);
+
+    rootNode->InsertEndChild(dataElement);
+
     for (int i = 0; i < NUM_OF_WINDOWS; ++i)
-        Data->SetAttribute(("Window" + std::to_string(i)).c_str(), (int)m_ActiveWindow[i]);
-    tinyxml2::XMLError result = doc.SaveFile((std::string(m_CurrentWorkingDirectory) + "\\ImGUI_Docks.xml").c_str());
+    {
+        dataElement->SetAttribute(("Window" + std::to_string(i)).c_str(), (int)m_WindowStates[i]);
+    }
+
+    tinyxml2::XMLError result = document.SaveFile((std::string(m_CurrentWorkingDirectory) + "\\imgui_editor_windows.xml").c_str());
 }
 
-void Editor::SetUndoRedoSize(const unsigned& sz)
+void Editor::SetUndoRedoSize(const unsigned& count)
 {
-    m_Redo_Undo_Size = sz;
+    m_RedoUndoCount = count;
 }
 
 AppConsole& Editor::GetConsole()
@@ -3435,17 +3457,17 @@ AppConsole& Editor::GetConsole()
 
 void Editor::KeyDown(WPARAM key, bool pressed)
 {
-    GetIO().KeysDown[key] = pressed;
+    ImGui::GetIO().KeysDown[key] = pressed;
 }
 
 void Editor::CharInput(char c)
 {
-    GetIO().AddInputCharacter(c);
+    ImGui::GetIO().AddInputCharacter(c);
 }
 
 void Editor::MouseScroll(short s)
 {
-    GetIO().MouseWheel = s;
+    ImGui::GetIO().MouseWheel = s;
 }
 
 GameObject* Editor::CreateArchetype(const std::string& n)
@@ -4035,7 +4057,7 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
 
     if (ImGui::TreeNode(s.c_str()))
     {
-        if (IsItemClicked())
+        if (ImGui::IsItemClicked())
         {
             m_CurrentObject = go;
             if (Input::Instance().GetKeyDown(KEY_LSHIFT))
@@ -4077,7 +4099,7 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
             auto gameObject = ly->GetObjectById(*begin);
             if (!gameObject->GetChildrenObjects().size())
             {
-                if (Selectable((gameObject->GetName() + "##" + std::to_string(*begin)).c_str(), selected == *begin))
+                if (ImGui::Selectable((gameObject->GetName() + "##" + std::to_string(*begin)).c_str(), selected == *begin))
                 {
                     m_CurrentObject = gameObject;
                     if (Input::Instance().GetKeyDown(KEY_LSHIFT))
@@ -4102,11 +4124,11 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                     }
                     selected = *begin;
                 }
-                if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject)
+                if (ImGui::IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject)
                 {
                     m_OutlinerSelectedObject = gameObject;
                 }
-                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && IsItemHovered())
+                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && ImGui::IsItemHovered())
                 {
                     if (m_OutlinerSelectedObject != gameObject)
                     {
@@ -4136,8 +4158,8 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
         }
         ImGui::TreePop();
     }
-    if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject) m_OutlinerSelectedObject = go;
-    if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && IsItemHovered())
+    if (ImGui::IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject) m_OutlinerSelectedObject = go;
+    if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && ImGui::IsItemHovered())
     {
         if (m_OutlinerSelectedObject != go)
         {
@@ -4283,7 +4305,7 @@ void Editor::RemoveTag(std::string t)
     m_Tags.erase(t);
 }
 
-void Editor::Outliner()
+void Editor::DrawOutliner()
 {
     // if (m_selectedOutliner) std::cout << m_selectedOutliner->GetName() << std::endl;
     // if (m_selectedOutliner) ImGui::Text("Selected Outliner : %s", m_selectedOutliner->GetName());
@@ -4303,7 +4325,7 @@ void Editor::Outliner()
             if (go->GetIsChildren()) continue;
             if (!go->GetChildrenObjects().size())
             {
-                if (Selectable((go->GetName() + "##" + std::to_string(i)).c_str(), selected == go->GetID()))
+                if (ImGui::Selectable((go->GetName() + "##" + std::to_string(i)).c_str(), selected == go->GetID()))
                 {
                     m_CurrentObject = go;
                     if (Input::Instance().GetKeyDown(KEY_LSHIFT))
@@ -4343,7 +4365,7 @@ void Editor::Outliner()
                     }
                     selected = go->GetID();
                 }
-                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && IsItemHovered())
+                if (Input::Instance().GetKeyUp(MOUSE_MID) && m_OutlinerSelectedObject && ImGui::IsItemHovered())
                 {
                     if (m_OutlinerSelectedObject != go)
                     {
@@ -4365,7 +4387,7 @@ void Editor::Outliner()
                         }
                     }
                 }
-                if (IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject) m_OutlinerSelectedObject = go;
+                if (ImGui::IsItemHovered() && Input::Instance().GetMousePressed(MOUSE_MID) && !m_OutlinerSelectedObject) m_OutlinerSelectedObject = go;
             }
             else
             {
@@ -4389,7 +4411,7 @@ void Editor::Outliner()
     }
 }
 
-void Editor::Inspector()
+void Editor::DrawInspector()
 {
     if (m_CurrentObject)
     {
@@ -4404,14 +4426,14 @@ void Editor::Inspector()
         if (!m_CurrentObject->GetArchetype().empty()) ImGui::Text("Archetype : %s", m_CurrentObject->GetArchetype().c_str());
         ImGui::Text("Tag : ");
         ImGui::SameLine();
-        if (Selectable(m_CurrentObject->GetTag() == std::string{} ? "Click me to add Tag" : m_CurrentObject->GetTag().c_str())) ImGui::OpenPopup("TagsPopUp");
-        if (BeginPopup("TagsPopUp"))
+        if (ImGui::Selectable(m_CurrentObject->GetTag() == std::string{} ? "Click me to add Tag" : m_CurrentObject->GetTag().c_str())) ImGui::OpenPopup("TagsPopUp");
+        if (ImGui::BeginPopup("TagsPopUp"))
         {
             ImGui::Text("Tags");
             ImGui::Separator();
             for (auto& tag : m_Tags)
             {
-                if (Selectable(tag.c_str()))
+                if (ImGui::Selectable(tag.c_str()))
                 {
                     ActionTagObject* act = new ActionTagObject(m_CurrentObject->GetTag(), tag, m_CurrentObject);
                     act->Execute();
@@ -4419,7 +4441,7 @@ void Editor::Inspector()
                     ClearRedo();
                 }
             }
-            if (Selectable(""))
+            if (ImGui::Selectable(""))
             {
                 if (m_CurrentObject->GetTag() != "")
                 {
@@ -4455,23 +4477,23 @@ void Editor::Inspector()
         ImGui::Text("Num of Components : %d", list.size());
         ImGui::Separator();
         if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponentPopup");
-        if (BeginPopup("AddComponentPopup"))
+        if (ImGui::BeginPopup("AddComponentPopup"))
         {
             ImGui::Text("Components");
             ImGui::Separator();
             for (int i = 0; i < AddComp.size(); ++i)
-                if (Selectable(AddComp[i].c_str()))
+                if (ImGui::Selectable(AddComp[i].c_str()))
                 {
                     ActionAddComponent* act = new ActionAddComponent(m_CurrentObject, AddComp[i], m_CurrentLayer);
                     act->Execute();
                     m_Undo.push_back(std::move(act));
                     ClearRedo();
                 }
-            EndPopup();
+            ImGui::EndPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Remove Component")) ImGui::OpenPopup("RemoveComponentPopup");
-        if (BeginPopup("RemoveComponentPopup"))
+        if (ImGui::BeginPopup("RemoveComponentPopup"))
         {
             ImGui::Text("Components");
             ImGui::Separator();
@@ -4482,7 +4504,7 @@ void Editor::Inspector()
                     auto scripts = m_CurrentObject->GetScripts();
                     for (size_t j = 0; j < scripts.size(); ++j)
                     {
-                        if (Selectable((std::string("Script:") + scripts[j]).c_str()))
+                        if (ImGui::Selectable((std::string("Script:") + scripts[j]).c_str()))
                         {
                             ActionRevertScript* act = new ActionRevertScript(m_CurrentObject, scripts[j], m_CurrentLayer);
                             act->Execute();
@@ -4491,7 +4513,7 @@ void Editor::Inspector()
                         }
                     }
                 }
-                else if (Selectable(DelComp[i].c_str()))
+                else if (ImGui::Selectable(DelComp[i].c_str()))
                 {
                     ActionRemoveComponent* act = new ActionRemoveComponent(m_CurrentObject, DelComp[i], m_CurrentLayer);
                     act->Execute();
@@ -4499,7 +4521,7 @@ void Editor::Inspector()
                     ClearRedo();
                 }
             }
-            EndPopup();
+            ImGui::EndPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Refresh")) m_CurrentObject->UpdateComponents();
@@ -4639,7 +4661,7 @@ void Editor::Inspector()
                                 ImGui::Text("%s : ", var.first.c_str());
                                 m_Global_Spaces += " ";
                                 ImGui::SameLine();
-                                Checkbox(m_Global_Spaces.c_str(), &tmp);
+                                ImGui::Checkbox(m_Global_Spaces.c_str(), &tmp);
                                 if (b != tmp)
                                 {
                                     int oldValue = b;
@@ -4657,7 +4679,7 @@ void Editor::Inspector()
                                 ImGui::Text("%s : ", var.first.c_str());
                                 m_Global_Spaces += " ";
                                 ImGui::SameLine();
-                                InputFloat(m_Global_Spaces.c_str(), &tmp);
+                                ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
                                 if (ImGui::IsKeyPressed(KEY_RETURN) && f != tmp)
                                 {
                                     float oldValue = f;
@@ -4724,7 +4746,7 @@ void Editor::Inspector()
 
 void Editor::SetEditorMouse()
 {
-    ImGuiIO& io = GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     // set up the imgui io
     Vector2 mousePos = GetInstance(Input).GetMousePosition();
     io.MousePos = ImVec2(mousePos.x, io.DisplaySize.y - mousePos.y);
@@ -4734,25 +4756,28 @@ void Editor::SetEditorMouse()
     io.MouseClickedPos[1] = ImVec2(mousePos.x, io.DisplaySize.y - mousePos.y);
 }
 
-Editor::Editor(float x, float y)
+Editor::Editor(HWND hwnd, float x, float y)
     : m_Console{}
-    , m_Redo_Undo_Size{20}
+    , m_RedoUndoCount{20}
     , m_CurrentObject{nullptr}
     , m_Global_Spaces{}
     , m_GlobalIDCounter{0}
     , m_CurrentLayer(nullptr)
     , m_IsEditorInFocus(false)
     , m_CurrentWorkingDirectory(_getcwd(0, 0))
-    , m_ActiveWindow()
+    , m_WindowStates()
     , m_Timer(0)
     , m_OutlinerSelectedObject(nullptr)
     , m_IsViewportFullScreen(false)
-    , m_Local(false)
-    , m_GameCameraInVP(false)
+    , m_IsTransformInLocalSpace(false)
+    , m_IsGameCameraAcitve(false)
 {
-    CreateContext();
+    ImGui::CreateContext();
 
-    ImGuiIO& io = GetIO();
+    ImGui_ImplWin32_Init(static_cast<void*>(hwnd));
+    ImGui_ImplOpenGL3_Init();
+
+    ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize.x = x;
     io.DisplaySize.y = y;
     io.DeltaTime = 1.0f / 60.0f;
@@ -4783,7 +4808,10 @@ Editor::Editor(float x, float y)
 
     // for (int i = 0; i < MAX_ARCHETYPES; ++i) m_Archetypes.emplace_back(nullptr, i);
     for (int i = 0; i < NUM_OF_WINDOWS; ++i)
-        m_ActiveWindow[i] = false;
+    {
+        m_WindowStates[i] = false;
+    }
+
     LoadData();
 
     for (int n = 0; n < IM_ARRAYSIZE(m_SavedPalettes); n++)
@@ -4791,9 +4819,11 @@ Editor::Editor(float x, float y)
         ImGui::ColorConvertHSVtoRGB(n / 31.0f, 0.8f, 0.8f, m_SavedPalettes[n].x, m_SavedPalettes[n].y, m_SavedPalettes[n].z);
         m_SavedPalettes[n].w = 1.0f;  // Alpha
     }
+
     SecureZeroMemory(m_EditorStringBuffer, 2 << 23);
     DeSerializeArchetypes();
     LoadTags();
+
     m_ImGuiFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 13.0f);
     m_ImGuiFontBold = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibrib.ttf", 23.0f);
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
@@ -4815,13 +4845,16 @@ Editor::~Editor()
     }
     // Need to save the archetype
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+
     ImGui::DestroyContext();
     free(m_CurrentWorkingDirectory);
 }
 
 void Editor::Update(float dt)
 {
-    GetIO().DeltaTime = dt;
+    ImGui::GetIO().DeltaTime = dt;
 
     // If not in play mode
     if (!ms_IsGameRunning)
@@ -4853,167 +4886,121 @@ void Editor::Update(float dt)
         //  SetCursorPos(cx + Application::Instance().GetWindowWidth() / 2, cy + Application::Instance().GetWindowHeight() / 2);
     }
 
-    ImGuiWindowFlags flag = ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-    if (Input::Instance().GetKeyDown(KEY_LCTRL))
-    {
-        flag = ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-    }
     UpdateMeshArray();
-    if (!m_CurrentLayer) m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
-    NewFrame();
-    if (m_ActiveWindow[(int)WindowStates::Viewport])
+
+    if (m_CurrentLayer == nullptr)
     {
-        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen) ImGuizmo::BeginFrame();
+        m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
     }
-    GetIO().DisplaySize.x = (float)Application::Instance().GetWindowWidth();
-    GetIO().DisplaySize.y = (float)Application::Instance().GetWindowHeight();
+
+    ImGui_ImplWin32_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui::NewFrame();
+
     SetEditorMouse();
-    MainMenu();
+    DrawMainMenu();
     ShortcutButtons();
     CreateNewSceneTab();
-    StyleEditor();
-    Help();
-    // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
-    // {
-    SetNextWindowPos(ImVec2(0, 18.0f));
-    SetNextWindowSize(ImVec2(0.25f * GetIO().DisplaySize.x, 0.65f * GetIO().DisplaySize.y));
-    // }
-    ImGui::Begin("Docking1", NULL, flag);
-    ImGui::BeginTabBar("docking_tab_bar_1");
-    ImGui::EndTabBar();
-    ImGui::End();
+    // DrawStyleEditor();
+    // DrawHelp();
 
-    // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
-    // {
-    SetNextWindowPos(ImVec2(0.8725f * GetIO().DisplaySize.x, 18.0f));
-    SetNextWindowSize(ImVec2(0.1275f * GetIO().DisplaySize.x, 0.985f * GetIO().DisplaySize.y));
-    // }
-    ImGui::Begin("Docking2", NULL, flag);
-    ImGui::BeginTabBar("docking_tab_bar_2");
-    ImGui::EndTabBar();
-    ImGui::End();
+    ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::Begin("main_window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-    // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
-    // {
-    SetNextWindowPos(ImVec2(0.25f * GetIO().DisplaySize.x, 18.0f));
-    SetNextWindowSize(ImVec2(0.6225f * GetIO().DisplaySize.x, 0.65f * GetIO().DisplaySize.y));
-    // }
-    ImGui::Begin("Docking3", NULL, flag);
-    ImGui::BeginTabBar("docking_tab_bar_3");
-    ImGui::EndTabBar();
-    ImGui::End();
-
-    // if (Input::Instance().GetKeyPressed(KEY_RCTRL))
-    // {
-    SetNextWindowPos(ImVec2(0, 0.65f * GetIO().DisplaySize.y + 18.0f));
-    SetNextWindowSize(ImVec2(0.8725f * GetIO().DisplaySize.x, 0.335f * GetIO().DisplaySize.y));
-    // }
-    ImGui::Begin("Docking4", NULL, flag);
-    ImGui::BeginTabBar("docking_tab_bar_4");
-    ImGui::EndTabBar();
-    ImGui::End();
-
-    if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
+    if (ImGui::BeginTabBar("editor_main_tab_bar"))
     {
-        if (m_ActiveWindow[(int)WindowStates::Viewport])
+        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
         {
-            ImGuiWindowFlags flag = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-            if (GetIO().KeyAlt) flag = flag | ImGuiWindowFlags_NoMove;
-            ImGui::BeginTabItem("ViewPort", &m_ActiveWindow[2], flag);
-            Viewport();
+            ImGuizmo::BeginFrame();
+        }
+
+        // ImGui::GetIO().DisplaySize.x = (float)Application::Instance().GetWindowWidth();
+        // ImGui::GetIO().DisplaySize.y = (float)Application::Instance().GetWindowHeight();
+
+        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
+        {
+            if (ImGui::BeginTabItem("ViewPort", &m_WindowStates[2]))
+            {
+                DrawViewport();
+                ImGui::EndTabItem();
+            }
+        }
+        else
+        {
+            // FullScreen Viewport here
+            DrawFullScreenViewport();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::Physics] && ImGui::BeginTabItem("Physics"))
+        {
+            DrawPhysicsEditor();
             ImGui::EndTabItem();
         }
+
+        if (m_WindowStates[(int)EditorWindowType::Outliner] && ImGui::BeginTabItem("Outliner"))
+        {
+            DrawOutliner();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::Inspector] && ImGui::BeginTabItem("Inspector"))
+        {
+            DrawInspector();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::Archetype] && ImGui::BeginTabItem("Archetype"))
+        {
+            DrawArchetype();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::LayerEditor] && ImGui::BeginTabItem("LayerEditor"))
+        {
+            DrawLayerEditor();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::Profiler] && ImGui::BeginTabItem("Profiler"))
+        {
+            DrawProfiler();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::Tags] && ImGui::BeginTabItem("Tags"))
+        {
+            DrawTagsEditor();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::TextEditor] && ImGui::BeginTabItem("TextEditor"))
+        {
+            DrawTextEditor();
+            ImGui::EndTabItem();
+        }
+
+        if (m_WindowStates[(int)EditorWindowType::Resource] && ImGui::BeginTabItem("ResourceManager"))
+        {
+            DrawResourceManager();
+            ImGui::EndTabItem();
+        }
+
+        // DebugDockSpaces();
+        m_Console.Draw();
+        UpdateRedoUndo();
+        m_Global_Spaces.clear();
+
+        ImGui::EndTabBar();
     }
-    else
-    {
-        // FullScreen Viewport here
-        FullScreenVP();
-    }
+    
+    ImGui::End();
+    ImGui::PopStyleVar();
 
-    if (m_ActiveWindow[(int)WindowStates::Physics])
-    {
-        ImGui::BeginTabItem("Physics", &m_ActiveWindow[(int)WindowStates::Physics], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        PhysicsEditor();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::Outliner])
-    {
-        ImGui::BeginTabItem("Outliner", &m_ActiveWindow[(int)WindowStates::Outliner], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        Outliner();
-        ImGui::NewLine();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::Inspector])
-    {
-        ImGui::BeginTabItem("Inspector", &m_ActiveWindow[(int)WindowStates::Inspector], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        Inspector();
-        ImGui::NewLine();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::Archetype])
-    {
-
-        ImGui::BeginTabItem("Archetype", &m_ActiveWindow[(int)WindowStates::Archetype], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        Archetype();
-        ImGui::NewLine();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::LayerEditor])
-    {
-
-        ImGui::BeginTabItem("LayerEditor", &m_ActiveWindow[(int)WindowStates::LayerEditor], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        LayerEditor();
-        ImGui::NewLine();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::Profiler])
-    {
-
-        ImGui::BeginTabItem("Profiler", &m_ActiveWindow[(int)WindowStates::Profiler], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        Profiler();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::Tags])
-    {
-
-        ImGui::BeginTabItem("Tags", &m_ActiveWindow[(int)WindowStates::Profiler], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        TagsEditor();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::TextEditor])
-    {
-        ImGui::BeginTabItem("TextEditor", &m_ActiveWindow[(int)WindowStates::TextEditor], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        TextEditor();
-        ImGui::NewLine();
-        ImGui::EndTabItem();
-    }
-
-    if (m_ActiveWindow[(int)WindowStates::Resource])
-    {
-        ImGui::BeginTabItem("ResourceManager", &m_ActiveWindow[(int)WindowStates::Resource], ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        ResourceManager();
-        ImGui::EndTabItem();
-    }
-
-    // DebugDockSpaces();
-    m_Console.Draw();
-    Update_Redo_Undo();
-    m_Global_Spaces.clear();
     ImGui::ShowDemoWindow();
-    // Call PostFrameFunction for all archetypes
-    Draw();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    m_DeltaMousePos = GetMousePos();
-}
-
-void Editor::Draw()
-{
-    Render();
+    m_DeltaMousePos = ImGui::GetMousePos();
 }

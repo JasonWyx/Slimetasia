@@ -21,7 +21,7 @@ class Editor : public ISystem<Editor>
 {
     friend class ISystem<Editor>;
 
-    enum class WindowStates
+    enum class EditorWindowType
     {
         Outliner = 0,
         Inspector,
@@ -39,11 +39,11 @@ class Editor : public ISystem<Editor>
     std::string m_Global_Spaces;
     std::list<Action*> m_Redo;
     std::list<Action*> m_Undo;
-    unsigned m_Redo_Undo_Size;
+    unsigned m_RedoUndoCount;
     AppConsole m_Console;
     GameObject* m_CurrentObject;
     std::vector<GameObject*> m_SelectedObjects;
-    bool m_ActiveWindow[NUM_OF_WINDOWS];
+    bool m_WindowStates[NUM_OF_WINDOWS];
     std::map<std::string, GameObject*> m_Archetypes;
     std::map<std::string, GameObject*> m_UpdatedArchetypes;
     Layer* m_CurrentLayer;
@@ -69,33 +69,36 @@ class Editor : public ISystem<Editor>
     ImVec2 m_DeltaMousePos;
     bool m_IsViewportFullScreen;
     std::set<std::string> m_Tags;
-    bool m_Local;
-    bool m_GameCameraInVP;
+    bool m_IsTransformInLocalSpace;
+    bool m_IsGameCameraAcitve;
     ImFont* m_ImGuiFont;
     ImFont* m_ImGuiFontBold;
 
-    void Outliner();
-    void Inspector();
+    void DrawOutliner();
+    void DrawInspector();
     void SetEditorMouse();
-    void Update_Redo_Undo();
+    void UpdateRedoUndo();
     void ClearRedoUndo();
-    void MainMenu();
+
+    void DrawMainMenu();
     void ShortcutButtons();
-    void StyleEditor();
-    void Help();
-    void Viewport();
-    void Archetype();
+
+    void DrawStyleEditor();
+    void DrawHelp();
+    void DrawViewport();
+    void DrawArchetype();
     void ParentArchetypeInspector(char* address, std::string parent, GameObject* currentArchetype);
     void ParentInspector(char* address, std::string comp, std::string parent);
     void StructInspector(char* address, std::string comp);
     void ClearRedo();
-    void TextEditor();
-    void LayerEditor();
-    void Profiler();
-    void FullScreenVP();
-    void TagsEditor();
-    void PhysicsEditor();
-    void ResourceManager();
+
+    void DrawTextEditor();
+    void DrawLayerEditor();
+    void DrawProfiler();
+    void DrawFullScreenViewport();
+    void DrawTagsEditor();
+    void DrawPhysicsEditor();
+    void DrawResourceManager();
 
     // Physics Options
     void PhysicsOptionsFloat(float* f);
@@ -157,11 +160,11 @@ class Editor : public ISystem<Editor>
 
 public:
     // x and y are the display size
-    Editor(float x, float y);
+    Editor(HWND hwnd, float x, float y);
     ~Editor();
 
     void Update(float dt);
-    void Draw();
+
     void Undo();
     void Redo();
     void SetUndoRedoSize(const unsigned& sz);

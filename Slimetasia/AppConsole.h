@@ -4,8 +4,6 @@
 
 #include "External Libraries\imgui\imgui.h"
 
-using namespace ImGui;
-
 class AppConsole
 {
     std::deque<std::string> m_Items;

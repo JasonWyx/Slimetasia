@@ -930,7 +930,6 @@
     <None Include="Shaders\ParticleStencil.vert">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="ApplicationIcon.ico">
