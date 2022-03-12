@@ -80,7 +80,7 @@ class Editor : public ISystem<Editor>
     void UpdateRedoUndo();
     void ClearRedoUndo();
 
-    void DrawMainMenu();
+    void DrawMenuBar();
     void ShortcutButtons();
 
     void DrawStyleEditor();

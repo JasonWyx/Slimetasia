@@ -16,6 +16,7 @@
 #include "CollisionMesh_3D.h"
 #include "Editor.h"
 #include "Factory.h"
+#include "RendererVk.h"
 #include "Input.h"
 #include "MeshRenderer.h"
 #include "ParticleSystem.h"
@@ -91,7 +92,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             /// Check for each files
             for (unsigned i = 0; i < amount; ++i)
             {
-                TCHAR buff[MAX_PATH] = {0};
+                TCHAR buff[MAX_PATH] = { 0 };
                 DragQueryFile(dropInfo, i, buff, MAX_PATH);
 
                 filesystem::path filePath = buff;
@@ -134,7 +135,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
                         switch (RESOURCEMANAGER.GetResourceType(filePath.string()))
                         {
                             case ResourceType::Audio: RESOURCEMANAGER.CreateResource<AudioResource>(filePath.filename().replace_extension().string(), filePath)->Load(); break;
-                            case ResourceType::Texture: ResourceImporter::ImportTexture({filePath.c_str()}); break;
+                            case ResourceType::Texture: ResourceImporter::ImportTexture({ filePath.c_str() }); break;
                             case ResourceType::Model: ResourceImporter::ImportModel(filePath.c_str()); break;
                             case ResourceType::Font: RESOURCEMANAGER.CreateResource<Font>(filePath.filename().replace_extension().string(), filePath)->Load(); break;
                         }
@@ -149,7 +150,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
                     switch (RESOURCEMANAGER.GetResourceType(filePath.string()))
                     {
                         case ResourceType::Audio: RESOURCEMANAGER.CreateResource<AudioResource>(filePath.filename().replace_extension().string(), filePath)->Load(); break;
-                        case ResourceType::Texture: ResourceImporter::ImportTexture({filePath.c_str()}); break;
+                        case ResourceType::Texture: ResourceImporter::ImportTexture({ filePath.c_str() }); break;
                         case ResourceType::Model: ResourceImporter::ImportModel(filePath.c_str()); break;
                         case ResourceType::Font: RESOURCEMANAGER.CreateResource<Font>(filePath.filename().replace_extension().string(), filePath)->Load(); break;
                     }
@@ -159,7 +160,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             // Display failed/Success files
             if (failedFiles.size() > 0)
             {
-                std::string errorMessage{"The following files failed to be added : \n"};
+                std::string errorMessage{ "The following files failed to be added : \n" };
 
                 for (int i = 0; i < failedFiles.size(); ++i)
                 {
@@ -195,7 +196,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             }
             if (successFiles.size() > 0)
             {
-                std::string errorMessage{"The following files have been added : \n"};
+                std::string errorMessage{ "The following files have been added : \n" };
 
                 for (int i = 0; i < successFiles.size(); ++i)
                     errorMessage += successFiles[i].filename().replace_extension().string() + " \n";
@@ -308,32 +309,32 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
 
     HDC dummyDC = GetDC(dummyWND);
 
-    PIXELFORMATDESCRIPTOR dummyPFD = {sizeof(PIXELFORMATDESCRIPTOR),
-                                      1,
-                                      PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,  // Flags
-                                      PFD_TYPE_RGBA,                                               // The kind of framebuffer. RGBA or palette.
-                                      32,                                                          // Colordepth of the framebuffer.
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      24,  // Number of bits for the depthbuffer
-                                      8,   // Number of bits for the stencilbuffer
-                                      0,   // Number of Aux buffers in the framebuffer.
-                                      PFD_MAIN_PLANE,
-                                      0,
-                                      0,
-                                      0,
-                                      0};
+    PIXELFORMATDESCRIPTOR dummyPFD = { sizeof(PIXELFORMATDESCRIPTOR),
+                                       1,
+                                       PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,  // Flags
+                                       PFD_TYPE_RGBA,                                               // The kind of framebuffer. RGBA or palette.
+                                       32,                                                          // Colordepth of the framebuffer.
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       24,  // Number of bits for the depthbuffer
+                                       8,   // Number of bits for the stencilbuffer
+                                       0,   // Number of Aux buffers in the framebuffer.
+                                       PFD_MAIN_PLANE,
+                                       0,
+                                       0,
+                                       0,
+                                       0 };
 
     int dummyPF = ChoosePixelFormat(dummyDC, &dummyPFD);
 
@@ -383,7 +384,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     m_MaxWindowWidth = GetSystemMetrics(SM_CXSCREEN);
     m_MaxWindowHeight = GetSystemMetrics(SM_CYSCREEN);
 
-    RECT wndRect = {0, 0, m_MaxWindowWidth, m_MaxWindowHeight};
+    RECT wndRect = { 0, 0, m_MaxWindowWidth, m_MaxWindowHeight };
 
     // Get actual usable window size
     AdjustWindowRectEx(&wndRect, s_WindowStyles[(int)WindowMode::Windowed], TRUE, s_WindowStylesEx[(int)WindowMode::Windowed]);
@@ -416,25 +417,25 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     // Retrieve current device settings into devMode
     if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &devMode)) return;
 
-    const int pixelAttribs[] = {WGL_DRAW_TO_WINDOW_ARB,
-                                GL_TRUE,
-                                WGL_SUPPORT_OPENGL_ARB,
-                                GL_TRUE,
-                                WGL_DOUBLE_BUFFER_ARB,
-                                GL_TRUE,
-                                WGL_PIXEL_TYPE_ARB,
-                                WGL_TYPE_RGBA_ARB,
-                                WGL_ACCELERATION_ARB,
-                                WGL_FULL_ACCELERATION_ARB,
-                                WGL_COLOR_BITS_ARB,
-                                32,
-                                WGL_ALPHA_BITS_ARB,
-                                8,
-                                WGL_DEPTH_BITS_ARB,
-                                24,
-                                WGL_STENCIL_BITS_ARB,
-                                8,
-                                0};
+    const int pixelAttribs[] = { WGL_DRAW_TO_WINDOW_ARB,
+                                 GL_TRUE,
+                                 WGL_SUPPORT_OPENGL_ARB,
+                                 GL_TRUE,
+                                 WGL_DOUBLE_BUFFER_ARB,
+                                 GL_TRUE,
+                                 WGL_PIXEL_TYPE_ARB,
+                                 WGL_TYPE_RGBA_ARB,
+                                 WGL_ACCELERATION_ARB,
+                                 WGL_FULL_ACCELERATION_ARB,
+                                 WGL_COLOR_BITS_ARB,
+                                 32,
+                                 WGL_ALPHA_BITS_ARB,
+                                 8,
+                                 WGL_DEPTH_BITS_ARB,
+                                 24,
+                                 WGL_STENCIL_BITS_ARB,
+                                 8,
+                                 0 };
 
     int pfdIndex = 0;
     unsigned numFormats = 0;
@@ -453,19 +454,19 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
 
     const int majorMin = 4;
     const int minorMin = 5;
-    int contextAttribs[] = {WGL_CONTEXT_MAJOR_VERSION_ARB,
-                            majorMin,
-                            WGL_CONTEXT_MINOR_VERSION_ARB,
-                            minorMin,
-                            WGL_CONTEXT_FLAGS_ARB,
+    int contextAttribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB,
+                             majorMin,
+                             WGL_CONTEXT_MINOR_VERSION_ARB,
+                             minorMin,
+                             WGL_CONTEXT_FLAGS_ARB,
 #ifdef EDITOR
-                            WGL_CONTEXT_DEBUG_BIT_ARB,
+                             WGL_CONTEXT_DEBUG_BIT_ARB,
 #else
-                            WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                             WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 #endif
-                            WGL_CONTEXT_PROFILE_MASK_ARB,
-                            WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                            0};
+                             WGL_CONTEXT_PROFILE_MASK_ARB,
+                             WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                             0 };
 
     m_GLRenderContext = wglCreateContextAttribsARB(m_DeviceContext, 0, contextAttribs);
     if (m_GLRenderContext == NULL)
@@ -586,17 +587,17 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
 
 #endif  // #ifdef MODERN_GL_INIT
 
-
 #ifdef EDITOR
     wglSwapIntervalEXT(1);
     DragAcceptFiles(m_Window, true);
     std::cout.rdbuf(os.rdbuf());
 #else
     wglSwapIntervalEXT(1);
-    // AllocConsole();
-    // freopen("CONOUT$", "w", stdout);
-    // freopen("CONOUT$", "w", stderr);
 #endif
+
+    AllocConsole();
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
 
     m_GameTimer = Timer(1.f / 60.0f);
     m_ComputeTimer = Timer();
@@ -608,7 +609,16 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     ResourceManager::Initialize();
     ResourceManager::Instance().RefreshResources();
     AISystem::Initialize();
+
+#if defined(USE_VULKAN_RENDERER)
+    // RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
+#else
+    // Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
+#endif  // #if defined(USE_VULKAN_RENDERER)
+
     Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
+    RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
+
     Input::Initialize();
     Editor::Initialize(m_Window, static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
     ParticleSystem ::Initialize(MAXCOUNT);
@@ -627,7 +637,15 @@ Application::~Application()
 
     Editor::Shutdown();
     Input::Shutdown();
+
+    RendererVk::Shutdown();
     Renderer::Shutdown();
+
+#if defined(USE_VULKAN_RENDERER)
+    // RendererVk::Shutdown();
+#else
+    // Renderer::Shutdown();
+#endif  // #if defined(USE_VULKAN_RENDERER)
     AISystem::Shutdown();
     ResourceManager::Shutdown();
     AnimationSystem::Shutdown();
@@ -660,7 +678,7 @@ void Application::ToggleFullScreen(bool isFullscreen)
 
     if (m_IsFullscreen)
     {
-        RECT wndRect = {0, 0, m_MaxWindowWidth, m_MaxWindowHeight};
+        RECT wndRect = { 0, 0, m_MaxWindowWidth, m_MaxWindowHeight };
 
         // Set window styles
         SetWindowLongPtr(m_Window, GWL_STYLE, s_WindowStyles[(int)WindowMode::Borderless]);
@@ -678,7 +696,7 @@ void Application::ToggleFullScreen(bool isFullscreen)
     }
     else
     {
-        RECT wndRect = {0, 0, m_MaxWindowWidth, m_MaxWindowHeight};
+        RECT wndRect = { 0, 0, m_MaxWindowWidth, m_MaxWindowHeight };
 
         // Set window styles
         SetWindowLongPtr(m_Window, GWL_STYLE, s_WindowStyles[(int)WindowMode::Windowed]);
@@ -772,6 +790,14 @@ void Application::RunMainLoop()
         audioTime = m_ComputeTimer.GetTimePassed();
 
         m_ComputeTimer.StartTimer();
+
+#if defined(USE_VULKAN_RENDERER)
+        // RendererVk::Instance().Update(scaledFrameTime);
+#else
+        // Renderer::Instance().Update(scaledFrameTime);
+#endif  // #if defined(USE_VULKAN_RENDERER)
+
+        RendererVk::Instance().Update(scaledFrameTime);
         Renderer::Instance().Update(scaledFrameTime);
         renderTime = m_ComputeTimer.GetTimePassed();
 

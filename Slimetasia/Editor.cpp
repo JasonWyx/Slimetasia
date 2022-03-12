@@ -58,13 +58,13 @@ void Editor::Undo()
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
-        Renderer::Instance().SetSelectedObjects({0});
+        Renderer::Instance().SetSelectedObjects({ 0 });
     }
     if (dynamic_cast<ActionCreateObjectArchetype*>(act))
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
-        Renderer::Instance().SetSelectedObjects({0});
+        Renderer::Instance().SetSelectedObjects({ 0 });
     }
     m_Undo.pop_back();
     act->Revert();
@@ -114,7 +114,7 @@ void Editor::ClearRedoUndo()
     }
 }
 
-void Editor::DrawMainMenu()
+void Editor::DrawMenuBar()
 {
     bool b = false;
     bool style = false;
@@ -282,10 +282,10 @@ void Editor::ShortcutButtons()
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    io.KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-    io.KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-    io.KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
-    io.KeySuper = false;
+    // io.KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+    // io.KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+    // io.KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
+    // io.KeySuper = false;
 
     if (ImGui::IsKeyDown(17))
     {
@@ -326,7 +326,7 @@ void Editor::ShortcutButtons()
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
 
-        Renderer::Instance().SetSelectedObjects({0});
+        Renderer::Instance().SetSelectedObjects({ 0 });
     }
 }
 
@@ -503,7 +503,7 @@ void Editor::DrawViewport()
             m_CurrentObject = nullptr;
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
             m_SelectedObjects.clear();
-            Renderer::Instance().SetSelectedObjects({0});
+            Renderer::Instance().SetSelectedObjects({ 0 });
             Renderer::Instance().ChangeCamera(false);
             ParticleSystem::Instance().Reset();
             AISystem::Instance().RevertBase();
@@ -568,7 +568,7 @@ void Editor::DrawViewport()
                         }
                         else
                         {
-                            Renderer::Instance().SetSelectedObjects({0});
+                            Renderer::Instance().SetSelectedObjects({ 0 });
                             m_CurrentObject = nullptr;
                         }
                     }
@@ -577,7 +577,7 @@ void Editor::DrawViewport()
                 {
                     m_SelectedObjects.clear();
                     m_SelectedObjects.push_back(m_CurrentObject);
-                    Renderer::Instance().SetSelectedObjects({m_CurrentObject->GetID()});
+                    Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
                 }
                 std::vector<unsigned> selecteds;
                 for (auto& obj : m_SelectedObjects)
@@ -586,7 +586,7 @@ void Editor::DrawViewport()
             }
             else
             {
-                Renderer::Instance().SetSelectedObjects({0});
+                Renderer::Instance().SetSelectedObjects({ 0 });
                 m_CurrentObject = nullptr;
                 m_SelectedObjects.clear();
             }
@@ -686,18 +686,18 @@ void Editor::DrawViewport()
                     // for one and for many
                     if (m_SelectedObjects.size() == 1)
                     {
-                        Vector3 tmpTrans{trans[0], trans[1], trans[2]};
-                        Vector3 tmpRot{rot[0], rot[1], rot[2]};
-                        Vector3 tmpScale{scale[0], scale[1], scale[2]};
+                        Vector3 tmpTrans{ trans[0], trans[1], trans[2] };
+                        Vector3 tmpRot{ rot[0], rot[1], rot[2] };
+                        Vector3 tmpScale{ scale[0], scale[1], scale[2] };
                         t->SetWorldPosition(tmpTrans);
                         t->SetWorldRotation(tmpRot);
                         t->SetWorldScale(tmpScale);
                     }
                     else if (m_SelectedObjects.size() > 1)
                     {
-                        Vector3 tmpTrans{trans[0], trans[1], trans[2]};
-                        Vector3 tmpRot{rot[0], rot[1], rot[2]};
-                        Vector3 tmpScale{scale[0], scale[1], scale[2]};
+                        Vector3 tmpTrans{ trans[0], trans[1], trans[2] };
+                        Vector3 tmpRot{ rot[0], rot[1], rot[2] };
+                        Vector3 tmpScale{ scale[0], scale[1], scale[2] };
                         Vector3 m_Trans = t->GetWorldPosition();
                         Vector3 m_Rot = t->GetWorldRotation();
                         Vector3 m_Scale = t->GetWorldScale();
@@ -756,9 +756,9 @@ void Editor::DrawViewport()
                     }
                     else if (m_SelectedObjects.size() > 1)
                     {
-                        Vector3 tmpTrans{trans[0], trans[1], trans[2]};
-                        Vector3 tmpRot{rot[0], rot[1], rot[2]};
-                        Vector3 tmpScale{scale[0], scale[1], scale[2]};
+                        Vector3 tmpTrans{ trans[0], trans[1], trans[2] };
+                        Vector3 tmpRot{ rot[0], rot[1], rot[2] };
+                        Vector3 tmpScale{ scale[0], scale[1], scale[2] };
                         Vector3 m_Trans = tmpTrans - savedTrans;
                         Vector3 m_Rot = tmpRot - savedRot;
                         Vector3 m_Scale = tmpScale - savedScale;
@@ -1053,7 +1053,7 @@ void Editor::DrawArchetype()
                         }
                         else if (properties[i].type == typeid(Vector4).name())
                         {
-                            static std::string hashes{"##"};
+                            static std::string hashes{ "##" };
                             ImVec4 backup_color;
                             static ImVec4 tmp_color;
                             Color4* clr = reinterpret_cast<Color4*>(address + properties[i].offset);
@@ -1394,7 +1394,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
             }
             else if (properties[i].type == typeid(Vector4).name())
             {
-                static std::string hashes{"##"};
+                static std::string hashes{ "##" };
                 ImVec4 backup_color;
                 static ImVec4 tmp_color;
                 Color4* clr = reinterpret_cast<Color4*>(address + properties[i].offset);
@@ -1858,7 +1858,7 @@ void Editor::DrawLayerEditor()
             ClearRedo();
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
-            Renderer::Instance().SetSelectedObjects({0});
+            Renderer::Instance().SetSelectedObjects({ 0 });
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
             Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
         }
@@ -1874,7 +1874,7 @@ void Editor::DrawLayerEditor()
             Renderer::Instance().SetCurrentLayer(ly);
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
-            Renderer::Instance().SetSelectedObjects({0});
+            Renderer::Instance().SetSelectedObjects({ 0 });
         }
     }
 }
@@ -1886,7 +1886,7 @@ void Editor::DrawProfiler()
     ImGui::Text("Current Frame Time : %f", real);
     // input sys
     ImGui::Text("Input System : %f", m_Timings[0]);
-    static float input_t[60] = {0};
+    static float input_t[60] = { 0 };
     if (m_Timer < 60)
         input_t[m_Timer] = (m_Timings[0] / rdt) * 100.0f;
     else
@@ -1898,7 +1898,7 @@ void Editor::DrawProfiler()
     ImGui::PlotLines(m_Global_Spaces.c_str(), input_t, IM_ARRAYSIZE(input_t), 0, "Input", 0, 100, ImVec2(0, 50));
     // physics sys
     ImGui::Text("Physics System : %f", m_Timings[1]);
-    static float physics_t[60] = {0};
+    static float physics_t[60] = { 0 };
     if (m_Timer < 60)
         physics_t[m_Timer] = (m_Timings[1] / rdt) * 100.0f;
     else
@@ -1910,7 +1910,7 @@ void Editor::DrawProfiler()
     ImGui::PlotLines(m_Global_Spaces.c_str(), physics_t, IM_ARRAYSIZE(input_t), 0, "Physics", 0, 100, ImVec2(0, 50));
     // scene sys
     ImGui::Text("Scene System : %f", m_Timings[2]);
-    static float Logic_t[60] = {0};
+    static float Logic_t[60] = { 0 };
     if (m_Timer < 60)
         Logic_t[m_Timer] = (m_Timings[2] / rdt) * 100.0f;
     else
@@ -1922,7 +1922,7 @@ void Editor::DrawProfiler()
     ImGui::PlotLines(m_Global_Spaces.c_str(), Logic_t, IM_ARRAYSIZE(input_t), 0, "Logic", 0, 100, ImVec2(0, 50));
     // render sys
     ImGui::Text("Renderer System : %f", m_Timings[3]);
-    static float Render_t[60] = {0};
+    static float Render_t[60] = { 0 };
     if (m_Timer < 60)
         Render_t[m_Timer] = (m_Timings[3] / rdt) * 100.0f;
     else
@@ -1934,7 +1934,7 @@ void Editor::DrawProfiler()
     ImGui::PlotLines(m_Global_Spaces.c_str(), Render_t, IM_ARRAYSIZE(input_t), 0, "Renderer", 0, 100, ImVec2(0, 50));
     // editor sys
     ImGui::Text("Editor System : %f", m_Timings[4]);
-    static float Editor_t[60] = {0};
+    static float Editor_t[60] = { 0 };
     if (m_Timer < 60)
         Editor_t[m_Timer] = (m_Timings[4] / rdt) * 100.0f;
     else
@@ -1946,7 +1946,7 @@ void Editor::DrawProfiler()
     ImGui::PlotLines(m_Global_Spaces.c_str(), Editor_t, IM_ARRAYSIZE(input_t), 0, "Editor", 0, 100, ImVec2(0, 50));
     // audio sys
     ImGui::Text("Audio System : %f", m_Timings[5]);
-    static float Audio_t[60] = {0};
+    static float Audio_t[60] = { 0 };
     if (m_Timer < 60)
         Audio_t[m_Timer] = (m_Timings[5] / rdt) * 100.0f;
     else
@@ -1959,7 +1959,7 @@ void Editor::DrawProfiler()
     if (m_Timer < 60) ++m_Timer;
     // animation sys
     ImGui::Text("Animation System : %f", m_Timings[6]);
-    static float Anim_t[60] = {0};
+    static float Anim_t[60] = { 0 };
     if (m_Timer < 60)
         Anim_t[m_Timer] = (m_Timings[6] / rdt) * 100.0f;
     else
@@ -1973,7 +1973,7 @@ void Editor::DrawProfiler()
 
     // Particle System
     ImGui::Text("Particle System : %f", m_Timings[7]);
-    static float Part_t[60] = {0};
+    static float Part_t[60] = { 0 };
     if (m_Timer < 60)
         Part_t[m_Timer] = (m_Timings[7] / rdt) * 100.0f;
     else
@@ -1987,7 +1987,7 @@ void Editor::DrawProfiler()
 
     // AI System
     ImGui::Text("AI System : %f", m_Timings[8]);
-    static float AI_t[60] = {0};
+    static float AI_t[60] = { 0 };
     if (m_Timer < 60)
         AI_t[m_Timer] = (m_Timings[8] / rdt) * 100.0f;
     else
@@ -2010,89 +2010,91 @@ void Editor::DrawFullScreenViewport()
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2((float)Application::Instance().GetWindowWidth(), (float)Application::Instance().GetWindowHeight()));
 
-    ImGui::Begin("FullScreen ViewPort", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
-    if (Application::Instance().GetGameTimer().IsPlayModePaused())
+    if (ImGui::Begin("FullScreen ViewPort", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar))
     {
-        if (ImGui::Button("Play"))
+        if (Application::Instance().GetGameTimer().IsPlayModePaused())
         {
-            ms_IsGameRunning = true;
-            while (ShowCursor(false) > 0)
-                ;
-            AudioSystem::Instance().UnPauseAudio();
-            Application::Instance().GetGameTimer().SetPlayModePaused(false);
+            if (ImGui::Button("Play"))
+            {
+                ms_IsGameRunning = true;
+                while (ShowCursor(false) > 0)
+                    ;
+                AudioSystem::Instance().UnPauseAudio();
+                Application::Instance().GetGameTimer().SetPlayModePaused(false);
+            }
         }
-    }
-    else
-    {
-        if (ImGui::Button("Pause") || Input::Instance().GetKeyPressed(KEY_F6))
+        else
         {
+            if (ImGui::Button("Pause") || Input::Instance().GetKeyPressed(KEY_F6))
+            {
+                while (ShowCursor(true) < 0)
+                    ;
+                AudioSystem::Instance().PauseAudio();
+                Application::Instance().GetGameTimer().SetPlayModePaused(true);
+            }
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
+        {
+            Application::Instance().GetGameTimer().SetPlayModePaused(false);
             while (ShowCursor(true) < 0)
                 ;
-            AudioSystem::Instance().PauseAudio();
-            Application::Instance().GetGameTimer().SetPlayModePaused(true);
-        }
-    }
+            // Show cursor
+            // ShowCursor(true);
+            ms_IsGameRunning = false;
 
-    ImGui::SameLine();
-
-    if (ImGui::Button("Stop") || Input::Instance().GetKeyPressed(KEY_F5))
-    {
-        Application::Instance().GetGameTimer().SetPlayModePaused(false);
-        while (ShowCursor(true) < 0)
-            ;
-        // Show cursor
-        // ShowCursor(true);
-        ms_IsGameRunning = false;
-
-        Application::Instance().GetGameTimer().SetEditorPaused(true);
-        PhysicsSystem::Instance().Close();
-        PhysicsSystem::Instance().RepopulateDTree();
-        if (!m_SavedLayers.empty())
-        {
-            Application::Instance().GetCurrentScene()->ClearLayer();
-            auto Scene = Application::Instance().GetCurrentScene();
-            // PhysicsSystem::s_DynamicsWorld.m_ColDetection.m_BroadPhase.m_Tree.ResetTree();
-            for (auto& ly : m_SavedLayers)
+            Application::Instance().GetGameTimer().SetEditorPaused(true);
+            PhysicsSystem::Instance().Close();
+            PhysicsSystem::Instance().RepopulateDTree();
+            if (!m_SavedLayers.empty())
             {
-                Scene->CreateLayerWithoutCamera(ly->GetName());
-                ly->Clone(Scene->GetLayers().back());
-                delete ly;
+                Application::Instance().GetCurrentScene()->ClearLayer();
+                auto Scene = Application::Instance().GetCurrentScene();
+                // PhysicsSystem::s_DynamicsWorld.m_ColDetection.m_BroadPhase.m_Tree.ResetTree();
+                for (auto& ly : m_SavedLayers)
+                {
+                    Scene->CreateLayerWithoutCamera(ly->GetName());
+                    ly->Clone(Scene->GetLayers().back());
+                    delete ly;
+                }
+                m_SavedLayers.clear();
+                m_CurrentLayer = Scene->GetLayers().back();
+                Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
             }
-            m_SavedLayers.clear();
-            m_CurrentLayer = Scene->GetLayers().back();
-            Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
+            m_CurrentObject = nullptr;
+            m_SelectedObjects.clear();
+            Renderer::Instance().SetSelectedObjects({ 0 });
+            Renderer::Instance().ChangeCamera(false);
+            ParticleSystem::Instance().Reset();
+            AISystem::Instance().RevertBase();
         }
-        m_CurrentObject = nullptr;
-        m_SelectedObjects.clear();
-        Renderer::Instance().SetSelectedObjects({0});
-        Renderer::Instance().ChangeCamera(false);
-        ParticleSystem::Instance().Reset();
-        AISystem::Instance().RevertBase();
+
+        if (ImGui::IsWindowHovered() && (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused()))
+        {
+            static Vector3 tmp;
+            static Vector3 current;
+
+            if (ImGui::IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
+            m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
+            m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
+            m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
+        }
+        else
+        {
+            m_CurrentLayer->GetEditorCamera()->Cancel();
+        }
+
+        ImVec2 windowSize = ImGui::GetWindowSize();
+        windowSize.y -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
+
+        Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
+        Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
+
+        ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::End();
     }
-
-    if (ImGui::IsWindowHovered() && (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused()))
-    {
-        static Vector3 tmp;
-        static Vector3 current;
-
-        if (ImGui::IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
-        m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
-        m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
-        m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
-    }
-    else
-    {
-        m_CurrentLayer->GetEditorCamera()->Cancel();
-    }
-
-    ImVec2 windowSize = ImGui::GetWindowSize();
-    windowSize.y -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
-
-    Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
-    Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
-
-    ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
-    ImGui::End();
 }
 
 void Editor::DrawTagsEditor()
@@ -3165,7 +3167,7 @@ void Editor::ParentStructOptions(TVector2<int>* vec2, GameObject*& go, std::stri
 
 void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, std::string p)
 {
-    static std::string hashes{"##"};
+    static std::string hashes{ "##" };
     ImVec4 backup_color;
     static ImVec4 tmp_color;
 
@@ -3303,7 +3305,7 @@ void Editor::Save()
         auto dir = file.find_last_of('\\');
         auto ext = file.find_first_of('.', dir);
         if (ext == file.npos) file += ".xml";
-        Serializer{file}.SaveScene(Application::Instance().GetCurrentScene());
+        Serializer{ file }.SaveScene(Application::Instance().GetCurrentScene());
     }
 }
 
@@ -3324,9 +3326,9 @@ void Editor::Load()
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
-        Renderer::Instance().SetSelectedObjects({0});
+        Renderer::Instance().SetSelectedObjects({ 0 });
         ClearRedoUndo();
-        Serializer{filename}.LoadScene();
+        Serializer{ filename }.LoadScene();
     }
     m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
     Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
@@ -3352,7 +3354,7 @@ void Editor::CreateNewSceneTab()
         {
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
-            Renderer::Instance().SetSelectedObjects({0});
+            Renderer::Instance().SetSelectedObjects({ 0 });
             ClearRedoUndo();
             Application::Instance().NewScene("Scene");
             Application::Instance().GetCurrentScene()->CreateLayer(name);
@@ -3765,7 +3767,7 @@ void Editor::RecursionLoadArchetypeStruct(tinyxml2::XMLElement* attribute, unsig
             {
                 // std::cout << sAttribute->Attribute("Type") << std::endl;
                 std::string& attribute = *reinterpret_cast<std::string*>(base + sProperty->offset);
-                std::string attributeValue{sAttribute->Attribute("Value")};
+                std::string attributeValue{ sAttribute->Attribute("Value") };
                 attribute = attributeValue;
                 // std::cout << attribute << std::endl;
             }
@@ -3825,7 +3827,7 @@ void Editor::RecursionLoadArchetypeParent(tinyxml2::XMLElement* attribute, unsig
                 {
                     // std::cout << attribute->Attribute("Type") << std::endl;
                     std::string& attribute_str = *reinterpret_cast<std::string*>(base + pProperty->offset);
-                    std::string attributeValue{attribute->Attribute("Value")};
+                    std::string attributeValue{ attribute->Attribute("Value") };
                     attribute_str = attributeValue;
                     // std::cout << attribute_str << std::endl;
                 }
@@ -3913,7 +3915,7 @@ void Editor::DeSerializeArchetypes()
                         {
                             // std::cout << pAttribute->Attribute("Type") << std::endl;
                             std::string& attribute = *reinterpret_cast<std::string*>(base + cProperty->offset);
-                            std::string attributeValue{pAttribute->Attribute("Value")};
+                            std::string attributeValue{ pAttribute->Attribute("Value") };
                             attribute = attributeValue;
                             // std::cout << attribute << std::endl;
                         }
@@ -4078,7 +4080,7 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                     }
                     else
                     {
-                        Renderer::Instance().SetSelectedObjects({0});
+                        Renderer::Instance().SetSelectedObjects({ 0 });
                         m_CurrentObject = nullptr;
                     }
                 }
@@ -4087,7 +4089,7 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
             {
                 m_SelectedObjects.clear();
                 m_SelectedObjects.push_back(m_CurrentObject);
-                Renderer::Instance().SetSelectedObjects({m_CurrentObject->GetID()});
+                Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
             }
             selected = go->GetID();
         }
@@ -4120,7 +4122,7 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                     {
                         m_SelectedObjects.clear();
                         m_SelectedObjects.push_back(m_CurrentObject);
-                        Renderer::Instance().SetSelectedObjects({m_CurrentObject->GetID()});
+                        Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
                     }
                     selected = *begin;
                 }
@@ -4353,7 +4355,7 @@ void Editor::DrawOutliner()
                             else
                             {
                                 m_CurrentObject = nullptr;
-                                Renderer::Instance().SetSelectedObjects({0});
+                                Renderer::Instance().SetSelectedObjects({ 0 });
                             }
                         }
                     }
@@ -4361,7 +4363,7 @@ void Editor::DrawOutliner()
                     {
                         m_SelectedObjects.clear();
                         m_SelectedObjects.push_back(go);
-                        Renderer::Instance().SetSelectedObjects({go->GetID()});
+                        Renderer::Instance().SetSelectedObjects({ go->GetID() });
                     }
                     selected = go->GetID();
                 }
@@ -4758,10 +4760,10 @@ void Editor::SetEditorMouse()
 
 Editor::Editor(HWND hwnd, float x, float y)
     : m_Console{}
-    , m_RedoUndoCount{20}
-    , m_CurrentObject{nullptr}
+    , m_RedoUndoCount{ 20 }
+    , m_CurrentObject{ nullptr }
     , m_Global_Spaces{}
-    , m_GlobalIDCounter{0}
+    , m_GlobalIDCounter{ 0 }
     , m_CurrentLayer(nullptr)
     , m_IsEditorInFocus(false)
     , m_CurrentWorkingDirectory(_getcwd(0, 0))
@@ -4773,40 +4775,14 @@ Editor::Editor(HWND hwnd, float x, float y)
     , m_IsGameCameraAcitve(false)
 {
     ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui_ImplWin32_Init(static_cast<void*>(hwnd));
     ImGui_ImplOpenGL3_Init();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize.x = x;
-    io.DisplaySize.y = y;
-    io.DeltaTime = 1.0f / 60.0f;
-    io.KeyMap[ImGuiKey_Tab] = VK_TAB;
-    io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-    io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-    io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
-    io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-    io.KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
-    io.KeyMap[ImGuiKey_PageDown] = VK_NEXT;
-    io.KeyMap[ImGuiKey_Home] = VK_HOME;
-    io.KeyMap[ImGuiKey_End] = VK_END;
-    io.KeyMap[ImGuiKey_Insert] = VK_INSERT;
-    io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
-    io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
-    io.KeyMap[ImGuiKey_Space] = VK_SPACE;
-    io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
-    io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
-    io.KeyMap[ImGuiKey_A] = 'A';
-    io.KeyMap[ImGuiKey_C] = 'C';
-    io.KeyMap[ImGuiKey_V] = 'V';
-    io.KeyMap[ImGuiKey_X] = 'X';
-    io.KeyMap[ImGuiKey_Y] = 'Y';
-    io.KeyMap[ImGuiKey_Z] = 'Z';
-
     unsigned char* pixels;
     int width, height;
 
-    // for (int i = 0; i < MAX_ARCHETYPES; ++i) m_Archetypes.emplace_back(nullptr, i);
     for (int i = 0; i < NUM_OF_WINDOWS; ++i)
     {
         m_WindowStates[i] = false;
@@ -4824,9 +4800,9 @@ Editor::Editor(HWND hwnd, float x, float y)
     DeSerializeArchetypes();
     LoadTags();
 
-    m_ImGuiFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 13.0f);
-    m_ImGuiFontBold = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibrib.ttf", 23.0f);
-    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+    m_ImGuiFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 13.0f);
+    m_ImGuiFontBold = ImGui::GetIO().Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibrib.ttf", 23.0f);
+    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 }
 
 Editor::~Editor()
@@ -4856,36 +4832,6 @@ void Editor::Update(float dt)
 {
     ImGui::GetIO().DeltaTime = dt;
 
-    // If not in play mode
-    if (!ms_IsGameRunning)
-    {
-        // ShowCursor(true);
-        // std::cout << "EDITOR NOT PLAYING" << std::endl;
-        // HCURSOR cursor = LoadCursor(Application::Instance().GetAppInstance(), IDC_ARROW);
-        // SetCursor(cursor);
-        // SetClassLongPtr(Application::Instance().GetWindowHandle(), GCLP_HCURSOR, reinterpret_cast<LONG_PTR>(cursor));
-        //
-        // s_lockMousePosition = false;
-    }
-
-    if (ms_ShouldLockMousePosition)
-    {
-        // float  minusy     = GetWindowPos().y      ;
-        // float  minusx     = GetWindowPos().x      ;
-        // ImVec2 windowSize = ImGui::GetWindowSize();
-        //
-        //// Get center position of current camera
-        // int cx = Application::Instance().GetCx() / 2;
-        // int cy = Application::Instance().GetCy() / 2;
-        // cx -= Application::Instance().GetWindowWidth() / 2;
-        // cy -= Application::Instance().GetWindowHeight() / 2;
-        //
-        // if (!m_viewportFullScreen)
-        //  SetCursorPos(cx + (int)minusx + (int)windowSize.x / 2, cy + (int)minusy + (int)windowSize.y / 2);
-        // else
-        //  SetCursorPos(cx + Application::Instance().GetWindowWidth() / 2, cy + Application::Instance().GetWindowHeight() / 2);
-    }
-
     UpdateMeshArray();
 
     if (m_CurrentLayer == nullptr)
@@ -4898,103 +4844,108 @@ void Editor::Update(float dt)
     ImGui::NewFrame();
 
     SetEditorMouse();
-    DrawMainMenu();
     ShortcutButtons();
     CreateNewSceneTab();
     // DrawStyleEditor();
     // DrawHelp();
 
-    ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
+    DrawMenuBar();
+
+    ImGui::SetNextWindowPos(ImVec2{ 0.0f, 0.0f });
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::Begin("main_window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
+    ImGui::Begin("main_window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar);
+    ImGui::DockSpace(ImGui::GetID("main_dock_space"));
 
-    if (ImGui::BeginTabBar("editor_main_tab_bar"))
+    if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
     {
-        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
-        {
-            ImGuizmo::BeginFrame();
-        }
-
-        // ImGui::GetIO().DisplaySize.x = (float)Application::Instance().GetWindowWidth();
-        // ImGui::GetIO().DisplaySize.y = (float)Application::Instance().GetWindowHeight();
-
-        if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
-        {
-            if (ImGui::BeginTabItem("ViewPort", &m_WindowStates[2]))
-            {
-                DrawViewport();
-                ImGui::EndTabItem();
-            }
-        }
-        else
-        {
-            // FullScreen Viewport here
-            DrawFullScreenViewport();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Physics] && ImGui::BeginTabItem("Physics"))
-        {
-            DrawPhysicsEditor();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Outliner] && ImGui::BeginTabItem("Outliner"))
-        {
-            DrawOutliner();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Inspector] && ImGui::BeginTabItem("Inspector"))
-        {
-            DrawInspector();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Archetype] && ImGui::BeginTabItem("Archetype"))
-        {
-            DrawArchetype();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::LayerEditor] && ImGui::BeginTabItem("LayerEditor"))
-        {
-            DrawLayerEditor();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Profiler] && ImGui::BeginTabItem("Profiler"))
-        {
-            DrawProfiler();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Tags] && ImGui::BeginTabItem("Tags"))
-        {
-            DrawTagsEditor();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::TextEditor] && ImGui::BeginTabItem("TextEditor"))
-        {
-            DrawTextEditor();
-            ImGui::EndTabItem();
-        }
-
-        if (m_WindowStates[(int)EditorWindowType::Resource] && ImGui::BeginTabItem("ResourceManager"))
-        {
-            DrawResourceManager();
-            ImGui::EndTabItem();
-        }
-
-        // DebugDockSpaces();
-        m_Console.Draw();
-        UpdateRedoUndo();
-        m_Global_Spaces.clear();
-
-        ImGui::EndTabBar();
+        ImGuizmo::BeginFrame();
     }
-    
+
+    if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
+    {
+        if (m_WindowStates[(int)EditorWindowType::Viewport])
+        {
+            ImGui::Begin("ViewPort");
+            DrawViewport();
+            ImGui::End();
+        }
+    }
+    else
+    {
+        // FullScreen Viewport here
+        DrawFullScreenViewport();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Physics])
+    {
+        ImGui::Begin("Physics");
+        DrawPhysicsEditor();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Outliner])
+    {
+        ImGui::Begin("Outliner");
+        DrawOutliner();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Inspector])
+    {
+        ImGui::Begin("Inspector");
+        DrawInspector();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Archetype])
+    {
+        ImGui::Begin("Archetype");
+        DrawArchetype();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::LayerEditor])
+    {
+        ImGui::Begin("LayerEditor");
+        DrawLayerEditor();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Profiler])
+    {
+        ImGui::Begin("Profiler");
+        DrawProfiler();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Tags])
+    {
+        ImGui::Begin("Tags");
+        DrawTagsEditor();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::TextEditor])
+    {
+        ImGui::Begin("TextEditor");
+        DrawTextEditor();
+        ImGui::End();
+    }
+
+    if (m_WindowStates[(int)EditorWindowType::Resource])
+    {
+        ImGui::Begin("ResourceManager");
+        DrawResourceManager();
+        ImGui::End();
+    }
+
+    m_Console.Draw();
+
+    UpdateRedoUndo();
+    m_Global_Spaces.clear();
+
     ImGui::End();
     ImGui::PopStyleVar();
 

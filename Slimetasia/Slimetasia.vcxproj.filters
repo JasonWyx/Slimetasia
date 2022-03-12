@@ -65,9 +65,6 @@
     <Filter Include="Engine Files\Core\Graphics">
       <UniqueIdentifier>{aa8ba1c9-102b-40e5-88e5-25b48ab4de3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine Files\Core\Graphics\RenderPasses">
-      <UniqueIdentifier>{066a11ad-51f9-42d8-a0a4-280ab6ce748c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine Files\Core\Physics\Ray">
       <UniqueIdentifier>{9711d362-f27b-4e32-9d6d-9ba12cc3ec67}</UniqueIdentifier>
     </Filter>
@@ -109,6 +106,15 @@
     </Filter>
     <Filter Include="External Libraries\imgui\impl">
       <UniqueIdentifier>{af06397d-7772-4524-a1d5-7d619ebc6c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Graphics\OpenGL">
+      <UniqueIdentifier>{43d942a0-6b8a-4710-870d-403ddbece5df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Graphics\OpenGL\RenderPasses">
+      <UniqueIdentifier>{066a11ad-51f9-42d8-a0a4-280ab6ce748c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Graphics\Vulkan">
+      <UniqueIdentifier>{4bab2ba9-b7c1-4e2c-b42e-68a1c10eeb63}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -199,9 +205,6 @@
     <ClCompile Include="PoolAllocator.cpp">
       <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Engine Files\Core\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="LightBase.cpp">
       <Filter>Engine Files\Components\Graphics</Filter>
     </ClCompile>
@@ -227,19 +230,19 @@
       <Filter>Engine Files\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="DebugPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="GeometryPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="LightPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="ShadowPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="SkyboxPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Engine Files\Components\Graphics</Filter>
@@ -269,16 +272,16 @@
       <Filter>Engine Files\Resource</Filter>
     </ClCompile>
     <ClCompile Include="PostProcessPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="FinalPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>Engine Files\Core\ParticleSystem</Filter>
     </ClCompile>
     <ClCompile Include="ParticlePass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="SingleFrameAllocator.cpp">
       <Filter>Engine Files\Utilities\MemoryAllocators</Filter>
@@ -368,13 +371,13 @@
       <Filter>Engine Files\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="RenderPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="WaterSimulator.cpp">
       <Filter>Engine Files\Components\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="WaterPass.cpp">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="VideoPlayer.cpp">
       <Filter>Engine Files\Components</Filter>
@@ -423,6 +426,12 @@
     </ClCompile>
     <ClCompile Include="External Libraries\imgui\backends\imgui_impl_win32.cpp">
       <Filter>External Libraries\imgui\impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Engine Files\Core\Graphics\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="RendererVk.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -577,19 +586,19 @@
       <Filter>Engine Files\Utilities\Containers</Filter>
     </ClInclude>
     <ClInclude Include="DebugPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="GeometryPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="LightPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="ShadowPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="SkyboxPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Engine Files\Components\Graphics</Filter>
@@ -616,19 +625,16 @@
       <Filter>Engine Files\Components\Physics\Rigidbody</Filter>
     </ClInclude>
     <ClInclude Include="PostProcessPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="FinalPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="ParticleSystem.h">
       <Filter>Engine Files\Core\ParticleSystem</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Engine Files\Core\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="ParticlePass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="PhysicsDefs.h">
       <Filter>Engine Files\Core\Physics</Filter>
@@ -748,10 +754,10 @@
       <Filter>Engine Files\Utilities</Filter>
     </ClInclude>
     <ClInclude Include="RenderPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="WaterPass.h">
-      <Filter>Engine Files\Core\Graphics\RenderPasses</Filter>
+      <Filter>Engine Files\Core\Graphics\OpenGL\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="VideoPlayer.h">
       <Filter>Engine Files\Components</Filter>
@@ -807,6 +813,12 @@
     </ClInclude>
     <ClInclude Include="External Libraries\imgui\backends\imgui_impl_win32.h">
       <Filter>External Libraries\imgui\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Engine Files\Core\Graphics\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="RendererVk.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

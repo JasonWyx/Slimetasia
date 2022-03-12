@@ -14,58 +14,57 @@ void AppConsole::Draw()
     window_flags |= ImGuiWindowFlags_NoCollapse;
     if (m_IsActiveWindow)
     {
-        if (ImGui::BeginTabItem("Console", &m_IsActiveWindow))
+        ImGui::Begin("Console");
+
+        if (ImGui::Button("Trigger Auto Scroll"))
         {
-            if (ImGui::Button("Trigger Auto Scroll"))
-            {
-                m_TriggerAutoScroll = !m_TriggerAutoScroll;
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Clear Log "))
-            {
-                ClearLog();
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Output Log "))
-            {
-                OutLog();
-            }
-
-            ImGui::SameLine();
-            ImGui::PushItemWidth(60.f);
-            ImGui::Text("Console's Max Lines : ");
-            ImGui::SameLine();
-            ImGui::InputScalar("", ImGuiDataType_U32, &m_MaxLines);
-            ImGui::PopItemWidth();
-
-            ImGui::Separator();
-
-            const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-
-            ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
-            for (unsigned i = 0; i < m_Items.size(); i++)
-            {
-                if (m_Items[i] == "") continue;
-                std::string item = m_Items[i];
-                ImVec4 col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-                ImGui::PushStyleColor(ImGuiCol_Text, col);
-                ImGui::TextUnformatted((item).c_str());
-                ImGui::PopStyleColor();
-            }
-            if (m_ScrollToBtm && m_TriggerAutoScroll)
-            {
-                ImGui::SetScrollHereY(1.0f);
-            }
-
-            m_ScrollToBtm = false;
-
-            ImGui::EndChild();
-            ImGui::EndTabItem();
+            m_TriggerAutoScroll = !m_TriggerAutoScroll;
         }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Clear Log "))
+        {
+            ClearLog();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Output Log "))
+        {
+            OutLog();
+        }
+
+        ImGui::SameLine();
+        ImGui::PushItemWidth(60.f);
+        ImGui::Text("Console's Max Lines : ");
+        ImGui::SameLine();
+        ImGui::InputScalar("What's this for?", ImGuiDataType_U32, &m_MaxLines);
+        ImGui::PopItemWidth();
+
+        ImGui::Separator();
+
+        const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+
+        ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
+        for (unsigned i = 0; i < m_Items.size(); i++)
+        {
+            if (m_Items[i] == "") continue;
+            std::string item = m_Items[i];
+            ImVec4 col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            ImGui::PushStyleColor(ImGuiCol_Text, col);
+            ImGui::TextUnformatted((item).c_str());
+            ImGui::PopStyleColor();
+        }
+        if (m_ScrollToBtm && m_TriggerAutoScroll)
+        {
+            ImGui::SetScrollHereY(1.0f);
+        }
+
+        m_ScrollToBtm = false;
+
+        ImGui::EndChild();
+        ImGui::End();
     }
 }
 
