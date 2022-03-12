@@ -74,28 +74,28 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
+    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\lowlevel\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\lowlevel\lib\;$(SolutionDir)Dependencies\fmod\studio\lib\;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
   </PropertyGroup>
