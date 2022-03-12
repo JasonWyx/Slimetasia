@@ -83,13 +83,13 @@ void Texture::LoadDDS()
 
     if (!fs.is_open())
     {
-        printf_s("ERROR: Failed to load texture - %s could not be opened.", m_FilePath.string().c_str());
+        printf_s("ERROR: Failed to load texture - %s could not be opened.\n", m_FilePath.string().c_str());
         return;
     }
 
     if (tag != DDS_MAGIC)
     {
-        printf_s("ERROR: Failed to load texture - %s is not a valid DDS file.", m_FilePath.string().c_str());
+        printf_s("ERROR: Failed to load texture - %s is not a valid DDS file.\n", m_FilePath.string().c_str());
         fs.close();
         return;
     }
