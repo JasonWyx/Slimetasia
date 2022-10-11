@@ -93,7 +93,7 @@ AudioSystem::AudioSystem()
     /// Set up FMOD channels
     if (ErrorCheck(fmodStudioSys_->initialize(MAXAUDIOCHANNELS, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, NULL))) std::cout << "AUDIO SYSTEM : FAIL - Channels" << std::endl;
 
-    if (ErrorCheck(fmodStudioSys_->getLowLevelSystem(&fmodSys_))) std::cout << "AUDIO SYSTEM : FAIL - FMOD System" << std::endl;
+    if (ErrorCheck(fmodStudioSys_->getCoreSystem(&fmodSys_))) std::cout << "AUDIO SYSTEM : FAIL - FMOD System" << std::endl;
 
     /// Set up 3D listeners
     if (ErrorCheck(fmodSys_->set3DNumListeners(1))) std::cout << "AUDIO SYSTEM : FAIL - Listener" << std::endl;

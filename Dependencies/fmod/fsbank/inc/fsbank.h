@@ -21,272 +21,123 @@
 typedef unsigned int FSBANK_INITFLAGS;
 typedef unsigned int FSBANK_BUILDFLAGS;
 
+#define FSBANK_INIT_NORMAL                  0x00000000
+#define FSBANK_INIT_IGNOREERRORS            0x00000001
+#define FSBANK_INIT_WARNINGSASERRORS        0x00000002
+#define FSBANK_INIT_CREATEINCLUDEHEADER     0x00000004
+#define FSBANK_INIT_DONTLOADCACHEFILES      0x00000008
+#define FSBANK_INIT_GENERATEPROGRESSITEMS   0x00000010
 
-/*
-[DEFINE]
-[
-    [NAME]
-    FSBANK_INITFLAGS
+#define FSBANK_BUILD_DEFAULT                0x00000000
+#define FSBANK_BUILD_DISABLESYNCPOINTS      0x00000001
+#define FSBANK_BUILD_DONTLOOP               0x00000002
+#define FSBANK_BUILD_FILTERHIGHFREQ         0x00000004
+#define FSBANK_BUILD_DISABLESEEKING         0x00000008
+#define FSBANK_BUILD_OPTIMIZESAMPLERATE     0x00000010
+#define FSBANK_BUILD_FSB5_DONTWRITENAMES    0x00000080
+#define FSBANK_BUILD_NOGUID                 0x00000100
+#define FSBANK_BUILD_WRITEPEAKVOLUME        0x00000200
 
-    [DESCRIPTION]
-    Bit fields to use with FSBank_Init to control the general operation of the library.
+#define FSBANK_BUILD_OVERRIDE_MASK          (FSBANK_BUILD_DISABLESYNCPOINTS | FSBANK_BUILD_DONTLOOP | FSBANK_BUILD_FILTERHIGHFREQ | FSBANK_BUILD_DISABLESEEKING | FSBANK_BUILD_OPTIMIZESAMPLERATE | FSBANK_BUILD_WRITEPEAKVOLUME)
+#define FSBANK_BUILD_CACHE_VALIDATION_MASK  (FSBANK_BUILD_DONTLOOP | FSBANK_BUILD_FILTERHIGHFREQ | FSBANK_BUILD_OPTIMIZESAMPLERATE)
 
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBank_Init
-]
-*/
-#define FSBANK_INIT_NORMAL                  0x00000000  /* Initialize normally. */
-#define FSBANK_INIT_IGNOREERRORS            0x00000001  /* Ignore individual subsound build errors, continue building for as long as possible. */
-#define FSBANK_INIT_WARNINGSASERRORS        0x00000002  /* Treat any warnings issued as errors. */
-#define FSBANK_INIT_CREATEINCLUDEHEADER     0x00000004  /* Create C header files with #defines defining indices for each member of the FSB. */
-#define FSBANK_INIT_DONTLOADCACHEFILES      0x00000008  /* Ignore existing cache files. */
-#define FSBANK_INIT_GENERATEPROGRESSITEMS   0x00000010  /* Generate status items that can be queried by another thread to monitor the build progress and give detailed error messages. */
-/* [DEFINE_END] */
-
-
-/*
-[DEFINE]
-[
-    [NAME]
-    FSBANK_BUILDFLAGS
-
-    [DESCRIPTION]
-    Bit fields to use with FSBank_Build and in FSBANK_SUBSOUND to control how subsounds are encoded.
-
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBank_Init
-    FSBANK_SUBSOUND
-]
-*/
-#define FSBANK_BUILD_DEFAULT                0x00000000  /* Build with default settings. */
-#define FSBANK_BUILD_DISABLESYNCPOINTS      0x00000001  /* Disable the storing of syncpoints in the output */
-#define FSBANK_BUILD_DONTLOOP               0x00000002  /* Disable perfect loop encoding and sound stretching. Removes chirps from the start of oneshot MP2, MP3 and IMAADPCM sounds. */
-#define FSBANK_BUILD_FILTERHIGHFREQ         0x00000004  /* XMA only. Enable high frequency filtering. */
-#define FSBANK_BUILD_DISABLESEEKING         0x00000008  /* XMA only. Disable seek tables to save memory. */
-#define FSBANK_BUILD_OPTIMIZESAMPLERATE     0x00000010  /* Attempt to optimize the sample rate down. Ignored if format is MP2, MP3 or if FSB4 basic headers flag is used. */
-#define FSBANK_BUILD_FSB5_DONTWRITENAMES    0x00000080  /* FSB5 format only. Do not write out a names chunk to the FSB to reduce file size. */
-#define FSBANK_BUILD_NOGUID                 0x00000100  /* FSB5 format only. Write out a null GUID for the FSB header.  The runtime will not use header caching for these FSB files. */
-#define FSBANK_BUILD_WRITEPEAKVOLUME        0x00000200  /* FSB5 format only. Write peak volume for all subsounds. */
-
-#define FSBANK_BUILD_OVERRIDE_MASK          (FSBANK_BUILD_DISABLESYNCPOINTS | FSBANK_BUILD_DONTLOOP | FSBANK_BUILD_FILTERHIGHFREQ | FSBANK_BUILD_DISABLESEEKING | FSBANK_BUILD_OPTIMIZESAMPLERATE | FSBANK_BUILD_WRITEPEAKVOLUME) /* Build flag mask that specifies which settings can be overridden per subsound. */
-#define FSBANK_BUILD_CACHE_VALIDATION_MASK  (FSBANK_BUILD_DONTLOOP | FSBANK_BUILD_FILTERHIGHFREQ | FSBANK_BUILD_OPTIMIZESAMPLERATE) /* Build flag mask that specifies which settings (when changed) invalidate a cache file. */
-/* [DEFINE_END] */
-
-
-/*
-[ENUM]
-[
-    [DESCRIPTION]
-    Error codes returned from every function.
-
-    [REMARKS]
-
-    [SEE_ALSO]
-]
-*/
 typedef enum FSBANK_RESULT
 {
-    FSBANK_OK,                              /* No errors. */
-    FSBANK_ERR_CACHE_CHUNKNOTFOUND,         /* An expected chunk is missing from the cache, perhaps try deleting cache files. */
-    FSBANK_ERR_CANCELLED,                   /* The build process was cancelled during compilation by the user. */
-    FSBANK_ERR_CANNOT_CONTINUE,             /* The build process cannot continue due to previously ignored errors. */
-    FSBANK_ERR_ENCODER,                     /* Encoder for chosen format has encountered an unexpected error. */
-    FSBANK_ERR_ENCODER_INIT,                /* Encoder initialization failed. */
-    FSBANK_ERR_ENCODER_NOTSUPPORTED,        /* Encoder for chosen format is not supported on this platform. */
-    FSBANK_ERR_FILE_OS,                     /* An operating system based file error was encountered. */
-    FSBANK_ERR_FILE_NOTFOUND,               /* A specified file could not be found. */
-    FSBANK_ERR_FMOD,                        /* Internal error from FMOD sub-system. */
-    FSBANK_ERR_INITIALIZED,                 /* Already initialized. */
-    FSBANK_ERR_INVALID_FORMAT,              /* The format of the source file is invalid. */
-    FSBANK_ERR_INVALID_PARAM,               /* An invalid parameter has been passed to this function. */
-    FSBANK_ERR_MEMORY,                      /* Ran out of memory. */
-    FSBANK_ERR_UNINITIALIZED,               /* Not initialized yet. */
-    FSBANK_ERR_WRITER_FORMAT,               /* Chosen encode format is not supported by this FSB version. */
-    FSBANK_WARN_CANNOTLOOP,                 /* Source file is too short for seamless looping. Looping disabled. */
-    FSBANK_WARN_IGNORED_FILTERHIGHFREQ,     /* FSBANK_BUILD_FILTERHIGHFREQ flag ignored: feature only supported by XMA format. */
-    FSBANK_WARN_IGNORED_DISABLESEEKING,     /* FSBANK_BUILD_DISABLESEEKING flag ignored: feature only supported by XMA format. */
-    FSBANK_WARN_FORCED_DONTWRITENAMES,      /* FSBANK_BUILD_FSB5_DONTWRITENAMES flag forced: cannot write names when source is from memory. */
-    FSBANK_ERR_ENCODER_FILE_NOTFOUND,       /* External encoder dynamic library not found */
-    FSBANK_ERR_ENCODER_FILE_BAD,            /* External encoder dynamic library could not be loaded, possibly incorrect binary format, incorrect architecture, file corruption */
+    FSBANK_OK,
+    FSBANK_ERR_CACHE_CHUNKNOTFOUND,
+    FSBANK_ERR_CANCELLED,
+    FSBANK_ERR_CANNOT_CONTINUE,
+    FSBANK_ERR_ENCODER,
+    FSBANK_ERR_ENCODER_INIT,
+    FSBANK_ERR_ENCODER_NOTSUPPORTED,
+    FSBANK_ERR_FILE_OS,
+    FSBANK_ERR_FILE_NOTFOUND,
+    FSBANK_ERR_FMOD,
+    FSBANK_ERR_INITIALIZED,
+    FSBANK_ERR_INVALID_FORMAT,
+    FSBANK_ERR_INVALID_PARAM,
+    FSBANK_ERR_MEMORY,
+    FSBANK_ERR_UNINITIALIZED,
+    FSBANK_ERR_WRITER_FORMAT,
+    FSBANK_WARN_CANNOTLOOP,
+    FSBANK_WARN_IGNORED_FILTERHIGHFREQ,
+    FSBANK_WARN_IGNORED_DISABLESEEKING,
+    FSBANK_WARN_FORCED_DONTWRITENAMES,
+    FSBANK_ERR_ENCODER_FILE_NOTFOUND,
+    FSBANK_ERR_ENCODER_FILE_BAD,
 } FSBANK_RESULT;
 
-
-/*
-[ENUM]
-[
-    [DESCRIPTION]
-    Compression formats available for encoding
-
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBank_Build
-]
-*/
 typedef enum FSBANK_FORMAT
 {
-    FSBANK_FORMAT_PCM,              /* PCM                                 (1:1)   All platforms. */
-    FSBANK_FORMAT_PCM_BIGENDIAN,    /* PCM Big Endian                      (1:1)   Xbox360 and PS3 only. */
-    FSBANK_FORMAT_XMA,              /* XMA                                 (VBR)   Xbox360 / XboxOne only (hardware).   Depends on xmaencoder. */
-    FSBANK_FORMAT_AT9_PSVITA,       /* ATRAC9                              (CBR)   PSVita only (hardware).              Depends on libatrac9. */
-    FSBANK_FORMAT_AT9_PS4,          /* ATRAC9                              (CBR)   PS4 only (hardware).                 Depends on libatrac9. */
-    FSBANK_FORMAT_VORBIS,           /* Vorbis                              (VBR)   All platforms.                       Depends on libvorbis. */
-    FSBANK_FORMAT_FADPCM,           /* FMOD ADPCM                          (3.5:1) All platforms. */
+    FSBANK_FORMAT_PCM,
+    FSBANK_FORMAT_XMA,
+    FSBANK_FORMAT_AT9,
+    FSBANK_FORMAT_VORBIS,
+    FSBANK_FORMAT_FADPCM,
+    FSBANK_FORMAT_OPUS,
 
-    FSBANK_FORMAT_MAX               /* Upper bound for this enumeration, for use with validation. */
+    FSBANK_FORMAT_MAX
 } FSBANK_FORMAT;
 
-
-/*
-[ENUM]
-[
-    [DESCRIPTION]
-    Version of FSB to write out.
-
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBank_Init
-]
-*/
 typedef enum FSBANK_FSBVERSION
 {
-    FSBANK_FSBVERSION_FSB5,         /* Produce FSB version 5 files. */
+    FSBANK_FSBVERSION_FSB5,
 
-    FSBANK_FSBVERSION_MAX           /* Upper bound for this enumeration, for use with validation. */
+    FSBANK_FSBVERSION_MAX
 } FSBANK_FSBVERSION;
 
-
-/*
-[ENUM]
-[
-    [DESCRIPTION]
-    Current state during the build process.
-
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBANK_PROGRESSITEM
-]
-*/
 typedef enum FSBANK_STATE
 {
-    FSBANK_STATE_DECODING,      /* Decode a file to usable raw sample data. */
-    FSBANK_STATE_ANALYSING,     /* Scan sound data for details (such as optimized sample rate). */
-    FSBANK_STATE_PREPROCESSING, /* Prepares sound data for encoder. */ 
-    FSBANK_STATE_ENCODING,      /* Pass the sample data to the chosen encoder. */
-    FSBANK_STATE_WRITING,       /* Write encoded data into an FSB. */
-    FSBANK_STATE_FINISHED,      /* Process complete. */
-    FSBANK_STATE_FAILED,        /* An error has occurred, check data (as FSBANK_STATEDATA_FAILED) for details. */
-    FSBANK_STATE_WARNING,       /* A warning has been issued, check data (as FSBANK_STATEDATA_WARNING) for details. */
+    FSBANK_STATE_DECODING,
+    FSBANK_STATE_ANALYSING,
+    FSBANK_STATE_PREPROCESSING,
+    FSBANK_STATE_ENCODING,
+    FSBANK_STATE_WRITING,
+    FSBANK_STATE_FINISHED,
+    FSBANK_STATE_FAILED,
+    FSBANK_STATE_WARNING,
 } FSBANK_STATE;
 
-
-/*
-[STRUCTURE]
-[
-    [DESCRIPTION]
-    Representation of how to encode a single subsound in the final FSB.
-
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBank_Build
-    FSBANK_BUILD_OPTIMIZESAMPLERATE
-    FSBANK_SPEAKERMAP
-    FSBANK_BUILDFLAGS
-]
-*/
 typedef struct FSBANK_SUBSOUND
 {
-    const char* const  *fileNames;              /* List of file names (instead of FSBANK_SUBSOUND::fileData) used to produce an interleaved sound. */
-    const void* const  *fileData;               /* List of file data pointers (instead of FSBANK_SUBSOUND::fileNames) used to produce an interleaved sound. */
-    const unsigned int *fileDataLengths;        /* List of file data lengths corresponding to the items in the FSBANK_SUBSOUND::fileData list. */
-    unsigned int        numFiles;               /* Number of items in either FSBANK_SUBSOUND::fileData / FSBANK_SUBSOUND::fileDataLengths or FSBANK_SUBSOUND::fileNames. */
-    FSBANK_BUILDFLAGS   overrideFlags;          /* Flags that will reverse the equivalent flags passed to FSBank_Build. */
-    unsigned int        overrideQuality;        /* Override the quality setting passed to FSBank_Build. */
-    float               desiredSampleRate;      /* Resample to this sample rate (ignores optimize sample rate setting), up to 192000Hz. */
-    float               percentOptimizedRate;   /* If using FSBANK_BUILD_OPTIMIZESAMPLERATE, this is the percentage of that rate to be used, up to 100.0%. */
+    const char* const  *fileNames;
+    const void* const  *fileData;
+    const unsigned int *fileDataLengths;
+    unsigned int        numFiles;
+    FSBANK_BUILDFLAGS   overrideFlags;
+    unsigned int        overrideQuality;
+    float               desiredSampleRate;
+    float               percentOptimizedRate;
 } FSBANK_SUBSOUND;
 
-
-/*
-[STRUCTURE]
-[
-    [DESCRIPTION]
-    Status information describing the progress of a build.
-
-    [REMARKS]
-
-    [SEE_ALSO]
-    FSBank_Build
-    FSBank_FetchNextProgressItem
-    FSBank_ReleaseProgressItem
-    FSBANK_STATE
-]
-*/
 typedef struct FSBANK_PROGRESSITEM
 {
-    int             subSoundIndex;  /* Index into the subsound list passed to FSBank_Build that this update relates to (-1 indicates no specific subsound). */
-    int             threadIndex;    /* Which thread index is serving this update (-1 indicates FSBank_Build / main thread). */
-    FSBANK_STATE    state;          /* Progress through the encoding process. */
-    const void     *stateData;      /* Cast to state specific data structure for extra information. */
+    int             subSoundIndex;
+    int             threadIndex;
+    FSBANK_STATE    state;
+    const void     *stateData;
 } FSBANK_PROGRESSITEM;
 
-
-/*
-[STRUCTURE]
-[
-    [DESCRIPTION]
-    Extra state data for FSBANK_STATE_FAILED
-
-    [REMARKS]
-    Cast stateData in FSBANK_PROGRESSITEM to this struct if the state is FSBANK_STATE_FAILED
-
-    [SEE_ALSO]
-    FSBANK_STATE_FAILED
-    FSBANK_PROGRESSITEM
-]
-*/
 typedef struct FSBANK_STATEDATA_FAILED
 {
-    FSBANK_RESULT errorCode;    /* Error result code. */
-    char errorString[256];      /* Description for error code. */
+    FSBANK_RESULT errorCode;
+    char errorString[256];
 } FSBANK_STATEDATA_FAILED;
 
-
-/*
-[STRUCTURE]
-[
-    [DESCRIPTION]
-    Extra state data for FSBANK_STATEDATA_WARNING
-
-    [REMARKS]
-    Cast stateData in FSBANK_PROGRESSITEM to this struct if the state is FSBANK_STATE_WARNING
-
-    [SEE_ALSO]
-    FSBANK_STATE_WARNING
-    FSBANK_PROGRESSITEM
-]
-*/
 typedef struct FSBANK_STATEDATA_WARNING
 {
-    FSBANK_RESULT warnCode;     /* Warning result code. */
-    char warningString[256];    /* Description for warning code. */
+    FSBANK_RESULT warnCode;
+    char warningString[256];
 } FSBANK_STATEDATA_WARNING;
 
 
 #ifdef __cplusplus
 extern "C" {
-#endif  
+#endif
 
-typedef void* (FB_CALL *FSBANK_MEMORY_ALLOC_CALLBACK)(unsigned int size, unsigned int, const char *sourceStr);
-typedef void* (FB_CALL *FSBANK_MEMORY_REALLOC_CALLBACK)(void *ptr, unsigned int size, unsigned int, const char *sourceStr);
-typedef void  (FB_CALL *FSBANK_MEMORY_FREE_CALLBACK)(void *ptr, unsigned int, const char *sourceStr);
+typedef void* (FB_CALL *FSBANK_MEMORY_ALLOC_CALLBACK)(unsigned int size, unsigned int type, const char *sourceStr);
+typedef void* (FB_CALL *FSBANK_MEMORY_REALLOC_CALLBACK)(void *ptr, unsigned int size, unsigned int type, const char *sourceStr);
+typedef void  (FB_CALL *FSBANK_MEMORY_FREE_CALLBACK)(void *ptr, unsigned int type, const char *sourceStr);
 
 FSBANK_RESULT FB_API FSBank_MemoryInit(FSBANK_MEMORY_ALLOC_CALLBACK userAlloc, FSBANK_MEMORY_REALLOC_CALLBACK userRealloc, FSBANK_MEMORY_FREE_CALLBACK userFree);
 FSBANK_RESULT FB_API FSBank_Init(FSBANK_FSBVERSION version, FSBANK_INITFLAGS flags, unsigned int numSimultaneousJobs, const char *cacheDirectory);
