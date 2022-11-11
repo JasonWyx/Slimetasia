@@ -105,10 +105,10 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;assimp-vc143-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmod_vc.lib;fmodstudio_vc.lib;lua54.lib;$(SolutionDir)Dependencies\opencv\lib\*.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -129,7 +129,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -155,7 +155,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -181,7 +181,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -303,6 +303,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="SphereVsConvexPolygon.cpp" />
     <ClCompile Include="SphereVsSphere.cpp" />
     <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="SwapchainHandler.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -399,6 +400,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="SphereVsConvexPolygon.h" />
     <ClInclude Include="SphereVsSphere.h" />
     <ClInclude Include="SpotLight.h" />
+    <ClInclude Include="SwapchainHandler.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Timer.h" />
