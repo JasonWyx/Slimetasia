@@ -86,8 +86,8 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             HDROP dropInfo = (HDROP)wParam;
             UINT amount = DragQueryFile(dropInfo, 0xFFFFFFFF, NULL, NULL);
 
-            std::vector<filesystem::path> failedFiles;
-            std::vector<filesystem::path> successFiles;
+            std::vector<std::filesystem::path> failedFiles;
+            std::vector<std::filesystem::path> successFiles;
 
             /// Check for each files
             for (unsigned i = 0; i < amount; ++i)
@@ -95,7 +95,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
                 TCHAR buff[MAX_PATH] = { 0 };
                 DragQueryFile(dropInfo, i, buff, MAX_PATH);
 
-                filesystem::path filePath = buff;
+                std::filesystem::path filePath = buff;
 
                 /// Check if file type is what we accept
                 if (RESOURCEMANAGER.CopyNewResource(filePath, hwnd))
@@ -114,7 +114,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
                 bool front = false;
                 bool back = false;
 
-                for (const filesystem::path& s : successFiles)
+                for (const std::filesystem::path& s : successFiles)
                 {
                     if (s.filename().string().rfind("_ft") != std::string::npos) front = true;
                     if (s.filename().string().rfind("_bk") != std::string::npos) back = true;
@@ -590,7 +590,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
 #ifdef EDITOR
     wglSwapIntervalEXT(1);
     DragAcceptFiles(m_Window, true);
-    std::cout.rdbuf(os.rdbuf());
+    // std::cout.rdbuf(os.rdbuf());
 #else
     wglSwapIntervalEXT(1);
 #endif
@@ -611,13 +611,13 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     AISystem::Initialize();
 
 #if defined(USE_VULKAN_RENDERER)
-    // RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
+    RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
 #else
-    // Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
+    Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
 #endif  // #if defined(USE_VULKAN_RENDERER)
 
-    Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
-    RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
+    // Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
+    // RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
 
     Input::Initialize();
     Editor::Initialize(m_Window, static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
@@ -638,13 +638,13 @@ Application::~Application()
     Editor::Shutdown();
     Input::Shutdown();
 
-    RendererVk::Shutdown();
+    // RendererVk::Shutdown();
     Renderer::Shutdown();
 
 #if defined(USE_VULKAN_RENDERER)
-    // RendererVk::Shutdown();
+    RendererVk::Shutdown();
 #else
-    // Renderer::Shutdown();
+    Renderer::Shutdown();
 #endif  // #if defined(USE_VULKAN_RENDERER)
     AISystem::Shutdown();
     ResourceManager::Shutdown();
@@ -719,7 +719,7 @@ void Application::RunMainLoop()
 #ifdef EDITOR
     NewScene("NewScene");
     Layer* layer = m_CurrentScene->CreateLayer("NewLayer");
-    Renderer::Instance().SetCurrentLayer(layer);
+    // Renderer::Instance().SetCurrentLayer(layer);
     m_GameTimer.SetEditorPaused(true);
 #else
     ToggleFullScreen(true);
@@ -792,13 +792,13 @@ void Application::RunMainLoop()
         m_ComputeTimer.StartTimer();
 
 #if defined(USE_VULKAN_RENDERER)
-        // RendererVk::Instance().Update(scaledFrameTime);
+        RendererVk::Instance().Update(scaledFrameTime);
 #else
-        // Renderer::Instance().Update(scaledFrameTime);
+        Renderer::Instance().Update(scaledFrameTime);
 #endif  // #if defined(USE_VULKAN_RENDERER)
 
-        RendererVk::Instance().Update(scaledFrameTime);
-        Renderer::Instance().Update(scaledFrameTime);
+        // RendererVk::Instance().Update(scaledFrameTime);
+        // Renderer::Instance().Update(scaledFrameTime);
         renderTime = m_ComputeTimer.GetTimePassed();
 
 #ifdef EDITOR

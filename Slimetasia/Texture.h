@@ -33,7 +33,7 @@ private:
     GLuint m_MipmapLevel;
 
 public:
-    Texture(const std::string& resourceName = "", const filesystem::path& filePath = "");
+    Texture(const std::string& resourceName = "", const std::filesystem::path& filePath = "");
     ~Texture();
 
     // Inherited via FileResourceBase
@@ -45,8 +45,8 @@ public:
     void LoadTextureDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs);
     void LoadSkyboxDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs);
 
-    void ImportTexture(const filesystem::path& filePath);
-    void ImportSkybox(std::vector<filesystem::path> const& faces);
+    void ImportTexture(const std::filesystem::path& filePath);
+    void ImportSkybox(std::vector<std::filesystem::path> const& faces);
 
     GLuint GetHandle() const;
 };

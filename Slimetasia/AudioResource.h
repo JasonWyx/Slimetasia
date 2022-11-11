@@ -15,7 +15,7 @@ private:
 
     /// Functions ---------------------------------------------------------------
 public:
-    AudioResource(const std::string& resourceName = "AudioResource", const filesystem::path& filepath = "");
+    AudioResource(const std::string& resourceName = "AudioResource", const std::filesystem::path& filepath = "");
 
     void Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* parentElem);
     void Unserialize(tinyxml2::XMLElement* currElem);

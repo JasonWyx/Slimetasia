@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-Shader::Shader(const std::string& resourceName, const filesystem::path& filePath)
+Shader::Shader(const std::string& resourceName, const std::filesystem::path& filePath)
     : ResourceBase(resourceName, filePath)
     , m_ShaderProgram(0)
     , m_VertShaderFilePath()
@@ -17,138 +17,32 @@ Shader::Shader(const std::string& resourceName, const filesystem::path& filePath
 
 Shader::~Shader()
 {
-    if (m_ShaderProgram != 0) glDeleteProgram(m_ShaderProgram);
+    if (m_ShaderProgram != 0)
+    {
+        glDeleteProgram(m_ShaderProgram);
+    }
 }
 
 void Shader::Compile()
 {
-    if (m_ShaderProgram != 0) glDeleteProgram(m_ShaderProgram);
-
-    std::ifstream vertShaderFile("Shaders/" + m_VertShaderFilePath, std::ios::in);
-    std::ifstream fragShaderFile("Shaders/" + m_FragShaderFilePath, std::ios::in);
-    std::ifstream geomShaderFile("Shaders/" + m_GeomShaderFilePath, std::ios::in);
-
-    if (!vertShaderFile.is_open()) throw std::runtime_error("ERROR: " + std::string(m_VertShaderFilePath) + " failed to open.");
-    if (!fragShaderFile.is_open()) throw std::runtime_error("ERROR: " + std::string(m_FragShaderFilePath) + " failed to open.");
-    if (!m_GeomShaderFilePath.empty() && !geomShaderFile.is_open()) throw std::runtime_error("ERROR: " + std::string(m_GeomShaderFilePath) + " failed to open.");
-
-    GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    GLuint geomShader = glCreateShader(GL_GEOMETRY_SHADER);
-
-    std::string vertSource = "";
-    std::string fragSource = "";
-    std::string geomSource = "";
-    std::string line = "";
-
-    while (std::getline(vertShaderFile, line))
+    if (m_ShaderProgram != 0)
     {
-        vertSource += '\n' + line;
-    }
-    vertShaderFile.close();
-
-    char const* src = vertSource.c_str();
-
-    GLint result = GL_FALSE;
-    int infoLength = 0;
-
-    glShaderSource(vertShader, 1, &src, nullptr);
-    glCompileShader(vertShader);
-
-    glGetShaderiv(vertShader, GL_COMPILE_STATUS, &result);
-    glGetShaderiv(vertShader, GL_INFO_LOG_LENGTH, &infoLength);
-    if (infoLength > 0)
-    {
-        std::vector<char> error(static_cast<std::size_t>(infoLength) + 1);
-        glGetShaderInfoLog(vertShader, infoLength, nullptr, error.data());
-        std::cout << error.data() << std::endl;
+        glDeleteProgram(m_ShaderProgram);
     }
 
-    line = "";
-    while (std::getline(fragShaderFile, line))
-    {
-        fragSource += '\n' + line;
-    }
-    fragShaderFile.close();
+    GLuint vertShader = CompileShader(std::string{ "Shaders/" } + m_VertShaderFilePath, GL_VERTEX_SHADER);
+    GLuint fragShader = CompileShader(std::string{ "Shaders/" } + m_FragShaderFilePath, GL_FRAGMENT_SHADER);
+    GLuint geomShader = CompileShader(std::string{ "Shaders/" } + m_GeomShaderFilePath, GL_GEOMETRY_SHADER);
 
-    src = fragSource.c_str();
-
-    result = GL_FALSE;
-    infoLength = 0;
-
-    glShaderSource(fragShader, 1, &src, nullptr);
-    glCompileShader(fragShader);
-
-    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &result);
-    glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &infoLength);
-    if (infoLength > 0)
-    {
-        std::vector<char> error(static_cast<std::size_t>(infoLength) + 1);
-        glGetShaderInfoLog(fragShader, infoLength, nullptr, error.data());
-        std::cout << error.data() << std::endl;
-        return;
-    }
-
-    if (!m_GeomShaderFilePath.empty() && geomShaderFile.is_open())
-    {
-        line = "";
-        while (std::getline(geomShaderFile, line))
-        {
-            geomSource += '\n' + line;
-        }
-        geomShaderFile.close();
-
-        src = geomSource.c_str();
-
-        result = GL_FALSE;
-        infoLength = 0;
-
-        glShaderSource(geomShader, 1, &src, nullptr);
-        glCompileShader(geomShader);
-
-        glGetShaderiv(geomShader, GL_COMPILE_STATUS, &result);
-        glGetShaderiv(geomShader, GL_INFO_LOG_LENGTH, &infoLength);
-        if (infoLength > 0)
-        {
-            std::vector<char> error(static_cast<std::size_t>(infoLength) + 1);
-            glGetShaderInfoLog(geomShader, infoLength, nullptr, error.data());
-            std::cout << error.data() << std::endl;
-            return;
-        }
-    }
-
-    GLuint tmpProgram = glCreateProgram();
-    glAttachShader(tmpProgram, vertShader);
-    glAttachShader(tmpProgram, fragShader);
-    if (!m_GeomShaderFilePath.empty()) glAttachShader(tmpProgram, geomShader);
-    glLinkProgram(tmpProgram);
-
-    result = GL_FALSE;
-    infoLength = 0;
-
-    glGetProgramiv(tmpProgram, GL_LINK_STATUS, &result);
-    glGetProgramiv(tmpProgram, GL_INFO_LOG_LENGTH, &infoLength);
-    if (infoLength > 0)
-    {
-        std::vector<char> error(static_cast<std::size_t>(infoLength) + 1);
-        glGetShaderInfoLog(tmpProgram, infoLength, nullptr, error.data());
-        std::cout << error.data() << std::endl;
-        return;
-    }
-
-    glDetachShader(tmpProgram, vertShader);
-    glDetachShader(tmpProgram, fragShader);
-    glDetachShader(tmpProgram, geomShader);
-    glDeleteShader(vertShader);
-    glDeleteShader(fragShader);
-    glDeleteShader(geomShader);
-
-    m_ShaderProgram = tmpProgram;
+    m_ShaderProgram = LinkProgram({ vertShader, fragShader, geomShader });
 }
 
 bool Shader::Enable()
 {
-    if (m_ShaderProgram != 0) glUseProgram(m_ShaderProgram);
+    if (m_ShaderProgram != 0)
+    {
+        glUseProgram(m_ShaderProgram);
+    }
     return m_ShaderProgram != 0;
 }
 
@@ -210,4 +104,86 @@ void Shader::Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root)
 void Shader::Unserialize(tinyxml2::XMLElement* root)
 {
     ResourceBase::Unserialize(root);
+}
+
+/*static*/ GLuint Shader::CompileShader(std::string filePath, GLenum shaderType)
+{
+    std::ifstream shaderFileStream{ filePath, std::ios::in };
+
+    if (!shaderFileStream.is_open())
+    {
+        std::cout << "ERROR: " + std::string(filePath) + " failed to open." << std::endl;
+        return GL_NONE;
+    }
+
+    GLuint shader = glCreateShader(shaderType);
+
+    std::string source = "";
+    std::string line = "";
+
+    while (std::getline(shaderFileStream, line))
+    {
+        source += line + '\n';
+    }
+
+    shaderFileStream.close();
+
+    char const* sourceCStr = source.c_str();
+
+    GLint result = GL_FALSE;
+    int infoLength = 0;
+
+    glShaderSource(shader, 1, &sourceCStr, nullptr);
+    glCompileShader(shader);
+
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+    if (!result)
+    {
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLength);
+
+        std::vector<char> error(static_cast<std::size_t>(infoLength) + 1);
+        glGetShaderInfoLog(shader, infoLength, nullptr, error.data());
+
+        std::cout << error.data() << std::endl;
+
+        glDeleteShader(shader);
+        return GL_NONE;
+    }
+
+    return shader;
+}
+
+GLuint Shader::LinkProgram(const std::vector<GLuint>& programs)
+{
+    GLuint shaderProgram = glCreateProgram();
+
+    for (const GLuint program : programs)
+    {
+        glAttachShader(shaderProgram, program);
+    }
+
+    glLinkProgram(shaderProgram);
+
+    GLint result = GL_FALSE;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &result);
+
+    if (!result)
+    {
+        GLint infoLength = 0;
+        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &infoLength);
+
+        std::vector<char> error(static_cast<std::size_t>(infoLength) + 1);
+        glGetShaderInfoLog(shaderProgram, infoLength, nullptr, error.data());
+        std::cout << error.data() << std::endl;
+
+        return GL_NONE;
+    }
+
+    for (const GLuint program : programs)
+    {
+        glDetachShader(shaderProgram, program);
+        glDeleteShader(program);
+    }
+
+    return shaderProgram;
 }

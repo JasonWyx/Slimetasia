@@ -5,7 +5,7 @@
 /*
 Constructor for AudioResource.
 */
-AudioResource::AudioResource(const std::string& resourceName, const filesystem::path& filepath)
+AudioResource::AudioResource(const std::string& resourceName, const std::filesystem::path& filepath)
     : ResourceBase{resourceName, filepath}
     , is3D_{true}
     , loop_{false}

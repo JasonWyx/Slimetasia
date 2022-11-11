@@ -17,7 +17,7 @@ This file is the implementation file that handles font system
 
 unsigned constexpr PADDING = 5;
 
-Font::Font(const std::string resourceName, const filesystem::path& filePath)
+Font::Font(const std::string resourceName, const std::filesystem::path& filePath)
     : ResourceBase(resourceName, filePath)
     , m_FontCharacterInfos()
     , m_FontTexture()

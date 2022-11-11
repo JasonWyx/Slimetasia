@@ -50,7 +50,7 @@ struct FontCharacter
 class Font : public ResourceBase
 {
 public:
-    Font(const std::string resourceName = "", const filesystem::path& filePath = "");
+    Font(const std::string resourceName = "", const std::filesystem::path& filePath = "");
     ~Font();
 
     virtual void Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* parentElem) override;

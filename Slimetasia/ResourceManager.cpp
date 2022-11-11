@@ -15,15 +15,15 @@
 // STATIC VARIABLES                                                           |
 // ===========================================================================|
 
-const filesystem::path ResourceManager::s_DirectoryPath = filesystem::current_path();
-const filesystem::path ResourceManager::s_ResourcePath = "Resources";
-const filesystem::path ResourceManager::s_ResourcePathAudio = ResourceManager::s_ResourcePath / "Audio";
-const filesystem::path ResourceManager::s_ResourcePathTexture = ResourceManager::s_ResourcePath / "Texture";
-const filesystem::path ResourceManager::s_ResourcePathModel = ResourceManager::s_ResourcePath / "Models";
-const filesystem::path ResourceManager::s_ResourcePathFonts = ResourceManager::s_ResourcePath / "Fonts";
-const filesystem::path ResourceManager::s_ResourcePathScripts = ResourceManager::s_DirectoryPath / "Scripts";
-const filesystem::path ResourceManager::s_ResourceDataDocument = s_ResourcePath / "Resource.xml";
-const filesystem::path ResourceManager::s_PhysicsWorldSettingsDataDocument = s_ResourcePath / "PhysicsWorldSettings.xml";
+const std::filesystem::path ResourceManager::s_DirectoryPath = std::filesystem::current_path();
+const std::filesystem::path ResourceManager::s_ResourcePath = "Resources";
+const std::filesystem::path ResourceManager::s_ResourcePathAudio = ResourceManager::s_ResourcePath / "Audio";
+const std::filesystem::path ResourceManager::s_ResourcePathTexture = ResourceManager::s_ResourcePath / "Texture";
+const std::filesystem::path ResourceManager::s_ResourcePathModel = ResourceManager::s_ResourcePath / "Models";
+const std::filesystem::path ResourceManager::s_ResourcePathFonts = ResourceManager::s_ResourcePath / "Fonts";
+const std::filesystem::path ResourceManager::s_ResourcePathScripts = ResourceManager::s_DirectoryPath / "Scripts";
+const std::filesystem::path ResourceManager::s_ResourceDataDocument = s_ResourcePath / "Resource.xml";
+const std::filesystem::path ResourceManager::s_PhysicsWorldSettingsDataDocument = s_ResourcePath / "PhysicsWorldSettings.xml";
 
 /*
 Constructor for ResourceManager.
@@ -39,13 +39,13 @@ ResourceManager::ResourceManager()
       }
 {
     /// Create directories if not created
-    std::vector<filesystem::path> paths = {s_ResourcePath, s_ResourcePathAudio, s_ResourcePathModel, s_ResourcePathTexture, s_ResourcePathFonts, s_ResourcePathScripts};
+    std::vector<std::filesystem::path> paths = {s_ResourcePath, s_ResourcePathAudio, s_ResourcePathModel, s_ResourcePathTexture, s_ResourcePathFonts, s_ResourcePathScripts};
 
     for (const auto& path : paths)
     {
-        if (!filesystem::exists(path))
+        if (!std::filesystem::exists(path))
         {
-            filesystem::create_directory(path);
+            std::filesystem::create_directory(path);
         }
     }
 
@@ -266,26 +266,26 @@ void ResourceManager::RefreshResources()
 /*
 Function to add a new file into the resource folder.
 */
-bool ResourceManager::CopyNewResource(filesystem::path& filePath, HWND hwnd)
+bool ResourceManager::CopyNewResource(std::filesystem::path& filePath, HWND hwnd)
 {
-    filesystem::path srcFilePath = filePath;
-    filesystem::path dstFilePath;
+    std::filesystem::path srcFilePath = filePath;
+    std::filesystem::path dstFilePath;
 
     if (srcFilePath.has_extension())
     {
-        filesystem::path folderPath;
+        std::filesystem::path folderPath;
         if (!GetResourceFolderPath(srcFilePath, folderPath))
         {
             return false;
         }
 
         dstFilePath = folderPath / srcFilePath.filename();
-        if (filesystem::copy_file(srcFilePath, dstFilePath, filesystem::copy_options::skip_existing))
+        if (std::filesystem::copy_file(srcFilePath, dstFilePath, std::filesystem::copy_options::skip_existing))
         {
             std::string errorMsg = "RESOURCE MANAGER : File already exist \nOverwrite (" + filePath.filename().string() + ") ?";
             if (MessageBox(hwnd, LPCSTR(errorMsg.c_str()), NULL, MB_YESNO) == 6)
             {
-                filesystem::copy_file(filePath, dstFilePath, filesystem::copy_options::overwrite_existing);
+                std::filesystem::copy_file(filePath, dstFilePath, std::filesystem::copy_options::overwrite_existing);
             }
             else
             {
@@ -301,7 +301,7 @@ bool ResourceManager::CopyNewResource(filesystem::path& filePath, HWND hwnd)
 /*
 Function to assign the new resource to a folder.
 */
-bool ResourceManager::GetResourceFolderPath(const filesystem::path& filePath, filesystem::path& folderPath) const
+bool ResourceManager::GetResourceFolderPath(const std::filesystem::path& filePath, std::filesystem::path& folderPath) const
 {
     /// Identify resource type
     ResourceType type = GetResourceType(filePath);
@@ -323,7 +323,7 @@ bool ResourceManager::GetResourceFolderPath(const filesystem::path& filePath, fi
 /*
 Function to identify the type of resource.
 */
-ResourceType ResourceManager::GetResourceType(filesystem::path filePath) const
+ResourceType ResourceManager::GetResourceType(std::filesystem::path filePath) const
 {
     if (filePath.has_extension())
     {

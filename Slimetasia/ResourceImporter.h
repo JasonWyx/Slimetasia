@@ -6,6 +6,6 @@
 
 namespace ResourceImporter
 {
-    void ImportModel(const filesystem::path& filePath);
-    void ImportTexture(const std::vector<filesystem::path>& filePaths);
+    void ImportModel(const std::filesystem::path& filePath);
+    void ImportTexture(const std::vector<std::filesystem::path>& filePaths);
 };  // namespace ResourceImporter

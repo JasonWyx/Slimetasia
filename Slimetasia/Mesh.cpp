@@ -32,7 +32,7 @@ auto ConvertAssimpMat4 = [](aiMatrix4x4 const& matrix) {
     return Matrix4(matrix.a1, matrix.b1, matrix.c1, matrix.d1, matrix.a2, matrix.b2, matrix.c2, matrix.d2, matrix.a3, matrix.b3, matrix.c3, matrix.d3, matrix.a4, matrix.b4, matrix.c4, matrix.d4);
 };
 
-Mesh::Mesh(const std::string& resourceName, const filesystem::path& filePath)
+Mesh::Mesh(const std::string& resourceName, const std::filesystem::path& filePath)
     : ResourceBase(resourceName, filePath)
     , m_Indices()
     , m_Vertices()

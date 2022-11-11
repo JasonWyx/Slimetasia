@@ -5,7 +5,7 @@
 /*
 Constructor for ResourceBase.
 */
-ResourceBase::ResourceBase(const std::string& resourceName, const filesystem::path& filepath)
+ResourceBase::ResourceBase(const std::string& resourceName, const std::filesystem::path& filepath)
     : m_Name(resourceName)
     , m_FilePath(filepath)
     , m_GUID(0)
@@ -21,7 +21,7 @@ const std::string& ResourceBase::GetName() const
 /*
 Function to get fullName_.
 */
-const filesystem::path& ResourceBase::GetFilePath() const
+const std::filesystem::path& ResourceBase::GetFilePath() const
 {
     return m_FilePath;
 }

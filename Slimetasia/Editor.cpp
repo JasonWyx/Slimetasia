@@ -2284,9 +2284,9 @@ void Editor::DrawResourceManager()
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
-                    for (auto const& entry : filesystem::directory_iterator(path))
+                    for (auto const& entry : std::filesystem::directory_iterator(path))
                     {
-                        auto path = filesystem::path(entry.path());
+                        auto path = std::filesystem::path(entry.path());
                         std::wstring file = path.stem().c_str();
                         if (res == file)
                         {
@@ -2312,9 +2312,9 @@ void Editor::DrawResourceManager()
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
-                    for (auto const& entry : filesystem::directory_iterator(path))
+                    for (auto const& entry : std::filesystem::directory_iterator(path))
                     {
-                        auto path = filesystem::path(entry.path());
+                        auto path = std::filesystem::path(entry.path());
                         std::wstring file = path.stem().c_str();
                         if (res == file)
                         {
@@ -2340,9 +2340,9 @@ void Editor::DrawResourceManager()
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
-                    for (auto const& entry : filesystem::directory_iterator(path))
+                    for (auto const& entry : std::filesystem::directory_iterator(path))
                     {
-                        auto path = filesystem::path(entry.path());
+                        auto path = std::filesystem::path(entry.path());
                         std::wstring file = path.stem().c_str();
                         if (res == file)
                         {
@@ -2368,9 +2368,9 @@ void Editor::DrawResourceManager()
                 if (resource.Validate())
                 {
                     std::wstring res = resource->GetFilePath().stem().c_str();
-                    for (auto const& entry : filesystem::directory_iterator(path))
+                    for (auto const& entry : std::filesystem::directory_iterator(path))
                     {
-                        auto path = filesystem::path(entry.path());
+                        auto path = std::filesystem::path(entry.path());
                         std::wstring file = path.stem().c_str();
                         if (res == file)
                         {
@@ -2394,13 +2394,13 @@ void Editor::DrawResourceManager()
             int result = MessageBox(handle, LPCSTR(message.c_str()), "WARNING", MB_OKCANCEL);
             if (result == IDOK)
             {
-                std::vector<filesystem::path> filesToBeDeleted;
+                std::vector<std::filesystem::path> filesToBeDeleted;
                 std::cout << "SELECTED OK" << std::endl;
                 // Mesh
                 std::string path("Resources\\Models");
-                for (auto const& entry : filesystem::directory_iterator(path))
+                for (auto const& entry : std::filesystem::directory_iterator(path))
                 {
-                    auto path = filesystem::path(entry.path());
+                    auto path = std::filesystem::path(entry.path());
                     std::wstring file = path.stem().c_str();
 
                     unsigned i = 1;
@@ -2434,9 +2434,9 @@ void Editor::DrawResourceManager()
 
                 // Texture
                 path = "Resources\\Texture";
-                for (auto const& entry : filesystem::directory_iterator(path))
+                for (auto const& entry : std::filesystem::directory_iterator(path))
                 {
-                    auto path = filesystem::path(entry.path());
+                    auto path = std::filesystem::path(entry.path());
                     std::wstring file = path.stem().c_str();
 
                     unsigned i = 1;
@@ -2458,9 +2458,9 @@ void Editor::DrawResourceManager()
 
                 // Font
                 path = "Resources\\Fonts";
-                for (auto const& entry : filesystem::directory_iterator(path))
+                for (auto const& entry : std::filesystem::directory_iterator(path))
                 {
-                    auto path = filesystem::path(entry.path());
+                    auto path = std::filesystem::path(entry.path());
                     std::wstring file = path.stem().c_str();
 
                     unsigned i = 1;
@@ -2483,13 +2483,13 @@ void Editor::DrawResourceManager()
                 for (const auto& entry : filesToBeDeleted)
                 {
                     std::cout << entry << std::endl;
-                    if (!filesystem::is_directory(entry))
+                    if (!std::filesystem::is_directory(entry))
                     {
-                        filesystem::remove(entry);
+                        std::filesystem::remove(entry);
                     }
                     else
                     {
-                        filesystem::remove_all(entry);
+                        std::filesystem::remove_all(entry);
                     }
                 }
             }

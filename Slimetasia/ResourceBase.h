@@ -3,16 +3,7 @@
 
 #include <fstream>
 #include <string>
-#define NOMINMAX
-#if VER_PRODUCTBUILD >= 10011
-// Windows 10+ SDK code goes here
 #include <filesystem>
-#define filesystem std::filesystem
-#else
-#include <experimental/filesystem>
-#define filesystem std::experimental::filesystem
-// Windows 8.1- SDK code goes here
-#endif
 
 #include "External Libraries/tinyxml2/tinyxml2.h"
 
@@ -35,16 +26,16 @@ using ResourceGUID = unsigned long long;
 // ===========================================================================|
 class ResourceBase
 {
-public:                           // Members
-    std::string m_Name;           // Name as referenced in the editor
-    filesystem::path m_FilePath;  // File path
+public:                                 // Members
+    std::string m_Name;                 // Name as referenced in the editor
+    std::filesystem::path m_FilePath;   // File path
 
 public:  // Functions
-    explicit ResourceBase(const std::string& name = "", const filesystem::path& filepath = "");
+    explicit ResourceBase(const std::string& name = "", const std::filesystem::path& filepath = "");
     virtual ~ResourceBase() = default;
 
     const std::string& GetName() const;
-    const filesystem::path& GetFilePath() const;
+    const std::filesystem::path& GetFilePath() const;
     ResourceStatus GetStatus() const;
     ResourceGUID GetGUID() const;
 

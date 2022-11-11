@@ -72,7 +72,7 @@ enum class MeshBufferID
 class Mesh : public ResourceBase
 {
 public:
-    Mesh(const std::string& resourceName = "Mesh", const filesystem::path& filePath = "");
+    Mesh(const std::string& resourceName = "Mesh", const std::filesystem::path& filePath = "");
     ~Mesh();
 
     // Inherited via FileResourceBase

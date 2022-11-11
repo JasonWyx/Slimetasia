@@ -49,7 +49,7 @@ struct Animation
 class AnimationSet : public ResourceBase
 {
 public:
-    AnimationSet(const std::string& resourceName = "AnimationSet", const filesystem::path& filepath = "");
+    AnimationSet(const std::string& resourceName = "AnimationSet", const std::filesystem::path& filepath = "");
     ~AnimationSet();
 
     void ImportFromAssimp(aiScene const* scene);

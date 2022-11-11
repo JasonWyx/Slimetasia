@@ -7,7 +7,7 @@
 
 #include <assimp/Importer.hpp>
 
-void ResourceImporter::ImportModel(const filesystem::path& filePath)
+void ResourceImporter::ImportModel(const std::filesystem::path& filePath)
 {
     Assimp::Importer importer;
     importer.SetPropertyBool("AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS", false);
@@ -28,7 +28,7 @@ void ResourceImporter::ImportModel(const filesystem::path& filePath)
     }
 }
 
-void ResourceImporter::ImportTexture(const std::vector<filesystem::path>& filePaths)
+void ResourceImporter::ImportTexture(const std::vector<std::filesystem::path>& filePaths)
 {
     HTexture newTexture = ResourceManager::Instance().CreateResource<Texture>(filePaths[0].filename().replace_extension().string(), filePaths[0]);
 
@@ -82,7 +82,7 @@ void ResourceImporter::ImportTexture(const std::vector<filesystem::path>& filePa
             }
         }
 
-        std::vector<filesystem::path> sortedFaces{filePaths[faceIndex[0]], filePaths[faceIndex[1]], filePaths[faceIndex[2]], filePaths[faceIndex[3]], filePaths[faceIndex[4]], filePaths[faceIndex[5]]};
+        std::vector<std::filesystem::path> sortedFaces{filePaths[faceIndex[0]], filePaths[faceIndex[1]], filePaths[faceIndex[2]], filePaths[faceIndex[3]], filePaths[faceIndex[4]], filePaths[faceIndex[5]]};
 
         newTexture->ImportSkybox(sortedFaces);
     }

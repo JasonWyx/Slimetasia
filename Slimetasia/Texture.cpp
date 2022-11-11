@@ -6,7 +6,7 @@
 
 #include "DDS.h"
 
-Texture::Texture(const std::string& resourceName, const filesystem::path& filePath)
+Texture::Texture(const std::string& resourceName, const std::filesystem::path& filePath)
     : ResourceBase(resourceName, filePath)
     , m_TextureType(TextureType::Diffuse)
     , m_TextureHandle(0)
@@ -108,19 +108,20 @@ void Texture::LoadDDS()
 
 void Texture::LoadTextureDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs)
 {
-    unsigned linearSize = header.pitchOrLinearSize;
-    unsigned mipMapCount = header.mipMapCount;
-    unsigned width = header.width;
-    unsigned height = header.height;
-    unsigned fourCC = header.ddspf.fourCC;
-    GLuint format = fourCC == DDSPF_DXT1.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-                                                : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_NONE;
-    GLuint blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
+    const unsigned linearSize = header.pitchOrLinearSize;
+    const unsigned mipMapCount = header.mipMapCount;
+    const unsigned width = header.width;
+    const unsigned height = header.height;
+    const unsigned fourCC = header.ddspf.fourCC;
+    const GLuint format = fourCC == DDSPF_DXT1.fourCC   ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+                    : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+                    : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+                                                  : GL_NONE;
+    const GLuint blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
 
-    unsigned bufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
+    const unsigned bufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
     unsigned char* buffer = new unsigned char[bufferSize];
-    unsigned offset = 0;
-
+    
     fs.read((char*)buffer, bufferSize);
 
     glBindTexture(GL_TEXTURE_2D, m_TextureHandle);
@@ -129,15 +130,19 @@ void Texture::LoadTextureDDS(DirectX::DDS_HEADER const& header, std::ifstream& f
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    for (unsigned level = 0; level < 1; ++level)
+    unsigned bufferOffset = 0;
+    unsigned currWidth = width;
+    unsigned currHeight = height;
+
+    for (unsigned mipLevel = 0; mipLevel < 1; ++mipLevel)
     {
-        unsigned imageSize = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
+        unsigned imageSize = ((currWidth + 3) / 4) * ((currHeight + 3) / 4) * blockSize;
 
-        glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height, 0, imageSize, buffer + offset);
+        glCompressedTexImage2D(GL_TEXTURE_2D, mipLevel, format, currWidth, currHeight, 0, imageSize, buffer + bufferOffset);
 
-        offset += imageSize;
-        width /= 2;
-        height /= 2;
+        bufferOffset += imageSize;
+        currWidth /= 2;
+        currHeight /= 2;
     }
 
     delete[] buffer;
@@ -145,17 +150,22 @@ void Texture::LoadTextureDDS(DirectX::DDS_HEADER const& header, std::ifstream& f
 
 void Texture::LoadSkyboxDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs)
 {
-    unsigned linearSize = header.pitchOrLinearSize;
-    unsigned mipMapCount = header.mipMapCount;
-    unsigned width = header.width;
-    unsigned height = header.height;
-    unsigned fourCC = header.ddspf.fourCC;
-    GLuint format = fourCC == DDSPF_DXT1.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-                                                : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_NONE;
-    GLuint blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
+    const unsigned linearSize = header.pitchOrLinearSize;
+    const unsigned mipCount = header.mipMapCount;
+    const unsigned width = header.width;
+    const unsigned height = header.height;
+    const unsigned fourCC = header.ddspf.fourCC;
+    const GLuint format = fourCC == DDSPF_DXT1.fourCC   ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+                    : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+                    : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+                                                  : GL_NONE;
 
-    unsigned bufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
+    const GLuint blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
+
+    unsigned bufferSize = mipCount > 1 ? linearSize * 2 : linearSize;
     unsigned char* buffer = new unsigned char[bufferSize];
+
+    fs.read((char*)buffer, bufferSize);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureHandle);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -163,19 +173,17 @@ void Texture::LoadSkyboxDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    for (int i = 0; i < 6; ++i)
+    for (unsigned i = 0; i < 6; ++i)
     {
         unsigned offset = 0;
         unsigned currWidth = width;
         unsigned currHeight = height;
 
-        fs.read((char*)buffer, bufferSize);
-
-        for (unsigned level = 0; level < mipMapCount; ++level)
+        for (unsigned mipLevel = 0; mipLevel < mipCount; ++mipLevel)
         {
-            unsigned imageSize = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
+            unsigned imageSize = ((currWidth + 3) / 4) * ((currHeight + 3) / 4) * blockSize;
 
-            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, format, currWidth, currHeight, 0, imageSize, buffer + offset);
+            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mipLevel, format, currWidth, currHeight, 0, imageSize, buffer + offset);
 
             offset += imageSize;
             currWidth /= 2;
@@ -185,7 +193,7 @@ void Texture::LoadSkyboxDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs
     delete[] buffer;
 }
 
-void Texture::ImportTexture(const filesystem::path& filePath)
+void Texture::ImportTexture(const std::filesystem::path& filePath)
 {
     stbi_set_flip_vertically_on_load(1);
 
@@ -240,7 +248,7 @@ void Texture::ImportTexture(const filesystem::path& filePath)
     m_LoadStatus = ResourceStatus::Loaded;
 }
 
-void Texture::ImportSkybox(const std::vector<filesystem::path>& faces)
+void Texture::ImportSkybox(const std::vector<std::filesystem::path>& faces)
 {
     stbi_set_flip_vertically_on_load(0);
 

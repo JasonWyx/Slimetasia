@@ -41,7 +41,7 @@ class PlayerPref
     static std::unordered_map<std::string, table> variables_;
     static bool loadedFromXML_;
     static tinyxml2::XMLDocument playerPrefXML_;
-    const static filesystem::path dataDoc_;
+    const static std::filesystem::path dataDoc_;
 
     /// Functions ---------------------------------------------------------------
 public:

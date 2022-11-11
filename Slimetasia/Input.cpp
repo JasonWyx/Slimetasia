@@ -1,6 +1,7 @@
 #include "Input.h"
 
 #include <stdio.h>
+#include <algorithm>
 
 #define TRANSITION_BIT 0x80  // 0 = pressed, 1 = released
 
@@ -26,7 +27,7 @@ int CKey::GetButtonPressed()
 }
 float CKey::GetAxis()
 {
-    return static_cast<float>(max(GetButtonPressed(), GetButtonDown()));
+    return static_cast<float>(std::max(GetButtonPressed(), GetButtonDown()));
 }
 int CButton::GetButtonUp()
 {
@@ -42,7 +43,7 @@ int CButton::GetButtonPressed()
 }
 float CButton::GetAxis()
 {
-    return static_cast<float>(max(GetButtonDown(), GetButtonPressed()));
+    return static_cast<float>(std::max(GetButtonDown(), GetButtonPressed()));
 }
 
 int CStick::GetButtonUp()

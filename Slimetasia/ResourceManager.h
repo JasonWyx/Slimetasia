@@ -61,15 +61,15 @@ private:  // Typedefs ----------------------------------------------------------
     tinyxml2::XMLDocument m_PhysicsWorldSettingsXML;
 
 public:
-    static const filesystem::path s_DirectoryPath;
-    static const filesystem::path s_ResourcePath;
-    static const filesystem::path s_ResourcePathAudio;
-    static const filesystem::path s_ResourcePathTexture;
-    static const filesystem::path s_ResourcePathModel;
-    static const filesystem::path s_ResourcePathFonts;
-    static const filesystem::path s_ResourcePathScripts;
-    static const filesystem::path s_ResourceDataDocument;
-    static const filesystem::path s_PhysicsWorldSettingsDataDocument;
+    static const std::filesystem::path s_DirectoryPath;
+    static const std::filesystem::path s_ResourcePath;
+    static const std::filesystem::path s_ResourcePathAudio;
+    static const std::filesystem::path s_ResourcePathTexture;
+    static const std::filesystem::path s_ResourcePathModel;
+    static const std::filesystem::path s_ResourcePathFonts;
+    static const std::filesystem::path s_ResourcePathScripts;
+    static const std::filesystem::path s_ResourceDataDocument;
+    static const std::filesystem::path s_PhysicsWorldSettingsDataDocument;
 
     /// Functions ---------------------------------------------------------------
 private:
@@ -90,9 +90,9 @@ public:
     /// Add new file to the resource folder
     const std::array<std::set<std::string>, (int)ResourceType::Invalid>& GetAllAcceptableFileTypes() const;
     void RefreshResources();
-    bool CopyNewResource(filesystem::path& filePath, HWND hwnd);
-    ResourceType GetResourceType(filesystem::path filePath) const;
-    bool GetResourceFolderPath(const filesystem::path& filePath, filesystem::path& folderPath) const;
+    bool CopyNewResource(std::filesystem::path& filePath, HWND hwnd);
+    ResourceType GetResourceType(std::filesystem::path filePath) const;
+    bool GetResourceFolderPath(const std::filesystem::path& filePath, std::filesystem::path& folderPath) const;
     void SavePhysicsWorldSettings(std::string filename);
     void LoadPhysicsWorldSettings(std::string filename);
 
@@ -170,7 +170,7 @@ public:
     Function to create a new resource.
     Provide a unique ID if load set to true.
     */
-    template <typename ResourceType> ResourceHandle<ResourceType> CreateResource(const std::string resourceName = "", const filesystem::path& filePath = "", const ResourceGUID guid = 0)
+    template <typename ResourceType> ResourceHandle<ResourceType> CreateResource(const std::string resourceName = "", const std::filesystem::path& filePath = "", const ResourceGUID guid = 0)
     {
         // No more free slots
         ASSERT(!m_FreeIndices.empty());

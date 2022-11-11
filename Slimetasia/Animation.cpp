@@ -20,7 +20,7 @@ Quaternion ConvertAssimpQuat(aiQuaternion const& value)
     return Quaternion(value.x, value.y, value.z, value.w);
 }
 
-AnimationSet::AnimationSet(const std::string& resourceName, const filesystem::path& filepath)
+AnimationSet::AnimationSet(const std::string& resourceName, const std::filesystem::path& filepath)
     : ResourceBase(resourceName, filepath)
     , m_Animations()
     , m_AnimationsMap()

@@ -22,7 +22,7 @@ DEFINE_TYPE_NAME(std::vector<Vector3>, "ArrayVector3");
 std::unordered_map<std::string, PlayerPref::table> PlayerPref::variables_ = {};
 bool PlayerPref::loadedFromXML_ = false;
 tinyxml2::XMLDocument PlayerPref::playerPrefXML_;
-const filesystem::path PlayerPref::dataDoc_ = "Resources/PlayerPref.xml";
+const std::filesystem::path PlayerPref::dataDoc_ = "Resources/PlayerPref.xml";
 
 // ===========================================================================|
 // CONSTRUCTOR                                                                |

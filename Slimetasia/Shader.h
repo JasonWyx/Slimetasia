@@ -7,14 +7,8 @@
 
 class Shader : public ResourceBase
 {
-    GLuint m_ShaderProgram;
-    std::string m_VertShaderFilePath;
-    std::string m_FragShaderFilePath;
-    std::string m_GeomShaderFilePath;
-    std::string m_TessShaderFilePath;
-
 public:
-    Shader(const std::string& resourceName = "Shader", const filesystem::path& filePath = "");
+    Shader(const std::string& resourceName = "Shader", const std::filesystem::path& filePath = "");
     ~Shader();
 
     void Compile();
@@ -38,4 +32,14 @@ public:
     // Inherited via ResourceBase
     virtual void Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root) override;
     virtual void Unserialize(tinyxml2::XMLElement* root) override;
+
+private:
+    static GLuint CompileShader(std::string filePath, GLenum shaderType);
+    GLuint LinkProgram(const std::vector<GLuint>& programs);
+
+    GLuint m_ShaderProgram;
+    std::string m_VertShaderFilePath;
+    std::string m_FragShaderFilePath;
+    std::string m_GeomShaderFilePath;
+    std::string m_TessShaderFilePath;
 };
