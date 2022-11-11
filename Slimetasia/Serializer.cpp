@@ -323,7 +323,7 @@ void Serializer::RecursionLoadParent(tinyxml2::XMLElement* attribute, unsigned c
                 {
                     // std::cout << attribute->Attribute("Type") << std::endl;
                     std::string& attribute_str = *reinterpret_cast<std::string*>(base + pProperty->offset);
-                    std::string attributeValue{attribute->Attribute("Value")};
+                    std::string attributeValue { attribute->Attribute("Value") };
                     attribute_str = attributeValue;
                     // std::cout << attribute_str << std::endl;
                 }
@@ -388,7 +388,7 @@ void Serializer::RecursionLoadStruct(tinyxml2::XMLElement* attribute, unsigned c
             {
                 // std::cout << sAttribute->Attribute("Type") << std::endl;
                 std::string& attribute = *reinterpret_cast<std::string*>(base + sProperty->offset);
-                std::string attributeValue{sAttribute->Attribute("Value")};
+                std::string attributeValue { sAttribute->Attribute("Value") };
                 attribute = attributeValue;
                 // std::cout << attribute << std::endl;
             }
@@ -530,7 +530,7 @@ void Serializer::LoadScene()
                             {
                                 // std::cout << pAttribute->Attribute("Type") << std::endl;
                                 std::string& attribute = *reinterpret_cast<std::string*>(base + cProperty->offset);
-                                std::string attributeValue{pAttribute->Attribute("Value")};
+                                std::string attributeValue { pAttribute->Attribute("Value") };
                                 attribute = attributeValue;
                                 // std::cout << attribute << std::endl;
                             }

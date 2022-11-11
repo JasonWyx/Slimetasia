@@ -28,6 +28,7 @@ struct Node;
 class PhysicsSystem : public ISystem<PhysicsSystem>
 {
 public:
+
     ~PhysicsSystem();
     // funcs
     void Init();
@@ -56,6 +57,7 @@ public:
     static PECollisionDispatch s_ColDispatch;
 
 private:
+
     friend class ISystem<PhysicsSystem>;
 
     PhysicsSystem();

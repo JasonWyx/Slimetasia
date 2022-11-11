@@ -31,7 +31,7 @@ void ActionCreateArchetype::Revert()
             if (go->GetArchetype() == obj->GetName())
             {
                 a_go.push_back(go);
-                go->SetArchetype(std::string{});
+                go->SetArchetype(std::string {});
             }
         }
     }
@@ -557,7 +557,7 @@ void ActionDeleteObject::ReattachChildren(GameObject* root)
     Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     for (unsigned i = 0; i < childrens.size(); ++i)
     {
-        auto tmp = m_CurrentLayer->CreateObject(std::string{});
+        auto tmp = m_CurrentLayer->CreateObject(std::string {});
         unsigned id = tmp->GetID();
         for (auto& go : childrens)
         {
@@ -605,7 +605,7 @@ void ActionDeleteArchetype::Execute()
             if (go->GetArchetype() == go->GetName())
             {
                 ids_.push_back(go->GetID());
-                go->SetArchetype(std::string{});
+                go->SetArchetype(std::string {});
             }
         }
         a_go.insert(std::pair<std::string, std::vector<unsigned>>(ly->GetName(), ids_));
@@ -769,7 +769,7 @@ void ActionDeleteTag::Execute()
         {
             if (go->GetTag() == name)
             {
-                go->SetTag(std::string{});
+                go->SetTag(std::string {});
                 list.push_back(std::pair<std::string, ImGuiID>(ly->GetName(), go->GetID()));
             }
         }

@@ -8,6 +8,7 @@
 class WaterSimulator : public IComponent
 {
 public:
+
     float m_TilingFactor;
     float m_FresnelPower;
     float m_PlaneSize;
@@ -32,6 +33,7 @@ public:
     void GenerateTextures(const iVector2& viewportSize);
 
 private:
+
     Transform* m_Transform;
     iVector2 m_ViewportSize;
     GLuint m_ReflectionTexture;

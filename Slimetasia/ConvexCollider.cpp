@@ -2,7 +2,7 @@
 
 Vector3 ConvexCollider::GetSupportPoint(const Vector3& dir) const
 {
-    return Vector3{};
+    return Vector3 {};
 }
 
 REFLECT_INIT(ConvexCollider)

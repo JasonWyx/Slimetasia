@@ -83,6 +83,7 @@ class AISystem : public ISystem<AISystem>
     AISystem& operator=(AISystem&& rhs) = delete;
 
 public:
+
     AISystem();
     void Init();
     ~AISystem();

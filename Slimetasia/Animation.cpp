@@ -70,19 +70,19 @@ void AnimationSet::ImportFromAssimp(aiScene const* scene)
             // Position key frames
             for (unsigned k = 0; k < currChannel->mNumPositionKeys; ++k)
             {
-                newNodeAnim.m_PositionKeys.push_back(PositionKey{static_cast<float>(currChannel->mPositionKeys[k].mTime), ConvertAssimpVec3(currChannel->mPositionKeys[k].mValue)});
+                newNodeAnim.m_PositionKeys.push_back(PositionKey { static_cast<float>(currChannel->mPositionKeys[k].mTime), ConvertAssimpVec3(currChannel->mPositionKeys[k].mValue) });
             }
 
             // Scaling key frames
             for (unsigned k = 0; k < currChannel->mNumScalingKeys; ++k)
             {
-                newNodeAnim.m_ScalingKeys.push_back(ScalingKey{static_cast<float>(currChannel->mScalingKeys[k].mTime), ConvertAssimpVec3(currChannel->mScalingKeys[k].mValue)});
+                newNodeAnim.m_ScalingKeys.push_back(ScalingKey { static_cast<float>(currChannel->mScalingKeys[k].mTime), ConvertAssimpVec3(currChannel->mScalingKeys[k].mValue) });
             }
 
             // Rotation key frames
             for (unsigned k = 0; k < currChannel->mNumRotationKeys; ++k)
             {
-                newNodeAnim.m_RotationKeys.push_back(RotationKey{static_cast<float>(currChannel->mRotationKeys[k].mTime), ConvertAssimpQuat(currChannel->mRotationKeys[k].mValue)});
+                newNodeAnim.m_RotationKeys.push_back(RotationKey { static_cast<float>(currChannel->mRotationKeys[k].mTime), ConvertAssimpQuat(currChannel->mRotationKeys[k].mValue) });
             }
         }
     }

@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "AABB.h"
+#include "Any.h"
 #include "Frustum.h"
 #include "Manifold.h"
 #include "MathDefs.h"
 #include "Ray.h"
 #include "RigidbodyComponent.h"
-#include "Any.h"
 
 #define FATTENING_FACTOR 1.1f
 
@@ -25,9 +25,11 @@ enum class NodeSide
     RIGHT
 };
 
-template <typename T> class DynamicAabbTree
+template <typename T>
+class DynamicAabbTree
 {
 public:
+
     DynamicAabbTree();
     ~DynamicAabbTree();
 
@@ -99,6 +101,7 @@ public:
     std::unordered_map<T*, Node*> m_DataMap;
 
 private:
+
     Node* SelectNode(Node* data, Node* left, Node* right);
     void Free(Node* node);
     void DebugDrawNode(Node* currNode, int level);
@@ -112,9 +115,13 @@ private:
     void SplitNode(Node* first, Node* second, ManifoldList& results);
 };
 
-template <typename T> DynamicAabbTree<T>::DynamicAabbTree() {}
+template <typename T>
+DynamicAabbTree<T>::DynamicAabbTree()
+{
+}
 
-template <typename T> DynamicAabbTree<T>::~DynamicAabbTree()
+template <typename T>
+DynamicAabbTree<T>::~DynamicAabbTree()
 {
     if (m_Data)
     {
@@ -123,7 +130,8 @@ template <typename T> DynamicAabbTree<T>::~DynamicAabbTree()
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::InsertData(T* obj, AABB& aabb)
+template <typename T>
+void DynamicAabbTree<T>::InsertData(T* obj, AABB& aabb)
 {
     if (m_Data != nullptr)
     {
@@ -174,7 +182,8 @@ template <typename T> void DynamicAabbTree<T>::InsertData(T* obj, AABB& aabb)
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::UpdateData(T* obj, AABB& aabb)
+template <typename T>
+void DynamicAabbTree<T>::UpdateData(T* obj, AABB& aabb)
 {
     // Warn("Assignment3: Required function un-implemented");
     auto it = m_DataMap.find(obj);
@@ -189,7 +198,8 @@ template <typename T> void DynamicAabbTree<T>::UpdateData(T* obj, AABB& aabb)
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::RemoveData(T* obj)
+template <typename T>
+void DynamicAabbTree<T>::RemoveData(T* obj)
 {
     if (m_Data && m_DataMap.size())
     {
@@ -248,13 +258,15 @@ template <typename T> void DynamicAabbTree<T>::RemoveData(T* obj)
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::DebugDraw(int level)
+template <typename T>
+void DynamicAabbTree<T>::DebugDraw(int level)
 {
     // Warn("Assignment3: Required function un-implemented");
     if (m_Data) DebugDrawNode(m_Data, level);
 }
 
-template <typename T> bool DynamicAabbTree<T>::Exists(T* obj)
+template <typename T>
+bool DynamicAabbTree<T>::Exists(T* obj)
 {
     if (!m_Data) return false;
 
@@ -263,26 +275,30 @@ template <typename T> bool DynamicAabbTree<T>::Exists(T* obj)
     return false;
 }
 
-template <typename T> void DynamicAabbTree<T>::CastRay(const Ray& ray, CastResults& results)
+template <typename T>
+void DynamicAabbTree<T>::CastRay(const Ray& ray, CastResults& results)
 {
     // Warn("Assignment3: Required function un-implemented");
     Raycast(m_Data, ray, results);
 }
 
-template <typename T> void DynamicAabbTree<T>::CastFrustum(const Frustum& frustum, CastResults& results) const
+template <typename T>
+void DynamicAabbTree<T>::CastFrustum(const Frustum& frustum, CastResults& results) const
 {
     // Warn("Assignment3: Required function un-implemented");
     Frustumcast(m_Data, frustum, results);
 }
 
-template <typename T> void DynamicAabbTree<T>::SelfQuery(ManifoldList& results)
+template <typename T>
+void DynamicAabbTree<T>::SelfQuery(ManifoldList& results)
 {
     // assert(T == RigidbodyComponent);
     // Warn("Assignment3: Required function un-implemented");
     Query(m_Data, results);
 }
 
-template <typename T> typename DynamicAabbTree<T>::Node* DynamicAabbTree<T>::SelectNode(Node* data, Node* left, Node* right)
+template <typename T>
+typename DynamicAabbTree<T>::Node* DynamicAabbTree<T>::SelectNode(Node* data, Node* left, Node* right)
 {
     AABB leftComb = AABB::Combine(data->m_AABB, left->m_AABB);
     AABB rightComb = AABB::Combine(data->m_AABB, right->m_AABB);
@@ -290,7 +306,8 @@ template <typename T> typename DynamicAabbTree<T>::Node* DynamicAabbTree<T>::Sel
     return (abs(leftComb.GetSurfaceArea() - left->m_AABB.GetSurfaceArea()) < abs(rightComb.GetSurfaceArea() - right->m_AABB.GetSurfaceArea()) ? left : right);
 }
 
-template <typename T> void DynamicAabbTree<T>::UpdateAABB(Node* currNode)
+template <typename T>
+void DynamicAabbTree<T>::UpdateAABB(Node* currNode)
 {
     if (currNode)
     {
@@ -299,7 +316,8 @@ template <typename T> void DynamicAabbTree<T>::UpdateAABB(Node* currNode)
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::BalanceTree(Node* currNode)
+template <typename T>
+void DynamicAabbTree<T>::BalanceTree(Node* currNode)
 {
     if (currNode)
     {
@@ -362,7 +380,8 @@ template <typename T> void DynamicAabbTree<T>::BalanceTree(Node* currNode)
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::Raycast(Node* currNode, const Ray& ray, CastResults& results)
+template <typename T>
+void DynamicAabbTree<T>::Raycast(Node* currNode, const Ray& ray, CastResults& results)
 {
     if (currNode)
     {
@@ -383,7 +402,8 @@ template <typename T> void DynamicAabbTree<T>::Raycast(Node* currNode, const Ray
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::Frustumcast(Node* currNode, const Frustum& frustum, CastResults& results, bool test) const
+template <typename T>
+void DynamicAabbTree<T>::Frustumcast(Node* currNode, const Frustum& frustum, CastResults& results, bool test) const
 {
     if (currNode)
     {
@@ -409,7 +429,8 @@ template <typename T> void DynamicAabbTree<T>::Frustumcast(Node* currNode, const
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::Query(Node* currNode, ManifoldList& results)
+template <typename T>
+void DynamicAabbTree<T>::Query(Node* currNode, ManifoldList& results)
 {
     if (!currNode->m_Height) return;
 
@@ -418,7 +439,8 @@ template <typename T> void DynamicAabbTree<T>::Query(Node* currNode, ManifoldLis
     Query(currNode->m_Left, currNode->m_Right, results);
 }
 
-template <typename T> void DynamicAabbTree<T>::Query(Node* first, Node* second, ManifoldList& results)
+template <typename T>
+void DynamicAabbTree<T>::Query(Node* first, Node* second, ManifoldList& results)
 {
     if (AABB::AABBAABB(first->m_AABB.m_Min, first->m_AABB.m_Max, second->m_AABB.m_Min, second->m_AABB.m_Max))
     {
@@ -429,7 +451,8 @@ template <typename T> void DynamicAabbTree<T>::Query(Node* first, Node* second, 
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::SplitNode(Node* first, Node* second, ManifoldList& results)
+template <typename T>
+void DynamicAabbTree<T>::SplitNode(Node* first, Node* second, ManifoldList& results)
 {
     if (!second->m_Height)
         std::swap(first, second);
@@ -442,7 +465,8 @@ template <typename T> void DynamicAabbTree<T>::SplitNode(Node* first, Node* seco
     Query(first, second->m_Right, results);
 }
 
-template <typename T> inline void DynamicAabbTree<T>::clear()
+template <typename T>
+inline void DynamicAabbTree<T>::clear()
 {
     if (m_Data)
     {
@@ -452,7 +476,8 @@ template <typename T> inline void DynamicAabbTree<T>::clear()
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::Free(Node* node)
+template <typename T>
+void DynamicAabbTree<T>::Free(Node* node)
 {
     if (node->m_Left)
     {
@@ -468,7 +493,8 @@ template <typename T> void DynamicAabbTree<T>::Free(Node* node)
     delete (node);
 }
 
-template <typename T> void DynamicAabbTree<T>::DebugDrawNode(Node* currNode, int level)
+template <typename T>
+void DynamicAabbTree<T>::DebugDrawNode(Node* currNode, int level)
 {
     currNode->m_AABB.DebugDraw(currNode->m_ClientData->GetOwner()->GetParentLayer()->GetId());
 
@@ -479,7 +505,8 @@ template <typename T> void DynamicAabbTree<T>::DebugDrawNode(Node* currNode, int
     }
 }
 
-template <typename T> void DynamicAabbTree<T>::UpdateHeight(Node* currNode)
+template <typename T>
+void DynamicAabbTree<T>::UpdateHeight(Node* currNode)
 {
     if (currNode)
     {

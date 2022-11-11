@@ -114,14 +114,14 @@ void Texture::LoadTextureDDS(DirectX::DDS_HEADER const& header, std::ifstream& f
     const unsigned height = header.height;
     const unsigned fourCC = header.ddspf.fourCC;
     const GLuint format = fourCC == DDSPF_DXT1.fourCC   ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-                    : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-                    : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-                                                  : GL_NONE;
+                          : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+                          : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+                                                        : GL_NONE;
     const GLuint blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
 
     const unsigned bufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
     unsigned char* buffer = new unsigned char[bufferSize];
-    
+
     fs.read((char*)buffer, bufferSize);
 
     glBindTexture(GL_TEXTURE_2D, m_TextureHandle);
@@ -156,9 +156,9 @@ void Texture::LoadSkyboxDDS(DirectX::DDS_HEADER const& header, std::ifstream& fs
     const unsigned height = header.height;
     const unsigned fourCC = header.ddspf.fourCC;
     const GLuint format = fourCC == DDSPF_DXT1.fourCC   ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-                    : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-                    : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-                                                  : GL_NONE;
+                          : fourCC == DDSPF_DXT3.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+                          : fourCC == DDSPF_DXT5.fourCC ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+                                                        : GL_NONE;
 
     const GLuint blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
 
@@ -225,7 +225,7 @@ void Texture::ImportTexture(const std::filesystem::path& filePath)
     header.size = sizeof(header);
     header.width = width;
     header.height = height;
-    header.ddspf = internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? DirectX::DDSPF_DXT1 : internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT ? DirectX::DDSPF_DXT5 : DDS_PIXELFORMAT{};
+    header.ddspf = internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? DirectX::DDSPF_DXT1 : internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT ? DirectX::DDSPF_DXT5 : DDS_PIXELFORMAT {};
     header.mipMapCount = 1;
     header.pitchOrLinearSize = imageSize;
     header.caps = DDS_SURFACE_FLAGS_TEXTURE;
@@ -278,7 +278,7 @@ void Texture::ImportSkybox(const std::vector<std::filesystem::path>& faces)
     header.size = sizeof(header);
     header.width = width;
     header.height = height;
-    header.ddspf = internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? DirectX::DDSPF_DXT1 : internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT ? DirectX::DDSPF_DXT5 : DDS_PIXELFORMAT{};
+    header.ddspf = internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? DirectX::DDSPF_DXT1 : internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT ? DirectX::DDSPF_DXT5 : DDS_PIXELFORMAT {};
     header.mipMapCount = 1;
     header.pitchOrLinearSize = imageSize;
     header.caps = DDS_SURFACE_FLAGS_CUBEMAP;

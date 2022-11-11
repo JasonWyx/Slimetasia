@@ -159,6 +159,7 @@ class Editor : public ISystem<Editor>
     void SaveTags();
 
 public:
+
     // x and y are the display size
     Editor(HWND hwnd, float x, float y);
     ~Editor();

@@ -9,13 +9,16 @@
 
 namespace PE
 {
-    template <typename T> class list
+    template <typename T>
+    class list
     {
     public:
+
         // List Iterator
         class iterator
         {
         public:
+
             // Iterator traits
             using value_type = T;
             using difference_type = std::ptrdiff_t;
@@ -110,6 +113,7 @@ namespace PE
             friend class List;
 
         private:
+
             size_t m_CurrentIndex;
             T* m_Buf;
             size_t m_Size;
@@ -158,6 +162,7 @@ namespace PE
         bool operator!=(const list<T>& rhs) const;
 
     private:
+
         void* m_Data;
         size_t m_Size;
         size_t m_Capacity;
@@ -193,7 +198,8 @@ namespace PE
     {
     }
 
-    template <typename T> list<T>::~list()
+    template <typename T>
+    list<T>::~list()
     {
         if (m_Capacity)
         {
@@ -202,7 +208,8 @@ namespace PE
         }
     }
 
-    template <typename T> list<T>& list<T>::operator=(const list<T>& rhs)
+    template <typename T>
+    list<T>& list<T>::operator=(const list<T>& rhs)
     {
         if (this != &rhs)
         {
@@ -213,7 +220,8 @@ namespace PE
         return *this;
     }
 
-    template <typename T> list<T>& list<T>::operator=(list<T>&& rhs) noexcept
+    template <typename T>
+    list<T>& list<T>::operator=(list<T>&& rhs) noexcept
     {
         if (this != &rhs)
         {
@@ -227,7 +235,8 @@ namespace PE
         return *this;
     }
 
-    template <typename T> typename list<T>::iterator list<T>::find(const T& elem)
+    template <typename T>
+    typename list<T>::iterator list<T>::find(const T& elem)
     {
         for (uint i = 0; i < m_Size; i++)
         {
@@ -237,15 +246,21 @@ namespace PE
         return end();
     }
 
-    template <typename T> typename list<T>::iterator list<T>::remove(const T& elem) { return remove(find(elem)); }
+    template <typename T>
+    typename list<T>::iterator list<T>::remove(const T& elem)
+    {
+        return remove(find(elem));
+    }
 
-    template <typename T> typename list<T>::iterator list<T>::remove(const iterator& it)
+    template <typename T>
+    typename list<T>::iterator list<T>::remove(const iterator& it)
     {
         assert(it.m_Buf == m_Data);
         return removeAt(it.m_CurrentIndex);
     }
 
-    template <typename T> typename list<T>::iterator list<T>::removeAt(uint index)
+    template <typename T>
+    typename list<T>::iterator list<T>::removeAt(uint index)
     {
         assert(index >= 0 && index < m_Size);
 
@@ -266,7 +281,8 @@ namespace PE
         return list<T>::iterator(m_Data, index, m_Size);
     }
 
-    template <typename T> void list<T>::reserve(size_t capacity)
+    template <typename T>
+    void list<T>::reserve(size_t capacity)
     {
         if (capacity <= m_Capacity) return;
 
@@ -295,7 +311,8 @@ namespace PE
         m_Capacity = capacity;
     }
 
-    template <typename T> void list<T>::add(const T& elem)
+    template <typename T>
+    void list<T>::add(const T& elem)
     {
         if (m_Size == m_Capacity)
         {
@@ -308,7 +325,8 @@ namespace PE
         m_Size++;
     }
 
-    template <typename T> void list<T>::addRange(const list<T>& rhs)
+    template <typename T>
+    void list<T>::addRange(const list<T>& rhs)
     {
         if (m_Size + rhs.m_Size > m_Capacity) reserve(m_Size + rhs.m_Size);
 
@@ -320,7 +338,8 @@ namespace PE
         }
     }
 
-    template <typename T> void list<T>::clear()
+    template <typename T>
+    void list<T>::clear()
     {
         for (auto i = 0u; i < m_Size; i++)
             (static_cast<T*>(m_Data)[i]).~T();
@@ -328,7 +347,8 @@ namespace PE
         m_Size = 0;
     }
 
-    template <typename T> bool list<T>::operator==(const list<T>& rhs) const
+    template <typename T>
+    bool list<T>::operator==(const list<T>& rhs) const
     {
         // comparing the size first.
         if (m_Size != rhs.m_Size) return false;
@@ -343,6 +363,10 @@ namespace PE
         return true;
     }
 
-    template <typename T> bool list<T>::operator!=(const list<T>& rhs) const { return !((*this) == rhs); }
+    template <typename T>
+    bool list<T>::operator!=(const list<T>& rhs) const
+    {
+        return !((*this) == rhs);
+    }
 
 }  // namespace PE

@@ -2,8 +2,8 @@
 #include "CorePrerequisites.h"
 #include "IComponent.h"
 #include "Mesh.h"
-#include "Transform.h"
 #include "SmartEnums.h"
+#include "Transform.h"
 
 #define TilingAxis_List(m) m(TilingAxis, XY) m(TilingAxis, XZ) m(TilingAxis, YZ)
 
@@ -38,6 +38,7 @@ class MeshRenderer : public IComponent
     float m_TilingSize;
 
 public:
+
     MeshRenderer(GameObject* parentObject);
     ~MeshRenderer();
 

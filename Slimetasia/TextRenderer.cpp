@@ -175,19 +175,20 @@ void TextRenderer::GenerateGeometryData()
         float fltMaxFontHeight = static_cast<float>(maxFontHeight);
 
         // Top Left
-        vertices.emplace_back(TextVertex{Vector3(charPos.x + charLeft, charPos.y + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL.x, charInfo.m_TextureOffsetTL.y)});
+        vertices.emplace_back(
+            TextVertex { Vector3(charPos.x + charLeft, charPos.y + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL.x, charInfo.m_TextureOffsetTL.y) });
 
         // Bottom left
         vertices.emplace_back(
-            TextVertex{Vector3(charPos.x + charLeft, charPos.y + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL.x, charInfo.m_TextureOffsetBR.y)});
+            TextVertex { Vector3(charPos.x + charLeft, charPos.y + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL.x, charInfo.m_TextureOffsetBR.y) });
 
         // Bottom right
-        vertices.emplace_back(TextVertex{Vector3(charPos.x + charLeft + charWidth, charPos.y + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize,
-                                         Vector2(charInfo.m_TextureOffsetBR.x, charInfo.m_TextureOffsetBR.y)});
+        vertices.emplace_back(TextVertex { Vector3(charPos.x + charLeft + charWidth, charPos.y + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize,
+                                           Vector2(charInfo.m_TextureOffsetBR.x, charInfo.m_TextureOffsetBR.y) });
 
         // Top right
         vertices.emplace_back(
-            TextVertex{Vector3(charPos.x + charLeft + charWidth, charPos.y + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetBR.x, charInfo.m_TextureOffsetTL.y)});
+            TextVertex { Vector3(charPos.x + charLeft + charWidth, charPos.y + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetBR.x, charInfo.m_TextureOffsetTL.y) });
 
         indices.insert(indices.end(), {
                                           static_cast<unsigned>(charCount * 4 + 0),

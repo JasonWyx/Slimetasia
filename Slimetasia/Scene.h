@@ -11,6 +11,7 @@ class Scene
     int m_LayerCount;
 
 public:
+
     Scene(char const* sceneName);
     // Scene(Scene const &otherScene);
     ~Scene();

@@ -4,8 +4,8 @@
 #include "CorePrerequisites.h"
 #include "Frustum.h"
 #include "IComponent.h"
-#include "Transform.h"
 #include "SmartEnums.h"
+#include "Transform.h"
 
 #define CameraProjectionMode_List(m) m(CameraProjectionMode, Orthographic) m(CameraProjectionMode, Perspective)
 
@@ -18,6 +18,7 @@ REFLECT_ENUM(CameraProjectionMode)
 class Camera : public IComponent
 {
 protected:
+
     Transform* m_Transform;  // Only position is used
     CameraProjectionMode m_ProjectionMode;
     float m_OrthoVerticalSize;
@@ -50,6 +51,7 @@ protected:
     float m_ReflectionHeight;
 
 public:
+
     Camera(GameObject* parentObject, char const* componentName = "Camera");
     ~Camera();
 

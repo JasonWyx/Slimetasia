@@ -7,6 +7,7 @@
 class MeshAnimator : public IComponent
 {
 public:
+
     REFLECT()
     MeshAnimator(GameObject* ownerObject);
     ~MeshAnimator();
@@ -31,6 +32,7 @@ public:
     // void                        SetMeshData(HMesh mesh);
 
 private:
+
     bool m_IsPlaying;
     bool m_IsPlayOnce;
     MeshRenderer* m_MeshRenderer;
@@ -38,9 +40,11 @@ private:
     HAnimationSet m_PrevAnimationSet;
 
 public:
+
     float m_AnimationTimeScale;
 
 private:
+
     float m_CurrentAnimationTick;
     Animation const* m_CurrentAnimation;
 
@@ -59,9 +63,11 @@ private:
     bool m_IsCrossFading;
 
 public:
+
     bool m_CrossFadeAnimations;
 
 private:
+
     float m_CrossFadeDuration;
     float m_CrossFadeTimer;
 
@@ -71,6 +77,7 @@ private:
     std::vector<Transform*> m_NodeObjectTransforms;
 
 private:  // Functions
+
     void UpdateBoneTransforms(std::vector<MeshNode> const& nodes, std::vector<MeshBone> const& bones, std::map<std::string, unsigned> const& nodesMap, std::map<std::string, unsigned> const& bonesMap,
                               MeshNode const& currNode, Matrix4 const& parentTransform);
 

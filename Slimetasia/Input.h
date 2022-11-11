@@ -181,6 +181,7 @@ struct CStick : public CBase
 
 private:
 public:
+
     CStick(STICK key, std::string axis)
         : key_(key)
         , axis_(axis)
@@ -208,6 +209,7 @@ struct CMouse : public CBase
 class ControllerMapping
 {
 public:
+
     enum CONTROLLERTYPE
     {
         KEYBOARD = 0,
@@ -217,6 +219,7 @@ public:
     // VARIABLES
     // --------------------------------------------------------------------------
 private:
+
     CONTROLLERTYPE currentMapping_;
 
     /// All actions in the game
@@ -226,6 +229,7 @@ private:
     // PRIVATE FUNCTIONS
     // --------------------------------------------------------------------------
 private:
+
     void LoadKeyboardMapping() {}
     void LoadControllerMapping() {}
     void ChangeKeyboardMapping() {}
@@ -243,6 +247,7 @@ private:
     // PUBLIC FUNCTIONS
     // --------------------------------------------------------------------------
 public:
+
     ControllerMapping();
 
     void SetControllerType(CONTROLLERTYPE type);
@@ -260,6 +265,7 @@ public:
 class Input : public ISystem<Input>
 {
 public:
+
     Input();
 
     void Update();
@@ -282,6 +288,7 @@ public:
     int IsControllerConnected();  // 1 connected, 0 no change, -1 disconnected
 
 private:
+
     bool IsMouseWrapping;
 
     bool CurrentControllerState;
@@ -299,16 +306,19 @@ private:
     const float XInputDeadZoneY = 0.2f;
 
 private:
+
     void MouseWrap();
 
     /// Controller mapping ------------------------------------------------------
 private:
+
     friend ControllerMapping;
     friend CButton;
     friend CStick;
     static ControllerMapping controllerMap_;
 
 public:
+
     void SetControllerMode(ControllerMapping::CONTROLLERTYPE type);
     int GetControllerMode();
     int GetControllerInputUp(std::string action);

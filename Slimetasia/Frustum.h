@@ -5,6 +5,7 @@
 class Frustum
 {
 public:
+
     Frustum() = default;
 
     ~Frustum() = default;
@@ -18,6 +19,7 @@ public:
     static IntersectionType::Type FrustumAabb(const Vector4 planes[6], const Vector3& aabbMin, const Vector3& aabbMax, size_t& lastAxis);
 
 private:
+
     Vector3 m_Vertices[8];
 
     Plane m_Planes[6];

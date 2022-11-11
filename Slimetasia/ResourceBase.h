@@ -1,9 +1,9 @@
 #pragma once
 #include <ntverp.h>
 
+#include <filesystem>
 #include <fstream>
 #include <string>
-#include <filesystem>
 
 #include "External Libraries/tinyxml2/tinyxml2.h"
 
@@ -26,11 +26,13 @@ using ResourceGUID = unsigned long long;
 // ===========================================================================|
 class ResourceBase
 {
-public:                                 // Members
-    std::string m_Name;                 // Name as referenced in the editor
-    std::filesystem::path m_FilePath;   // File path
+public:  // Members
+
+    std::string m_Name;                // Name as referenced in the editor
+    std::filesystem::path m_FilePath;  // File path
 
 public:  // Functions
+
     explicit ResourceBase(const std::string& name = "", const std::filesystem::path& filepath = "");
     virtual ~ResourceBase() = default;
 
@@ -52,7 +54,8 @@ public:  // Functions
     ResourceBase& operator=(ResourceBase const&) = delete;
     ResourceBase& operator=(ResourceBase&&) = delete;
 
-protected:                        // Members
+protected:  // Members
+
     ResourceGUID m_GUID;          // Resource ID
     ResourceStatus m_LoadStatus;  // Status of the resource
 

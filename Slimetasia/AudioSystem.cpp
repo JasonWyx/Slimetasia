@@ -42,11 +42,11 @@ void AudioSystem::ChannelInfo::Reset()
 Constructor for AudioSystem::ChannelManager.
 */
 AudioSystem::ChannelManager::ChannelManager()
-    : inUse_{false}
-    , usedBy_{nullptr}
-    , channel_{nullptr}
-    , emitterInfo_{nullptr}
-    , defaultInfo_{}
+    : inUse_ { false }
+    , usedBy_ { nullptr }
+    , channel_ { nullptr }
+    , emitterInfo_ { nullptr }
+    , defaultInfo_ {}
 {
 }
 
@@ -162,7 +162,7 @@ void AudioSystem::Update(float dt)
             {
                 /// Update 3D position if there is an emitter
                 Vector3 pos = c.usedBy_->GetWorldPosition();
-                Vector3 vel = (dt != 0) ? ((pos - c.emitterInfo_->lastPosition_) / dt) : Vector3{0, 0, 0};
+                Vector3 vel = (dt != 0) ? ((pos - c.emitterInfo_->lastPosition_) / dt) : Vector3 { 0, 0, 0 };
                 c.emitterInfo_->lastPosition_ = pos;
 
                 const FMOD_VECTOR& fmodPosition = VectorToFmod(pos);
@@ -197,7 +197,7 @@ void AudioSystem::Update(float dt)
     if (mainListener_)
     {
         Vector3 pos = mainListener_->GetPosition();
-        Vector3 vel = (dt != 0) ? (pos - mainListenerLastPos_) / dt : Vector3{0, 0, 0};
+        Vector3 vel = (dt != 0) ? (pos - mainListenerLastPos_) / dt : Vector3 { 0, 0, 0 };
         Vector3 up = mainListener_->GetUpwardVector();
         Vector3 forward = mainListener_->GetForwardVector();
 

@@ -44,6 +44,7 @@ enum class ResourceType
 class ResourceManager : public ISystem<ResourceManager>
 {
 private:  // Typedefs ----------------------------------------------------------
+
     using ResourceVector = std::vector<ResourceEntry>;
     using ResourceNamesMap = std::unordered_map<std::string, unsigned>;
     using ResourceIDsMap = std::unordered_map<ResourceGUID, unsigned>;
@@ -61,6 +62,7 @@ private:  // Typedefs ----------------------------------------------------------
     tinyxml2::XMLDocument m_PhysicsWorldSettingsXML;
 
 public:
+
     static const std::filesystem::path s_DirectoryPath;
     static const std::filesystem::path s_ResourcePath;
     static const std::filesystem::path s_ResourcePathAudio;
@@ -73,10 +75,12 @@ public:
 
     /// Functions ---------------------------------------------------------------
 private:
+
     friend class ResourceHandleBase;
     ResourceBase* GetResourceInstance(ResourceHandleBase& handle);
 
 public:
+
     ResourceManager();
     ~ResourceManager();
 
@@ -97,8 +101,10 @@ public:
     void LoadPhysicsWorldSettings(std::string filename);
 
     /// Data serialization
-    template <typename XML> tinyxml2::XMLElement* FindElement(XML* doc, std::string name, bool recusive = false);
-    template <typename T> tinyxml2::XMLElement* InsertElement(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root, std::string name, const T& val);
+    template <typename XML>
+    tinyxml2::XMLElement* FindElement(XML* doc, std::string name, bool recusive = false);
+    template <typename T>
+    tinyxml2::XMLElement* InsertElement(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root, std::string name, const T& val);
     tinyxml2::XMLElement* InsertElement(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root, std::string name, std::string val);
 
     // template<typename ResourceType> ResourceHandle<ResourceType> GetResource     (std::string const & name);
@@ -108,7 +114,8 @@ public:
     // template<typename ResourceType> ResourceHandle<ResourceType> CreateResource  (ResourceType * resource);
     // template<typename ResourceType> void                         DestroyResource (ResourceHandle<ResourceType> handle);
 
-    template <typename ResourceType> std::vector<ResourceHandle<ResourceType>> GetResources()
+    template <typename ResourceType>
+    std::vector<ResourceHandle<ResourceType>> GetResources()
     {
         std::vector<ResourceHandle<ResourceType>> results;
 
@@ -126,7 +133,8 @@ public:
     /*
     Function to get a resource via name.
     */
-    template <typename ResourceType> ResourceHandle<ResourceType> GetResource(std::string const& name)
+    template <typename ResourceType>
+    ResourceHandle<ResourceType> GetResource(std::string const& name)
     {
         /// Find resource
         auto entryIndex = m_ResourceNameMap.find(name);
@@ -141,13 +149,14 @@ public:
 
         /// No resource of name is found
         std::cout << "RESOURCE MANAGER : FAIL - No (" << typeid(ResourceType).name() << ") resource with name " << name << std::endl;
-        return ResourceHandle<ResourceType>{};
+        return ResourceHandle<ResourceType> {};
     }
 
     /*
     Function to get a resource via ID.
     */
-    template <typename ResourceType> ResourceHandle<ResourceType> GetResource(ResourceGUID guid)
+    template <typename ResourceType>
+    ResourceHandle<ResourceType> GetResource(ResourceGUID guid)
     {
         /// Find resource
         // std::cout << "ID IS " << id << std::endl;
@@ -163,14 +172,15 @@ public:
 
         /// No resource of GUID is found
         std::cout << "RESOURCE MANAGER : FAIL - No (" << typeid(ResourceType).name() << ") resource with GUID : " << guid << std::endl;
-        return ResourceHandle<ResourceType>{};
+        return ResourceHandle<ResourceType> {};
     }
 
     /*
     Function to create a new resource.
     Provide a unique ID if load set to true.
     */
-    template <typename ResourceType> ResourceHandle<ResourceType> CreateResource(const std::string resourceName = "", const std::filesystem::path& filePath = "", const ResourceGUID guid = 0)
+    template <typename ResourceType>
+    ResourceHandle<ResourceType> CreateResource(const std::string resourceName = "", const std::filesystem::path& filePath = "", const ResourceGUID guid = 0)
     {
         // No more free slots
         ASSERT(!m_FreeIndices.empty());
@@ -199,7 +209,8 @@ public:
     /*
     Function to create a new resouce. Used during importing.
     */
-    template <typename ResourceType> ResourceHandle<ResourceType> CreateResource(ResourceType* resource)
+    template <typename ResourceType>
+    ResourceHandle<ResourceType> CreateResource(ResourceType* resource)
     {
         // No more free slots
         ASSERT(!m_FreeIndices.empty());
@@ -218,7 +229,8 @@ public:
     Funtion to destroy a resource.
     */
 
-    template <typename ResourceType> void DestroyResource(ResourceHandle<ResourceType>& handle)
+    template <typename ResourceType>
+    void DestroyResource(ResourceHandle<ResourceType>& handle)
     {
         if (handle.Validate())
         {

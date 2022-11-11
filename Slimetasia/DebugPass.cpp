@@ -9,21 +9,21 @@
 #include "MeshRenderer.h"
 #include "ResourceManager.h"
 
-static const std::vector<Vector3> sTranslateGizmoMesh = {Vector3(0.0f, 0.0f, 0.0f),  Vector3(1.0f, 0.0f, 0.0f),  Vector3(0.9f, 0.1f, 0.0f), Vector3(0.9f, 0.0f, 0.1f),
-                                                         Vector3(0.9f, -0.1f, 0.0f), Vector3(0.9f, 0.0f, -0.1f), Vector3(0.9f, 0.1f, 0.0f)};
+static const std::vector<Vector3> sTranslateGizmoMesh = { Vector3(0.0f, 0.0f, 0.0f),  Vector3(1.0f, 0.0f, 0.0f),  Vector3(0.9f, 0.1f, 0.0f), Vector3(0.9f, 0.0f, 0.1f),
+                                                          Vector3(0.9f, -0.1f, 0.0f), Vector3(0.9f, 0.0f, -0.1f), Vector3(0.9f, 0.1f, 0.0f) };
 
-static const std::vector<Vector3> sTranslatePanGizmoMesh = {Vector3(0.0f, 0.0f, 0.0f), Vector3(0.2f, 0.0f, 0.0f), Vector3(0.2f, 0.2f, 0.0f), Vector3(0.0f, 0.2f, 0.0f)};
+static const std::vector<Vector3> sTranslatePanGizmoMesh = { Vector3(0.0f, 0.0f, 0.0f), Vector3(0.2f, 0.0f, 0.0f), Vector3(0.2f, 0.2f, 0.0f), Vector3(0.0f, 0.2f, 0.0f) };
 
-static const std::vector<Vector3> sScaleGizmoMesh = {Vector3(0.0f, 0.0f, 0.0f),   Vector3(1.0f, 0.0f, 0.0f),
+static const std::vector<Vector3> sScaleGizmoMesh = { Vector3(0.0f, 0.0f, 0.0f),   Vector3(1.0f, 0.0f, 0.0f),
 
-                                                     Vector3(0.9f, 0.1f, 0.1f),   Vector3(0.9f, -0.1f, 0.1f),  Vector3(0.9f, -0.1f, 0.1f), Vector3(0.9f, -0.1f, -0.1f),
-                                                     Vector3(0.9f, -0.1f, -0.1f), Vector3(0.9f, 0.1f, -0.1f),  Vector3(0.9f, 0.1f, -0.1f), Vector3(0.9f, 0.1f, 0.1f),
+                                                      Vector3(0.9f, 0.1f, 0.1f),   Vector3(0.9f, -0.1f, 0.1f),  Vector3(0.9f, -0.1f, 0.1f), Vector3(0.9f, -0.1f, -0.1f),
+                                                      Vector3(0.9f, -0.1f, -0.1f), Vector3(0.9f, 0.1f, -0.1f),  Vector3(0.9f, 0.1f, -0.1f), Vector3(0.9f, 0.1f, 0.1f),
 
-                                                     Vector3(1.1f, 0.1f, 0.1f),   Vector3(1.1f, -0.1f, 0.1f),  Vector3(1.1f, -0.1f, 0.1f), Vector3(1.1f, -0.1f, -0.1f),
-                                                     Vector3(1.1f, -0.1f, -0.1f), Vector3(1.1f, 0.1f, -0.1f),  Vector3(1.1f, 0.1f, -0.1f), Vector3(1.1f, 0.1f, 0.1f),
+                                                      Vector3(1.1f, 0.1f, 0.1f),   Vector3(1.1f, -0.1f, 0.1f),  Vector3(1.1f, -0.1f, 0.1f), Vector3(1.1f, -0.1f, -0.1f),
+                                                      Vector3(1.1f, -0.1f, -0.1f), Vector3(1.1f, 0.1f, -0.1f),  Vector3(1.1f, 0.1f, -0.1f), Vector3(1.1f, 0.1f, 0.1f),
 
-                                                     Vector3(0.9f, 0.1f, 0.1f),   Vector3(1.1f, 0.1f, 0.1f),   Vector3(0.9f, -0.1f, 0.1f), Vector3(1.1f, -0.1f, 0.1f),
-                                                     Vector3(0.9f, -0.1f, -0.1f), Vector3(1.1f, -0.1f, -0.1f), Vector3(0.9f, 0.1f, -0.1f), Vector3(1.1f, 0.1f, -0.1f)};
+                                                      Vector3(0.9f, 0.1f, 0.1f),   Vector3(1.1f, 0.1f, 0.1f),   Vector3(0.9f, -0.1f, 0.1f), Vector3(1.1f, -0.1f, 0.1f),
+                                                      Vector3(0.9f, -0.1f, -0.1f), Vector3(1.1f, -0.1f, -0.1f), Vector3(0.9f, 0.1f, -0.1f), Vector3(1.1f, 0.1f, -0.1f) };
 
 static std::vector<Vector3> sRotateGizmoMesh;
 
@@ -308,7 +308,7 @@ void DebugPass::DrawDebug(unsigned layerId, std::vector<Vector3> const& geometry
     std::vector<DebugDrawCommand>& commandList = m_DebugDrawCommands[layerId];
     std::vector<Vector3>& geometryList = m_DebugDrawVertices[layerId];
 
-    commandList.push_back(DebugDrawCommand{static_cast<int>(geometryList.size()), static_cast<int>(geometry.size()), color, type});
+    commandList.push_back(DebugDrawCommand { static_cast<int>(geometryList.size()), static_cast<int>(geometry.size()), color, type });
     geometryList.insert(geometryList.end(), geometry.begin(), geometry.end());
 }
 

@@ -16,6 +16,7 @@
 class Action
 {
 public:
+
     virtual ~Action() {}
 
     virtual void Execute() = 0;
@@ -31,6 +32,7 @@ class ActionChangeName : public Action
     unsigned id;
 
 public:
+
     ActionChangeName(std::string pv, std::string nv, Layer* l, GameObject* g)
         : oldValue(pv)
         , newValue(nv)
@@ -56,6 +58,7 @@ class ActionInput : public Action
     unsigned id;
 
 public:
+
     ActionInput(T pv, T nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
         : name(o)
         , oldValue(pv)
@@ -138,6 +141,7 @@ class ActionInput<std::string> : public Action
     unsigned id;
 
 public:
+
     ActionInput(std::string pv, std::string nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
         : name(o)
         , oldValue(pv)
@@ -206,6 +210,7 @@ class ActionCreate : public Action
     unsigned parentID;
 
 public:
+
     ActionCreate(Layer* ly, std::string n)
         : layer(ly)
         , obj(nullptr)
@@ -243,10 +248,11 @@ class ActionAddComponent : public Action
     unsigned id;
 
 public:
+
     ActionAddComponent(GameObject* g, std::string c, Layer* ly)
         : go(g)
         , comp(c)
-        , script_name{}
+        , script_name {}
         , l(ly)
     {
         name = go->GetName();
@@ -270,6 +276,7 @@ class ActionRemoveComponent : public Action
     void ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp);
 
 public:
+
     ActionRemoveComponent(GameObject* g, std::string c, Layer* l);
     void Execute() override;
     void Revert() override;
@@ -284,6 +291,7 @@ class ActionCreateArchetype : public Action
     bool del;
 
 public:
+
     ActionCreateArchetype(GameObject* go, GameObject* ugo)
         : obj(go)
         , uobj(ugo)
@@ -300,6 +308,7 @@ class ActionRevertArchetype : public Action
     GameObject* obj;
 
 public:
+
     ActionRevertArchetype(GameObject* go)
         : obj(go)
     {
@@ -316,6 +325,7 @@ class ActionMakeChanges : public Action
     GameObject* obj;
 
 public:
+
     ActionMakeChanges(GameObject* go)
         : obj(go)
     {
@@ -335,6 +345,7 @@ class ActionCreateObjectArchetype : public Action
     unsigned id;
 
 public:
+
     ActionCreateObjectArchetype(Layer* l, std::string a, std::string n)
         : ly(l)
         , archetype(a)
@@ -358,6 +369,7 @@ class ActionRevertScript : public Action
     unsigned id;
 
 public:
+
     ActionRevertScript(GameObject* g, std::string s, Layer* ly)
         : go(g)
         , script(s)
@@ -383,6 +395,7 @@ class ActionParentStructInput : public Action
     void ParentRecurrsion(unsigned char* curr, unsigned char* tmp, std::string comp);
 
 public:
+
     ActionParentStructInput(GameObject* g, std::string c, Layer* l);
     void Execute() override;
     void Revert() override;
@@ -401,6 +414,7 @@ class ActionMeshInput : public Action
     unsigned id;
 
 public:
+
     ActionMeshInput(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
         : oldIndex(o)
         , newIndex(n)
@@ -425,6 +439,7 @@ class ActionInputFont : public Action
     unsigned id;
 
 public:
+
     ActionInputFont(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
         : oldIndex(o)
         , newIndex(n)
@@ -444,6 +459,7 @@ class ActionCreateLayer : public Action
     Layer* p;
 
 public:
+
     ActionCreateLayer(std::string n, Layer* l)
         : name(n)
         , p(l)
@@ -464,6 +480,7 @@ class ActionDeleteObject : public Action
     void ReattachChildren(GameObject* root);
 
 public:
+
     ActionDeleteObject(GameObject* g, Layer* l)
         : ly(l)
     {
@@ -489,6 +506,7 @@ class ActionDeleteArchetype : public Action
     std::map<std::string, std::vector<unsigned>> a_go;
 
 public:
+
     ActionDeleteArchetype(GameObject* g, GameObject* ug)
         : del(true)
         , go(g)
@@ -506,6 +524,7 @@ class ActionDeleteLayer : public Action
     Layer* ly;
 
 public:
+
     ActionDeleteLayer(Layer* l)
     {
         ly = new Layer(nullptr, 0, l->GetName(), false);
@@ -528,6 +547,7 @@ class ActionInputTexture : public Action
     std::string l_name;
 
 public:
+
     ActionInputTexture(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
         : oldIndex(o)
         , newIndex(n)
@@ -555,6 +575,7 @@ class ActionInputAnimation : public Action
     std::string l_name;
 
 public:
+
     ActionInputAnimation(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
         : oldIndex(o)
         , newIndex(n)
@@ -581,6 +602,7 @@ class ActionInputScript : public Action
     std::string var;
 
 public:
+
     ActionInputScript(GameObject* g, std::string s, T o, T n, std::string v)
         : id(0)
         , script(s)
@@ -616,6 +638,7 @@ class ActionAddTag : public Action
     std::string name;
 
 public:
+
     ActionAddTag(std::string n)
         : name(n)
     {
@@ -630,6 +653,7 @@ class ActionDeleteTag : public Action
     std::string name;
 
 public:
+
     ActionDeleteTag(std::string n)
         : name(n)
     {
@@ -645,6 +669,7 @@ class ActionChangeTag : public Action
     std::string newName;
 
 public:
+
     ActionChangeTag(std::string o, std::string n)
         : oldName(o)
         , newName(n)
@@ -662,6 +687,7 @@ class ActionTagObject : public Action
     std::string layerName;
 
 public:
+
     ActionTagObject(std::string o, std::string n, GameObject* go)
         : oldTag(o)
         , newTag(n)
@@ -681,6 +707,7 @@ class ActionInputPhysics : public Action
     T* value;
 
 public:
+
     ActionInputPhysics(T o, T n, T* v)
         : oldValue(o)
         , newValue(n)
@@ -712,6 +739,7 @@ class ActionMultiTransform : public Action
     std::string layer;
 
 public:
+
     ActionMultiTransform(Vector3 d, std::vector<unsigned> id, std::string c, std::string v, Layer* ly)
         : component(c)
         , variable(v)
@@ -733,6 +761,7 @@ class ActionDuplicate : public Action
     void ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* original, GameObject* Clone);
 
 public:
+
     ActionDuplicate(Layer* ly, std::vector<GameObject*> selected)
     {
         layerName = ly->GetName();
@@ -751,6 +780,7 @@ class ActionAddAttractor : public Action
     unsigned attractor;
 
 public:
+
     ActionAddAttractor(GameObject* go, std::vector<unsigned> list, unsigned attract)
     {
         id = go->GetID();
@@ -770,6 +800,7 @@ class ActionDeleteAttractor : public Action
     unsigned attractor;
 
 public:
+
     ActionDeleteAttractor(GameObject* go, std::vector<unsigned> list, unsigned attract)
     {
         id = go->GetID();

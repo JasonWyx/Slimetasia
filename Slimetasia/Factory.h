@@ -10,6 +10,7 @@
 class ComponentReflection
 {
 public:
+
     virtual std::vector<registration::variant> getProperties() = 0;
     virtual std::vector<registration::class_> getParents() = 0;
     virtual bool hasVtable() = 0;
@@ -19,6 +20,7 @@ public:
 class ComponentFactory
 {
 public:
+
     virtual void* create(GameObject* go) = 0;
     virtual void remove(GameObject* go) = 0;
     virtual void createIfDoesntExist(GameObject* go) = 0;
@@ -27,12 +29,14 @@ public:
 class EnumReflection
 {
 public:
+
     virtual std::vector<const char*> getEnums() = 0;
 };
 
 class Factory
 {
 public:
+
     Factory();
     ~Factory();
 

@@ -8,6 +8,7 @@
 class LightBase : public IComponent
 {
 protected:
+
     Transform* m_Transform;
 
     float m_Intensity;
@@ -21,6 +22,7 @@ protected:
     GLuint m_ShadowMap;
 
 public:
+
     LightBase(GameObject* owner, char const* componentName = "LightBase");
     virtual ~LightBase();
 

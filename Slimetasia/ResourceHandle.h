@@ -6,6 +6,7 @@
 class ResourceHandleBase
 {
 public:
+
     ResourceHandleBase();  // Create null handle
     explicit ResourceHandleBase(ResourceEntry* const entry);
     ~ResourceHandleBase();
@@ -15,17 +16,21 @@ public:
     operator ResourceGUID();
 
 protected:  // Members
+
     unsigned m_Unused;
     ResourceGUID m_ResourceGUID;
 
 protected:  // Functions
+
     ResourceBase* GetResource();
 };
 
 // Templated handles to check validity and handle resource access
-template <typename ResourceType> class ResourceHandle : public ResourceHandleBase
+template <typename ResourceType>
+class ResourceHandle : public ResourceHandleBase
 {
 public:
+
     ResourceHandle()
         : ResourceHandleBase()
     {

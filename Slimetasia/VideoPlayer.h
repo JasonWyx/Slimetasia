@@ -15,12 +15,14 @@ class GameObject;
 class VideoPlayer : public IComponent
 {
 public:  // Reflected variables
+
     std::string m_VideoFileName;
     bool m_IsPlaying;
     bool m_IsLooping;
     bool m_FillScreen;
 
 public:
+
     VideoPlayer(GameObject* parentObject, const char* componentName = "VideoPlayer");
     ~VideoPlayer();
 
@@ -39,6 +41,7 @@ public:
     static void LoadFrames(cv::VideoCapture& videoCapture, std::vector<cv::Mat>& frames, unsigned& loadedCount, const unsigned maxFrames, bool& loadingFinished, const bool& terminate);
 
 private:
+
     Transform* m_Transform;
     std::string m_PrevVideoFileName;
     cv::VideoCapture m_Video;
@@ -56,6 +59,7 @@ private:
     std::vector<cv::Mat> m_Frames;
 
 private:
+
     void BuildFrameTexture();
 
     REFLECT()

@@ -21,21 +21,23 @@
 #include "Math.h"
 #include "Vector.h"
 
-template <typename T> class TMatrix2
+template <typename T>
+class TMatrix2
 {
     float m[4];
 
 public:
+
     explicit TMatrix2()
-        : m{1, 0, 1, 0}
+        : m { 1, 0, 1, 0 }
     {
     }
     explicit TMatrix2(T m0, T m1, T m2, T m3)
-        : m{m0, m1, m2, m3}
+        : m { m0, m1, m2, m3 }
     {
     }
     explicit TMatrix2(T val)
-        : m{val, 0, val, 0}
+        : m { val, 0, val, 0 }
     {
     }
 
@@ -63,21 +65,23 @@ public:
     static TMatrix2<T> Rotate(float angle);
 };
 
-template <typename T> class TMatrix3
+template <typename T>
+class TMatrix3
 {
     float m[9];
 
 public:
+
     explicit TMatrix3()
-        : m{1, 0, 0, 0, 1, 0, 0, 0, 1}
+        : m { 1, 0, 0, 0, 1, 0, 0, 0, 1 }
     {
     }
     explicit TMatrix3(T val)
-        : m{val, 0, 0, 0, val, 0, 0, 0, val}
+        : m { val, 0, 0, 0, val, 0, 0, 0, val }
     {
     }
     explicit TMatrix3(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8)
-        : m{m0, m1, m2, m3, m4, m5, m6, m7, m8}
+        : m { m0, m1, m2, m3, m4, m5, m6, m7, m8 }
     {
     }
 
@@ -118,25 +122,27 @@ public:
     friend std::ostream& operator<<(std::ostream& os, TMatrix3 const& rhs);
 };
 
-template <typename T> class TMatrix4
+template <typename T>
+class TMatrix4
 {
     float m[16];
 
 public:
+
     explicit TMatrix4()
-        : m{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+        : m { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
     {
     }
     explicit TMatrix4(T val)
-        : m{val, 0, 0, 0, 0, val, 0, 0, 0, 0, val, 0, 0, 0, 0, val}
+        : m { val, 0, 0, 0, 0, val, 0, 0, 0, 0, val, 0, 0, 0, 0, val }
     {
     }
     explicit TMatrix4(TMatrix3<T> _m)
-        : m{_m[0], _m[1], _m[2], 0, _m[3], _m[4], _m[5], 0, _m[6], _m[7], _m[8], 0, 0, 0, 0, 1}
+        : m { _m[0], _m[1], _m[2], 0, _m[3], _m[4], _m[5], 0, _m[6], _m[7], _m[8], 0, 0, 0, 0, 1 }
     {
     }
     explicit TMatrix4(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8, T m9, T m10, T m11, T m12, T m13, T m14, T m15)
-        : m{m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15}
+        : m { m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15 }
     {
     }
 
@@ -194,12 +200,14 @@ public:
 /******************************************************************************/
 /* TMatrix2<T> Definitions Start */
 
-template <typename T> float TMatrix2<T>::GetDeterminant() const
+template <typename T>
+float TMatrix2<T>::GetDeterminant() const
 {
     return m[0] * m[3] - m[1] * m[2];
 }
 
-template <typename T> TMatrix2<T>& TMatrix2<T>::Identity()
+template <typename T>
+TMatrix2<T>& TMatrix2<T>::Identity()
 {
     m[0] = 1;
     m[1] = 0;
@@ -208,7 +216,8 @@ template <typename T> TMatrix2<T>& TMatrix2<T>::Identity()
     return *this;
 }
 
-template <typename T> TMatrix2<T>& TMatrix2<T>::Invert()
+template <typename T>
+TMatrix2<T>& TMatrix2<T>::Invert()
 {
     float determinant = GetDeterminant();
     float invDeterminant = 1.0f / determinant;
@@ -224,83 +233,98 @@ template <typename T> TMatrix2<T>& TMatrix2<T>::Invert()
     return *this;
 }
 
-template <typename T> TMatrix2<T>& TMatrix2<T>::Transpose()
+template <typename T>
+TMatrix2<T>& TMatrix2<T>::Transpose()
 {
     std::swap(m[0], m[3]);
     return *this;
 }
 
-template <typename T> TMatrix2<T>& TMatrix2<T>::operator+=(TMatrix2<T> const& rhs)
+template <typename T>
+TMatrix2<T>& TMatrix2<T>::operator+=(TMatrix2<T> const& rhs)
 {
     for (int i = 0; i < sizeof(m); i++)
         m[i] += rhs[i];
     return *this;
 }
 
-template <typename T> TMatrix2<T>& TMatrix2<T>::operator-=(TMatrix2<T> const& rhs)
+template <typename T>
+TMatrix2<T>& TMatrix2<T>::operator-=(TMatrix2<T> const& rhs)
 {
     for (int i = 0; i < sizeof(m); i++)
         m[i] -= rhs[i];
     return *this;
 }
 
-template <typename T> TMatrix2<T>& TMatrix2<T>::operator*=(TMatrix2<T> const& rhs)
+template <typename T>
+TMatrix2<T>& TMatrix2<T>::operator*=(TMatrix2<T> const& rhs)
 {
     *this = *this * rhs;
     return *this;
 }
 
-template <typename T> TMatrix2<T> TMatrix2<T>::operator+(TMatrix2<T> const& rhs) const
+template <typename T>
+TMatrix2<T> TMatrix2<T>::operator+(TMatrix2<T> const& rhs) const
 {
     return TMatrix2<T>(*this) += rhs;
 }
 
-template <typename T> TMatrix2<T> TMatrix2<T>::operator-(TMatrix2<T> const& rhs) const
+template <typename T>
+TMatrix2<T> TMatrix2<T>::operator-(TMatrix2<T> const& rhs) const
 {
     return TMatrix2<T>(*this) -= rhs;
 }
 
-template <typename T> TMatrix2<T> TMatrix2<T>::operator*(TMatrix2<T> const& rhs) const
+template <typename T>
+TMatrix2<T> TMatrix2<T>::operator*(TMatrix2<T> const& rhs) const
 {
     return TMatrix2<T>(m[0] * rhs[0] + m[2] * rhs[1], m[1] * rhs[0] + m[3] * rhs[1], m[0] * rhs[2] + m[2] * rhs[3], m[1] * rhs[2] + m[3] * rhs[3]);
 }
 
-template <typename T> TMatrix2<T> TMatrix2<T>::operator*(T const& rhs) const
+template <typename T>
+TMatrix2<T> TMatrix2<T>::operator*(T const& rhs) const
 {
-    return TMatrix2<T>{m[0] * rhs, m[1] * rhs, m[2] * rhs, m[3] * rhs};
+    return TMatrix2<T> { m[0] * rhs, m[1] * rhs, m[2] * rhs, m[3] * rhs };
 }
 
-template <typename T> TMatrix2<T> TMatrix2<T>::operator-() const
+template <typename T>
+TMatrix2<T> TMatrix2<T>::operator-() const
 {
     return TMatrix2<T>(-m[0], -m[1], -m[2], -m[3]);
 }
 
-template <typename T> TVector2<T> TMatrix2<T>::operator*(TVector2<T> const& rhs) const
+template <typename T>
+TVector2<T> TMatrix2<T>::operator*(TVector2<T> const& rhs) const
 {
     return TVector2<T>(m[0] * rhs.x + m[2] * rhs.y, m[1] * rhs.x + m[3] * rhs.y);
 }
 
-template <typename T> T TMatrix2<T>::operator[](unsigned index) const
+template <typename T>
+T TMatrix2<T>::operator[](unsigned index) const
 {
     return m[index];
 }
 
-template <typename T> T& TMatrix2<T>::operator[](unsigned index)
+template <typename T>
+T& TMatrix2<T>::operator[](unsigned index)
 {
     return m[index];
 }
 
-template <typename T> inline TMatrix2<T> TMatrix2<T>::Scale(float scaleX, float scaleY)
+template <typename T>
+inline TMatrix2<T> TMatrix2<T>::Scale(float scaleX, float scaleY)
 {
     return TMatrix2<T>(scaleX, 0, scaleY, 0);
 }
 
-template <typename T> inline TMatrix2<T> TMatrix2<T>::Rotate(float angle)
+template <typename T>
+inline TMatrix2<T> TMatrix2<T>::Rotate(float angle)
 {
     return TMatrix2<T>(cosf(angle), sinf(angle), -sinf(angle), cosf(angle));
 }
 
-template <typename T> std::ostream& operator<<(std::ostream& os, TMatrix2<T> const& rhs)
+template <typename T>
+std::ostream& operator<<(std::ostream& os, TMatrix2<T> const& rhs)
 {
     os << "Matrix2[" << rhs[0] << ", " << rhs[1] << ", " << std::endl;
     os << rhs[2] << ", " << rhs[3] << "]" << std::endl;
@@ -312,12 +336,14 @@ template <typename T> std::ostream& operator<<(std::ostream& os, TMatrix2<T> con
 
 /******************************************************************************/
 /* TMatrix3<T> Definitions Start */
-template <typename T> float TMatrix3<T>::GetDeterminant() const
+template <typename T>
+float TMatrix3<T>::GetDeterminant() const
 {
     return m[0] * m[3] - m[1] * m[2];
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::Identity()
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::Identity()
 {
     m[0] = 1;
     m[3] = 0;
@@ -331,7 +357,8 @@ template <typename T> TMatrix3<T>& TMatrix3<T>::Identity()
     return *this;
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::Invert()
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::Invert()
 {
     float determinant, invDeterminant;
     float tmp[9];
@@ -365,7 +392,8 @@ template <typename T> TMatrix3<T>& TMatrix3<T>::Invert()
     return *this;
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::Transpose()
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::Transpose()
 {
     std::swap(m[1], m[3]);
     std::swap(m[2], m[6]);
@@ -373,7 +401,8 @@ template <typename T> TMatrix3<T>& TMatrix3<T>::Transpose()
     return *this;
 }
 
-template <typename T> inline void TMatrix3<T>::SetAllValues(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8)
+template <typename T>
+inline void TMatrix3<T>::SetAllValues(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8)
 {
     m[0] = m0;
     m[1] = m1;
@@ -386,7 +415,8 @@ template <typename T> inline void TMatrix3<T>::SetAllValues(T m0, T m1, T m2, T 
     m[8] = m8;
 }
 
-template <typename T> void TMatrix3<T>::Zero()
+template <typename T>
+void TMatrix3<T>::Zero()
 {
     m[0] = static_cast<T>(0);
     m[1] = static_cast<T>(0);
@@ -399,34 +429,39 @@ template <typename T> void TMatrix3<T>::Zero()
     m[8] = static_cast<T>(0);
 }
 
-template <typename T> TMatrix3<T> TMatrix3<T>::GetInverse() const
+template <typename T>
+TMatrix3<T> TMatrix3<T>::GetInverse() const
 {
     TMatrix3 tmp(*this);
 
     return tmp.Invert();
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::operator+=(TMatrix3<T> const& rhs)
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::operator+=(TMatrix3<T> const& rhs)
 {
     for (int i = 0; i < sizeof(m); i++)
         m[i] += rhs[i];
     return *this;
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::operator-=(TMatrix3<T> const& rhs)
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::operator-=(TMatrix3<T> const& rhs)
 {
     for (int i = 0; i < sizeof(m); i++)
         m[i] -= rhs[i];
     return *this;
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::operator*=(TMatrix3<T> const& rhs)
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::operator*=(TMatrix3<T> const& rhs)
 {
     *this = *this * rhs;
     return *this;
 }
 
-template <typename T> TMatrix3<T>& TMatrix3<T>::operator*=(T const& rhs)
+template <typename T>
+TMatrix3<T>& TMatrix3<T>::operator*=(T const& rhs)
 {
     m[0] *= rhs;
     m[1] *= rhs;
@@ -441,56 +476,66 @@ template <typename T> TMatrix3<T>& TMatrix3<T>::operator*=(T const& rhs)
     return *this;
 }
 
-template <typename T> TMatrix3<T> TMatrix3<T>::operator+(TMatrix3<T> const& rhs) const
+template <typename T>
+TMatrix3<T> TMatrix3<T>::operator+(TMatrix3<T> const& rhs) const
 {
     return TMatrix3<T>(*this) += rhs;
 }
 
-template <typename T> TMatrix3<T> TMatrix3<T>::operator-(TMatrix3<T> const& rhs) const
+template <typename T>
+TMatrix3<T> TMatrix3<T>::operator-(TMatrix3<T> const& rhs) const
 {
     return TMatrix3<T>(*this) -= rhs;
 }
 
-template <typename T> TMatrix3<T> TMatrix3<T>::operator*(TMatrix3<T> const& rhs) const
+template <typename T>
+TMatrix3<T> TMatrix3<T>::operator*(TMatrix3<T> const& rhs) const
 {
     return TMatrix3<T>(m[0] * rhs[0] + m[3] * rhs[1] + m[6] * rhs[2], m[1] * rhs[0] + m[4] * rhs[1] + m[7] * rhs[2], m[2] * rhs[0] + m[5] * rhs[1] + m[8] * rhs[2],
                        m[0] * rhs[3] + m[3] * rhs[4] + m[6] * rhs[5], m[1] * rhs[3] + m[4] * rhs[4] + m[7] * rhs[5], m[2] * rhs[3] + m[5] * rhs[4] + m[8] * rhs[5],
                        m[0] * rhs[6] + m[3] * rhs[7] + m[6] * rhs[8], m[1] * rhs[6] + m[4] * rhs[7] + m[7] * rhs[8], m[2] * rhs[6] + m[5] * rhs[7] + m[8] * rhs[8]);
 }
 
-template <typename T> TMatrix3<T> TMatrix3<T>::operator*(T const& rhs) const
+template <typename T>
+TMatrix3<T> TMatrix3<T>::operator*(T const& rhs) const
 {
-    return TMatrix3<T>{m[0] * rhs, m[1] * rhs, m[2] * rhs, m[3] * rhs, m[4] * rhs, m[5] * rhs, m[6] * rhs, m[7] * rhs, m[8] * rhs};
+    return TMatrix3<T> { m[0] * rhs, m[1] * rhs, m[2] * rhs, m[3] * rhs, m[4] * rhs, m[5] * rhs, m[6] * rhs, m[7] * rhs, m[8] * rhs };
 }
 
-template <typename T> TMatrix3<T> TMatrix3<T>::operator-() const
+template <typename T>
+TMatrix3<T> TMatrix3<T>::operator-() const
 {
     return TMatrix3<T>(-m[0], -m[1], -m[2], -m[3], -m[4], -m[5], -m[6], -m[7], -m[8]);
 }
 
-template <typename T> TVector3<T> TMatrix3<T>::operator*(TVector3<T> const& rhs) const
+template <typename T>
+TVector3<T> TMatrix3<T>::operator*(TVector3<T> const& rhs) const
 {
     return TVector3<T>(m[0] * rhs.x + m[3] * rhs.y + m[6] * rhs.z, m[1] * rhs.x + m[4] * rhs.y + m[7] * rhs.z, m[2] * rhs.x + m[5] * rhs.y + m[8] * rhs.z);
 }
 
-template <typename T> T TMatrix3<T>::operator[](unsigned index) const
+template <typename T>
+T TMatrix3<T>::operator[](unsigned index) const
 {
     return m[index];
 }
 
-template <typename T> T& TMatrix3<T>::operator[](unsigned index)
+template <typename T>
+T& TMatrix3<T>::operator[](unsigned index)
 {
     return m[index];
 }
 
-template <typename T> inline void TMatrix3<T>::SetRow3(unsigned index, TVector3<T> const& v)
+template <typename T>
+inline void TMatrix3<T>::SetRow3(unsigned index, TVector3<T> const& v)
 {
     m[index] = v.x;
     m[index + 4] = v.y;
     m[index + 8] = v.z;
 }
 
-template <typename T> inline void TMatrix3<T>::SetCol3(unsigned index, TVector3<T> const& v)
+template <typename T>
+inline void TMatrix3<T>::SetCol3(unsigned index, TVector3<T> const& v)
 {
     index *= 4;
     m[index] = v.x;
@@ -498,43 +543,51 @@ template <typename T> inline void TMatrix3<T>::SetCol3(unsigned index, TVector3<
     m[index + 2] = v.z;
 }
 
-template <typename T> inline TVector3<T> TMatrix3<T>::GetRow3(unsigned index) const
+template <typename T>
+inline TVector3<T> TMatrix3<T>::GetRow3(unsigned index) const
 {
     return TVector3<T>(m[index], m[index + 4], m[index + 8]);
 }
 
-template <typename T> inline TVector3<T> TMatrix3<T>::GetCol3(unsigned index) const
+template <typename T>
+inline TVector3<T> TMatrix3<T>::GetCol3(unsigned index) const
 {
     index *= 4;
     return TVector3<T>(m[index], m[index + 1], m[index + 2]);
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::Scale(float scaleX, float scaleY, float scaleZ)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::Scale(float scaleX, float scaleY, float scaleZ)
 {
     return TMatrix3<T>(scaleX, 0, 0, 0, scaleY, 0, 0, 0, scaleZ);
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::Scale(TVector3<T> const& scale)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::Scale(TVector3<T> const& scale)
 {
     return TMatrix3<T>();
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::Rotate(float angleX, float angleY, float angleZ)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::Rotate(float angleX, float angleY, float angleZ)
 {
     return RotateX(angleX) * RotateY(angleY) * RotateZ(angleZ);
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::Rotate(TVector3<T> const& angles)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::Rotate(TVector3<T> const& angles)
 {
     return RotateX(angles.x) * RotateY(angles.y) * RotateZ(angles.z);
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::Rotate(TVector3<T> const& axis, TVector3<T> const& angles)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::Rotate(TVector3<T> const& axis, TVector3<T> const& angles)
 {
     return TMatrix3<T>();
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::RotateX(float angle)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::RotateX(float angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -549,7 +602,8 @@ template <typename T> inline TMatrix3<T> TMatrix3<T>::RotateX(float angle)
     return tmp;
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::RotateY(float angle)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::RotateY(float angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -564,7 +618,8 @@ template <typename T> inline TMatrix3<T> TMatrix3<T>::RotateY(float angle)
     return tmp;
 }
 
-template <typename T> inline TMatrix3<T> TMatrix3<T>::RotateZ(float angle)
+template <typename T>
+inline TMatrix3<T> TMatrix3<T>::RotateZ(float angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -579,7 +634,8 @@ template <typename T> inline TMatrix3<T> TMatrix3<T>::RotateZ(float angle)
     return tmp;
 }
 
-template <typename T> std::ostream& operator<<(std::ostream& os, TMatrix3<T> const& rhs)
+template <typename T>
+std::ostream& operator<<(std::ostream& os, TMatrix3<T> const& rhs)
 {
     os << "Matrix3[" << rhs[0] << ", " << rhs[1] << ", " << rhs[2] << ", " << std::endl;
     os << rhs[3] << ", " << rhs[4] << ", " << rhs[5] << ", " << std::endl;
@@ -593,24 +649,28 @@ template <typename T> std::ostream& operator<<(std::ostream& os, TMatrix3<T> con
 /******************************************************************************/
 /* TMatrix4<T> Definition Begin */
 
-template <typename T> inline float TMatrix4<T>::GetCoFactor(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8) const
+template <typename T>
+inline float TMatrix4<T>::GetCoFactor(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8) const
 {
     return m0 * (m4 * m8 - m5 * m7) - m1 * (m3 * m8 - m5 * m6) + m2 * (m3 * m7 - m4 * m6);
 }
 
-template <typename T> inline float TMatrix4<T>::GetDeterminant() const
+template <typename T>
+inline float TMatrix4<T>::GetDeterminant() const
 {
     return m[0] * GetCoFactor(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]) - m[1] * GetCoFactor(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]) +
            m[2] * GetCoFactor(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]) - m[3] * GetCoFactor(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::Identity()
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::Identity()
 {
     *this = TMatrix4<T>(1.0f);
     return *this;
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::Invert()
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::Invert()
 {
     // get cofactors of minor matrices
     float cofactor0 = GetCoFactor(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
@@ -667,12 +727,14 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::Invert()
     return *this;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Inverted() const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Inverted() const
 {
     return TMatrix4<T>(*this).Invert();
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::Transpose()
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::Transpose()
 {
     std::swap(m[1], m[4]);
     std::swap(m[2], m[8]);
@@ -684,12 +746,14 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::Transpose()
     return *this;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Transposed() const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Transposed() const
 {
     return TMatrix4(*this).Transpose();
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator+=(TMatrix4<T> const& rhs)
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::operator+=(TMatrix4<T> const& rhs)
 {
     m[0] += rhs[0];
     m[1] += rhs[1];
@@ -710,7 +774,8 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator+=(TMatrix4<T> co
     return *this;
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator-=(TMatrix4<T> const& rhs)
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::operator-=(TMatrix4<T> const& rhs)
 {
     m[0] -= rhs[0];
     m[1] -= rhs[1];
@@ -731,7 +796,8 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator-=(TMatrix4<T> co
     return *this;
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator*=(TMatrix4 const& rhs)
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::operator*=(TMatrix4 const& rhs)
 {
     TMatrix4<T> tmp = *this;
 
@@ -755,7 +821,8 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator*=(TMatrix4 const
     return *this;
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator*=(T scale)
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::operator*=(T scale)
 {
     m[0] *= scale;
     m[1] *= scale;
@@ -776,7 +843,8 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator*=(T scale)
     return *this;
 }
 
-template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator/=(T scale)
+template <typename T>
+inline TMatrix4<T>& TMatrix4<T>::operator/=(T scale)
 {
     m[0] /= scale;
     m[1] /= scale;
@@ -797,53 +865,63 @@ template <typename T> inline TMatrix4<T>& TMatrix4<T>::operator/=(T scale)
     return *this;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::operator+(TMatrix4<T> const& rhs) const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::operator+(TMatrix4<T> const& rhs) const
 {
     return TMatrix4<T>(*this) += rhs;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::operator-(TMatrix4<T> const& rhs) const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::operator-(TMatrix4<T> const& rhs) const
 {
     return TMatrix4<T>(*this) -= rhs;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::operator*(TMatrix4<T> const& rhs) const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::operator*(TMatrix4<T> const& rhs) const
 {
     return TMatrix4<T>(*this) *= rhs;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::operator*(T scale) const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::operator*(T scale) const
 {
     return TMatrix4<T>(*this) *= scale;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::operator/(T scale) const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::operator/(T scale) const
 {
     return TMatrix4<T>(*this) /= scale;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::operator-() const
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::operator-() const
 {
     return -TMatrix4<T>(*this);
 }
 
-template <typename T> inline TVector4<T> TMatrix4<T>::operator*(TVector4<T> const& rhs) const
+template <typename T>
+inline TVector4<T> TMatrix4<T>::operator*(TVector4<T> const& rhs) const
 {
     return TVector4<T>(m[0] * rhs.x + m[4] * rhs.y + m[8] * rhs.z + m[12] * rhs.w, m[1] * rhs.x + m[5] * rhs.y + m[9] * rhs.z + m[13] * rhs.w,
                        m[2] * rhs.x + m[6] * rhs.y + m[10] * rhs.z + m[14] * rhs.w, m[3] * rhs.x + m[7] * rhs.y + m[11] * rhs.z + m[15] * rhs.w);
 }
 
-template <typename T> inline T TMatrix4<T>::operator[](unsigned index) const
+template <typename T>
+inline T TMatrix4<T>::operator[](unsigned index) const
 {
     return m[index];
 }
 
-template <typename T> inline T& TMatrix4<T>::operator[](unsigned index)
+template <typename T>
+inline T& TMatrix4<T>::operator[](unsigned index)
 {
     return m[index];
 }
 
-template <typename T> inline void TMatrix4<T>::Decompose(TVector3<T>& translate, TVector3<T>& rotation, TVector3<T>& scale)
+template <typename T>
+inline void TMatrix4<T>::Decompose(TVector3<T>& translate, TVector3<T>& rotation, TVector3<T>& scale)
 {
     scale[0] = GetCol3(0).Length();
     scale[1] = GetCol3(1).Length();
@@ -862,14 +940,16 @@ template <typename T> inline void TMatrix4<T>::Decompose(TVector3<T>& translate,
     translate.z = m[14];
 }
 
-template <typename T> inline void TMatrix4<T>::SetRow3(unsigned index, TVector3<T> const& v)
+template <typename T>
+inline void TMatrix4<T>::SetRow3(unsigned index, TVector3<T> const& v)
 {
     m[index] = v.x;
     m[index + 4] = v.y;
     m[index + 8] = v.z;
 }
 
-template <typename T> inline void TMatrix4<T>::SetCol3(unsigned index, TVector3<T> const& v)
+template <typename T>
+inline void TMatrix4<T>::SetCol3(unsigned index, TVector3<T> const& v)
 {
     index *= 4;
     m[index] = v.x;
@@ -877,7 +957,8 @@ template <typename T> inline void TMatrix4<T>::SetCol3(unsigned index, TVector3<
     m[index + 2] = v.z;
 }
 
-template <typename T> inline void TMatrix4<T>::SetRow4(unsigned index, TVector4<T> const& v)
+template <typename T>
+inline void TMatrix4<T>::SetRow4(unsigned index, TVector4<T> const& v)
 {
     m[index] = v.x;
     m[index + 4] = v.y;
@@ -885,7 +966,8 @@ template <typename T> inline void TMatrix4<T>::SetRow4(unsigned index, TVector4<
     m[index + 12] = v.w;
 }
 
-template <typename T> inline void TMatrix4<T>::SetCol4(unsigned index, TVector4<T> const& v)
+template <typename T>
+inline void TMatrix4<T>::SetCol4(unsigned index, TVector4<T> const& v)
 {
     index *= 4;
     m[index] = v.x;
@@ -894,34 +976,40 @@ template <typename T> inline void TMatrix4<T>::SetCol4(unsigned index, TVector4<
     m[index + 3] = v.w;
 }
 
-template <typename T> inline TVector3<T> TMatrix4<T>::GetRow3(unsigned index) const
+template <typename T>
+inline TVector3<T> TMatrix4<T>::GetRow3(unsigned index) const
 {
     return TVector3<T>(m[index], m[index + 4], m[index + 8]);
 }
 
-template <typename T> inline TVector4<T> TMatrix4<T>::GetRow4(unsigned index) const
+template <typename T>
+inline TVector4<T> TMatrix4<T>::GetRow4(unsigned index) const
 {
     return TVector3<T>(m[index], m[index + 4], m[index + 8], m[index + 12]);
 }
 
-template <typename T> inline TVector3<T> TMatrix4<T>::GetCol3(unsigned index) const
+template <typename T>
+inline TVector3<T> TMatrix4<T>::GetCol3(unsigned index) const
 {
     index *= 4;
     return TVector3<T>(m[index], m[index + 1], m[index + 2]);
 }
 
-template <typename T> inline TVector4<T> TMatrix4<T>::GetCol4(unsigned index) const
+template <typename T>
+inline TVector4<T> TMatrix4<T>::GetCol4(unsigned index) const
 {
     index *= 4;
     return TVector3<T>(m[index], m[index + 1], m[index + 2], m[index + 3]);
 }
 
-template <typename T> inline TMatrix3<T> TMatrix4<T>::ToMat3() const
+template <typename T>
+inline TMatrix3<T> TMatrix4<T>::ToMat3() const
 {
     return TMatrix3<T>(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Translate(TVector3<T> const& v)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Translate(TVector3<T> const& v)
 {
     TMatrix4 tmp = TMatrix4();
     tmp[12] = v.x;
@@ -930,7 +1018,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::Translate(TVector3<T> cons
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Rotate(T angle, TVector3<T> const& v)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Rotate(T angle, TVector3<T> const& v)
 {
     float c = cosf(Math::ToRadians(angle));  // cosine
     float s = sinf(Math::ToRadians(angle));  // sine
@@ -943,7 +1032,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::Rotate(T angle, TVector3<T
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::RotateX(T angle)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::RotateX(T angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -958,7 +1048,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::RotateX(T angle)
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::RotateY(T angle)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::RotateY(T angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -973,7 +1064,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::RotateY(T angle)
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::RotateZ(T angle)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::RotateZ(T angle)
 {
     float c = cosf(Math::ToRadians(angle));
     float s = sinf(Math::ToRadians(angle));
@@ -988,7 +1080,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::RotateZ(T angle)
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Scale(TVector3<T> const& v)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Scale(TVector3<T> const& v)
 {
     TMatrix4<T> tmp(1.0);
 
@@ -999,7 +1092,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::Scale(TVector3<T> const& v
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Scale(T scale)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Scale(T scale)
 {
     TMatrix4<T> tmp(scale);
 
@@ -1008,7 +1102,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::Scale(T scale)
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::SetFrustumPersp(float l, float r, float b, float t, float n, float f)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::SetFrustumPersp(float l, float r, float b, float t, float n, float f)
 {
     TMatrix4<T> tmp(1.0f);
     tmp[0] = 2 * n / (r - l);
@@ -1022,7 +1117,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::SetFrustumPersp(float l, f
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::SetFrustumOrtho(float l, float r, float b, float t, float n, float f)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::SetFrustumOrtho(float l, float r, float b, float t, float n, float f)
 {
     TMatrix4<T> tmp;
     tmp[0] = 2 / (r - l);
@@ -1034,7 +1130,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::SetFrustumOrtho(float l, f
     return tmp;
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::Perspective(float fov, float aspectRatio, float n, float f)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::Perspective(float fov, float aspectRatio, float n, float f)
 {
     float t = tanf(Math::ToRadians(fov) / 2);
     float h = n * t;
@@ -1043,7 +1140,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::Perspective(float fov, flo
     return TMatrix4<T>::SetFrustumPersp(-w, w, -h, h, n, f);
 }
 
-template <typename T> inline TMatrix4<T> TMatrix4<T>::LookAt(TVector3<T> const& eye, TVector3<T> const& center, TVector3<T> const& worldUp)
+template <typename T>
+inline TMatrix4<T> TMatrix4<T>::LookAt(TVector3<T> const& eye, TVector3<T> const& center, TVector3<T> const& worldUp)
 {
     TVector3<T> forward = eye - center;
     forward.Normalize();
@@ -1060,7 +1158,8 @@ template <typename T> inline TMatrix4<T> TMatrix4<T>::LookAt(TVector3<T> const& 
     return transform;
 }
 
-template <typename T> std::ostream& operator<<(std::ostream& os, TMatrix4<T> const& rhs)
+template <typename T>
+std::ostream& operator<<(std::ostream& os, TMatrix4<T> const& rhs)
 {
     os << "Matrix4[";
     os << rhs[0] << ", " << rhs[4] << ", " << rhs[8] << ", " << rhs[12] << std::endl;

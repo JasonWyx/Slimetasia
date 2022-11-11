@@ -5,8 +5,8 @@
 #include "Renderer.h"
 
 BoxCollider::BoxCollider(GameObject* parentObject, const Vector3& halfExtent)
-    : ConvexCollider{parentObject, "BoxCollider", eCollisionShapeType_CONVEX_POLY, eCollisionShape_BOX}
-    , m_HalfExtent{halfExtent}
+    : ConvexCollider { parentObject, "BoxCollider", eCollisionShapeType_CONVEX_POLY, eCollisionShape_BOX }
+    , m_HalfExtent { halfExtent }
 {
     assert(halfExtent.x >= 0.f && halfExtent.y >= 0.f && halfExtent.z >= 0.f);
 
@@ -20,21 +20,21 @@ BoxCollider::BoxCollider(GameObject* parentObject, const Vector3& halfExtent)
     m_EdgeData.AddVertex(6);
     m_EdgeData.AddVertex(7);
 
-    m_EdgeData.AddFace({0, 1, 2, 3});
-    m_EdgeData.AddFace({1, 5, 6, 2});
-    m_EdgeData.AddFace({5, 4, 7, 6});
-    m_EdgeData.AddFace({4, 0, 3, 7});
-    m_EdgeData.AddFace({4, 5, 1, 0});
-    m_EdgeData.AddFace({0, 1, 2, 3});
+    m_EdgeData.AddFace({ 0, 1, 2, 3 });
+    m_EdgeData.AddFace({ 1, 5, 6, 2 });
+    m_EdgeData.AddFace({ 5, 4, 7, 6 });
+    m_EdgeData.AddFace({ 4, 0, 3, 7 });
+    m_EdgeData.AddFace({ 4, 5, 1, 0 });
+    m_EdgeData.AddFace({ 0, 1, 2, 3 });
 
     m_EdgeData.Initialize();
 }
 
 BoxCollider::BoxCollider(GameObject* parentObject, const float& width, const float& height, const float& depth)
-    : ConvexCollider{parentObject, "BoxCollider", eCollisionShapeType_CONVEX_POLY, eCollisionShape_BOX}
-    , m_HalfWidth{width}
-    , m_HalfHeight{height}
-    , m_HalfDepth{depth}
+    : ConvexCollider { parentObject, "BoxCollider", eCollisionShapeType_CONVEX_POLY, eCollisionShape_BOX }
+    , m_HalfWidth { width }
+    , m_HalfHeight { height }
+    , m_HalfDepth { depth }
 {
     assert(width >= 0.f && height >= 0.f && depth >= 0.f);
 
@@ -48,12 +48,12 @@ BoxCollider::BoxCollider(GameObject* parentObject, const float& width, const flo
     m_EdgeData.AddVertex(6);
     m_EdgeData.AddVertex(7);
 
-    m_EdgeData.AddFace({0, 1, 2, 3});
-    m_EdgeData.AddFace({1, 5, 6, 2});
-    m_EdgeData.AddFace({5, 4, 7, 6});
-    m_EdgeData.AddFace({4, 0, 3, 7});
-    m_EdgeData.AddFace({4, 5, 1, 0});
-    m_EdgeData.AddFace({0, 1, 2, 3});
+    m_EdgeData.AddFace({ 0, 1, 2, 3 });
+    m_EdgeData.AddFace({ 1, 5, 6, 2 });
+    m_EdgeData.AddFace({ 5, 4, 7, 6 });
+    m_EdgeData.AddFace({ 4, 0, 3, 7 });
+    m_EdgeData.AddFace({ 4, 5, 1, 0 });
+    m_EdgeData.AddFace({ 0, 1, 2, 3 });
 
     m_EdgeData.Initialize();
 }
@@ -62,14 +62,14 @@ Vector3 BoxCollider::GetVertexPosition(const uint& index) const
 {
     switch (index)
     {
-        case 0: return Vector3{-m_HalfExtent.x, m_HalfExtent.y, -m_HalfExtent.z};
-        case 1: return Vector3{m_HalfExtent.x, m_HalfExtent.y, -m_HalfExtent.z};
-        case 2: return Vector3{m_HalfExtent.x, -m_HalfExtent.y, -m_HalfExtent.z};
-        case 3: return Vector3{-m_HalfExtent};
-        case 4: return Vector3{-m_HalfExtent.x, m_HalfExtent.y, m_HalfExtent.z};
-        case 5: return Vector3{m_HalfExtent};
-        case 6: return Vector3{m_HalfExtent.x, -m_HalfExtent.y, m_HalfExtent.z};
-        case 7: return Vector3{-m_HalfExtent.x, -m_HalfExtent.y, m_HalfExtent.z};
+        case 0: return Vector3 { -m_HalfExtent.x, m_HalfExtent.y, -m_HalfExtent.z };
+        case 1: return Vector3 { m_HalfExtent.x, m_HalfExtent.y, -m_HalfExtent.z };
+        case 2: return Vector3 { m_HalfExtent.x, -m_HalfExtent.y, -m_HalfExtent.z };
+        case 3: return Vector3 { -m_HalfExtent };
+        case 4: return Vector3 { -m_HalfExtent.x, m_HalfExtent.y, m_HalfExtent.z };
+        case 5: return Vector3 { m_HalfExtent };
+        case 6: return Vector3 { m_HalfExtent.x, -m_HalfExtent.y, m_HalfExtent.z };
+        case 7: return Vector3 { -m_HalfExtent.x, -m_HalfExtent.y, m_HalfExtent.z };
         default: std::cout << "Index is out of range! BoxCollider::GetVertexPosition!\n"; assert(false);
     }
 
@@ -117,12 +117,12 @@ void BoxCollider::Initialize()
     m_EdgeData.AddVertex(6);
     m_EdgeData.AddVertex(7);
 
-    m_EdgeData.AddFace({0, 1, 2, 3});
-    m_EdgeData.AddFace({1, 5, 6, 2});
-    m_EdgeData.AddFace({5, 4, 7, 6});
-    m_EdgeData.AddFace({4, 0, 3, 7});
-    m_EdgeData.AddFace({4, 5, 1, 0});
-    m_EdgeData.AddFace({0, 1, 2, 3});
+    m_EdgeData.AddFace({ 0, 1, 2, 3 });
+    m_EdgeData.AddFace({ 1, 5, 6, 2 });
+    m_EdgeData.AddFace({ 5, 4, 7, 6 });
+    m_EdgeData.AddFace({ 4, 0, 3, 7 });
+    m_EdgeData.AddFace({ 4, 5, 1, 0 });
+    m_EdgeData.AddFace({ 0, 1, 2, 3 });
 
     m_EdgeData.Initialize();
 }
@@ -140,40 +140,40 @@ void BoxCollider::DebugDraw()
     Vector3 maxPt(position.x + m_HalfExtent.x, position.y + m_HalfExtent.y, position.z + m_HalfExtent.z);
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{maxPt.x, maxPt.y, minPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, minPt.y, maxPt.z});
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, minPt.z});
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{maxPt.x, maxPt.y, minPt.z});
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, minPt.z});
-
-    pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, minPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{minPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, minPt.z});
+    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, maxPt.z});
-    pts.emplace_back(Vector3{minPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(minPt);
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, minPt.z});
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, minPt.z});
-    pts.emplace_back(Vector3{maxPt.x, maxPt.y, minPt.z});
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
 
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 0.0f, 1.0f), DebugPrimitiveType::Lines);
 }
@@ -224,7 +224,7 @@ Vector3 BoxCollider::GetPointOnEdge(const Vector3& pt) const
     Vector3 pos = GetPosition();
 
     // return an arbitrary point on the edge if the point is on the centroid.
-    if (pos == pt) return Vector3{pos.x + m_HalfWidth, pos.y, pos.z};
+    if (pos == pt) return Vector3 { pos.x + m_HalfWidth, pos.y, pos.z };
 
     return Vector3();
 }
@@ -235,7 +235,7 @@ bool BoxCollider::Raycast(const Ray& ray, RaycastData_tmp& data)
     Vector3 maxPt(pos + m_HalfExtent);
     Vector3 minPt(pos - m_HalfExtent);
     float t = 0.f;
-    Vector4 plane_l{1.f, 0.f, 0.f, minPt.x}, plane_bo{0.f, 1.f, 0.f, minPt.y}, plane_f{0.f, 0.f, 1.f, minPt.z};
+    Vector4 plane_l { 1.f, 0.f, 0.f, minPt.x }, plane_bo { 0.f, 1.f, 0.f, minPt.y }, plane_f { 0.f, 0.f, 1.f, minPt.z };
     auto denom = 0.f;
     t = 0.f;
     auto tmax = FLT_MAX, t1 = 0.f, t2 = 0.f;

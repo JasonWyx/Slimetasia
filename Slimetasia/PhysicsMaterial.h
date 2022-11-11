@@ -6,6 +6,7 @@
 class PhysicsMaterial
 {
 public:
+
     PhysicsMaterial(const std::string& name = "", const float& restitution = 0.f, const float& rollingResist = 0.f, const float& frictionCoeff = 0.f);
 
     ~PhysicsMaterial() = default;
@@ -35,6 +36,7 @@ public:
     static uint s_PhysicsMaterialCount;
 
 private:
+
     std::string m_PhysicsMaterialName;
 
     float m_Restitution;

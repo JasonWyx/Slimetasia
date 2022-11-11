@@ -6,8 +6,8 @@
 #include "RigidbodyComponent.h"
 
 Manifold::Manifold(RigidbodyComponent* first, RigidbodyComponent* second)
-    : m_FirstBody{first}
-    , m_SecondBody{second}
+    : m_FirstBody { first }
+    , m_SecondBody { second }
     , m_PenetrationDepth(0.f)
     , m_Normal(0.f, 0.f, 0.f)
     , m_ContactCount(0)
@@ -88,10 +88,10 @@ void Manifold::ApplyImpulse()
         if (contactVelocity > 0.f) return;
 
         Vector3 radACrossNormal = radA.Cross(m_Normal);
-        Matrix3 firstInertiaTensor{0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+        Matrix3 firstInertiaTensor { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
         // m_FirstCollider->ComputeInertiaTensor(firstInertiaTensor, m_FirstBody->m_Mass);
         Vector3 radBCrossNormal = radB.Cross(m_Normal);
-        Matrix3 secondInertiaTensor{0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+        Matrix3 secondInertiaTensor { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
         // m_SecondCollider->ComputeInertiaTensor(secondInertiaTensor, m_SecondBody->m_Mass);
 
         float inverseMassSum = m_FirstBody->m_InverseMass + m_SecondBody->m_InverseMass + (firstInertiaTensor * radACrossNormal).Length() + (secondInertiaTensor * radBCrossNormal).Length();
@@ -155,10 +155,10 @@ void Manifold::PositionCorrection()
 
 void Manifold::InfMassCorrection()
 {
-    m_FirstBody->m_LinearVelocity = Vector3{0.f, 0.f, 0.f};
+    m_FirstBody->m_LinearVelocity = Vector3 { 0.f, 0.f, 0.f };
     // m_FirstBody->m_AngularVelocity = Vector3{ 0.f, 0.f, 0.f };
 
-    m_SecondBody->m_LinearVelocity = Vector3{0.f, 0.f, 0.f};
+    m_SecondBody->m_LinearVelocity = Vector3 { 0.f, 0.f, 0.f };
     // m_SecondBody->m_AngularVelocity = Vector3{ 0.f, 0.f, 0.f };
 }
 

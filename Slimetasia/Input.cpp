@@ -1,6 +1,7 @@
 #include "Input.h"
 
 #include <stdio.h>
+
 #include <algorithm>
 
 #define TRANSITION_BIT 0x80  // 0 = pressed, 1 = released

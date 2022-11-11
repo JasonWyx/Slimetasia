@@ -6,6 +6,7 @@
 class ParticlePass
 {
 public:
+
     ParticlePass();
     ~ParticlePass();
 
@@ -13,6 +14,7 @@ public:
     void StartSortingParticleData(Camera& camera);
 
 private:
+
     GLuint m_VertexArray;
     GLuint m_PositionBuffer;
     GLuint m_ColorBuffer;

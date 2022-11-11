@@ -8,6 +8,7 @@
 class Shader : public ResourceBase
 {
 public:
+
     Shader(const std::string& resourceName = "Shader", const std::filesystem::path& filePath = "");
     ~Shader();
 
@@ -34,6 +35,7 @@ public:
     virtual void Unserialize(tinyxml2::XMLElement* root) override;
 
 private:
+
     static GLuint CompileShader(std::string filePath, GLenum shaderType);
     GLuint LinkProgram(const std::vector<GLuint>& programs);
 

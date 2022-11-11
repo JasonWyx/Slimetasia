@@ -17,6 +17,7 @@ class MeshRenderer;
 class ShadowPass
 {
 private:
+
     GLuint m_Framebuffer;
     HShader m_ShadowDirectionalShader;
     HShader m_ShadowPointShader;
@@ -24,6 +25,7 @@ private:
     static std::vector<Vector3> GetShadowFrustumPoints(Vector3 direction, Vector3 position, float aspectRatio, float fov, float n, float f, bool isOrtho);
 
 public:
+
     ShadowPass();
     ~ShadowPass();
 

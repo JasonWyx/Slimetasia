@@ -49,13 +49,13 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
         {
             if (dist.x > 0.f)
             {
-                manifold->m_Normal = Vector3{1.f, 0.f, 0.f};
-                manifold->m_Contacts[0] = Vector3{firstPos.x + x_overlap, firstPos.y, firstPos.z};
+                manifold->m_Normal = Vector3 { 1.f, 0.f, 0.f };
+                manifold->m_Contacts[0] = Vector3 { firstPos.x + x_overlap, firstPos.y, firstPos.z };
             }
             else
             {
-                manifold->m_Normal = Vector3{-1.f, 0.f, 0.f};
-                manifold->m_Contacts[0] = Vector3{firstPos.x - x_overlap, firstPos.y, firstPos.z};
+                manifold->m_Normal = Vector3 { -1.f, 0.f, 0.f };
+                manifold->m_Contacts[0] = Vector3 { firstPos.x - x_overlap, firstPos.y, firstPos.z };
             }
 
             manifold->m_PenetrationDepth = x_overlap;
@@ -68,13 +68,13 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
         {
             if (dist.y > 0.f)
             {
-                manifold->m_Normal = Vector3{0.f, 1.f, 0.f};
-                manifold->m_Contacts[0] = Vector3{firstPos.x, firstPos.y + y_overlap, firstPos.z};
+                manifold->m_Normal = Vector3 { 0.f, 1.f, 0.f };
+                manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y + y_overlap, firstPos.z };
             }
             else
             {
-                manifold->m_Normal = Vector3{0.f, -1.f, 0.f};
-                manifold->m_Contacts[0] = Vector3{firstPos.x, firstPos.y - y_overlap, firstPos.z};
+                manifold->m_Normal = Vector3 { 0.f, -1.f, 0.f };
+                manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y - y_overlap, firstPos.z };
             }
 
             manifold->m_PenetrationDepth = y_overlap;
@@ -84,13 +84,13 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
         // the only choice is z
         if (dist.z > 0.f)
         {
-            manifold->m_Normal = Vector3{0.f, 0.f, 1.f};
-            manifold->m_Contacts[0] = Vector3{firstPos.x, firstPos.y, firstPos.z + z_overlap};
+            manifold->m_Normal = Vector3 { 0.f, 0.f, 1.f };
+            manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y, firstPos.z + z_overlap };
         }
         else
         {
-            manifold->m_Normal = Vector3{0.f, 0.f, -1.f};
-            manifold->m_Contacts[0] = Vector3{firstPos.x, firstPos.y, firstPos.z - z_overlap};
+            manifold->m_Normal = Vector3 { 0.f, 0.f, -1.f };
+            manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y, firstPos.z - z_overlap };
         }
 
         manifold->m_PenetrationDepth = z_overlap;

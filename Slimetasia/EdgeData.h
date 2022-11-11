@@ -6,6 +6,7 @@
 class EdgeData
 {
 public:
+
     struct Vertex
     {
         Vertex(const int& index);
@@ -44,6 +45,7 @@ public:
     void ClearData();
 
 private:
+
     std::vector<Vertex> m_Vertices;
     std::vector<Edge> m_Edges;
     std::vector<Face> m_Faces;

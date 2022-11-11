@@ -15,10 +15,10 @@ void DrawRay(const Ray& ray, float t, unsigned int layerID, Color4 color)
     pts.emplace_back(ray.m_start + t * ray.m_dir);
 
     // shape.mSegments.emplace_back(ray.m_start, ray.m_start + t * ray.m_dir);
-    auto z = Vector3{0.f, 0.f, 1.f};
-    auto v = Vector3{0.f, 0.f, 1.f}.Cross(ray.m_dir);
+    auto z = Vector3 { 0.f, 0.f, 1.f };
+    auto v = Vector3 { 0.f, 0.f, 1.f }.Cross(ray.m_dir);
 
-    if (v.SquareLength() == 0.f) v = ray.m_dir.Cross(Vector3{1.f, 0.f, 0.f});
+    if (v.SquareLength() == 0.f) v = ray.m_dir.Cross(Vector3 { 1.f, 0.f, 0.f });
 
     v = v.Normalized();
 

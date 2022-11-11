@@ -18,6 +18,7 @@ class Material : public ResourceBase
     HTexture m_NormalTexture;
 
 public:
+
     Material() = default;
     ~Material() = default;
 

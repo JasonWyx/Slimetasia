@@ -8,17 +8,17 @@
 
 struct Ray
 {
-    Ray(const Vector3& start = Vector3{}, const Vector3& dir = Vector3{}, const float& max = 1.f)
-        : m_start{start}
-        , m_dir{dir}
-        , m_MaxFraction{max}
+    Ray(const Vector3& start = Vector3 {}, const Vector3& dir = Vector3 {}, const float& max = 1.f)
+        : m_start { start }
+        , m_dir { dir }
+        , m_MaxFraction { max }
     {
     }
 
     Ray(const Ray& rhs)
-        : m_start{rhs.m_start}
-        , m_dir{rhs.m_dir}
-        , m_MaxFraction{rhs.m_MaxFraction}
+        : m_start { rhs.m_start }
+        , m_dir { rhs.m_dir }
+        , m_MaxFraction { rhs.m_MaxFraction }
     {
     }
 

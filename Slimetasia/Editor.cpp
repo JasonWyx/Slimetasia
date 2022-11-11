@@ -686,18 +686,18 @@ void Editor::DrawViewport()
                     // for one and for many
                     if (m_SelectedObjects.size() == 1)
                     {
-                        Vector3 tmpTrans{ trans[0], trans[1], trans[2] };
-                        Vector3 tmpRot{ rot[0], rot[1], rot[2] };
-                        Vector3 tmpScale{ scale[0], scale[1], scale[2] };
+                        Vector3 tmpTrans { trans[0], trans[1], trans[2] };
+                        Vector3 tmpRot { rot[0], rot[1], rot[2] };
+                        Vector3 tmpScale { scale[0], scale[1], scale[2] };
                         t->SetWorldPosition(tmpTrans);
                         t->SetWorldRotation(tmpRot);
                         t->SetWorldScale(tmpScale);
                     }
                     else if (m_SelectedObjects.size() > 1)
                     {
-                        Vector3 tmpTrans{ trans[0], trans[1], trans[2] };
-                        Vector3 tmpRot{ rot[0], rot[1], rot[2] };
-                        Vector3 tmpScale{ scale[0], scale[1], scale[2] };
+                        Vector3 tmpTrans { trans[0], trans[1], trans[2] };
+                        Vector3 tmpRot { rot[0], rot[1], rot[2] };
+                        Vector3 tmpScale { scale[0], scale[1], scale[2] };
                         Vector3 m_Trans = t->GetWorldPosition();
                         Vector3 m_Rot = t->GetWorldRotation();
                         Vector3 m_Scale = t->GetWorldScale();
@@ -756,9 +756,9 @@ void Editor::DrawViewport()
                     }
                     else if (m_SelectedObjects.size() > 1)
                     {
-                        Vector3 tmpTrans{ trans[0], trans[1], trans[2] };
-                        Vector3 tmpRot{ rot[0], rot[1], rot[2] };
-                        Vector3 tmpScale{ scale[0], scale[1], scale[2] };
+                        Vector3 tmpTrans { trans[0], trans[1], trans[2] };
+                        Vector3 tmpRot { rot[0], rot[1], rot[2] };
+                        Vector3 tmpScale { scale[0], scale[1], scale[2] };
                         Vector3 m_Trans = tmpTrans - savedTrans;
                         Vector3 m_Rot = tmpRot - savedRot;
                         Vector3 m_Scale = tmpScale - savedScale;
@@ -838,7 +838,7 @@ void Editor::DrawArchetype()
         // Add Tags here
         ImGui::Text("Tag:");
         ImGui::SameLine();
-        if (ImGui::Selectable(currentArchetype->GetTag() == std::string{} ? "Click me to add Tag" : currentArchetype->GetTag().c_str())) ImGui::OpenPopup("ArcheTagsPopUp");
+        if (ImGui::Selectable(currentArchetype->GetTag() == std::string {} ? "Click me to add Tag" : currentArchetype->GetTag().c_str())) ImGui::OpenPopup("ArcheTagsPopUp");
         if (ImGui::BeginPopup("ArcheTagsPopUp"))
         {
             ImGui::Text("Tags");
@@ -1053,7 +1053,7 @@ void Editor::DrawArchetype()
                         }
                         else if (properties[i].type == typeid(Vector4).name())
                         {
-                            static std::string hashes{ "##" };
+                            static std::string hashes { "##" };
                             ImVec4 backup_color;
                             static ImVec4 tmp_color;
                             Color4* clr = reinterpret_cast<Color4*>(address + properties[i].offset);
@@ -1289,7 +1289,7 @@ void Editor::DrawArchetype()
         ImGui::SameLine();
         if (ImGui::Button("OK", ImVec2(120, 0)) || ImGui::IsKeyPressed(KEY_RETURN))
         {
-            if (std::string{} != string)
+            if (std::string {} != string)
             {
                 auto go = CreateArchetype(string);
                 ActionCreateArchetype* act = new ActionCreateArchetype(go, m_UpdatedArchetypes[string]);
@@ -1394,7 +1394,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
             }
             else if (properties[i].type == typeid(Vector4).name())
             {
-                static std::string hashes{ "##" };
+                static std::string hashes { "##" };
                 ImVec4 backup_color;
                 static ImVec4 tmp_color;
                 Color4* clr = reinterpret_cast<Color4*>(address + properties[i].offset);
@@ -3167,7 +3167,7 @@ void Editor::ParentStructOptions(TVector2<int>* vec2, GameObject*& go, std::stri
 
 void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, std::string p)
 {
-    static std::string hashes{ "##" };
+    static std::string hashes { "##" };
     ImVec4 backup_color;
     static ImVec4 tmp_color;
 
@@ -3305,7 +3305,7 @@ void Editor::Save()
         auto dir = file.find_last_of('\\');
         auto ext = file.find_first_of('.', dir);
         if (ext == file.npos) file += ".xml";
-        Serializer{ file }.SaveScene(Application::Instance().GetCurrentScene());
+        Serializer { file }.SaveScene(Application::Instance().GetCurrentScene());
     }
 }
 
@@ -3328,7 +3328,7 @@ void Editor::Load()
         m_SelectedObjects.clear();
         Renderer::Instance().SetSelectedObjects({ 0 });
         ClearRedoUndo();
-        Serializer{ filename }.LoadScene();
+        Serializer { filename }.LoadScene();
     }
     m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
     Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
@@ -3767,7 +3767,7 @@ void Editor::RecursionLoadArchetypeStruct(tinyxml2::XMLElement* attribute, unsig
             {
                 // std::cout << sAttribute->Attribute("Type") << std::endl;
                 std::string& attribute = *reinterpret_cast<std::string*>(base + sProperty->offset);
-                std::string attributeValue{ sAttribute->Attribute("Value") };
+                std::string attributeValue { sAttribute->Attribute("Value") };
                 attribute = attributeValue;
                 // std::cout << attribute << std::endl;
             }
@@ -3827,7 +3827,7 @@ void Editor::RecursionLoadArchetypeParent(tinyxml2::XMLElement* attribute, unsig
                 {
                     // std::cout << attribute->Attribute("Type") << std::endl;
                     std::string& attribute_str = *reinterpret_cast<std::string*>(base + pProperty->offset);
-                    std::string attributeValue{ attribute->Attribute("Value") };
+                    std::string attributeValue { attribute->Attribute("Value") };
                     attribute_str = attributeValue;
                     // std::cout << attribute_str << std::endl;
                 }
@@ -3915,7 +3915,7 @@ void Editor::DeSerializeArchetypes()
                         {
                             // std::cout << pAttribute->Attribute("Type") << std::endl;
                             std::string& attribute = *reinterpret_cast<std::string*>(base + cProperty->offset);
-                            std::string attributeValue{ pAttribute->Attribute("Value") };
+                            std::string attributeValue { pAttribute->Attribute("Value") };
                             attribute = attributeValue;
                             // std::cout << attribute << std::endl;
                         }
@@ -3946,13 +3946,13 @@ void Editor::UpdateMeshArray()
     m_FontNames.clear();
 
     m_FontIDs.push_back(0);
-    m_FontNames.push_back(std::string{});
+    m_FontNames.push_back(std::string {});
     m_TextureIDs.push_back(0);
-    m_TextureNames.push_back(std::string{});
+    m_TextureNames.push_back(std::string {});
     m_MeshIDs.push_back(0);
-    m_MeshNames.push_back(std::string{});
+    m_MeshNames.push_back(std::string {});
     m_AnimationIDs.push_back(0);
-    m_AnimationNames.push_back(std::string{});
+    m_AnimationNames.push_back(std::string {});
 
     std::vector<HTexture> textures = ResourceManager::Instance().GetResources<Texture>();
     std::vector<HMesh> meshes = ResourceManager::Instance().GetResources<Mesh>();
@@ -4428,7 +4428,7 @@ void Editor::DrawInspector()
         if (!m_CurrentObject->GetArchetype().empty()) ImGui::Text("Archetype : %s", m_CurrentObject->GetArchetype().c_str());
         ImGui::Text("Tag : ");
         ImGui::SameLine();
-        if (ImGui::Selectable(m_CurrentObject->GetTag() == std::string{} ? "Click me to add Tag" : m_CurrentObject->GetTag().c_str())) ImGui::OpenPopup("TagsPopUp");
+        if (ImGui::Selectable(m_CurrentObject->GetTag() == std::string {} ? "Click me to add Tag" : m_CurrentObject->GetTag().c_str())) ImGui::OpenPopup("TagsPopUp");
         if (ImGui::BeginPopup("TagsPopUp"))
         {
             ImGui::Text("Tags");
@@ -4621,7 +4621,7 @@ void Editor::DrawInspector()
                                 sound->SetAudioClip(SoundTracks[currentSound]);
                             else
                                 sound->SetAndPlayAudioClip(SoundTracks[currentSound]);
-                            std::string oldValue = s < 0 ? std::string{} : SoundTracks[s];
+                            std::string oldValue = s < 0 ? std::string {} : SoundTracks[s];
                             std::string newValue = SoundTracks[currentSound];
                             ActionInput<std::string>* act =
                                 new ActionInput<std::string>(oldValue, newValue, m_CurrentObject->GetName(), "AudioEmitter", "audioClipName_", m_CurrentLayer, m_CurrentObject);
@@ -4759,11 +4759,11 @@ void Editor::SetEditorMouse()
 }
 
 Editor::Editor(HWND hwnd, float x, float y)
-    : m_Console{}
-    , m_RedoUndoCount{ 20 }
-    , m_CurrentObject{ nullptr }
-    , m_Global_Spaces{}
-    , m_GlobalIDCounter{ 0 }
+    : m_Console {}
+    , m_RedoUndoCount { 20 }
+    , m_CurrentObject { nullptr }
+    , m_Global_Spaces {}
+    , m_GlobalIDCounter { 0 }
     , m_CurrentLayer(nullptr)
     , m_IsEditorInFocus(false)
     , m_CurrentWorkingDirectory(_getcwd(0, 0))
@@ -4851,7 +4851,7 @@ void Editor::Update(float dt)
 
     DrawMenuBar();
 
-    ImGui::SetNextWindowPos(ImVec2{ 0.0f, 0.0f });
+    ImGui::SetNextWindowPos(ImVec2 { 0.0f, 0.0f });
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);

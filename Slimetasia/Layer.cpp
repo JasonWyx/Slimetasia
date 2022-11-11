@@ -99,10 +99,10 @@ GameObject* Layer::CreateObject(std::string const& objectName)
             gameObject.m_Name = objectName;
             gameObject.m_IsActive = true;
             gameObject.m_IsInitialized = true;
-            gameObject.SetArchetype(std::string{});
-            gameObject.SetChildrenObjects(ChildrenList{});
+            gameObject.SetArchetype(std::string {});
+            gameObject.SetChildrenObjects(ChildrenList {});
             gameObject.SetParentObject(0);
-            gameObject.SetTag(std::string{});
+            gameObject.SetTag(std::string {});
 
             m_ActiveObjects.push_back(&gameObject);
             return &gameObject;

@@ -50,6 +50,7 @@ struct FontCharacter
 class Font : public ResourceBase
 {
 public:
+
     Font(const std::string resourceName = "", const std::filesystem::path& filePath = "");
     ~Font();
 
@@ -64,6 +65,7 @@ public:
     GLuint GetTextureHandle() const;
 
 private:
+
     FontCharacter m_FontCharacterInfos[128];
     GLuint m_FontTexture;
     unsigned m_AtlasSize;

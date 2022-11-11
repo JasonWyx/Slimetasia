@@ -3,8 +3,8 @@
 
 #include "Font.h"
 #include "IComponent.h"
-#include "Transform.h"
 #include "SmartEnums.h"
+#include "Transform.h"
 
 enum class AnchorPoint
 {
@@ -32,6 +32,7 @@ REFLECT_ENUM(TextAnchorPoint)
 class TextRenderer : public IComponent
 {
 public:
+
     TextRenderer(GameObject* owner);
     ~TextRenderer();
 
@@ -39,6 +40,7 @@ public:
     void OnInactive() override;
 
 private:
+
     // Owner transform
     std::size_t m_TextHash;
 
@@ -51,6 +53,7 @@ private:
     void GenerateGeometryData();
 
 public:
+
     // Text rendering related stuff
     Transform* m_Transform;
     std::string m_Text;

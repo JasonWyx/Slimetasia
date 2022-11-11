@@ -1,7 +1,7 @@
 #pragma once
 #include "Factory.h"
-#include "Utility.h"
 #include "SmartEnums.h"
+#include "Utility.h"
 
 constexpr uint SPHERE_DEBUGDRAW_POINTS = 16;
 constexpr uint HALF_SPHERE_DEBUGDRAW_POINTS = SPHERE_DEBUGDRAW_POINTS / 2;

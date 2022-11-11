@@ -6,7 +6,8 @@
 
 namespace PE
 {
-    template <typename T> struct ListElem
+    template <typename T>
+    struct ListElem
     {
         ListElem(const T& data, ListElem* next = nullptr)
             : m_data(data)
@@ -18,9 +19,11 @@ namespace PE
     };
 
     // singly-linked link list.
-    template <typename T> class ForwardList
+    template <typename T>
+    class ForwardList
     {
     public:
+
         ForwardList(MemoryAllocator& memallocator)
             : m_Datahead(nullptr)
             , m_Memallocator(memallocator)
@@ -39,12 +42,14 @@ namespace PE
         T& operator()(const uint& index);*/
 
     private:
+
         ListElem<T>* m_Datahead;
         MemoryAllocator& m_Memallocator;
         uint m_Size;
     };
 
-    template <typename T> void ForwardList<T>::InsertData(const T& data)
+    template <typename T>
+    void ForwardList<T>::InsertData(const T& data)
     {
         // allocates the memory required for the input data.
         auto elem = new (m_Memallocator.Allocate(sizeof(ListElem<T>))) ListElem<T>(data, m_Datahead);
@@ -55,7 +60,8 @@ namespace PE
         ++m_Size;
     }
 
-    template <typename T> void ForwardList<T>::Clear()
+    template <typename T>
+    void ForwardList<T>::Clear()
     {
         ListElem<T>* tmp = nullptr;
         while (m_Datahead)
@@ -68,7 +74,8 @@ namespace PE
         m_Datahead = nullptr;
     }
 
-    template <typename T> void ForwardList<T>::PopFront()
+    template <typename T>
+    void ForwardList<T>::PopFront()
     {
         auto tmp = m_Datahead->m_next;
         m_Memallocator.ReleaseMemory(m_Datahead, sizeof(ListElem<T>));
@@ -76,7 +83,8 @@ namespace PE
         --m_Size;
     }
 
-    template <typename T> void ForwardList<T>::Swap(ForwardList<T>& rhs)
+    template <typename T>
+    void ForwardList<T>::Swap(ForwardList<T>& rhs)
     {
         // shallow copying
         auto tmp = rhs;
@@ -84,7 +92,8 @@ namespace PE
         this = tmp;
     }
 
-    template <typename T> struct DoubleListElem
+    template <typename T>
+    struct DoubleListElem
     {
         DoubleListElem(const T& data, DoubleListElem* next = nullptr, DoubleListElem* prev = nullptr)
             : m_data(data)
@@ -98,9 +107,11 @@ namespace PE
     };
 
     // doubly-linked link list.
-    template <typename T> class DoublyLinkedList
+    template <typename T>
+    class DoublyLinkedList
     {
     public:
+
         DoublyLinkedList(MemoryAllocator& memallocator)
             : m_DataHead(nullptr)
             , m_DataTail(nullptr)
@@ -125,13 +136,15 @@ namespace PE
         void clear();
 
     private:
+
         DoubleListElem<T>* m_DataHead;
         DoubleListElem<T>* m_DataTail;
         MemoryAllocator& m_Memallocator;
         uint m_Size;
     };
 
-    template <typename T> void DoublyLinkedList<T>::InsertData(const T& data)
+    template <typename T>
+    void DoublyLinkedList<T>::InsertData(const T& data)
     {
         // allocates the memory required for the input data.
         auto elem = new (m_Memallocator.Allocate(sizeof(DoubleListElem<T>))) DoubleListElem<T>(data, m_DataHead);
@@ -141,7 +154,8 @@ namespace PE
         m_DataHead = elem;
     }
 
-    template <typename T> void DoublyLinkedList<T>::InsertBack(const T& data)
+    template <typename T>
+    void DoublyLinkedList<T>::InsertBack(const T& data)
     {
         // allocates the memory required for the input data.
         auto elem = new (m_Memallocator.Allocate(sizeof(DoubleListElem<T>))) DoubleListElem<T>(data, nullptr);
@@ -152,7 +166,8 @@ namespace PE
         m_DataTail = elem;
     }
 
-    template <typename T> void DoublyLinkedList<T>::PopBack()
+    template <typename T>
+    void DoublyLinkedList<T>::PopBack()
     {
         if (m_Size)
         {
@@ -163,7 +178,8 @@ namespace PE
         }
     }
 
-    template <typename T> void DoublyLinkedList<T>::PopFront()
+    template <typename T>
+    void DoublyLinkedList<T>::PopFront()
     {
         if (m_Size)
         {
@@ -179,7 +195,8 @@ namespace PE
     {
     }*/
 
-    template <typename T> void DoublyLinkedList<T>::clear()
+    template <typename T>
+    void DoublyLinkedList<T>::clear()
     {
         DoubleListElem<T>* tmp = nullptr;
         while (m_DataHead)
@@ -193,7 +210,8 @@ namespace PE
         m_DataTail = nullptr;
     }
 
-    template <typename T> void DoublyLinkedList<T>::Swap(DoublyLinkedList& rhs)
+    template <typename T>
+    void DoublyLinkedList<T>::Swap(DoublyLinkedList& rhs)
     {
         auto tmp = rhs;
         rhs = this;

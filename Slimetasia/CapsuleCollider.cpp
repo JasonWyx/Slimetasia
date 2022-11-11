@@ -5,8 +5,8 @@
 #include "Renderer.h"
 
 CapsuleCollider::CapsuleCollider(GameObject* parentObject, const float& radius, const float& halfHeight)
-    : CollisionMesh_3D{parentObject, "CapsuleCollider", eCollisionShapeType_CAPSULE, eCollisionShape_CAPSULE, radius}
-    , m_HalfHeight{halfHeight}
+    : CollisionMesh_3D { parentObject, "CapsuleCollider", eCollisionShapeType_CAPSULE, eCollisionShape_CAPSULE, radius }
+    , m_HalfHeight { halfHeight }
 {
 }
 
@@ -20,7 +20,7 @@ void CapsuleCollider::DebugDraw()
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
     if (pid != currentLayerID) return;
     std::vector<Vector3> pts;
-    auto u = Vector3{1.f, 0.f, 0.f}, v = Vector3{0.f, 1.f, 0.f}, w = Vector3{0.f, 0.f, 1.f};
+    auto u = Vector3 { 1.f, 0.f, 0.f }, v = Vector3 { 0.f, 1.f, 0.f }, w = Vector3 { 0.f, 0.f, 1.f };
     const auto mypos = GetPosition();
 
     Vector3 d(0, 0, m_HalfHeight);
@@ -80,8 +80,8 @@ void CapsuleCollider::ComputeInertiaTensor(Matrix3& tensor, const float& mass) c
 Vector3 CapsuleCollider::GetClosestPoint(const Vector3& inp) const
 {
     auto pos = GetPosition();
-    Vector3 top{pos.x, pos.y + m_HalfHeight, pos.z};
-    Vector3 bot{pos.x, pos.y - m_HalfHeight, pos.z};
+    Vector3 top { pos.x, pos.y + m_HalfHeight, pos.z };
+    Vector3 bot { pos.x, pos.y - m_HalfHeight, pos.z };
 
     Vector3 dist = inp - bot;
     Vector3 normal = (top - bot).Normalized();

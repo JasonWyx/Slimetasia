@@ -11,7 +11,7 @@
 Constructor for AudioListener.
 */
 AudioListener::AudioListener(GameObject* parentObject)
-    : IComponent{parentObject, "AudioListener"}
+    : IComponent { parentObject, "AudioListener" }
     , isMain_()
 {
     if (!m_OwnerObject->GetParentLayer()) return;
@@ -69,7 +69,7 @@ Vector3 AudioListener::GetPosition() const
     auto transformRef_ = m_OwnerObject->GetComponent<Transform>();
     if (transformRef_) return transformRef_->GetWorldPosition();
 
-    return Vector3{0.0f, 0.0f, 0.0f};
+    return Vector3 { 0.0f, 0.0f, 0.0f };
 }
 
 /*

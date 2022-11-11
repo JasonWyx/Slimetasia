@@ -5,7 +5,7 @@
 #include "Renderer.h"
 
 Plane::Plane()
-    : m_Data{0.f, 0.f, 0.f, 0.f}
+    : m_Data { 0.f, 0.f, 0.f, 0.f }
 {
 }
 
@@ -22,17 +22,17 @@ Plane::Plane(const Vector3& normal, const Vector3& point)
 }
 
 Plane::Plane(const Vector3& normal, const float& dist)
-    : m_Data{normal, dist}
+    : m_Data { normal, dist }
 {
 }
 
 Plane::Plane(const Vector4& data)
-    : m_Data{data}
+    : m_Data { data }
 {
 }
 
 Plane::Plane(const float& x, const float& y, const float& z, const float& d)
-    : m_Data{x, y, z, d}
+    : m_Data { x, y, z, d }
 {
 }
 
@@ -49,9 +49,9 @@ void Plane::DebugDraw(const float& x, const float& y, const unsigned int& parent
     std::vector<Vector3> pts;
 
     // WarnIf(ShowDebugDrawWarnings, "Assignment2: Required function un-implemented");
-    auto pt = Vector3{m_Data.x * m_Data.w, m_Data.y * m_Data.w, m_Data.z * m_Data.w};
-    auto v = Vector3{0.f, 0.f, 1.f}.Cross(pt);
-    if (v.SquareLength() == 0.f) v = pt.Cross(Vector3{1.f, 0.f, 0.f});
+    auto pt = Vector3 { m_Data.x * m_Data.w, m_Data.y * m_Data.w, m_Data.z * m_Data.w };
+    auto v = Vector3 { 0.f, 0.f, 1.f }.Cross(pt);
+    if (v.SquareLength() == 0.f) v = pt.Cross(Vector3 { 1.f, 0.f, 0.f });
     v = v.Normalized();
     auto w = pt.Cross(v);
     w = w.Normalized();
@@ -69,7 +69,7 @@ void Plane::DebugDraw(const float& x, const float& y, const unsigned int& parent
 
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 1.0f, 1.0f), DebugPrimitiveType::Lines);
 
-    DrawRay(Ray{pt, m_Normal}, 1.f, parentID, Color4(0.0f, 1.0f, 1.0f, 1.0f));
+    DrawRay(Ray { pt, m_Normal }, 1.f, parentID, Color4(0.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void Plane::Set(const Vector3& p0, const Vector3& p1, const Vector3& p2)
@@ -99,7 +99,7 @@ Vector3 Plane::ProjectPointOnPlane(const Vector3& point, const Vector3& normal, 
 
 IntersectionType::Type Plane::PlaneSphere(const Vector4& plane, const Vector3& sphereCenter, float sphereRadius)
 {
-    auto norm = Vector3{plane.x, plane.y, plane.z};
+    auto norm = Vector3 { plane.x, plane.y, plane.z };
     auto p_prime = Plane::ProjectPointOnPlane(sphereCenter, norm, plane.w);
     auto rad_sq = sphereRadius * sphereRadius;
     auto len = (sphereCenter - p_prime).SquareLength();
@@ -110,12 +110,12 @@ IntersectionType::Type Plane::PlaneSphere(const Vector4& plane, const Vector3& s
 
 IntersectionType::Type Plane::PlaneAabb(const Vector4& plane, const Vector3& aabbMin, const Vector3& aabbMax)
 {
-    Vector3 he{(aabbMax.x - aabbMin.x) / 2.f, (aabbMax.y - aabbMin.y) / 2.f, (aabbMax.z - aabbMin.z) / 2.f};
+    Vector3 he { (aabbMax.x - aabbMin.x) / 2.f, (aabbMax.y - aabbMin.y) / 2.f, (aabbMax.z - aabbMin.z) / 2.f };
     auto center = aabbMin + he;
     he.x *= plane.x >= 0.f ? 1.f : -1.f;
     he.y *= plane.y >= 0.f ? 1.f : -1.f;
     he.z *= plane.z >= 0.f ? 1.f : -1.f;
-    auto d = Vector3{plane.x, plane.y, plane.z}.Dot(he);
+    auto d = Vector3 { plane.x, plane.y, plane.z }.Dot(he);
     d *= d < 0.f ? -1.f : 1.f;
     return Plane::PlaneSphere(plane, center, d);
 }

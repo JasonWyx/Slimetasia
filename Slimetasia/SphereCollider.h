@@ -4,6 +4,7 @@
 class SphereCollider : public CollisionMesh_3D
 {
 public:
+
     SphereCollider(GameObject* parentObject = nullptr, const float& radius = 0.5f);
 
     virtual ~SphereCollider() = default;

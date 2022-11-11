@@ -3,7 +3,7 @@
 #include "CollisionMesh_2D.h"
 #include "PhysicsSystem.h"
 
-Vector2 ReactiveComponent::s_mousepos = Vector2{};
+Vector2 ReactiveComponent::s_mousepos = Vector2 {};
 bool ReactiveComponent::s_mouseclick = false;
 bool ReactiveComponent::s_mousedown = false;
 

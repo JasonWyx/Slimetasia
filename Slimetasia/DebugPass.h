@@ -50,23 +50,25 @@ enum class GizmoMode
     None
 };
 
-static std::vector<Vector3> const gWireBoxMesh = {Vector3(-1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 1.0f, 1.0f),   Vector3(1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, 1.0f),
-                                                  Vector3(1.0f, -1.0f, 1.0f),   Vector3(1.0f, -1.0f, 1.0f),  Vector3(1.0f, 1.0f, 1.0f),    Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f),
-                                                  Vector3(1.0f, 1.0f, -1.0f),   Vector3(1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, -1.0f),
-                                                  Vector3(1.0f, -1.0f, 1.0f),   Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
-                                                  Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f),  Vector3(1.0f, 1.0f, -1.0f)};
+static std::vector<Vector3> const gWireBoxMesh = { Vector3(-1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 1.0f, 1.0f),   Vector3(1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, 1.0f),
+                                                   Vector3(1.0f, -1.0f, 1.0f),   Vector3(1.0f, -1.0f, 1.0f),  Vector3(1.0f, 1.0f, 1.0f),    Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f),
+                                                   Vector3(1.0f, 1.0f, -1.0f),   Vector3(1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, -1.0f),
+                                                   Vector3(1.0f, -1.0f, 1.0f),   Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
+                                                   Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f),  Vector3(1.0f, 1.0f, -1.0f) };
 
-static std::vector<Vector3> const gSolidBoxMesh = {
-    Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, 1.0f),  Vector3(-1.0f, 1.0f, 1.0f),  Vector3(1.0f, 1.0f, -1.0f), Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f),
-    Vector3(1.0f, -1.0f, 1.0f),   Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f),  Vector3(-1.0f, -1.0f, -1.0f),
-    Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f),   Vector3(-1.0f, 1.0f, -1.0f), Vector3(1.0f, -1.0f, 1.0f), Vector3(-1.0f, -1.0f, 1.0f),  Vector3(-1.0f, -1.0f, -1.0f),
-    Vector3(-1.0f, 1.0f, 1.0f),   Vector3(-1.0f, -1.0f, 1.0f),  Vector3(1.0f, -1.0f, 1.0f),  Vector3(1.0f, 1.0f, 1.0f),  Vector3(1.0f, -1.0f, -1.0f),  Vector3(1.0f, 1.0f, -1.0f),
-    Vector3(1.0f, -1.0f, -1.0f),  Vector3(1.0f, 1.0f, 1.0f),    Vector3(1.0f, -1.0f, 1.0f),  Vector3(1.0f, 1.0f, 1.0f),  Vector3(1.0f, 1.0f, -1.0f),   Vector3(-1.0f, 1.0f, -1.0f),
-    Vector3(1.0f, 1.0f, 1.0f),    Vector3(-1.0f, 1.0f, -1.0f),  Vector3(-1.0f, 1.0f, 1.0f),  Vector3(1.0f, 1.0f, 1.0f),  Vector3(-1.0f, 1.0f, 1.0f),   Vector3(1.0f, -1.0f, 1.0f)};
+static std::vector<Vector3> const gSolidBoxMesh = { Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, 1.0f),  Vector3(-1.0f, 1.0f, 1.0f),   Vector3(1.0f, 1.0f, -1.0f),  Vector3(-1.0f, -1.0f, -1.0f),
+                                                    Vector3(-1.0f, 1.0f, -1.0f),  Vector3(1.0f, -1.0f, 1.0f),   Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
+                                                    Vector3(1.0f, -1.0f, -1.0f),  Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f),  Vector3(-1.0f, 1.0f, -1.0f),
+                                                    Vector3(1.0f, -1.0f, 1.0f),   Vector3(-1.0f, -1.0f, 1.0f),  Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f),  Vector3(-1.0f, -1.0f, 1.0f),
+                                                    Vector3(1.0f, -1.0f, 1.0f),   Vector3(1.0f, 1.0f, 1.0f),    Vector3(1.0f, -1.0f, -1.0f),  Vector3(1.0f, 1.0f, -1.0f),  Vector3(1.0f, -1.0f, -1.0f),
+                                                    Vector3(1.0f, 1.0f, 1.0f),    Vector3(1.0f, -1.0f, 1.0f),   Vector3(1.0f, 1.0f, 1.0f),    Vector3(1.0f, 1.0f, -1.0f),  Vector3(-1.0f, 1.0f, -1.0f),
+                                                    Vector3(1.0f, 1.0f, 1.0f),    Vector3(-1.0f, 1.0f, -1.0f),  Vector3(-1.0f, 1.0f, 1.0f),   Vector3(1.0f, 1.0f, 1.0f),   Vector3(-1.0f, 1.0f, 1.0f),
+                                                    Vector3(1.0f, -1.0f, 1.0f) };
 
 class DebugPass
 {
 private:
+
     iVector2 m_ViewportSize;
 
     HShader m_DebugLineShader;
@@ -90,6 +92,7 @@ private:
     GizmoType m_HoveredGizmo;
 
 public:
+
     DebugPass(iVector2 const& viewportSize);
     ~DebugPass();
 

@@ -3,9 +3,9 @@
 #include "GameObject.h"
 #include "MeshRenderer.h"
 
-const Vector3 Transform::worldForward{0, 0, 1};
-const Vector3 Transform::worldUpward{0, 1, 0};
-const Vector3 Transform::worldRight{1, 0, 0};
+const Vector3 Transform::worldForward { 0, 0, 1 };
+const Vector3 Transform::worldUpward { 0, 1, 0 };
+const Vector3 Transform::worldRight { 1, 0, 0 };
 
 Transform::Transform(GameObject* parentObject)
     : IComponent(parentObject, "Transform")
@@ -116,7 +116,7 @@ void Transform::OnUpdate(float dt)
     if (!change)
     {
         m_deltaPos = m_WorldPosition;
-        parentMat = Matrix4{}.Identity();
+        parentMat = Matrix4 {}.Identity();
         if (m_OwnerObject->GetParentObject())
         {
             auto pTrans = m_OwnerObject->GetParentLayer()->GetObjectById(m_OwnerObject->GetParentObject())->GetComponent<Transform>();
@@ -138,7 +138,7 @@ void Transform::OnUpdate(float dt)
         {
             auto mat = pTrans->GetWorldTransformMatrix();
             // std::cout << m_defaultPos[0] << " " << m_defaultPos[1] << " " << m_defaultPos[2] << std::endl;
-            Vector4 pos{m_defaultPos.x, m_defaultPos.y, m_defaultPos.z, 1};
+            Vector4 pos { m_defaultPos.x, m_defaultPos.y, m_defaultPos.z, 1 };
             if (!lambda(pTrans->GetWorldPosition(), parentPos) || !lambda(pTrans->GetWorldRotation(), parentRot) || !lambda(pTrans->GetWorldScale(), parentScale))
             {
                 parentMat = mat;
@@ -159,7 +159,7 @@ void Transform::OnUpdate(float dt)
             else if (!lambda(m_WorldPosition, m_deltaPos))
             {
                 // Vector3 m_diff = m_WorldPosition - m_deltaPos;
-                Vector4 tmp{m_WorldPosition.x, m_WorldPosition.y, m_WorldPosition.z, 1};
+                Vector4 tmp { m_WorldPosition.x, m_WorldPosition.y, m_WorldPosition.z, 1 };
                 auto r = mat.Invert() * tmp;
                 m_defaultPos.x = r.x;
                 m_defaultPos.y = r.y;
@@ -216,35 +216,35 @@ Matrix4 Transform::GetWorldTransformMatrix()
 
 Vector3 Transform::GetForwardVector() const
 {
-    Vector4 result{worldForward, 0};
+    Vector4 result { worldForward, 0 };
 
     result = Matrix4::RotateX(m_WorldRotation.x) * result;
     result = Matrix4::RotateY(m_WorldRotation.y) * result;
     result = Matrix4::RotateZ(m_WorldRotation.z) * result;
 
-    return Vector3{result.x, result.y, result.z}.Normalize();
+    return Vector3 { result.x, result.y, result.z }.Normalize();
 }
 
 Vector3 Transform::GetRightVector() const
 {
-    Vector4 result{worldRight, 0};
+    Vector4 result { worldRight, 0 };
 
     result = Matrix4::RotateX(m_WorldRotation.x) * result;
     result = Matrix4::RotateY(m_WorldRotation.y) * result;
     result = Matrix4::RotateZ(m_WorldRotation.z) * result;
 
-    return Vector3{result.x, result.y, result.z}.Normalize();
+    return Vector3 { result.x, result.y, result.z }.Normalize();
 }
 
 Vector3 Transform::GetUpwardVector() const
 {
-    Vector4 result{worldUpward, 0};
+    Vector4 result { worldUpward, 0 };
 
     result = Matrix4::RotateX(m_WorldRotation.x) * result;
     result = Matrix4::RotateY(m_WorldRotation.y) * result;
     result = Matrix4::RotateZ(m_WorldRotation.z) * result;
 
-    return Vector3{result.x, result.y, result.z}.Normalize();
+    return Vector3 { result.x, result.y, result.z }.Normalize();
 }
 
 // Quaternion Transform::GetOrientation() const

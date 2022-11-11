@@ -4,14 +4,17 @@
 
 namespace PE
 {
-    template <typename T> class Vector
+    template <typename T>
+    class Vector
     {
     public:
+
         using difference_type = std::ptrdiff_t;
         // Vector Iterator
         class iterator
         {
         public:
+
             // Iterator traits
             using value_type = T;
             using pointer = T*;
@@ -107,6 +110,7 @@ namespace PE
             T* Ptr() const { return &(m_Buf[m_CurrentIndex]); }
 
         private:
+
             size_t m_CurrentIndex;
             T* m_Buf;
             size_t m_Size;
@@ -147,6 +151,7 @@ namespace PE
         void* Start() { return m_Data; }
 
     private:
+
         void* m_Data;
         MemoryAllocator& m_Memallocator;
         size_t m_Size;
@@ -176,7 +181,8 @@ namespace PE
         rhs.m_Capacity = rhs.m_Size = 0;
     }
 
-    template <typename T> Vector<T>& Vector<T>::operator=(const Vector<T>& rhs)
+    template <typename T>
+    Vector<T>& Vector<T>::operator=(const Vector<T>& rhs)
     {
         if (rhs.m_Size > 0)
         {
@@ -202,7 +208,8 @@ namespace PE
         return *this;
     }
 
-    template <typename T> Vector<T>& Vector<T>::operator=(Vector<T>&& rhs) noexcept
+    template <typename T>
+    Vector<T>& Vector<T>::operator=(Vector<T>&& rhs) noexcept
     {
         std::swap(m_Data, rhs.m_Data);
         std::swap(m_Memallocator, rhs.m_Memallocator);
@@ -211,7 +218,8 @@ namespace PE
         return *this;
     }
 
-    template <typename T> Vector<T>::~Vector()
+    template <typename T>
+    Vector<T>::~Vector()
     {
         T* items = static_cast<T*>(m_Data);
         for (size_t i = 0; i < m_Size; i++)
@@ -223,27 +231,46 @@ namespace PE
     }
 
     // operators
-    template <typename T> T& Vector<T>::operator[](const uint index)
+    template <typename T>
+    T& Vector<T>::operator[](const uint index)
     {
         assert(index < m_Size);
         return (static_cast<T*>(m_Data)[index]);
     }
 
-    template <typename T> const T& Vector<T>::operator[](const uint index) const
+    template <typename T>
+    const T& Vector<T>::operator[](const uint index) const
     {
         assert(index < m_Size);
         return (static_cast<T*>(m_Data)[index]);
     }
 
-    template <typename T> T& Vector<T>::front() { return (static_cast<T*>(m_Data)[0]); }
+    template <typename T>
+    T& Vector<T>::front()
+    {
+        return (static_cast<T*>(m_Data)[0]);
+    }
 
-    template <typename T> const T& Vector<T>::front() const { return (static_cast<T*>(m_Data)[0]); }
+    template <typename T>
+    const T& Vector<T>::front() const
+    {
+        return (static_cast<T*>(m_Data)[0]);
+    }
 
-    template <typename T> T& Vector<T>::back() { return (static_cast<T*>(m_Data)[m_Size - 1]); }
+    template <typename T>
+    T& Vector<T>::back()
+    {
+        return (static_cast<T*>(m_Data)[m_Size - 1]);
+    }
 
-    template <typename T> const T& Vector<T>::back() const { return (static_cast<T*>(m_Data)[m_Size - 1]); }
+    template <typename T>
+    const T& Vector<T>::back() const
+    {
+        return (static_cast<T*>(m_Data)[m_Size - 1]);
+    }
     // funcs
-    template <typename T> typename Vector<T>::iterator Vector<T>::insert(iterator pos, const T& val)
+    template <typename T>
+    typename Vector<T>::iterator Vector<T>::insert(iterator pos, const T& val)
     {
         size_t offset = pos.Index();
         if (pos.Ptr() == &(static_cast<T*>(m_Data)[m_Size]))
@@ -284,7 +311,8 @@ namespace PE
         return pos;
     }
 
-    template <typename T> void Vector<T>::push_back(T&& val)
+    template <typename T>
+    void Vector<T>::push_back(T&& val)
     {
         // Increase cap
         if (m_Size == m_Capacity)
@@ -301,7 +329,8 @@ namespace PE
         }
     }
 
-    template <typename T> void Vector<T>::push_back(const T& val)
+    template <typename T>
+    void Vector<T>::push_back(const T& val)
     {
         // Increase cap
         if (m_Size == m_Capacity)
@@ -318,14 +347,16 @@ namespace PE
         }
     }
 
-    template <typename T> void Vector<T>::pop_back()
+    template <typename T>
+    void Vector<T>::pop_back()
     {
         T& lastObj = static_cast<T*>(m_Data)[m_Size - 1];
         (lastObj).~T();
         m_Size--;
     }
 
-    template <typename T> void Vector<T>::reserve(size_t capacity)
+    template <typename T>
+    void Vector<T>::reserve(size_t capacity)
     {
         if (capacity <= m_Capacity) return;
 

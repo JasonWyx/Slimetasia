@@ -11,9 +11,14 @@
 // ===========================================================================|
 // HELPER                                                                     |
 // ===========================================================================|
-template <typename T> const char* GetTypeName();
+template <typename T>
+const char* GetTypeName();
 #define DEFINE_TYPE_NAME(type, name) \
-    template <> const char* GetTypeName<type>() { return name; }
+    template <>                      \
+    const char* GetTypeName<type>()  \
+    {                                \
+        return name;                 \
+    }
 
 // ===========================================================================|
 // PLAYERPREF                                                                 |
@@ -24,15 +29,16 @@ class PlayerPref
     struct TypeBase
     {
         std::string type_;
-        virtual ~TypeBase(){};
+        virtual ~TypeBase() {};
     };
 
-    template <typename t> struct Type : public TypeBase
+    template <typename t>
+    struct Type : public TypeBase
     {
         t variable_;
 
-        Type(t variable = t{})
-            : variable_{variable} {};
+        Type(t variable = t {})
+            : variable_ { variable } {};
     };
 
     /// Variables ---------------------------------------------------------------
@@ -45,10 +51,12 @@ class PlayerPref
 
     /// Functions ---------------------------------------------------------------
 public:
+
     PlayerPref();
     ~PlayerPref();
 
-    template <typename t> static bool SaveVariable(std::string name, t value, std::string tableName = "Variables")
+    template <typename t>
+    static bool SaveVariable(std::string name, t value, std::string tableName = "Variables")
     {
         Deserialize();
 
@@ -72,7 +80,8 @@ public:
         return true;
     }
 
-    template <typename t> static t GetVariable(std::string name, std::string tableName = "Variables")
+    template <typename t>
+    static t GetVariable(std::string name, std::string tableName = "Variables")
     {
         Deserialize();
 
@@ -87,7 +96,7 @@ public:
             }
         }
 
-        return t{};
+        return t {};
     }
 
     static void DeleteAllVariables();

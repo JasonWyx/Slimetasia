@@ -20,5 +20,6 @@ class SceneRenderer : public ISystem<SceneRenderer>
     void RenderLayer();
 
 public:
+
     void Update(float dt);
 };

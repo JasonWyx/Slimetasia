@@ -5,7 +5,7 @@
 #include "PhysicsSystem.h"
 
 RigidbodyComponent::RigidbodyComponent(GameObject* parentObject)
-    : IComponent{parentObject, "RigidbodyComponent"}
+    : IComponent { parentObject, "RigidbodyComponent" }
     ,
     // m_Active(true),
     m_LinearVelocity(0.f, 0.f, 0.f)

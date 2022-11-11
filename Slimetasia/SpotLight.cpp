@@ -71,7 +71,7 @@ void SpotLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
 }
 
@@ -80,7 +80,7 @@ std::vector<Matrix4> SpotLight::GetLightViewProjMatricies()
     Vector3 dir = m_Direction.Normalized();
     Vector3 up = dir.y == 1 ? Vector3(0.0f, 0.0f, -1.0f) : dir.y == -1 ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
 
-    return std::vector<Matrix4>{Matrix4::Perspective(m_OuterAngle * 2, 1, 0.5, GetShadowDistance()) * Matrix4::LookAt(m_Transform->GetWorldPosition(), m_Transform->GetWorldPosition() + dir, up)};
+    return std::vector<Matrix4> { Matrix4::Perspective(m_OuterAngle * 2, 1, 0.5, GetShadowDistance()) * Matrix4::LookAt(m_Transform->GetWorldPosition(), m_Transform->GetWorldPosition() + dir, up) };
 }
 
 REFLECT_INIT(SpotLight)

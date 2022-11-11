@@ -52,7 +52,7 @@ Renderer::Renderer(iVector2 const& viewportSize)
     glVertexArrayAttribBinding(m_ScreenQuadVAO, 1, 0);
     glVertexArrayAttribFormat(m_ScreenQuadVAO, 1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 3);
 
-    GLfloat bufferData[] = {-1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1};
+    GLfloat bufferData[] = { -1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1 };
 
     glNamedBufferStorage(m_ScreenQuadVBO, sizeof(bufferData), bufferData, 0);
 }
@@ -429,40 +429,40 @@ void Renderer::DrawCube(float w, Vector3 pos)
     Vector3 minPt(pos.x - halfWidth, pos.y - halfHeight, pos.z - halfDepth);
     Vector3 maxPt(pos.x + halfWidth, pos.y + halfHeight, pos.z + halfDepth);
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{maxPt.x, maxPt.y, minPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, minPt.y, maxPt.z});
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, minPt.z});
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{maxPt.x, maxPt.y, minPt.z});
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, minPt.z});
-
-    pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{maxPt.x, minPt.y, minPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{minPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, minPt.z});
+    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, maxPt.z});
-    pts.emplace_back(Vector3{minPt.x, minPt.y, maxPt.z});
+    pts.emplace_back(minPt);
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, minPt.z});
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, maxPt.y, minPt.z});
-    pts.emplace_back(Vector3{maxPt.x, maxPt.y, minPt.z});
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+
+    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
 
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
 
@@ -480,15 +480,15 @@ void Renderer::Draw2DBox(float w, float h, Vector3 pos, Color4 col)
     Vector3 minPt(pos.x - halfWidth, pos.y, pos.z - halfDepth);
     Vector3 maxPt(pos.x + halfWidth, pos.y, pos.z + halfDepth);
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3{maxPt.x, pos.y, minPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, pos.y, minPt.z });
 
-    pts.emplace_back(Vector3{maxPt.x, pos.y, minPt.z});
+    pts.emplace_back(Vector3 { maxPt.x, pos.y, minPt.z });
     pts.emplace_back(minPt);
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3{minPt.x, pos.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, pos.y, maxPt.z });
 
-    pts.emplace_back(Vector3{minPt.x, pos.y, maxPt.z});
+    pts.emplace_back(Vector3 { minPt.x, pos.y, maxPt.z });
     pts.emplace_back(maxPt);
 
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();

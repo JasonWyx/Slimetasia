@@ -1,7 +1,7 @@
 #include "ResourceImporter.h"
 
 #include "CorePrerequisites.h"
-//#include <filesystem>
+// #include <filesystem>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
@@ -45,7 +45,7 @@ void ResourceImporter::ImportTexture(const std::vector<std::filesystem::path>& f
     }
     else
     {
-        std::vector<char const*> faceTags = {"_ft", "_bk", "_up", "_dn", "_rt", "_lf"};
+        std::vector<char const*> faceTags = { "_ft", "_bk", "_up", "_dn", "_rt", "_lf" };
         std::vector<int> faceIndex(6);
 
         for (std::size_t i = 0; i < filePaths.size(); ++i)
@@ -82,7 +82,8 @@ void ResourceImporter::ImportTexture(const std::vector<std::filesystem::path>& f
             }
         }
 
-        std::vector<std::filesystem::path> sortedFaces{filePaths[faceIndex[0]], filePaths[faceIndex[1]], filePaths[faceIndex[2]], filePaths[faceIndex[3]], filePaths[faceIndex[4]], filePaths[faceIndex[5]]};
+        std::vector<std::filesystem::path> sortedFaces { filePaths[faceIndex[0]], filePaths[faceIndex[1]], filePaths[faceIndex[2]],
+                                                         filePaths[faceIndex[3]], filePaths[faceIndex[4]], filePaths[faceIndex[5]] };
 
         newTexture->ImportSkybox(sortedFaces);
     }

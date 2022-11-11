@@ -88,13 +88,15 @@ using ushort = unsigned short;
 
 namespace PE
 {
-    template <typename T> void hash2(size_t& seed, const T& val)
+    template <typename T>
+    void hash2(size_t& seed, const T& val)
     {
         std::hash<T> hasher;
         seed ^= hasher(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
-    template <typename Container> struct reverse_wrapper
+    template <typename Container>
+    struct reverse_wrapper
     {
         reverse_wrapper(Container& inp)
             : m_Container(inp)
@@ -104,17 +106,40 @@ namespace PE
         Container& m_Container;
     };
 
-    template <typename Container> auto begin(const reverse_wrapper<Container>& inp) -> decltype(std::rbegin(inp.mContainer)) { return std::rbegin(inp.mContainer); }
+    template <typename Container>
+    auto begin(const reverse_wrapper<Container>& inp) -> decltype(std::rbegin(inp.mContainer))
+    {
+        return std::rbegin(inp.mContainer);
+    }
 
-    template <typename Container> auto cbegin(const reverse_wrapper<Container>& inp) -> decltype(std::crbegin(inp.mContainer)) { return std::crbegin(inp.mContainer); }
+    template <typename Container>
+    auto cbegin(const reverse_wrapper<Container>& inp) -> decltype(std::crbegin(inp.mContainer))
+    {
+        return std::crbegin(inp.mContainer);
+    }
 
-    template <typename Container> auto end(const reverse_wrapper<Container>& inp) -> decltype(std::rend(inp.mContainer)) { return std::rend(inp.mContainer); }
+    template <typename Container>
+    auto end(const reverse_wrapper<Container>& inp) -> decltype(std::rend(inp.mContainer))
+    {
+        return std::rend(inp.mContainer);
+    }
 
-    template <typename Container> auto cend(const reverse_wrapper<Container>& inp) -> decltype(std::crend(inp.mContainer)) { return std::crend(inp.mContainer); }
+    template <typename Container>
+    auto cend(const reverse_wrapper<Container>& inp) -> decltype(std::crend(inp.mContainer))
+    {
+        return std::crend(inp.mContainer);
+    }
 
-    template <typename Container> static reverse_wrapper<Container> Reverse(Container&& cont) { return reverse_wrapper<Container>(std::forward<Container>(cont)); }
+    template <typename Container>
+    static reverse_wrapper<Container> Reverse(Container&& cont)
+    {
+        return reverse_wrapper<Container>(std::forward<Container>(cont));
+    }
 
-    inline bool approxEqual(const float& a, const float& b, const float& epsilon = EPSILON) { return (std::fabs(a - b) < epsilon); }
+    inline bool approxEqual(const float& a, const float& b, const float& epsilon = EPSILON)
+    {
+        return (std::fabs(a - b) < epsilon);
+    }
 
     // Function to test if two vectors are (almost) equal
     inline bool approxEqual(const Vector3& vec1, const Vector3& vec2, const float& epsilon)
@@ -123,15 +148,31 @@ namespace PE
     }
 
     // Function to test if two vectors are (almost) equal
-    inline bool approxEqual(const Vector2& vec1, const Vector2& vec2, const float& epsilon) { return approxEqual(vec1.x, vec2.x, epsilon) && approxEqual(vec1.y, vec2.y, epsilon); }
+    inline bool approxEqual(const Vector2& vec1, const Vector2& vec2, const float& epsilon)
+    {
+        return approxEqual(vec1.x, vec2.x, epsilon) && approxEqual(vec1.y, vec2.y, epsilon);
+    }
 
-    template <typename T> bool AreVectorsParallel(const TVector3<T>& lhs, const TVector3<T>& rhs) { return lhs.Cross(rhs).SquareLength() < static_cast<T>(EPSILON); }
+    template <typename T>
+    bool AreVectorsParallel(const TVector3<T>& lhs, const TVector3<T>& rhs)
+    {
+        return lhs.Cross(rhs).SquareLength() < static_cast<T>(EPSILON);
+    }
 
-    template <typename T> bool AreVectorsOrthogonal(const TVector3<T>& lhs, const TVector3<T>& rhs) { return std::abs(lhs.Dot(rhs)) < static_cast<T>(EPSILON); }
+    template <typename T>
+    bool AreVectorsOrthogonal(const TVector3<T>& lhs, const TVector3<T>& rhs)
+    {
+        return std::abs(lhs.Dot(rhs)) < static_cast<T>(EPSILON);
+    }
 
-    template <typename T> T Clamp(const T& inp, const T& min, const T& max) { return inp < min ? min : inp > max ? max : inp; }
+    template <typename T>
+    T Clamp(const T& inp, const T& min, const T& max)
+    {
+        return inp < min ? min : inp > max ? max : inp;
+    }
 
-    template <typename T> TVector3<T> Clamp(const TVector3<T>& vec, const T& maxLength)
+    template <typename T>
+    TVector3<T> Clamp(const TVector3<T>& vec, const T& maxLength)
     {
         if (vec.SquareLength() > maxLength * maxLength)
         {
@@ -140,7 +181,8 @@ namespace PE
         return vec;
     }
 
-    template <typename T> Vector3 GetClosestPointOnSegment(const Vector3& segFirstPt, const Vector3& segSecondPt, const Vector3& point)
+    template <typename T>
+    Vector3 GetClosestPointOnSegment(const Vector3& segFirstPt, const Vector3& segSecondPt, const Vector3& point)
     {
         const Vector3 ab = segSecondPt - segFirstPt;
 
@@ -293,9 +335,15 @@ namespace PE
     }
 
     // Project a point onto a plane that is given by a point and its unit length normal
-    inline Vector3 projectPointOntoPlane(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint) { return point - planeNormal.Dot(point - planePoint) * planeNormal; }
+    inline Vector3 projectPointOntoPlane(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint)
+    {
+        return point - planeNormal.Dot(point - planePoint) * planeNormal;
+    }
 
     // Return the distance between a point and a plane (the plane normal must be normalized)
-    inline float computePointToPlaneDistance(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint) { return planeNormal.Dot(point - planePoint); }
+    inline float computePointToPlaneDistance(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint)
+    {
+        return planeNormal.Dot(point - planePoint);
+    }
 
 }  // namespace PE

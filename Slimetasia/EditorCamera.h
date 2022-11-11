@@ -5,6 +5,7 @@
 class EditorCamera : public Camera
 {
 private:
+
     float m_Latitude;
     float m_Azimuth;
 
@@ -16,6 +17,7 @@ private:
     bool m_Update;
 
 public:
+
     EditorCamera(GameObject* parentObject);
     ~EditorCamera() = default;
 

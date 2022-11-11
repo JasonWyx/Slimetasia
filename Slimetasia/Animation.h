@@ -49,6 +49,7 @@ struct Animation
 class AnimationSet : public ResourceBase
 {
 public:
+
     AnimationSet(const std::string& resourceName = "AnimationSet", const std::filesystem::path& filepath = "");
     ~AnimationSet();
 
@@ -61,6 +62,7 @@ public:
     std::vector<std::string> const& GetAnimationNames() const;
 
 private:
+
     std::vector<Animation> m_Animations;
     std::map<std::string, unsigned> m_AnimationsMap;
     std::vector<std::string> m_AnimationsNames;

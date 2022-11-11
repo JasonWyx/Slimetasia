@@ -15,8 +15,8 @@ namespace
     // GLFW data
     GLFWwindow* g_Window = NULL;
     double g_Time = 0.0f;
-    bool g_MouseJustPressed[3] = {false, false, false};
-    GLFWcursor* g_MouseCursors[ImGuiMouseCursor_COUNT] = {0};
+    bool g_MouseJustPressed[3] = { false, false, false };
+    GLFWcursor* g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
 
     // OpenGL3 data
     char g_GlslVersion[32] = "#version 150";
@@ -26,9 +26,15 @@ namespace
     int g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
     unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
 
-    const char* GetClipboardText(void* user_data) { return glfwGetClipboardString((GLFWwindow*)user_data); }
+    const char* GetClipboardText(void* user_data)
+    {
+        return glfwGetClipboardString((GLFWwindow*)user_data);
+    }
 
-    void SetClipboardText(void* user_data, const char* text) { glfwSetClipboardString((GLFWwindow*)user_data, text); }
+    void SetClipboardText(void* user_data, const char* text)
+    {
+        glfwSetClipboardString((GLFWwindow*)user_data, text);
+    }
 
     void glfwMouseButtonCallback(GLFWwindow*, int button, int action, int /*mods*/)
     {
@@ -341,10 +347,10 @@ namespace ImGuiUtils
         // Setup viewport, orthographic projection matrix
         glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
         const float ortho_projection[4][4] = {
-            {2.0f / io.DisplaySize.x, 0.0f, 0.0f, 0.0f},
-            {0.0f, 2.0f / -io.DisplaySize.y, 0.0f, 0.0f},
-            {0.0f, 0.0f, -1.0f, 0.0f},
-            {-1.0f, 1.0f, 0.0f, 1.0f},
+            { 2.0f / io.DisplaySize.x, 0.0f, 0.0f, 0.0f },
+            { 0.0f, 2.0f / -io.DisplaySize.y, 0.0f, 0.0f },
+            { 0.0f, 0.0f, -1.0f, 0.0f },
+            { -1.0f, 1.0f, 0.0f, 1.0f },
         };
         glUseProgram(g_ShaderHandle);
         glUniform1i(g_AttribLocationTex, 0);
@@ -457,8 +463,8 @@ namespace ImGuiUtils
             "	Out_Color = Frag_Color * texture( Texture, Frag_UV.st);\n"
             "}\n";
 
-        const char* vertex_shader_with_version[2] = {g_GlslVersion, vertex_shader};
-        const char* fragment_shader_with_version[2] = {g_GlslVersion, fragment_shader};
+        const char* vertex_shader_with_version[2] = { g_GlslVersion, vertex_shader };
+        const char* fragment_shader_with_version[2] = { g_GlslVersion, fragment_shader };
 
         g_ShaderHandle = glCreateProgram();
         g_VertHandle = glCreateShader(GL_VERTEX_SHADER);

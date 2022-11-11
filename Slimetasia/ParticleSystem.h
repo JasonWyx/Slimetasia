@@ -46,7 +46,7 @@ struct ParticleData
     {
         generate(maxCount);
     }
-    ~ParticleData(){};
+    ~ParticleData() {};
     ParticleData(const ParticleData&) = delete;
     ParticleData& operator=(const ParticleData&) = delete;
     void generate(unsigned maxSize);
@@ -66,33 +66,40 @@ struct ParticleUpdater
 class TimeUpdater : public ParticleUpdater
 {
 public:
+
     virtual void update(float dt, ParticleData* p) override;
 };
 
 class EulerUpdater : public ParticleUpdater
 {
 public:
-    Vector3 m_GlobalAcceleration{};
+
+    Vector3 m_GlobalAcceleration {};
 
 public:
+
     virtual void update(float dt, ParticleData* p) override;
 };
 
 class FloorUpdater : public ParticleUpdater
 {
 public:
-    float m_FloorY{0.0f};
-    float m_BounceFactor{0.5f};
+
+    float m_FloorY { 0.0f };
+    float m_BounceFactor { 0.5f };
 
 public:
+
     virtual void update(float dt, ParticleData* p) override;
 };
 
 class AttractorUpdater : public ParticleUpdater
 {
 protected:
+
     std::vector<Attractor*> m_Attractors;  // .w is force
 public:
+
     virtual void update(float dt, ParticleData* p) override;
 
     size_t collectionSize() const { return m_Attractors.size(); }
@@ -106,6 +113,7 @@ class ColorUpdater : public ParticleUpdater
     Vector4 mix(const Vector4& x, const Vector4& y, const float& a);
 
 public:
+
     virtual void update(float dt, ParticleData* p) override;
 };
 
@@ -118,6 +126,7 @@ class ParticleSystem : public ISystem<ParticleSystem>
     AttractorUpdater* m_AttractorUpdator;
 
 public:
+
     explicit ParticleSystem(unsigned maxCount);
     ~ParticleSystem();
 
@@ -144,6 +153,7 @@ public:
 class ParticleEmitter : public IComponent
 {
 public:
+
     Vector4 m_StartMinColor;
     Vector4 m_StartMaxColor;
     Vector4 m_EndMinColor;
@@ -153,7 +163,7 @@ public:
     // Vector4  m_color;
     HTexture m_Texture;
     HTexture m_EndTexture;
-    float m_TextureFade{1.0f};
+    float m_TextureFade { 1.0f };
     float m_ElapsedTime;
     float m_Gravity;
     bool m_IsAffectedByAttractor;
@@ -161,9 +171,10 @@ public:
     bool m_IsAffectedByAllAttractor;
     float m_FloorHeight;
     std::vector<unsigned> m_Attractors;
-    float m_EmissionRate{0.0};
+    float m_EmissionRate { 0.0 };
 
 public:
+
     void SetTexture(HTexture t) { m_Texture = t; }
 
     HTexture GetTexture() const { return m_Texture; }
@@ -187,7 +198,7 @@ public:
     }
 
     // calls all the generators and at the end it activates (wakes) particle
-    virtual void emit(float dt, ParticleData* p){};
+    virtual void emit(float dt, ParticleData* p) {};
     virtual void RevalidateResources() override
     {
         // m_texture.Validate();
@@ -199,6 +210,7 @@ public:
 class BoxParticleEmitter : public ParticleEmitter
 {
 public:
+
     Vector3 m_Position;
     Vector3 m_StartPositionOffset;
     Vector3 m_MinVelocity;
@@ -207,10 +219,12 @@ public:
     float m_MaxTime;
 
 private:
+
     Vector4 linearRand(const Vector4& Min, const Vector4& Max) const;
     float linearRand(const float& Min, const float& Max) const;
 
 public:
+
     BoxParticleEmitter(GameObject* parentObject)
         : ParticleEmitter(parentObject, "BoxParticleEmitter")
         , m_Position()
@@ -241,6 +255,7 @@ class CircleParticleEmitter : public ParticleEmitter
     float linearRand(const float& Min, const float& Max) const;
 
 public:
+
     CircleParticleEmitter(GameObject* parentObject)
         : ParticleEmitter(parentObject, "CircleParticleEmitter")
         , m_Center()
@@ -263,6 +278,7 @@ class Attractor : public IComponent
     Transform* m_Transform;
 
 public:
+
     float m_Force;
 
     Attractor(GameObject* parentObject, std::string n = "Attractor")

@@ -8,6 +8,7 @@
 class PostProcessPass
 {
 public:
+
     PostProcessPass(iVector2 const& viewportSize);
     ~PostProcessPass();
 
@@ -15,6 +16,7 @@ public:
     void SetViewportSize(iVector2 const& viewportSize);
 
 private:
+
     HShader m_BasicDrawShader;
     HShader m_BloomPrePassShader;
     HShader m_GausBlurShader;

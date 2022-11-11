@@ -6,6 +6,7 @@
 class Transform : public IComponent
 {
 public:
+
     // Quaternion m_Orientation;
 
     Vector3 m_LocalPosition;
@@ -17,6 +18,7 @@ public:
     Vector3 m_WorldScale;
 
 private:
+
     Vector3 m_defaultPos;
     Vector3 m_deltaPos;
 
@@ -31,6 +33,7 @@ private:
     Matrix4 parentMat;
 
 public:
+
     static const Vector3 worldForward;
     static const Vector3 worldUpward;
     static const Vector3 worldRight;

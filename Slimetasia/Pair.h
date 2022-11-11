@@ -5,9 +5,11 @@
 
 namespace PE
 {
-    template <typename T, typename U> class pair
+    template <typename T, typename U>
+    class pair
     {
     public:
+
         pair(const T& first, const U& second)
             : m_First(first)
             , m_Second(second)
@@ -38,11 +40,16 @@ namespace PE
         void Swap(pair& rhs);
 
     private:
+
         T m_First;
         U m_Second;
     };
 
-    template <typename T, typename U> pair<T, U>& Makepair(const T& first, const U& second) { return pair(first, second); }
+    template <typename T, typename U>
+    pair<T, U>& Makepair(const T& first, const U& second)
+    {
+        return pair(first, second);
+    }
 
     /*template<size_t I, typename T, typename U>
     typename tuple_elem<I, PE::pair<T, U>>::type& get(PE::pair<T, U>& inp)
@@ -102,13 +109,15 @@ namespace PE
         return inp.Second;
     }*/
 
-    template <typename T, typename U> void pair<T, U>::Swap(pair& rhs)
+    template <typename T, typename U>
+    void pair<T, U>::Swap(pair& rhs)
     {
         std::swap(m_First, rhs.m_First);
         std::swap(m_Second, rhs.m_Second);
     }
 
-    template <typename T, typename U> pair<T, U>& pair<T, U>::operator=(const pair& rhs)
+    template <typename T, typename U>
+    pair<T, U>& pair<T, U>::operator=(const pair& rhs)
     {
         if (this != &rhs)
         {
@@ -118,22 +127,47 @@ namespace PE
         return *this;
     }
 
-    template <typename T, typename U> pair<T, U>& pair<T, U>::operator=(pair&& rhs)
+    template <typename T, typename U>
+    pair<T, U>& pair<T, U>::operator=(pair&& rhs)
     {
         if (this != &rhs) *this = std::move(rhs);
 
         return *this;
     }
 
-    template <typename T, typename U> bool pair<T, U>::operator<(const pair& rhs) { return m_First < rhs.m_First; }
+    template <typename T, typename U>
+    bool pair<T, U>::operator<(const pair& rhs)
+    {
+        return m_First < rhs.m_First;
+    }
 
-    template <typename T, typename U> bool pair<T, U>::operator<=(const pair& rhs) { return m_First <= rhs.m_First; }
+    template <typename T, typename U>
+    bool pair<T, U>::operator<=(const pair& rhs)
+    {
+        return m_First <= rhs.m_First;
+    }
 
-    template <typename T, typename U> bool pair<T, U>::operator>(const pair& rhs) { return m_First > rhs.m_First; }
+    template <typename T, typename U>
+    bool pair<T, U>::operator>(const pair& rhs)
+    {
+        return m_First > rhs.m_First;
+    }
 
-    template <typename T, typename U> bool pair<T, U>::operator>=(const pair& rhs) { return m_First >= rhs.m_First; }
+    template <typename T, typename U>
+    bool pair<T, U>::operator>=(const pair& rhs)
+    {
+        return m_First >= rhs.m_First;
+    }
 
-    template <typename T, typename U> bool pair<T, U>::operator==(const pair& rhs) { return m_First == rhs.m_First; }
+    template <typename T, typename U>
+    bool pair<T, U>::operator==(const pair& rhs)
+    {
+        return m_First == rhs.m_First;
+    }
 
-    template <typename T, typename U> bool pair<T, U>::operator!=(const pair& rhs) { return m_First != rhs.m_First; }
+    template <typename T, typename U>
+    bool pair<T, U>::operator!=(const pair& rhs)
+    {
+        return m_First != rhs.m_First;
+    }
 }  // namespace PE

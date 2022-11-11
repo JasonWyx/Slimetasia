@@ -38,7 +38,7 @@ void DirectionalLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
 }
 
@@ -54,8 +54,8 @@ std::vector<Matrix4> DirectionalLight::GetLightViewProjMatricies()
     Vector3 dirNorm = m_Direction.Normalized();
     Vector3 up = dirNorm.y == 1 ? Vector3(0.0f, 0.0f, -1.0f) : dirNorm.y == -1 ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
 
-    return std::vector<Matrix4>{Matrix4::SetFrustumOrtho(-m_ShadowDistance, m_ShadowDistance, -m_ShadowDistance, m_ShadowDistance, -m_ShadowDistance, m_ShadowDistance) *
-                                Matrix4::LookAt(pos, pos + dirNorm, up)};
+    return std::vector<Matrix4> { Matrix4::SetFrustumOrtho(-m_ShadowDistance, m_ShadowDistance, -m_ShadowDistance, m_ShadowDistance, -m_ShadowDistance, m_ShadowDistance) *
+                                  Matrix4::LookAt(pos, pos + dirNorm, up) };
 }
 
 REFLECT_VIRTUAL(LightBase)

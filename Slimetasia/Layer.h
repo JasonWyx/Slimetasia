@@ -33,6 +33,7 @@ class Layer
     RenderLayer m_RenderLayer;
 
 public:
+
     Layer(Scene* parentScene, unsigned id, std::string const& layerName, bool createCamera, unsigned objectPoolSize = 1 << 12);
     ~Layer();
 

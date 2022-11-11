@@ -20,6 +20,7 @@
 class Renderer : public ISystem<Renderer>
 {
 private:
+
     friend class ISystem<Renderer>;
 
     Renderer(iVector2 const& viewportSize);
@@ -60,6 +61,7 @@ private:
     void BuildRenderTargets();
 
 public:
+
     void Update(float dt);
 
     void DrawDebug(unsigned layerId, std::vector<Vector3> const& geometry, Color4 color, DebugPrimitiveType type);

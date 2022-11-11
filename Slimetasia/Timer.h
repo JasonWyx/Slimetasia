@@ -7,6 +7,7 @@ using Clock = std::chrono::high_resolution_clock;
 class Timer
 {
 private:
+
     Clock::time_point m_StartTime;
     Clock::time_point m_CurrentTime;
     Clock::time_point m_PreviousTime;
@@ -24,6 +25,7 @@ private:
     bool m_IsPlayModePause;
 
 public:
+
     Timer();
     Timer(const float& t);  // Constructs with countdown initialized
 

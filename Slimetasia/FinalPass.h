@@ -7,6 +7,7 @@
 class FinalPass
 {
 public:
+
     FinalPass(iVector2 const& viewportSize);
     ~FinalPass();
 
@@ -16,6 +17,7 @@ public:
     GLuint GetFramebuffer() const;
 
 private:
+
     HShader m_FinalPassShader;
     GLuint m_VertexArray;
     GLuint m_VertexBuffer;

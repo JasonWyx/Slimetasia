@@ -84,25 +84,25 @@ ParticleSystem::ParticleSystem(unsigned maxCount)
         m_Particles.m_Color[i] = Vector4(1.f, 1.f, 1.f, 1.f);
 
     // Time Updater
-    auto time_updater = new TimeUpdater{};
+    auto time_updater = new TimeUpdater {};
     addUpdater(time_updater);
 
     // Attractor Updater
-    m_AttractorUpdator = new AttractorUpdater{};
+    m_AttractorUpdator = new AttractorUpdater {};
     // m_attractorUpdater->add(Vector4{ 2,0,0,1000.f });
     addUpdater(m_AttractorUpdator);
 
     // Euler Updater
-    auto euler_updater = new EulerUpdater{};
-    euler_updater->m_GlobalAcceleration = Vector3{0.f, 0.f, 0.f};
+    auto euler_updater = new EulerUpdater {};
+    euler_updater->m_GlobalAcceleration = Vector3 { 0.f, 0.f, 0.f };
     addUpdater(euler_updater);
 
     // color updater
-    auto color_updater = new ColorUpdater{};
+    auto color_updater = new ColorUpdater {};
     addUpdater(color_updater);
 
     // Floor Updater
-    auto floor_updater = new FloorUpdater{};
+    auto floor_updater = new FloorUpdater {};
     addUpdater(floor_updater);
 }
 
@@ -182,10 +182,10 @@ void BoxParticleEmitter::emit(float dt, ParticleData* p)
 
     m_ElapsedTime = fmodf(m_ElapsedTime, (1.0f / m_EmissionRate));
 
-    Vector4 posMin{m_Position.x - m_StartPositionOffset.x, m_Position.y - m_StartPositionOffset.y, m_Position.z - m_StartPositionOffset.z, 1.0};
-    Vector4 posMax{m_Position.x + m_StartPositionOffset.x, m_Position.y + m_StartPositionOffset.y, m_Position.z + m_StartPositionOffset.z, 1.0};
-    Vector4 velMin{m_MinVelocity, 0.f};
-    Vector4 velMax{m_MaxVelocity, 0.f};
+    Vector4 posMin { m_Position.x - m_StartPositionOffset.x, m_Position.y - m_StartPositionOffset.y, m_Position.z - m_StartPositionOffset.z, 1.0 };
+    Vector4 posMax { m_Position.x + m_StartPositionOffset.x, m_Position.y + m_StartPositionOffset.y, m_Position.z + m_StartPositionOffset.z, 1.0 };
+    Vector4 velMin { m_MinVelocity, 0.f };
+    Vector4 velMax { m_MaxVelocity, 0.f };
 
     if (!trans)
         for (unsigned i = startId; i < endId; ++i)
@@ -302,7 +302,7 @@ void TimeUpdater::update(float dt, ParticleData* p)
 
 void EulerUpdater::update(float dt, ParticleData* p)
 {
-    const Vector4 globalA{dt * m_GlobalAcceleration.x, dt * m_GlobalAcceleration.y, dt * m_GlobalAcceleration.z, 0.0};
+    const Vector4 globalA { dt * m_GlobalAcceleration.x, dt * m_GlobalAcceleration.y, dt * m_GlobalAcceleration.z, 0.0 };
     const float localDT = (float)dt;
 
     const unsigned int endId = p->m_CountAlive;
@@ -421,8 +421,8 @@ void CircleParticleEmitter::emit(float dt, ParticleData* p)
 
     m_ElapsedTime = fmodf(m_ElapsedTime, (1.0f / m_EmissionRate));
 
-    Vector4 velMin{m_MinVelocity, 0.f};
-    Vector4 velMax{m_MaxVelocity, 0.f};
+    Vector4 velMin { m_MinVelocity, 0.f };
+    Vector4 velMax { m_MaxVelocity, 0.f };
 
     if (!trans)
         for (size_t i = startId; i < endId; ++i)

@@ -22,6 +22,7 @@ class AudioEmitter : public IComponent
 
     /// Variables ---------------------------------------------------------------
 private:
+
     AudioSystem::ChannelInfo info_;  /// Info regarding what the emitter is playing
 
     bool fadingOut_;      /// Is the emitter fading out
@@ -33,6 +34,7 @@ private:
 
     /// Functions ---------------------------------------------------------------
 public:
+
     AudioEmitter(GameObject* parentObject);
     ~AudioEmitter();
 

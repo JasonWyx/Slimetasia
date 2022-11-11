@@ -5,7 +5,7 @@
 #include "Renderer.h"
 
 SphereCollider::SphereCollider(GameObject* parentObject, const float& radius)
-    : CollisionMesh_3D{parentObject, "SphereCollider", eCollisionShapeType_SPHERE, eCollisionShape_SPHERE, radius}
+    : CollisionMesh_3D { parentObject, "SphereCollider", eCollisionShapeType_SPHERE, eCollisionShape_SPHERE, radius }
 {
 }
 
@@ -18,7 +18,7 @@ void SphereCollider::DebugDraw()
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
     if (pid != currentLayerID) return;
     std::vector<Vector3> pts;
-    auto u = Vector3{1.f, 0.f, 0.f}, v = Vector3{0.f, 1.f, 0.f}, w = Vector3{0.f, 0.f, 1.f};
+    auto u = Vector3 { 1.f, 0.f, 0.f }, v = Vector3 { 0.f, 1.f, 0.f }, w = Vector3 { 0.f, 0.f, 1.f };
     const auto mypos = GetPosition() + m_offset;
     // drawing the disc.
     for (auto i = 0u, j = 0u; i < discpoints; ++i)

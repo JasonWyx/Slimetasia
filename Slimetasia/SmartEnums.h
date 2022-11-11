@@ -11,7 +11,7 @@
         vals(SMARTENUM_VAL) e##type##_count, \
     };
 
-#define SMARTENUM_DEFINE_NAMES(type, vals) static const char* type##Array[] = {vals(SMARTENUM_STRING)};
+#define SMARTENUM_DEFINE_NAMES(type, vals) static const char* type##Array[] = { vals(SMARTENUM_STRING) };
 
 #define SMARTENUM_DEFINE_GET_VALUE_FROM_STRING(type)          \
     static type get##type##FromString(const char* str)        \

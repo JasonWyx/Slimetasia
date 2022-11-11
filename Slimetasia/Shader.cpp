@@ -30,9 +30,9 @@ void Shader::Compile()
         glDeleteProgram(m_ShaderProgram);
     }
 
-    GLuint vertShader = CompileShader(std::string{ "Shaders/" } + m_VertShaderFilePath, GL_VERTEX_SHADER);
-    GLuint fragShader = CompileShader(std::string{ "Shaders/" } + m_FragShaderFilePath, GL_FRAGMENT_SHADER);
-    GLuint geomShader = CompileShader(std::string{ "Shaders/" } + m_GeomShaderFilePath, GL_GEOMETRY_SHADER);
+    GLuint vertShader = CompileShader(std::string { "Shaders/" } + m_VertShaderFilePath, GL_VERTEX_SHADER);
+    GLuint fragShader = CompileShader(std::string { "Shaders/" } + m_FragShaderFilePath, GL_FRAGMENT_SHADER);
+    GLuint geomShader = CompileShader(std::string { "Shaders/" } + m_GeomShaderFilePath, GL_GEOMETRY_SHADER);
 
     m_ShaderProgram = LinkProgram({ vertShader, fragShader, geomShader });
 }
@@ -108,7 +108,7 @@ void Shader::Unserialize(tinyxml2::XMLElement* root)
 
 /*static*/ GLuint Shader::CompileShader(std::string filePath, GLenum shaderType)
 {
-    std::ifstream shaderFileStream{ filePath, std::ios::in };
+    std::ifstream shaderFileStream { filePath, std::ios::in };
 
     if (!shaderFileStream.is_open())
     {

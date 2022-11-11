@@ -55,6 +55,7 @@ float constexpr DITHER = PI * 2.f / static_cast<float>(discpoints);
 class CollisionMesh_3D : public IComponent
 {
 public:
+
     // new constructor
     CollisionMesh_3D(GameObject* parentObject, const std::string& name = "CollisionMesh_3D", const CollisionShapeType& shapetype = eCollisionShapeType_SPHERE,
                      const CollisionShape& shape = eCollisionShape_TRIANGLE, const float& rad = 1.f);
@@ -121,8 +122,9 @@ public:
 
     REFLECT()
 protected:
+
     // char m_collision_layer = 0x0;
-    Vector3 m_offset{};
+    Vector3 m_offset {};
     IntersectionList m_intersectList;
     IntersectionList m_prevIntersect;
     IntersectionList m_currentIntersect;

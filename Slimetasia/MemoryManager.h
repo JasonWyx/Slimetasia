@@ -8,6 +8,7 @@ struct MemoryAllocator;
 class MemoryManager
 {
 public:
+
     // using an enum class instead of a normal enum.
     // ensures that the values do not convert to any other types.
     enum class AllocationType
@@ -40,6 +41,7 @@ public:
     static MemoryAllocator* m_BaseMemAllocator;
 
 private:
+
     // default memory allocator
     static DefaultMemAllocator m_DefaultAllocator;
     PoolAllocator m_PoolMemAllocator;

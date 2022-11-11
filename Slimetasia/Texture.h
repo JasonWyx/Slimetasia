@@ -25,6 +25,7 @@ enum class TextureType
 class Texture : public ResourceBase
 {
 private:
+
     TextureType m_TextureType;
 
     GLuint m_TextureHandle;
@@ -33,6 +34,7 @@ private:
     GLuint m_MipmapLevel;
 
 public:
+
     Texture(const std::string& resourceName = "", const std::filesystem::path& filePath = "");
     ~Texture();
 

@@ -239,14 +239,14 @@ void MeshAnimator::UpdateBoneTransforms(std::vector<MeshNode> const& nodes, std:
             ASSERT(crossFadeFactor >= 0.0f && crossFadeFactor <= 1.0f);
 
             const Pose& transitionPose = m_TransitionPose[currNodeAnimIt->second];
-            nextPose = {Math::Lerp(transitionPose.scaling, currNodeAnim.GetInterpolatedScale(m_CurrentAnimationTick), crossFadeFactor),
-                        Quaternion::Slerp(transitionPose.rotation, currNodeAnim.GetInterpolatedRotation(m_CurrentAnimationTick), crossFadeFactor),
-                        Math::Lerp(transitionPose.translation, currNodeAnim.GetInterpolatedPosition(m_CurrentAnimationTick), crossFadeFactor)};
+            nextPose = { Math::Lerp(transitionPose.scaling, currNodeAnim.GetInterpolatedScale(m_CurrentAnimationTick), crossFadeFactor),
+                         Quaternion::Slerp(transitionPose.rotation, currNodeAnim.GetInterpolatedRotation(m_CurrentAnimationTick), crossFadeFactor),
+                         Math::Lerp(transitionPose.translation, currNodeAnim.GetInterpolatedPosition(m_CurrentAnimationTick), crossFadeFactor) };
         }
         else
         {
-            nextPose = {currNodeAnim.GetInterpolatedScale(m_CurrentAnimationTick), currNodeAnim.GetInterpolatedRotation(m_CurrentAnimationTick),
-                        currNodeAnim.GetInterpolatedPosition(m_CurrentAnimationTick)};
+            nextPose = { currNodeAnim.GetInterpolatedScale(m_CurrentAnimationTick), currNodeAnim.GetInterpolatedRotation(m_CurrentAnimationTick),
+                         currNodeAnim.GetInterpolatedPosition(m_CurrentAnimationTick) };
         }
 
         localTransform = Matrix4::Translate(nextPose.translation) * nextPose.rotation.EulerTransform() * Matrix4::Scale(nextPose.scaling);

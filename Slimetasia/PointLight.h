@@ -4,6 +4,7 @@
 class PointLight : public LightBase
 {
 public:
+
     PointLight(GameObject* parentObject);
     ~PointLight();
 

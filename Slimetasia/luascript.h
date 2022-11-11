@@ -626,13 +626,17 @@ class LuaScript : public IComponent
     static int ToggleFullscreen(lua_State* L);
 
     /// Helper functions --------------------------------------------------------
-    template <typename T> friend static bool GetComp(lua_State* L, T** result);
+    template <typename T>
+    friend static bool GetComp(lua_State* L, T** result);
 
-    template <typename T> friend static T check(std::string name, lua_State* L, int index, bool assert);
+    template <typename T>
+    friend static T check(std::string name, lua_State* L, int index, bool assert);
 
-    template <typename T> friend static int pushCustomType(std::string name, lua_State* L, T input);
+    template <typename T>
+    friend static int pushCustomType(std::string name, lua_State* L, T input);
 
-    template <typename T> friend static int pushCustomTypeArray(std::string name, lua_State* L, std::vector<T> input);
+    template <typename T>
+    friend static int pushCustomTypeArray(std::string name, lua_State* L, std::vector<T> input);
 
     /// Other functions ---------------------------------------------------------
     std::set<unsigned> Blacklist;
@@ -649,6 +653,7 @@ class LuaScript : public IComponent
     static int GotFocus(lua_State* L);
 
 public:
+
     LuaScript(GameObject* parentObject);
     LuaScript(const std::string& filename);
     ~LuaScript();
@@ -668,7 +673,8 @@ public:
         lua_pop(L, n);
     }
 
-    template <typename T> T get(const std::string& var)
+    template <typename T>
+    T get(const std::string& var)
     {
         if (!L)
         {
@@ -687,7 +693,8 @@ public:
         return result;
     }
 
-    template <typename T> void set(const std::string& var, const T& val)
+    template <typename T>
+    void set(const std::string& var, const T& val)
     {
         if (!L)
         {
@@ -743,9 +750,18 @@ public:
     }
 
     // generic Gets
-    template <typename T> T lua_get(const std::string& var) { return T{}; }
-    template <> inline bool lua_get(const std::string& var) { return (bool)lua_toboolean(L, -1); }
-    template <> inline int lua_get<int>(const std::string& var)
+    template <typename T>
+    T lua_get(const std::string& var)
+    {
+        return T {};
+    }
+    template <>
+    inline bool lua_get(const std::string& var)
+    {
+        return (bool)lua_toboolean(L, -1);
+    }
+    template <>
+    inline int lua_get<int>(const std::string& var)
     {
         if (!lua_isnumber(L, -1))
         {
@@ -754,7 +770,8 @@ public:
         }
         return (int)lua_tonumber(L, -1);
     }
-    template <> inline float lua_get<float>(const std::string& var)
+    template <>
+    inline float lua_get<float>(const std::string& var)
     {
         if (!lua_isnumber(L, -1))
         {
@@ -763,16 +780,18 @@ public:
         }
         return (float)lua_tonumber(L, -1);
     }
-    template <> inline std::string lua_get<std::string>(const std::string& var)
+    template <>
+    inline std::string lua_get<std::string>(const std::string& var)
     {
         if (!lua_isstring(L, -1))
         {
             PrintError(var, "not a string");
             return "Null";
         }
-        return std::string{lua_tostring(L, -1)};
+        return std::string { lua_tostring(L, -1) };
     }
-    template <> inline Vector3 lua_get<Vector3>(const std::string& var)
+    template <>
+    inline Vector3 lua_get<Vector3>(const std::string& var)
     {
         if (!checkVector3(L, -1, false))
         {
@@ -781,7 +800,8 @@ public:
         }
         return (Vector3)*checkVector3(L, -1);
     }
-    template <> inline Vector4 lua_get<Vector4>(const std::string& var)
+    template <>
+    inline Vector4 lua_get<Vector4>(const std::string& var)
     {
         if (!checkColor(L, -1, false))
         {
@@ -790,25 +810,28 @@ public:
         }
         return (Vector4)*checkColor(L, -1);
     }
-    template <> inline HAnimationSet lua_get<HAnimationSet>(const std::string& var)
+    template <>
+    inline HAnimationSet lua_get<HAnimationSet>(const std::string& var)
     {
         if (!checkResAnimation(L, -1, false))
         {
             PrintError(var, "not a HAnimationSet");
-            return HAnimationSet{};
+            return HAnimationSet {};
         }
         return (HAnimationSet)*checkResAnimation(L, -1);
     }
-    template <> inline RaycastData_tmp lua_get<RaycastData_tmp>(const std::string& var)
+    template <>
+    inline RaycastData_tmp lua_get<RaycastData_tmp>(const std::string& var)
     {
         if (!checkRayCastdata(L, -1, false))
         {
             PrintError(var, "not a RayCastData");
-            return RaycastData_tmp{};
+            return RaycastData_tmp {};
         }
         return (RaycastData_tmp)*checkRayCastdata(L, -1);
     }
-    template <> inline GameObject* lua_get<GameObject*>(const std::string& var)
+    template <>
+    inline GameObject* lua_get<GameObject*>(const std::string& var)
     {
         if (!checkGameObject(L, -1, false))
         {
@@ -817,7 +840,8 @@ public:
         }
         return (GameObject*)*checkGameObject(L, -1);
     }
-    template <> inline Transform* lua_get<Transform*>(const std::string& var)
+    template <>
+    inline Transform* lua_get<Transform*>(const std::string& var)
     {
         if (!checkTransform(L, -1, false))
         {
@@ -826,7 +850,8 @@ public:
         }
         return (Transform*)*checkTransform(L, -1);
     }
-    template <> inline RigidbodyComponent* lua_get<RigidbodyComponent*>(const std::string& var)
+    template <>
+    inline RigidbodyComponent* lua_get<RigidbodyComponent*>(const std::string& var)
     {
         if (!checkRigidbody(L, -1, false))
         {
@@ -835,7 +860,8 @@ public:
         }
         return (RigidbodyComponent*)*checkRigidbody(L, -1);
     }
-    template <> inline AudioListener* lua_get<AudioListener*>(const std::string& var)
+    template <>
+    inline AudioListener* lua_get<AudioListener*>(const std::string& var)
     {
         if (!checkAudioListener(L, -1, false))
         {
@@ -844,7 +870,8 @@ public:
         }
         return (AudioListener*)*checkAudioListener(L, -1);
     }
-    template <> inline AudioEmitter* lua_get<AudioEmitter*>(const std::string& var)
+    template <>
+    inline AudioEmitter* lua_get<AudioEmitter*>(const std::string& var)
     {
         if (!checkAudioEmitter(L, -1, false))
         {
@@ -853,7 +880,8 @@ public:
         }
         return (AudioEmitter*)*checkAudioEmitter(L, -1);
     }
-    template <> inline MeshRenderer* lua_get<MeshRenderer*>(const std::string& var)
+    template <>
+    inline MeshRenderer* lua_get<MeshRenderer*>(const std::string& var)
     {
         if (!checkMeshRenderer(L, -1, false))
         {
@@ -862,7 +890,8 @@ public:
         }
         return (MeshRenderer*)*checkMeshRenderer(L, -1);
     }
-    template <> inline MeshAnimator* lua_get<MeshAnimator*>(const std::string& var)
+    template <>
+    inline MeshAnimator* lua_get<MeshAnimator*>(const std::string& var)
     {
         if (!checkMeshAnimator(L, -1, false))
         {
@@ -871,7 +900,8 @@ public:
         }
         return (MeshAnimator*)*checkMeshAnimator(L, -1);
     }
-    template <> inline LuaScript* lua_get<LuaScript*>(const std::string& var)
+    template <>
+    inline LuaScript* lua_get<LuaScript*>(const std::string& var)
     {
         if (!checkluaScript(L, -1, false))
         {
@@ -880,7 +910,8 @@ public:
         }
         return (LuaScript*)*checkluaScript(L, -1);
     }
-    template <> inline Camera* lua_get<Camera*>(const std::string& var)
+    template <>
+    inline Camera* lua_get<Camera*>(const std::string& var)
     {
         if (!checkCamera(L, -1, false))
         {
@@ -889,7 +920,8 @@ public:
         }
         return (Camera*)*checkCamera(L, -1);
     }
-    template <> inline BoxParticleEmitter* lua_get<BoxParticleEmitter*>(const std::string& var)
+    template <>
+    inline BoxParticleEmitter* lua_get<BoxParticleEmitter*>(const std::string& var)
     {
         if (!checkBoxParticle(L, -1, false))
         {
@@ -898,7 +930,8 @@ public:
         }
         return (BoxParticleEmitter*)*checkBoxParticle(L, -1);
     }
-    template <> inline CircleParticleEmitter* lua_get<CircleParticleEmitter*>(const std::string& var)
+    template <>
+    inline CircleParticleEmitter* lua_get<CircleParticleEmitter*>(const std::string& var)
     {
         if (!checkCircleParticle(L, -1, false))
         {
@@ -907,7 +940,8 @@ public:
         }
         return (CircleParticleEmitter*)*checkCircleParticle(L, -1);
     }
-    template <> inline Pathfinding* lua_get<Pathfinding*>(const std::string& var)
+    template <>
+    inline Pathfinding* lua_get<Pathfinding*>(const std::string& var)
     {
         if (!checkPathFinding(L, -1, false))
         {
@@ -916,7 +950,8 @@ public:
         }
         return (Pathfinding*)*checkPathFinding(L, -1);
     }
-    template <> inline SphereCollider* lua_get<SphereCollider*>(const std::string& var)
+    template <>
+    inline SphereCollider* lua_get<SphereCollider*>(const std::string& var)
     {
         if (!checkSphereCollider(L, -1, false))
         {
@@ -925,7 +960,8 @@ public:
         }
         return (SphereCollider*)*checkSphereCollider(L, -1);
     }
-    template <> inline TextRenderer* lua_get<TextRenderer*>(const std::string& var)
+    template <>
+    inline TextRenderer* lua_get<TextRenderer*>(const std::string& var)
     {
         if (!checkTextRenderer(L, -1, false))
         {
@@ -936,7 +972,8 @@ public:
     }
 
     // Get array helper function
-    template <typename T> std::vector<T> GetArrayVariables(T* (*func)(lua_State*, int, bool))
+    template <typename T>
+    std::vector<T> GetArrayVariables(T* (*func)(lua_State*, int, bool))
     {
         std::vector<T> result;
         int tableSize = (int)lua_rawlen(L, 1);  /// get size of table
@@ -952,28 +989,33 @@ public:
     }
 
     // Arrays
-    template <> inline std::vector<float> lua_get(const std::string& name)
+    template <>
+    inline std::vector<float> lua_get(const std::string& name)
     {
         std::cout << "GetArray : default types are not supported" << std::endl;
         return std::vector<float>();
     }
-    template <> inline std::vector<int> lua_get(const std::string& name)
+    template <>
+    inline std::vector<int> lua_get(const std::string& name)
     {
         std::cout << "GetArray : default types are not supported" << std::endl;
         return std::vector<int>();
     }
-    template <> inline std::vector<bool> lua_get(const std::string& name)
+    template <>
+    inline std::vector<bool> lua_get(const std::string& name)
     {
         std::cout << "GetArray : default types are not supported" << std::endl;
         return std::vector<bool>();
     }
-    template <> inline std::vector<std::string> lua_get(const std::string& name)
+    template <>
+    inline std::vector<std::string> lua_get(const std::string& name)
     {
         std::cout << "GetArray : default types are not supported" << std::endl;
         return std::vector<std::string>();
     }
 
-    template <> inline std::vector<Vector3> lua_get(const std::string& name)
+    template <>
+    inline std::vector<Vector3> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -985,7 +1027,8 @@ public:
             }
         return std::vector<Vector3>();
     }
-    template <> inline std::vector<Vector4> lua_get(const std::string& name)
+    template <>
+    inline std::vector<Vector4> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -997,7 +1040,8 @@ public:
             }
         return std::vector<Vector4>();
     }
-    template <> inline std::vector<HAnimationSet> lua_get(const std::string& name)
+    template <>
+    inline std::vector<HAnimationSet> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1009,7 +1053,8 @@ public:
             }
         return std::vector<HAnimationSet>();
     }
-    template <> inline std::vector<RaycastData_tmp> lua_get(const std::string& name)
+    template <>
+    inline std::vector<RaycastData_tmp> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1021,7 +1066,8 @@ public:
             }
         return std::vector<RaycastData_tmp>();
     }
-    template <> inline std::vector<GameObject*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<GameObject*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1033,7 +1079,8 @@ public:
             }
         return std::vector<GameObject*>();
     }
-    template <> inline std::vector<Transform*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<Transform*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1045,7 +1092,8 @@ public:
             }
         return std::vector<Transform*>();
     }
-    template <> inline std::vector<RigidbodyComponent*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<RigidbodyComponent*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1057,7 +1105,8 @@ public:
             }
         return std::vector<RigidbodyComponent*>();
     }
-    template <> inline std::vector<AudioListener*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<AudioListener*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1069,7 +1118,8 @@ public:
             }
         return std::vector<AudioListener*>();
     }
-    template <> inline std::vector<AudioEmitter*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<AudioEmitter*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1081,7 +1131,8 @@ public:
             }
         return std::vector<AudioEmitter*>();
     }
-    template <> inline std::vector<MeshRenderer*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<MeshRenderer*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1093,7 +1144,8 @@ public:
             }
         return std::vector<MeshRenderer*>();
     }
-    template <> inline std::vector<MeshAnimator*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<MeshAnimator*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1105,7 +1157,8 @@ public:
             }
         return std::vector<MeshAnimator*>();
     }
-    template <> inline std::vector<LuaScript*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<LuaScript*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1117,7 +1170,8 @@ public:
             }
         return std::vector<LuaScript*>();
     }
-    template <> inline std::vector<Camera*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<Camera*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1129,7 +1183,8 @@ public:
             }
         return std::vector<Camera*>();
     }
-    template <> inline std::vector<BoxParticleEmitter*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<BoxParticleEmitter*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1141,7 +1196,8 @@ public:
             }
         return std::vector<BoxParticleEmitter*>();
     }
-    template <> inline std::vector<CircleParticleEmitter*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<CircleParticleEmitter*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1153,7 +1209,8 @@ public:
             }
         return std::vector<CircleParticleEmitter*>();
     }
-    template <> inline std::vector<Pathfinding*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<Pathfinding*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1165,7 +1222,8 @@ public:
             }
         return std::vector<Pathfinding*>();
     }
-    template <> inline std::vector<SphereCollider*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<SphereCollider*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1177,7 +1235,8 @@ public:
             }
         return std::vector<SphereCollider*>();
     }
-    template <> inline std::vector<TextRenderer*> lua_get(const std::string& name)
+    template <>
+    inline std::vector<TextRenderer*> lua_get(const std::string& name)
     {
         if (getToStack(name)) try
             {
@@ -1191,121 +1250,155 @@ public:
     }
 
     // Set
-    template <typename T> void lua_set(const std::string& var, T b) { return; }
-    template <> inline void lua_set(const std::string& var, bool b)
+    template <typename T>
+    void lua_set(const std::string& var, T b)
+    {
+        return;
+    }
+    template <>
+    inline void lua_set(const std::string& var, bool b)
     {
         lua_pushboolean(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, float f)
+    template <>
+    inline void lua_set(const std::string& var, float f)
     {
         lua_pushnumber(L, f);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, int i)
+    template <>
+    inline void lua_set(const std::string& var, int i)
     {
         lua_pushinteger(L, i);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, std::string s)
+    template <>
+    inline void lua_set(const std::string& var, std::string s)
     {
         lua_pushstring(L, s.c_str());
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, Vector3 b)
+    template <>
+    inline void lua_set(const std::string& var, Vector3 b)
     {
         pushVector3(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, Vector4 b)
+    template <>
+    inline void lua_set(const std::string& var, Vector4 b)
     {
         pushColor(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, HAnimationSet b)
+    template <>
+    inline void lua_set(const std::string& var, HAnimationSet b)
     {
         pushResAnimation(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, RaycastData_tmp b)
+    template <>
+    inline void lua_set(const std::string& var, RaycastData_tmp b)
     {
         pushRayCastdata(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, GameObject* b)
+    template <>
+    inline void lua_set(const std::string& var, GameObject* b)
     {
         pushGameObject(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, Transform* b)
+    template <>
+    inline void lua_set(const std::string& var, Transform* b)
     {
         pushTransform(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, RigidbodyComponent* b)
+    template <>
+    inline void lua_set(const std::string& var, RigidbodyComponent* b)
     {
         pushRigidBody(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, AudioListener* b)
+    template <>
+    inline void lua_set(const std::string& var, AudioListener* b)
     {
         pushAudioListener(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, AudioEmitter* b)
+    template <>
+    inline void lua_set(const std::string& var, AudioEmitter* b)
     {
         pushAudioEmitter(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, MeshRenderer* b)
+    template <>
+    inline void lua_set(const std::string& var, MeshRenderer* b)
     {
         pushMeshRenderer(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, MeshAnimator* b)
+    template <>
+    inline void lua_set(const std::string& var, MeshAnimator* b)
     {
         pushMeshAnimator(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, LuaScript* b)
+    template <>
+    inline void lua_set(const std::string& var, LuaScript* b)
     {
         pushluaScript(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, Camera* b)
+    template <>
+    inline void lua_set(const std::string& var, Camera* b)
     {
         pushCamera(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, BoxParticleEmitter* b)
+    template <>
+    inline void lua_set(const std::string& var, BoxParticleEmitter* b)
     {
         pushBoxParticle(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, CircleParticleEmitter* b)
+    template <>
+    inline void lua_set(const std::string& var, CircleParticleEmitter* b)
     {
         pushCircleParticle(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, Pathfinding* b)
+    template <>
+    inline void lua_set(const std::string& var, Pathfinding* b)
     {
         pushPathFinding(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, SphereCollider* b)
+    template <>
+    inline void lua_set(const std::string& var, SphereCollider* b)
     {
         pushSphereCollider(L, b);
         lua_setglobal(L, var.c_str());
     }
-    template <> inline void lua_set(const std::string& var, TextRenderer* b)
+    template <>
+    inline void lua_set(const std::string& var, TextRenderer* b)
     {
         pushTextRenderer(L, b);
         lua_setglobal(L, var.c_str());
     }
 
-    template <typename T> T get_default() { return T{}; }
+    template <typename T>
+    T get_default()
+    {
+        return T {};
+    }
 
-    template <> inline std::string get_default<std::string>() { return "null"; }
+    template <>
+    inline std::string get_default<std::string>()
+    {
+        return "null";
+    }
 
     void PrintName() { std::cout << m_Name << std::endl; }
 

@@ -7,10 +7,11 @@
 struct IntersectionData
 {
 public:
-    IntersectionData(const bool& intersect = false, const float& dist = 0.f, const Vector3& dir = Vector3{}, const Vector3& push = Vector3{}, const bool& sp = false)
+
+    IntersectionData(const bool& intersect = false, const float& dist = 0.f, const Vector3& dir = Vector3 {}, const Vector3& push = Vector3 {}, const bool& sp = false)
         : m_is_intersect(intersect)
         , m_penetration(dist)
-        , m_direction{dir}
+        , m_direction { dir }
         , m_push(push)
         , m_sphere(sp)
         , m_FirstRigidbody(nullptr)

@@ -9,6 +9,7 @@
 class WaterPass
 {
 public:
+
     WaterPass(const iVector2 viewportSize);
     ~WaterPass();
 
@@ -16,6 +17,7 @@ public:
     void SetViewportSize(iVector2 const& viewportSize);
 
 private:
+
     iVector2 m_ViewportSize;
     GeometryPass m_GeometryPass;
     LightPass m_LightPass;
@@ -33,6 +35,7 @@ private:
     GLuint m_VertexBuffer;
 
 private:
+
     void BuildRenderTargets();
     void BuildDUDVMaps();
 };

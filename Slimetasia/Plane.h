@@ -11,12 +11,13 @@ namespace IntersectionType
         Overlaps,
         NotImplemented
     };
-    static const char* Names[] = {"Coplanar", "Outside", "Inside", "Overlaps", "NotImplemented"};
+    static const char* Names[] = { "Coplanar", "Outside", "Inside", "Overlaps", "NotImplemented" };
 }  // namespace IntersectionType
 
 class Plane
 {
 public:
+
     Plane();
 
     Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2);
@@ -61,6 +62,7 @@ public:
     static IntersectionType::Type PlaneAabb(const Vector4& plane, const Vector3& aabbMin, const Vector3& aabbMax);
 
 private:
+
     union
     {
         union

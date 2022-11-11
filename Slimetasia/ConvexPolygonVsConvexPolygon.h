@@ -14,6 +14,7 @@ struct ConvexPolygonVsConvexPolygon : public BaseDetectionAlgorithm
     void ComputeCollisionData(Manifold* manifold, RigidbodyComponent* first, RigidbodyComponent* second) override;
 
 private:
+
     float FindSmallestPenetration(uint& chosenFaceIndex, BoxCollider* first, BoxCollider* second);
 
     void FindIncidentFace(Vector3 (&verts)[4], BoxCollider* referenceBox, BoxCollider* incidentBox, const uint& referenceIndex);

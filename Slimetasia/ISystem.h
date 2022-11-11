@@ -3,9 +3,11 @@
 #define GetInstance(name) name::Instance()
 
 // Singleton class wrapper
-template <typename System> class ISystem
+template <typename System>
+class ISystem
 {
 public:
+
     static System& Instance()
     {
         ASSERT(IsInitialized());
@@ -18,7 +20,8 @@ public:
         return _Instance();
     }
 
-    template <typename... Args> static void Initialize(Args... args)
+    template <typename... Args>
+    static void Initialize(Args... args)
     {
         ASSERT(!IsInitialized());
         IsInitializedInternally() = true;
@@ -35,6 +38,7 @@ public:
     }
 
 protected:
+
     // Default constructor & destructor
     ISystem() { ASSERT(IsInitializedInternally()); }
     virtual ~ISystem() = default;

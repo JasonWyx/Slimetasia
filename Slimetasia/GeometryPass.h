@@ -31,6 +31,7 @@ using GBuffers = std::array<GLuint, (int)GBuffer::Count>;
 class GeometryPass : public RenderPass
 {
 public:
+
     GeometryPass(const iVector2& viewportSize);
     ~GeometryPass();
 
@@ -46,6 +47,7 @@ public:
     void StartMeshCulling(const Camera& camera, const RenderLayer& renderLayer);
 
 private:
+
     HShader m_GeomShader;
     HShader m_TextShader;
     HShader m_VideoShader;

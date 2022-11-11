@@ -19,9 +19,9 @@ struct Edge_2D
 {
     Edge_2D() = default;
     Edge_2D(const TVector2<float>& startpt, const TVector2<float>& endpt)
-        : m_start_pt{startpt}
-        , m_end_pt{endpt}
-        , m_edge_vector{m_end_pt - m_start_pt}
+        : m_start_pt { startpt }
+        , m_end_pt { endpt }
+        , m_edge_vector { m_end_pt - m_start_pt }
     {
         ComputeNormal();
     }
@@ -39,6 +39,7 @@ struct Edge_2D
 class CollisionMesh_2D : public IComponent
 {
 public:
+
     CollisionMesh_2D(GameObject* parentObject = nullptr, const std::string& name = "CollisionMesh_2D")
         : IComponent(parentObject, name)
     {
@@ -81,6 +82,7 @@ public:
 
     REFLECT()
 protected:
+
     TVector3<float> m_offset;
 
 private:
@@ -90,9 +92,10 @@ private:
 class CircleColliderMesh : public CollisionMesh_2D
 {
 public:
+
     CircleColliderMesh(GameObject* parentobject, const float& rad = 0.f)
-        : CollisionMesh_2D{parentobject, "CircleColliderMesh"}
-        , m_radius{rad}
+        : CollisionMesh_2D { parentobject, "CircleColliderMesh" }
+        , m_radius { rad }
     {
     }
 
@@ -108,16 +111,18 @@ public:
 
     REFLECT()
 private:
+
     float m_radius;
 };
 
 class AABBColliderMesh : public CollisionMesh_2D
 {
 public:
+
     AABBColliderMesh(GameObject* parentobject, const float& height = 0.f, const float& width = 0.f)
-        : CollisionMesh_2D{parentobject, "AABBColliderMesh"}
-        , m_height{height}
-        , m_width{width}
+        : CollisionMesh_2D { parentobject, "AABBColliderMesh" }
+        , m_height { height }
+        , m_width { width }
     {
     }
 
@@ -131,16 +136,18 @@ public:
 
     REFLECT()
 private:
+
     float m_height, m_width;
 };
 
 class POLYGONColliderMesh : public CollisionMesh_2D
 {
 public:
+
     POLYGONColliderMesh(GameObject* parentobject, const int& verts = 0, const std::vector<Edge_2D>& edges = std::vector<Edge_2D>())
-        : CollisionMesh_2D{parentobject, "POLYGONColliderMesh"}
-        , m_vert_count{verts}
-        , m_edges{edges}
+        : CollisionMesh_2D { parentobject, "POLYGONColliderMesh" }
+        , m_vert_count { verts }
+        , m_edges { edges }
     {
     }
     int GetNumVerts() const { return m_vert_count; }
@@ -148,6 +155,7 @@ public:
 
     // REFLECT()
 private:
+
     int m_vert_count;
     std::vector<Edge_2D> m_edges;
 };

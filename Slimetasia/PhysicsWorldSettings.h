@@ -42,7 +42,7 @@ struct PhysicsWorldSettings
     float m_DefaultSleepAngularVel = 3.0 * (PI) / 180.0f;
 
     // world gravity applied on all objects with the boolean turned on.
-    Vector3 m_Gravity{0.f, -30.f, 0.f};
+    Vector3 m_Gravity { 0.f, -30.f, 0.f };
 
     // no. of iterations when solving the velocity constraints using the Sequential Impulse Technique.
     uint m_DefaultVelSolverIteration = 5;

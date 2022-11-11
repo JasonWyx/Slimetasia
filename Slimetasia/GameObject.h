@@ -35,6 +35,7 @@ class GameObject
     void ClearComponentsXceptTransform();
 
 public:
+
     // For storing a list of objects in the same node for octree
     GameObject* m_NextObj;
 
@@ -75,7 +76,8 @@ public:
 
     void DeleteAllChildren(GameObject* go);
 
-    template <typename ComponentType> ComponentType* AddComponent()
+    template <typename ComponentType>
+    ComponentType* AddComponent()
     {
         // TODO: Do check for scripts
         for (IComponent* component : m_ActiveComponents)
@@ -96,7 +98,8 @@ public:
     }
 
     // used for dependancy checks. Adds the component if the component specified is not found.
-    template <typename ComponentType> ComponentType* AddIfDoesntExist()
+    template <typename ComponentType>
+    ComponentType* AddIfDoesntExist()
     {
         for (IComponent* component : m_ActiveComponents)
         {
@@ -108,7 +111,8 @@ public:
         return AddComponent<ComponentType>();
     }
 
-    template <typename ComponentType> ComponentType* GetComponent() const
+    template <typename ComponentType>
+    ComponentType* GetComponent() const
     {
         for (IComponent* component : m_ActiveComponents)
         {
@@ -117,7 +121,8 @@ public:
         return nullptr;
     }
 
-    template <typename ComponentType> void RemoveComponent()
+    template <typename ComponentType>
+    void RemoveComponent()
     {
         for (IComponent* component : m_ActiveComponents)
         {
@@ -131,7 +136,8 @@ public:
         }
     }
 
-    template <typename ComponentType> std::vector<ComponentType*> GetAllComponentWithThisBase() const
+    template <typename ComponentType>
+    std::vector<ComponentType*> GetAllComponentWithThisBase() const
     {
         std::vector<ComponentType*> vec;
 

@@ -338,20 +338,20 @@ AISystem::~AISystem()
 
 void AISystem::Update(const float& dt)
 {
-    //#ifdef EDITOR
-    //  if (Editor::s_isPlaying == false)
-    //  {
-    //    Init();
-    //    for (int i = 0; i < row_size; ++i)
-    //    {
-    //      for (int j = 0; j < col_size; ++j)
-    //      {
-    //        if (m_gridMap[i][j].valid == 1)
-    //          Renderer::Instance().Draw2DBox(1.f, 1.f, m_gridMap[i][j].pos, Color4(0.0, 0.0, 1.0, 1.0));
-    //      }
-    //    }
-    //  }
-    //#endif
+    // #ifdef EDITOR
+    //   if (Editor::s_isPlaying == false)
+    //   {
+    //     Init();
+    //     for (int i = 0; i < row_size; ++i)
+    //     {
+    //       for (int j = 0; j < col_size; ++j)
+    //       {
+    //         if (m_gridMap[i][j].valid == 1)
+    //           Renderer::Instance().Draw2DBox(1.f, 1.f, m_gridMap[i][j].pos, Color4(0.0, 0.0, 1.0, 1.0));
+    //       }
+    //     }
+    //   }
+    // #endif
 
     // for (auto&elem : originalPathsArr)
     //{

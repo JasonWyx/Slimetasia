@@ -5,7 +5,8 @@
 class BoxCollider : public ConvexCollider
 {
 public:
-    BoxCollider(GameObject* parentObject = nullptr, const Vector3& halfExtent = Vector3{0.5f, 0.5f, 0.5f});
+
+    BoxCollider(GameObject* parentObject = nullptr, const Vector3& halfExtent = Vector3 { 0.5f, 0.5f, 0.5f });
 
     BoxCollider(GameObject* parentObject, const float& width, const float& height, const float& depth);
 
@@ -52,6 +53,7 @@ public:
     REFLECT()
 
 protected:
+
     union
     {
         struct

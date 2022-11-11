@@ -21,6 +21,7 @@ enum class WindowMode
 class Application : public ISystem<Application>
 {
 private:
+
     // Windows API variables
     HINSTANCE m_Instance;
     HWND m_Window;
@@ -61,6 +62,7 @@ private:
     void ProcessWindowMessages();
 
 public:
+
     Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow);
     ~Application();
 

@@ -76,7 +76,7 @@ GLsizei LightBase::GetShadowResolution() const
 
 float LightBase::GetShadowDistance() const
 {
-    return std::sqrtf(4 * (256 * std::max({m_LightColor.r, m_LightColor.g, m_LightColor.b}) * m_Intensity)) * 0.5f;
+    return std::sqrtf(4 * (256 * std::max({ m_LightColor.r, m_LightColor.g, m_LightColor.b }) * m_Intensity)) * 0.5f;
 }
 
 // void LightBase::SetShadowDistance(float dist)
@@ -96,14 +96,14 @@ void LightBase::SetShadowBias(float bias)
 
 GLuint LightBase::GetShadowMapTexture()
 {
-    //#ifdef EDITOR
-    // Detect change in shadow resolution size. Should only change in editor mode.
+    // #ifdef EDITOR
+    //  Detect change in shadow resolution size. Should only change in editor mode.
     if (m_ShadowResolution != m_ShadowResolutionPrev)
     {
         this->BuildShadowMap();
         m_ShadowResolutionPrev = m_ShadowResolution;
     }
-    //#endif
+    // #endif
     return m_ShadowMap;
 }
 

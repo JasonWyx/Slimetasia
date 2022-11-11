@@ -24,11 +24,13 @@ struct GBufferID
 class GBufferRenderPass
 {
 private:
+
     GLuint m_Framebuffer;
     GLuint m_GBuffers[GBufferID::Count];
     // HShader m_GBufferShader;
 
 public:
+
     GBufferRenderPass();
     ~GBufferRenderPass();
 

@@ -283,7 +283,7 @@ void PlayerPref::Deserialize()
                     {
                         const char* value;
                         currElem->QueryStringAttribute("Value", &value);
-                        values.push_back(std::string{value});
+                        values.push_back(std::string { value });
                     }
                     SaveVariable<std::vector<std::string>>(variableName, values, tableName);
                 }

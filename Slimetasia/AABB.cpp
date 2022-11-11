@@ -35,9 +35,9 @@ float AABB::GetVolume() const
     /******Student:Assignment2******/
     // Return the aabb's volume
     // Warn("Assignment2: Required function un-implemented");
-    Vector3 u{m_Max.x - m_Min.x, 0.f, 0.f};
-    Vector3 v{0.f, m_Max.y - m_Min.y, 0.f};
-    Vector3 w{0.f, 0.f, m_Max.z - m_Min.z};
+    Vector3 u { m_Max.x - m_Min.x, 0.f, 0.f };
+    Vector3 v { 0.f, m_Max.y - m_Min.y, 0.f };
+    Vector3 w { 0.f, 0.f, m_Max.z - m_Min.z };
 
     return abs(u.Cross(v).Dot(w));
 }
@@ -182,7 +182,7 @@ bool AABB::AABBAABB(const Vector3& aabbMin0, const Vector3& aabbMax0, const Vect
 
 bool AABB::RayAabb(const Vector3& rayStart, const Vector3& rayDir, const Vector3& aabbMin, const Vector3& aabbMax, float& t)
 {
-    Vector4 plane_l{1.f, 0.f, 0.f, aabbMin.x}, plane_bo{0.f, 1.f, 0.f, aabbMin.y}, plane_f{0.f, 0.f, 1.f, aabbMin.z};
+    Vector4 plane_l { 1.f, 0.f, 0.f, aabbMin.x }, plane_bo { 0.f, 1.f, 0.f, aabbMin.y }, plane_f { 0.f, 0.f, 1.f, aabbMin.z };
     auto denom = 0.f;
     t = 0.f;
     auto tmax = FLT_MAX, t1 = 0.f, t2 = 0.f;

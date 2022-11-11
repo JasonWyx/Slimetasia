@@ -7,10 +7,14 @@
 
 class Any;
 
-template <class Type> Type any_cast(Any&);
-template <class Type> Type any_cast(const Any&);
-template <class Type> Type* any_cast(Any*);
-template <class Type> const Type* any_cast(const Any*);
+template <class Type>
+Type any_cast(Any&);
+template <class Type>
+Type any_cast(const Any&);
+template <class Type>
+Type* any_cast(Any*);
+template <class Type>
+const Type* any_cast(const Any*);
 
 struct bad_any_cast : public std::bad_cast
 {
@@ -19,10 +23,15 @@ struct bad_any_cast : public std::bad_cast
 class Any
 {
 public:
-    template <class Type> friend Type any_cast(Any&);
-    template <class Type> friend Type any_cast(const Any&);
-    template <class Type> friend Type* any_cast(Any*);
-    template <class Type> friend const Type* any_cast(const Any*);
+
+    template <class Type>
+    friend Type any_cast(Any&);
+    template <class Type>
+    friend Type any_cast(const Any&);
+    template <class Type>
+    friend Type* any_cast(Any*);
+    template <class Type>
+    friend const Type* any_cast(const Any*);
 
     Any()
         : ptr(nullptr)
@@ -57,13 +66,15 @@ public:
         return (*this);
     }
 
-    template <class T> Any& operator=(T&& x)
+    template <class T>
+    Any& operator=(T&& x)
     {
         ptr.reset(new concrete<typename std::decay<T>::type>(typename std::decay<T>::type(x)));
         return (*this);
     }
 
-    template <class T> Any& operator=(const T& x)
+    template <class T>
+    Any& operator=(const T& x)
     {
         ptr.reset(new concrete<typename std::decay<T>::type>(typename std::decay<T>::type(x)));
         return (*this);
@@ -76,6 +87,7 @@ public:
     const std::type_info& type() const { return (!empty()) ? ptr->type() : typeid(void); }
 
 private:
+
     struct placeholder
     {
         virtual std::unique_ptr<placeholder> clone() const = 0;
@@ -83,7 +95,8 @@ private:
         virtual ~placeholder() {}
     };
 
-    template <class T> struct concrete : public placeholder
+    template <class T>
+    struct concrete : public placeholder
     {
         concrete(T&& x)
             : value(std::move(x))
@@ -105,21 +118,25 @@ private:
     std::unique_ptr<placeholder> ptr;
 };
 
-template <class Type> Type any_cast(Any& val)
+template <class Type>
+Type any_cast(Any& val)
 {
     if (val.ptr->type() != typeid(Type)) throw bad_any_cast();
     return static_cast<Any::concrete<Type>*>(val.ptr.get())->value;
 }
 
-template <class Type> Type any_cast(const Any& val)
+template <class Type>
+Type any_cast(const Any& val)
 {
     return any_cast<Type>(Any(val));
 }
-template <class Type> Type* any_cast(Any* ptr)
+template <class Type>
+Type* any_cast(Any* ptr)
 {
     return dynamic_cast<Type*>(ptr->ptr.get());
 }
-template <class Type> const Type* any_cast(const Any* ptr)
+template <class Type>
+const Type* any_cast(const Any* ptr)
 {
     return dynamic_cast<const Type*>(ptr->ptr.get());
 }

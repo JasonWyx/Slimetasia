@@ -72,6 +72,7 @@ enum class MeshBufferID
 class Mesh : public ResourceBase
 {
 public:
+
     Mesh(const std::string& resourceName = "Mesh", const std::filesystem::path& filePath = "");
     ~Mesh();
 
@@ -100,6 +101,7 @@ public:
     GLuint GetVAO() const;
 
 private:
+
     std::vector<GLuint> m_Indices;
     std::vector<Vector3> m_Vertices;
     std::vector<Vector3> m_Normals;

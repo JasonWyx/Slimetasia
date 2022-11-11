@@ -11,11 +11,13 @@
 class PECollisionDispatch : public CollisionDispatch
 {
 public:
+
     PECollisionDispatch() {}
 
     BaseDetectionAlgorithm* SelectAlgorithm(const CollisionShapeType& shape1, const CollisionShapeType& shape2) override;
 
 protected:
+
     // variables
     CapsuleVsCapsule m_CapsuleCapsule;
     CapsuleVsConvexPolygon m_CapsuleConvex;

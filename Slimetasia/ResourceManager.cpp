@@ -29,17 +29,17 @@ const std::filesystem::path ResourceManager::s_PhysicsWorldSettingsDataDocument 
 Constructor for ResourceManager.
 */
 ResourceManager::ResourceManager()
-    : m_ResourceEntries{MAX_RESOURCE_ENTRIES}
-    , m_ResourceNameMap{}
-    , m_AcceptableFileTypes{
-          std::set<std::string>{".ogg", ".OGG"},                                                                  // Audio
-          std::set<std::string>{".dds", ".jpg", ".png", ".tga", ".bmp", ".DDS", ".JPG", ".PNG", ".TGA", ".BMP"},  // Texture
-          std::set<std::string>{".fbx", ".dae", ".FBX", ".DAE"},                                                  // Mesh
-          std::set<std::string>{".ttf", ".TTF"},                                                                  // Font
-      }
+    : m_ResourceEntries { MAX_RESOURCE_ENTRIES }
+    , m_ResourceNameMap {}
+    , m_AcceptableFileTypes {
+        std::set<std::string> { ".ogg", ".OGG" },                                                                  // Audio
+        std::set<std::string> { ".dds", ".jpg", ".png", ".tga", ".bmp", ".DDS", ".JPG", ".PNG", ".TGA", ".BMP" },  // Texture
+        std::set<std::string> { ".fbx", ".dae", ".FBX", ".DAE" },                                                  // Mesh
+        std::set<std::string> { ".ttf", ".TTF" },                                                                  // Font
+    }
 {
     /// Create directories if not created
-    std::vector<std::filesystem::path> paths = {s_ResourcePath, s_ResourcePathAudio, s_ResourcePathModel, s_ResourcePathTexture, s_ResourcePathFonts, s_ResourcePathScripts};
+    std::vector<std::filesystem::path> paths = { s_ResourcePath, s_ResourcePathAudio, s_ResourcePathModel, s_ResourcePathTexture, s_ResourcePathFonts, s_ResourcePathScripts };
 
     for (const auto& path : paths)
     {
@@ -413,7 +413,8 @@ void ResourceManager::LoadPhysicsWorldSettings(std::string filename)
 /*
 Function to find an element in an xml document.
 */
-template <typename XML> tinyxml2::XMLElement* ResourceManager::FindElement(XML* doc, std::string name, bool recursive)
+template <typename XML>
+tinyxml2::XMLElement* ResourceManager::FindElement(XML* doc, std::string name, bool recursive)
 {
     tinyxml2::XMLElement* curr = doc->FirstChildElement(name.c_str());
 
@@ -435,7 +436,8 @@ template <typename XML> tinyxml2::XMLElement* ResourceManager::FindElement(XML* 
 /*
 Function to insert an element into an xml document.
 */
-template <typename T> tinyxml2::XMLElement* ResourceManager::InsertElement(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root, std::string name, const T& val)
+template <typename T>
+tinyxml2::XMLElement* ResourceManager::InsertElement(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root, std::string name, const T& val)
 {
     tinyxml2::XMLElement* newElement = FindElement(root, name);
     if (newElement)

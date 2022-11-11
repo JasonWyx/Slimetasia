@@ -7,6 +7,7 @@ class ResourceBase;
 class ResourceEntry
 {
 public:
+
     ResourceEntry()
         : m_Entry(nullptr)
     {
@@ -18,6 +19,7 @@ public:
     void ClearHandles();
 
 private:
+
     ResourceBase* m_Entry;
     std::set<ResourceHandleBase*> m_Handles;
 

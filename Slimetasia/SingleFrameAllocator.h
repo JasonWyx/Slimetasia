@@ -5,6 +5,7 @@
 class SingleFrameAllocator : public MemoryAllocator
 {
 public:
+
     SingleFrameAllocator();
 
     ~SingleFrameAllocator() override;
@@ -28,6 +29,7 @@ public:
     virtual void ResetMemory();
 
 private:
+
     // frames to wait before shrinking the allocated memory if it is overallocated.
     static const uint FRAMES_UNTIL_SHRINK = 120u;
 

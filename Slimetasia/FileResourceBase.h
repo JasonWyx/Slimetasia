@@ -21,10 +21,12 @@ enum class FileResourceStatus
 class FileResourceBase : public ResourceBase
 {
 private:
+
     std::string m_FilePath;
     FileResourceStatus m_Status;
 
 public:
+
     FileResourceBase();
     ~FileResourceBase();
     FileResourceBase(FileResourceBase const&) = delete;

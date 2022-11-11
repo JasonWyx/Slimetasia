@@ -4,6 +4,7 @@
 class CapsuleCollider : public CollisionMesh_3D
 {
 public:
+
     CapsuleCollider(GameObject* parentObject = nullptr, const float& radius = 0.5f, const float& half_height = 0.5f);
 
     virtual ~CapsuleCollider() = default;
@@ -36,5 +37,6 @@ public:
     REFLECT()
 
 private:
+
     float m_HalfHeight;
 };

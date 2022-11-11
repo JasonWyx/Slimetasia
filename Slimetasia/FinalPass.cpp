@@ -30,7 +30,7 @@ FinalPass::FinalPass(iVector2 const& viewportSize)
     glVertexArrayAttribBinding(m_VertexArray, 1, 0);
     glVertexArrayAttribFormat(m_VertexArray, 1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 3);
 
-    GLfloat bufferData[] = {-1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1};
+    GLfloat bufferData[] = { -1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1 };
 
     glNamedBufferStorage(m_VertexBuffer, sizeof(bufferData), bufferData, 0);
 }

@@ -15,7 +15,7 @@ GeometryPass::GeometryPass(const iVector2& viewportSize)
     , m_TextShader(ResourceManager::Instance().CreateResource<Shader>("TextShader"))
     , m_VideoShader(ResourceManager::Instance().CreateResource<Shader>("VideoShader"))
     , m_Framebuffer(0)
-    , m_GBuffers{0}
+    , m_GBuffers { 0 }
     , m_DSBuffer(0)
     , m_ClipPlane(0)
 {
@@ -35,9 +35,9 @@ GeometryPass::GeometryPass(const iVector2& viewportSize)
 
     BuildRenderTargets();
 
-    GLuint drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4,
+    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4,
 #ifdef EDITOR
-                            GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6
+                             GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6
 #endif
     };
 
@@ -56,7 +56,7 @@ GeometryPass::GeometryPass(const iVector2& viewportSize)
     glVertexArrayAttribBinding(m_VertexArray, 1, 0);
     glVertexArrayAttribFormat(m_VertexArray, 1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 3);
 
-    GLfloat bufferData[] = {-1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1};
+    GLfloat bufferData[] = { -1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1 };
 
     glNamedBufferStorage(m_VertexBuffer, sizeof(bufferData), bufferData, 0);
 }
@@ -116,11 +116,13 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
         {
             std::vector<MeshRenderer*> sortedRenderers = meshList;
 
-            std::sort(sortedRenderers.begin(), sortedRenderers.end(), [](MeshRenderer* a, MeshRenderer* b) {
-                Transform* transformA = a->GetTransform();
-                Transform* transformB = b->GetTransform();
-                return transformA->m_WorldPosition.z < transformB->m_WorldPosition.z;
-            });
+            std::sort(sortedRenderers.begin(), sortedRenderers.end(),
+                      [](MeshRenderer* a, MeshRenderer* b)
+                      {
+                          Transform* transformA = a->GetTransform();
+                          Transform* transformB = b->GetTransform();
+                          return transformA->m_WorldPosition.z < transformB->m_WorldPosition.z;
+                      });
 
             glDisable(GL_CULL_FACE);
             glDisable(GL_DEPTH_TEST);
@@ -187,7 +189,7 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
                 GLuint normalTexture = renderer->GetNormalTexture().Validate() ? renderer->GetNormalTexture()->GetHandle() : GL_NONE;
                 GLuint specularTexture = renderer->GetSpecularTexture().Validate() ? renderer->GetSpecularTexture()->GetHandle() : GL_NONE;
                 GLuint emissiveTexture = renderer->GetEmissiveTexture().Validate() ? renderer->GetEmissiveTexture()->GetHandle() : GL_NONE;
-                GLuint textureFlags[] = {diffuseTexture, normalTexture, specularTexture, emissiveTexture};
+                GLuint textureFlags[] = { diffuseTexture, normalTexture, specularTexture, emissiveTexture };
 
                 glUniform4uiv(textureFlagsLoc, 1, textureFlags);
 
@@ -280,7 +282,7 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
                 GLuint normalTexture = renderer->GetNormalTexture().Validate() ? renderer->GetNormalTexture()->GetHandle() : GL_NONE;
                 GLuint specularTexture = renderer->GetSpecularTexture().Validate() ? renderer->GetSpecularTexture()->GetHandle() : GL_NONE;
                 GLuint emissiveTexture = renderer->GetEmissiveTexture().Validate() ? renderer->GetEmissiveTexture()->GetHandle() : GL_NONE;
-                GLuint textureFlags[] = {diffuseTexture, normalTexture, specularTexture, emissiveTexture};
+                GLuint textureFlags[] = { diffuseTexture, normalTexture, specularTexture, emissiveTexture };
 
                 glUniform4uiv(textureFlagsLoc, 1, textureFlags);
 
@@ -328,11 +330,13 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            std::sort(sortedRenderers.begin(), sortedRenderers.end(), [](TextRenderer* a, TextRenderer* b) {
-                Transform* transformA = a->m_Transform;
-                Transform* transformB = b->m_Transform;
-                return transformA->m_WorldPosition.z < transformB->m_WorldPosition.z;
-            });
+            std::sort(sortedRenderers.begin(), sortedRenderers.end(),
+                      [](TextRenderer* a, TextRenderer* b)
+                      {
+                          Transform* transformA = a->m_Transform;
+                          Transform* transformB = b->m_Transform;
+                          return transformA->m_WorldPosition.z < transformB->m_WorldPosition.z;
+                      });
         }
         else
         {

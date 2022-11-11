@@ -17,6 +17,7 @@ class Renderable : public IComponent
     // ADD: Animation (Skeletal)
 
 public:
+
     Renderable(GameObject* parentObject);
     ~Renderable() = default;
 

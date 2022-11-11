@@ -16,7 +16,7 @@ PointLight::~PointLight()
 
 float PointLight::GetShadowDistance() const
 {
-    return 2.0f * std::sqrtf(4 * (256 * std::max({m_LightColor.r, m_LightColor.g, m_LightColor.b}) * m_Intensity)) / 2.0f;
+    return 2.0f * std::sqrtf(4 * (256 * std::max({ m_LightColor.r, m_LightColor.g, m_LightColor.b }) * m_Intensity)) / 2.0f;
 }
 
 void PointLight::BuildShadowMap()
@@ -32,7 +32,7 @@ void PointLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
 }
 

@@ -18,9 +18,10 @@ class Serializer
     void RecursionLoadStruct(tinyxml2::XMLElement* attribute, unsigned char* base);
 
 public:
+
     Serializer(std::string fn)
         : filename(fn)
-        , doc{}
+        , doc {}
     {
     }
 

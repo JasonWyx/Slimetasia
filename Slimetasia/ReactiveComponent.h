@@ -8,6 +8,7 @@
 class ReactiveComponent : public IComponent
 {
 public:
+
     ReactiveComponent(GameObject* parentObject = nullptr);
     ~ReactiveComponent();
 
@@ -31,5 +32,6 @@ public:
 
     REFLECT()
 private:
+
     bool m_mouseClick = false, m_mouseHover = false, m_mouseDown = false;
 };

@@ -11,13 +11,13 @@
 Constructor for AudioEmitter.
 */
 AudioEmitter::AudioEmitter(GameObject* parentObject)
-    : IComponent{parentObject, "AudioEmitter"}
-    , channelGroupName_{"SFX"}
-    , fadingOut_{false}
-    , timer_{0}
-    , channelIndex_{-1}
+    : IComponent { parentObject, "AudioEmitter" }
+    , channelGroupName_ { "SFX" }
+    , fadingOut_ { false }
+    , timer_ { 0 }
+    , channelIndex_ { -1 }
     ,  /// Which channel is this emiiter using -1 is out of bounds
-    info_{}
+    info_ {}
 {
 }
 
@@ -185,7 +185,7 @@ bool AudioEmitter::SetAudioClip(std::string audioClipName)
     if (c == AUDIOSYSTEM.audioClips_.end())
     {
         // std::cout << "AUDIO SYSTEM : " << audioClipName << " does not exist" << std::endl;
-        info_.audioClipName_ = std::string{};
+        info_.audioClipName_ = std::string {};
         return false;
     }
 
@@ -257,9 +257,9 @@ Vector3 AudioEmitter::GetWorldPosition() const
     if (m_OwnerObject)
     {
         auto transformRef_ = m_OwnerObject->GetComponent<Transform>();
-        return transformRef_ ? transformRef_->GetWorldPosition() : Vector3{};
+        return transformRef_ ? transformRef_->GetWorldPosition() : Vector3 {};
     }
-    return Vector3{};
+    return Vector3 {};
 }
 
 /*

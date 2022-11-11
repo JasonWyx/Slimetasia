@@ -22,6 +22,7 @@ class Pathfinding : public IComponent
     bool isBaseGrid = false;
 
 public:
+
     Pathfinding(GameObject* parentObject, const std::string& name = "Pathfinding");
     ~Pathfinding() = default;
     bool AStarFindPath(const Vector3& end, bool splitpath);

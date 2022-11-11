@@ -10,6 +10,7 @@ class Camera;
 class LightPass
 {
 public:
+
     LightPass(iVector2 const& viewportSize);
     ~LightPass();
 
@@ -18,6 +19,7 @@ public:
     void StartLightCulling(const Camera& camera, const RenderLayer& renderLayer);
 
 private:
+
     iVector2 m_ViewportSize;
 
     // Shaders
@@ -57,5 +59,6 @@ private:
     std::future<std::vector<SpotLight*>> culledSpotLights;
 
 private:
+
     void BuildRenderTargets();
 };

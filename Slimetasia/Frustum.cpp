@@ -81,7 +81,7 @@ void Frustum::DebugDraw(const unsigned int& parentID)
 
 IntersectionType::Type Frustum::FrustumAabb(const Vector4 planes[6], const Vector3& aabbMin, const Vector3& aabbMax, size_t& lastAxis)
 {
-    IntersectionType::Type type{IntersectionType::NotImplemented};
+    IntersectionType::Type type { IntersectionType::NotImplemented };
     bool overlap = false;
     for (auto i = 0u; i < 6u; ++i)
     {

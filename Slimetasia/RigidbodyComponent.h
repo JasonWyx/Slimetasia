@@ -11,6 +11,7 @@ class CollisionMesh_3D;
 class RigidbodyComponent : public IComponent
 {
 public:
+
     RigidbodyComponent(GameObject* parentObject);
     ~RigidbodyComponent() override;
 
@@ -71,6 +72,7 @@ public:
     REFLECT()
 
 private:
+
     Vector3 m_LinearVelocity;
     Vector3 m_Acceleration;
     Vector3 m_Offset;

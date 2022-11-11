@@ -5,6 +5,7 @@
 class PoolAllocator : public MemoryAllocator
 {
 public:
+
     PoolAllocator();
     ~PoolAllocator() override;
 
@@ -20,6 +21,7 @@ public:
     void ReleaseMemory(void* ptr, const size_t& size) override;
 
 private:
+
     struct MemoryUnit
     {
         MemoryUnit* m_Next;

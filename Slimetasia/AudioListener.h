@@ -27,10 +27,12 @@ class AudioListener : public IComponent
 
     /// Variables ---------------------------------------------------------------
 private:
+
     bool isMain_;
 
     /// Functions ---------------------------------------------------------------
 public:
+
     AudioListener(GameObject* parentObject);
     ~AudioListener();
 

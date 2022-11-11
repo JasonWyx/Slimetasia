@@ -2,7 +2,8 @@
 #include "Math.h"
 #include "Vector.h"
 
-template <typename T> struct TQuaternion
+template <typename T>
+struct TQuaternion
 {
     T x, y, z, w;
 
@@ -84,7 +85,8 @@ template <typename T> struct TQuaternion
     static TQuaternion Slerp(TQuaternion const& src, TQuaternion const& dst, float t);
 };
 
-template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator+=(TQuaternion<T> const& rhs)
+template <typename T>
+inline TQuaternion<T>& TQuaternion<T>::operator+=(TQuaternion<T> const& rhs)
 {
     x += rhs.x;
     y += rhs.y;
@@ -93,7 +95,8 @@ template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator+=(TQuatern
     return *this;
 }
 
-template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator-=(TQuaternion<T> const& rhs)
+template <typename T>
+inline TQuaternion<T>& TQuaternion<T>::operator-=(TQuaternion<T> const& rhs)
 {
     x -= rhs.x;
     y -= rhs.y;
@@ -102,7 +105,8 @@ template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator-=(TQuatern
     return *this;
 }
 
-template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator*=(TQuaternion<T> const& rhs)
+template <typename T>
+inline TQuaternion<T>& TQuaternion<T>::operator*=(TQuaternion<T> const& rhs)
 {
     TQuaternion<T> lhs(*this);
     x = lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y;
@@ -112,7 +116,8 @@ template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator*=(TQuatern
     return *this;
 }
 
-template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator*=(T rhs)
+template <typename T>
+inline TQuaternion<T>& TQuaternion<T>::operator*=(T rhs)
 {
     x *= rhs;
     y *= rhs;
@@ -121,7 +126,8 @@ template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator*=(T rhs)
     return *this;
 }
 
-template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator/=(T rhs)
+template <typename T>
+inline TQuaternion<T>& TQuaternion<T>::operator/=(T rhs)
 {
     x /= rhs;
     y /= rhs;
@@ -130,37 +136,44 @@ template <typename T> inline TQuaternion<T>& TQuaternion<T>::operator/=(T rhs)
     return *this;
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::operator-() const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::operator-() const
 {
     return TQuaternion(-x, -y, -z, -w);
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::operator*(TQuaternion<T> const& rhs) const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::operator*(TQuaternion<T> const& rhs) const
 {
     return TQuaternion<T>(*this) *= rhs;
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::operator+(TQuaternion<T> const& rhs) const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::operator+(TQuaternion<T> const& rhs) const
 {
     return TQuaternion<T>(*this) += rhs;
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::operator-(TQuaternion<T> const& rhs) const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::operator-(TQuaternion<T> const& rhs) const
 {
     return TQuaternion<T>(*this) -= rhs;
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::operator*(T const& rhs) const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::operator*(T const& rhs) const
 {
     return TQuaternion<T>(*this) *= rhs;
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::operator/(T const& rhs) const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::operator/(T const& rhs) const
 {
     return TQuaternion<T>(*this) /= rhs;
 }
 
-template <typename T> inline TVector3<T> TQuaternion<T>::operator*(const TVector3<T>& rhs) const
+template <typename T>
+inline TVector3<T> TQuaternion<T>::operator*(const TVector3<T>& rhs) const
 {
     const float productX = w * rhs.x + y * rhs.z - z * rhs.y;
     const float productY = w * rhs.y + z * rhs.x - x * rhs.z;
@@ -169,42 +182,50 @@ template <typename T> inline TVector3<T> TQuaternion<T>::operator*(const TVector
     return TVector3<T>(w * productX - productY * z + productZ * y - productW * x, w * productY - productZ * x + productX * z - productW * y, w * productZ - productX * y + productY * x - productW * z);
 }
 
-template <typename T> inline bool TQuaternion<T>::operator==(TQuaternion<T> const& rhs) const
+template <typename T>
+inline bool TQuaternion<T>::operator==(TQuaternion<T> const& rhs) const
 {
     return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
 }
 
-template <typename T> inline bool TQuaternion<T>::operator!=(TQuaternion<T> const& rhs) const
+template <typename T>
+inline bool TQuaternion<T>::operator!=(TQuaternion<T> const& rhs) const
 {
     return !(*this == rhs);
 }
 
-template <typename T> inline T TQuaternion<T>::Dot(TQuaternion<T> const& rhs) const
+template <typename T>
+inline T TQuaternion<T>::Dot(TQuaternion<T> const& rhs) const
 {
     return V4().Dot(rhs.V4());
 }
 
-template <typename T> inline T TQuaternion<T>::Length() const
+template <typename T>
+inline T TQuaternion<T>::Length() const
 {
     return V4().Length();
 }
 
-template <typename T> inline T TQuaternion<T>::LengthSq() const
+template <typename T>
+inline T TQuaternion<T>::LengthSq() const
 {
     return V4().LengthSq();
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::Normalize() const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::Normalize() const
 {
     return TQuaternion<T>(*this) /= Length();
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::Conjugate() const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::Conjugate() const
 {
     return TQuaternion<T>(x * -1.0f, y * -1.0f, z * -1.0f, w);
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::Integrate(TVector3<T> const& vector, T scalar)
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::Integrate(TVector3<T> const& vector, T scalar)
 {
     TQuaternion<T> q(vector.x * scalar, vector.y * scalar, vector.z * scalar, 0.0f);
 
@@ -216,12 +237,14 @@ template <typename T> inline TQuaternion<T> TQuaternion<T>::Integrate(TVector3<T
     w += 0.5f * q.w;
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::Invert() const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::Invert() const
 {
     return TQuaternion<T>(*this).Conjugate() /= LengthSq();
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::Exponent() const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::Exponent() const
 {
     T a = V3().Length();
     T c = cosf(a);
@@ -229,7 +252,8 @@ template <typename T> inline TQuaternion<T> TQuaternion<T>::Exponent() const
     return TQuaternion<T>(x * s, y * s, z * s, c);
 }
 
-template <typename T> inline TQuaternion<T> TQuaternion<T>::Logarithm() const
+template <typename T>
+inline TQuaternion<T> TQuaternion<T>::Logarithm() const
 {
     T theta = acos(w);
     T sinTheta = sin(theta);
@@ -237,7 +261,8 @@ template <typename T> inline TQuaternion<T> TQuaternion<T>::Logarithm() const
     return TQuaternion<T>(x * theta, y * theta, z * theta, 0);
 }
 
-template <typename T> inline TVector3<T> TQuaternion<T>::RotateVector(TVector3<T> const& vector) const
+template <typename T>
+inline TVector3<T> TQuaternion<T>::RotateVector(TVector3<T> const& vector) const
 {
     TQuaternion<T> tmp(vector);
     TQuaternion<T> conj = Conjugate();
@@ -247,23 +272,27 @@ template <typename T> inline TVector3<T> TQuaternion<T>::RotateVector(TVector3<T
     return res.V3();
 }
 
-template <typename T> inline TVector3<T> TQuaternion<T>::EulerAngles() const
+template <typename T>
+inline TVector3<T> TQuaternion<T>::EulerAngles() const
 {
     return TVector3<T>(atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)), asin(2 * (w * y - z * x)), atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)));
 }
 
-template <typename T> inline TMatrix4<T> TQuaternion<T>::EulerTransform() const
+template <typename T>
+inline TMatrix4<T> TQuaternion<T>::EulerTransform() const
 {
     return TMatrix4<T>(1 - 2 * (y * y + z * z), 2 * (x * y + w * z), 2 * (x * z - w * y), 0, 2 * (x * y - w * z), 1 - 2 * (x * x + z * z), 2 * (y * z + w * x), 0, 2 * (x * z + w * y),
                        2 * (y * z - w * x), 1 - 2 * (x * x + y * y), 0, 0, 0, 0, 1);
 }
 
-template <typename T> inline void TQuaternion<T>::Zero()
+template <typename T>
+inline void TQuaternion<T>::Zero()
 {
     *this = TQuaternion();
 }
 
-template <typename T> void TQuaternion<T>::Identity()
+template <typename T>
+void TQuaternion<T>::Identity()
 {
     x = 0;
     y = 0;
@@ -271,23 +300,27 @@ template <typename T> void TQuaternion<T>::Identity()
     w = 1;
 }
 
-template <typename T> TQuaternion<T> TQuaternion<T>::GetUnit() const
+template <typename T>
+TQuaternion<T> TQuaternion<T>::GetUnit() const
 {
     float len = Length();
     return TQuaternion<T>(x / len, y / len, z / len, w / len);
 }
 
-template <typename T> TQuaternion<T> TQuaternion<T>::GetConjugate() const
+template <typename T>
+TQuaternion<T> TQuaternion<T>::GetConjugate() const
 {
     return TQuaternion<T>(-x, -y, -z, w);
 }
 
-template <typename T> TQuaternion<T> TQuaternion<T>::GetInverse() const
+template <typename T>
+TQuaternion<T> TQuaternion<T>::GetInverse() const
 {
     return TQuaternion<T>(-x, -y, -z, w);
 }
 
-template <typename T> inline TMatrix3<T> TQuaternion<T>::GetMatrix() const
+template <typename T>
+inline TMatrix3<T> TQuaternion<T>::GetMatrix() const
 {
     T nQ = x * x + y * y + z * z + w * w;
     T s = nQ > static_cast<T>(0) ? (static_cast<T>(2) / nQ) : static_cast<T>(0);
@@ -309,17 +342,20 @@ template <typename T> inline TMatrix3<T> TQuaternion<T>::GetMatrix() const
     return TMatrix3<T>(static_cast<T>(1) - yys - zzs, xys - wzs, xzs + wys, xys + wzs, static_cast<T>(1) - xxs - zzs, yzs - wxs, xzs - wys, yzs + wxs, static_cast<T>(1) + xxs - yys);
 }
 
-template <typename T> inline TVector3<T> TQuaternion<T>::V3() const
+template <typename T>
+inline TVector3<T> TQuaternion<T>::V3() const
 {
     return TVector3<T>(x, y, z);
 }
 
-template <typename T> inline TVector4<T> TQuaternion<T>::V4() const
+template <typename T>
+inline TVector4<T> TQuaternion<T>::V4() const
 {
     return TVector4<T>(x, y, z, w);
 }
 
-template <typename T> TQuaternion<T> TQuaternion<T>::Slerp(TQuaternion<T> const& src, TQuaternion<T> const& dst, float t)
+template <typename T>
+TQuaternion<T> TQuaternion<T>::Slerp(TQuaternion<T> const& src, TQuaternion<T> const& dst, float t)
 {
     TQuaternion<T> v0 = src.Normalize();
     TQuaternion<T> v1 = dst.Normalize();

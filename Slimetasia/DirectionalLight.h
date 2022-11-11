@@ -4,10 +4,12 @@
 class DirectionalLight : public LightBase
 {
 private:
+
     Vector3 m_Direction;
     float m_ShadowDistance;
 
 public:
+
     DirectionalLight(GameObject* parentObject);
     ~DirectionalLight();
 

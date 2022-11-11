@@ -5,6 +5,7 @@
 class PlaneCollider : public CollisionMesh_3D
 {
 public:
+
     PlaneCollider(GameObject* parentObject = nullptr, const float& radius = 0.5f);
 
     virtual ~PlaneCollider() = default;
@@ -24,6 +25,7 @@ public:
     void DebugDraw() override;
 
 private:
+
     float m_Length;
     float m_Width;
     Vector3 m_Normal;

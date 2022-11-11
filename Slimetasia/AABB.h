@@ -7,6 +7,7 @@ class MeshRenderer;
 class AABB
 {
 public:
+
     AABB();
     AABB(const Vector3& min, const Vector3& max);
     AABB(RigidbodyComponent* rigidbody);

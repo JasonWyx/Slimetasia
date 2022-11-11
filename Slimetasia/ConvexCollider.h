@@ -4,6 +4,7 @@
 class ConvexCollider : public CollisionMesh_3D
 {
 public:
+
     ConvexCollider(GameObject* parentObject = nullptr, const std::string& name = "CollisionMesh_3D", const CollisionShapeType& shapetype = eCollisionShapeType_CONVEX_POLY,
                    const CollisionShape& shape = eCollisionShape_CONVEX_MESH)
         : CollisionMesh_3D(parentObject, name, shapetype, shape)

@@ -7,11 +7,13 @@
 class SkyboxPass
 {
 private:
+
     GLuint m_SkyboxVAO;
     GLuint m_SkyboxVBO;
     HShader m_SkyboxShader;
 
 public:
+
     SkyboxPass();
     ~SkyboxPass();
 

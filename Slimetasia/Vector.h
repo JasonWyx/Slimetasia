@@ -40,7 +40,7 @@ struct TVector2
     // 2 Constructors to prevent implicit conversion
     explicit TVector2()
         : x(0)
-        , y(0){};
+        , y(0) {};
     explicit TVector2(T splat)
         : x(splat)
         , y(splat)
@@ -114,7 +114,7 @@ struct TVector3
     explicit TVector3()
         : x(0)
         , y(0)
-        , z(0){};
+        , z(0) {};
     explicit TVector3(T splat)
         : x(splat)
         , y(splat)
@@ -203,7 +203,7 @@ struct TVector4
         : x(0)
         , y(0)
         , z(0)
-        , w(0){};
+        , w(0) {};
     explicit TVector4(T splat)
         : x(splat)
         , y(splat)

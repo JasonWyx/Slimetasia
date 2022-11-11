@@ -11,6 +11,7 @@
 class DefaultCollisionDispatch : public CollisionDispatch
 {
 public:
+
     DefaultCollisionDispatch() = default;
 
     ~DefaultCollisionDispatch() override = default;
@@ -18,5 +19,6 @@ public:
     BaseDetectionAlgorithm* SelectAlgorithm(const CollisionShapeType& shape1, const CollisionShapeType& shape2) override;
 
 protected:
+
     // variables
 };

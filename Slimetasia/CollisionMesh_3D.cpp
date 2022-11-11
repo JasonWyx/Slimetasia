@@ -35,10 +35,10 @@
 //}
 
 CollisionMesh_3D::CollisionMesh_3D(GameObject* parentObject, const std::string& name, const CollisionShapeType& shapetype, const CollisionShape& shape, const float& rad)
-    : IComponent{parentObject, name}
-    , m_ColShapeType{shapetype}
-    , m_ColShape{shape}
-    , m_radius{rad}
+    : IComponent { parentObject, name }
+    , m_ColShapeType { shapetype }
+    , m_ColShape { shape }
+    , m_radius { rad }
 {
     if (parentObject)
     {

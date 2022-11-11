@@ -14,6 +14,7 @@
 class RenderLayer
 {
 public:
+
     RenderLayer();
     ~RenderLayer();
 
@@ -51,6 +52,7 @@ public:
     void UpdateAabbTree();
 
 private:
+
     // Cameras
     std::vector<Camera*> m_Cameras;
     // Renderables

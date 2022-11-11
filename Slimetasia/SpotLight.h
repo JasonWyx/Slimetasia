@@ -4,12 +4,14 @@
 class SpotLight : public LightBase
 {
 private:
+
     Vector3 m_Direction;
     float m_InnerAngle;
     float m_OuterAngle;
     float m_FalloffExponent;
 
 public:
+
     SpotLight(GameObject* parentObject);
     ~SpotLight();
 

@@ -12,6 +12,7 @@ class AppConsole
     bool m_TriggerAutoScroll;
 
 public:
+
     AppConsole(unsigned MAX_LINES = 50)
         : m_MaxLines(MAX_LINES)
         , m_ScrollToBtm(false)

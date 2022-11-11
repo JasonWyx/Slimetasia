@@ -16,13 +16,13 @@
 #include "CollisionMesh_3D.h"
 #include "Editor.h"
 #include "Factory.h"
-#include "RendererVk.h"
 #include "Input.h"
 #include "MeshRenderer.h"
 #include "ParticleSystem.h"
 #include "PhysicsSystem.h"
 #include "Reflection.h"
 #include "Renderer.h"
+#include "RendererVk.h"
 #include "ResourceImporter.h"
 #include "ResourceManager.h"
 #include "Scene.h"
@@ -160,7 +160,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             // Display failed/Success files
             if (failedFiles.size() > 0)
             {
-                std::string errorMessage{ "The following files failed to be added : \n" };
+                std::string errorMessage { "The following files failed to be added : \n" };
 
                 for (int i = 0; i < failedFiles.size(); ++i)
                 {
@@ -196,7 +196,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             }
             if (successFiles.size() > 0)
             {
-                std::string errorMessage{ "The following files have been added : \n" };
+                std::string errorMessage { "The following files have been added : \n" };
 
                 for (int i = 0; i < successFiles.size(); ++i)
                     errorMessage += successFiles[i].filename().replace_extension().string() + " \n";
@@ -302,7 +302,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         MessageBox(NULL, TEXT("Program requires Windows NT!"), appName, MB_ICONERROR);
     }
 
-//#define LEGACY_GL_INIT
+// #define LEGACY_GL_INIT
 #ifndef LEGACY_GL_INIT
 
     HWND dummyWND = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], 0, 0, 1, 1, nullptr, nullptr, hInstance, nullptr);

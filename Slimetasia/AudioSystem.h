@@ -81,6 +81,7 @@ class AudioSystem : public ISystem<AudioSystem>
 
     /// Variables ---------------------------------------------------------------
 private:
+
     FMOD::Studio::System* fmodStudioSys_;
     FMOD::System* fmodSys_;
 
@@ -100,15 +101,18 @@ private:
 
     /// Functions ---------------------------------------------------------------
 public:
+
     AudioSystem();
     ~AudioSystem();
 
     void Update(float dt);
 
 private:
+
     static bool ErrorCheck(FMOD_RESULT fResult);
 
 public:
+
     void LoadAudio(std::string audioClipName, std::string pathName, bool is3D = true, bool loop = false, bool stream = false);
     void UnLoadAudio(std::string audioClipName);
 
@@ -116,6 +120,7 @@ public:
     float GetChannelGrpVol(std::string channelGrpName);
 
 private:
+
     void UnloadAllAudio();
 
     void CreateNewChannelGroup(std::string channelGroupName);
@@ -128,10 +133,11 @@ private:
 
     void MakeMainListener(AudioListener* listener);
     void FindNewListener(AudioListener* ignore = nullptr);
-    void SetListenerPosition(Vector3 pos = Vector3{}, Vector3 vel = Vector3{}, Vector3 forward = Transform::worldForward, Vector3 up = Transform::worldUpward);
+    void SetListenerPosition(Vector3 pos = Vector3 {}, Vector3 vel = Vector3 {}, Vector3 forward = Transform::worldForward, Vector3 up = Transform::worldUpward);
 
     // Editor Functions
 public:
+
     void EditorPlayAudio(unsigned index);
     void EditorStopAudio();
     void PauseAudio();

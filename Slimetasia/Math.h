@@ -35,7 +35,8 @@ float constexpr EPSILON = 0.00001f;
 
 namespace Math
 {
-    template <typename T> T Lerp(T const& src, T const& dst, float interpolant)
+    template <typename T>
+    T Lerp(T const& src, T const& dst, float interpolant)
     {
         //// This might cause jittering
         // T tmp = src;
@@ -51,20 +52,34 @@ namespace Math
         return (interpolant >= 1.0f) ? dst : src + (dst - src) * interpolant;
     }
 
-    template <typename T> T RandomRange(T min, T max) { return min + static_cast<T>(((float)rand() / (float)RAND_MAX) * static_cast<float>(max - min)); }
+    template <typename T>
+    T RandomRange(T min, T max)
+    {
+        return min + static_cast<T>(((float)rand() / (float)RAND_MAX) * static_cast<float>(max - min));
+    }
 
-    template <typename T> T ToRadians(T degrees) { return degrees * DEG_TO_RAD; }
+    template <typename T>
+    T ToRadians(T degrees)
+    {
+        return degrees * DEG_TO_RAD;
+    }
 
-    template <typename T> T ToDegrees(T degrees) { return degrees * RAD_TO_DEG; }
+    template <typename T>
+    T ToDegrees(T degrees)
+    {
+        return degrees * RAD_TO_DEG;
+    }
 
 }  // namespace Math
 
-template <typename T> GLfloat const* ValuePtrFloat(T const& obj)
+template <typename T>
+GLfloat const* ValuePtrFloat(T const& obj)
 {
     return reinterpret_cast<GLfloat const*>(&obj);
 }
 
-template <typename T> GLint const* ValuePtrInt(T const& obj)
+template <typename T>
+GLint const* ValuePtrInt(T const& obj)
 {
     return reinterpret_cast<GLint const*>(&obj);
 }
