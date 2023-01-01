@@ -14,14 +14,11 @@
 #include "Serializer.h"
 #include "Texture.h"
 
-#define NUM_OF_WINDOWS 10
-#define MAX_ARCHETYPES 100
-
 class Editor : public ISystem<Editor>
 {
     friend class ISystem<Editor>;
 
-    enum class EditorWindowType
+    enum class WindowType
     {
         Outliner = 0,
         Inspector,
@@ -32,7 +29,9 @@ class Editor : public ISystem<Editor>
         Profiler,
         Tags,
         Physics,
-        Resource
+        Resource,
+
+        Count
     };
 
     unsigned m_GlobalIDCounter;
@@ -43,7 +42,7 @@ class Editor : public ISystem<Editor>
     AppConsole m_Console;
     GameObject* m_CurrentObject;
     std::vector<GameObject*> m_SelectedObjects;
-    bool m_WindowStates[NUM_OF_WINDOWS];
+    bool m_WindowStates[static_cast<unsigned>(WindowType::Count)];
     std::map<std::string, GameObject*> m_Archetypes;
     std::map<std::string, GameObject*> m_UpdatedArchetypes;
     Layer* m_CurrentLayer;
@@ -182,16 +181,9 @@ public:
     GameObject* LuaCreateArchetypeObject(std::string n, Layer* layer);
     void SetLayer(Layer* ly);
     void SystemTimer(float input, float phy, float Comps, float renderer, float editor, float audio, float anim, float particle, float ai);
-    void SetCurrentObject(GameObject* go)
-    {
-        m_CurrentObject = go;
-        if (m_CurrentObject == nullptr)
-        {
-            m_SelectedObjects.clear();
-        }
-    }
-    GameObject* GetCurrentObject() { return m_CurrentObject; }
-    std::set<std::string> GetTags() { return m_Tags; }
+    void SetCurrentObject(GameObject* go);
+    GameObject* GetCurrentObject();
+    std::set<std::string> GetTags();
     void AddTag(std::string t);
     void RemoveTag(std::string t);
 

@@ -116,6 +116,9 @@
     <Filter Include="Engine Files\Core\Graphics\Vulkan">
       <UniqueIdentifier>{4bab2ba9-b7c1-4e2c-b42e-68a1c10eeb63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine Files\Core\Graphics\Vulkan\Handlers">
+      <UniqueIdentifier>{68856b71-7b64-427a-9d89-cf0815d04a10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -432,6 +435,12 @@
     </ClCompile>
     <ClCompile Include="RendererVk.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceObject.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapchainHandler.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -819,6 +828,12 @@
     </ClInclude>
     <ClInclude Include="RendererVk.h">
       <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceObject.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapchainHandler.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

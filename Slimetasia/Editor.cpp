@@ -9,13 +9,21 @@
 #include "AudioEmitter.h"
 #include "AudioSystem.h"
 #include "External Libraries/ImGuizmo/ImGuizmo.h"
+#ifdef USE_VULKAN_RENDERER
+#include "External Libraries/imgui/backends/imgui_impl_vulkan.h"
+#else
 #include "External Libraries/imgui/backends/imgui_impl_opengl3.h"
+#endif  // USE_VULKAN_RENDERER
 #include "External Libraries/imgui/backends/imgui_impl_win32.h"
 #include "MeshAnimator.h"
 #include "MeshRenderer.h"
 #include "ParticleSystem.h"
 #include "PhysicsSystem.h"
+// #ifdef USE_VULKAN_RENDERER
+#include "RendererVk.h"
+// #else
 #include "Renderer.h"
+// #endif // USE_VULKAN_RENDERER
 #include "ResourceManager.h"
 #include "RigidbodyComponent.h"
 #include "Timer.h"
@@ -169,49 +177,49 @@ void Editor::DrawMenuBar()
     }
     if (ImGui::BeginMenu("Windows"))
     {
-        if (ImGui::MenuItem("Outliner", NULL, m_WindowStates[(int)EditorWindowType::Outliner], !m_WindowStates[(int)EditorWindowType::Outliner]))
+        if (ImGui::MenuItem("Outliner", NULL, m_WindowStates[(int)WindowType::Outliner], !m_WindowStates[(int)WindowType::Outliner]))
         {
-            m_WindowStates[(int)EditorWindowType::Outliner] = true;
+            m_WindowStates[(int)WindowType::Outliner] = true;
         }
-        if (ImGui::MenuItem("Inspector", NULL, m_WindowStates[(int)EditorWindowType::Inspector], !m_WindowStates[(int)EditorWindowType::Inspector]))
+        if (ImGui::MenuItem("Inspector", NULL, m_WindowStates[(int)WindowType::Inspector], !m_WindowStates[(int)WindowType::Inspector]))
         {
-            m_WindowStates[(int)EditorWindowType::Inspector] = true;
+            m_WindowStates[(int)WindowType::Inspector] = true;
         }
         if (ImGui::MenuItem("Console", NULL, m_Console.m_IsActiveWindow, !m_Console.m_IsActiveWindow))
         {
             m_Console.m_IsActiveWindow = true;
         }
-        if (ImGui::MenuItem("Viewport", NULL, m_WindowStates[(int)EditorWindowType::Viewport], !m_WindowStates[(int)EditorWindowType::Viewport]))
+        if (ImGui::MenuItem("Viewport", NULL, m_WindowStates[(int)WindowType::Viewport], !m_WindowStates[(int)WindowType::Viewport]))
         {
-            m_WindowStates[(int)EditorWindowType::Viewport] = true;
+            m_WindowStates[(int)WindowType::Viewport] = true;
         }
-        if (ImGui::MenuItem("Archetype", NULL, m_WindowStates[(int)EditorWindowType::Archetype], !m_WindowStates[(int)EditorWindowType::Archetype]))
+        if (ImGui::MenuItem("Archetype", NULL, m_WindowStates[(int)WindowType::Archetype], !m_WindowStates[(int)WindowType::Archetype]))
         {
-            m_WindowStates[(int)EditorWindowType::Archetype] = true;
+            m_WindowStates[(int)WindowType::Archetype] = true;
         }
-        if (ImGui::MenuItem("ImGui::Text Editor", NULL, m_WindowStates[(int)EditorWindowType::TextEditor], !m_WindowStates[(int)EditorWindowType::TextEditor]))
+        if (ImGui::MenuItem("ImGui::Text Editor", NULL, m_WindowStates[(int)WindowType::TextEditor], !m_WindowStates[(int)WindowType::TextEditor]))
         {
-            m_WindowStates[(int)EditorWindowType::TextEditor] = true;
+            m_WindowStates[(int)WindowType::TextEditor] = true;
         }
-        if (ImGui::MenuItem("Layer Editor", NULL, m_WindowStates[(int)EditorWindowType::LayerEditor], !m_WindowStates[(int)EditorWindowType::LayerEditor]))
+        if (ImGui::MenuItem("Layer Editor", NULL, m_WindowStates[(int)WindowType::LayerEditor], !m_WindowStates[(int)WindowType::LayerEditor]))
         {
-            m_WindowStates[(int)EditorWindowType::LayerEditor] = true;
+            m_WindowStates[(int)WindowType::LayerEditor] = true;
         }
-        if (ImGui::MenuItem("Profiler", NULL, m_WindowStates[(int)EditorWindowType::Profiler], !m_WindowStates[(int)EditorWindowType::Profiler]))
+        if (ImGui::MenuItem("Profiler", NULL, m_WindowStates[(int)WindowType::Profiler], !m_WindowStates[(int)WindowType::Profiler]))
         {
-            m_WindowStates[(int)EditorWindowType::Profiler] = true;
+            m_WindowStates[(int)WindowType::Profiler] = true;
         }
-        if (ImGui::MenuItem("Tags Editor", NULL, m_WindowStates[(int)EditorWindowType::Tags], !m_WindowStates[(int)EditorWindowType::Tags]))
+        if (ImGui::MenuItem("Tags Editor", NULL, m_WindowStates[(int)WindowType::Tags], !m_WindowStates[(int)WindowType::Tags]))
         {
-            m_WindowStates[(int)EditorWindowType::Tags] = true;
+            m_WindowStates[(int)WindowType::Tags] = true;
         }
-        if (ImGui::MenuItem("Physics Editor", NULL, m_WindowStates[(int)EditorWindowType::Physics], !m_WindowStates[(int)EditorWindowType::Physics]))
+        if (ImGui::MenuItem("Physics Editor", NULL, m_WindowStates[(int)WindowType::Physics], !m_WindowStates[(int)WindowType::Physics]))
         {
-            m_WindowStates[(int)EditorWindowType::Physics] = true;
+            m_WindowStates[(int)WindowType::Physics] = true;
         }
-        if (ImGui::MenuItem("Resource Manager", NULL, m_WindowStates[(int)EditorWindowType::Resource], !m_WindowStates[(int)EditorWindowType::Resource]))
+        if (ImGui::MenuItem("Resource Manager", NULL, m_WindowStates[(int)WindowType::Resource], !m_WindowStates[(int)WindowType::Resource]))
         {
-            m_WindowStates[(int)EditorWindowType::Resource] = true;
+            m_WindowStates[(int)WindowType::Resource] = true;
         }
         ImGui::EndMenu();
     }
@@ -287,37 +295,37 @@ void Editor::ShortcutButtons()
     // io.KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
     // io.KeySuper = false;
 
-    if (ImGui::IsKeyDown(17))
+    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
     {
-        if (ImGui::IsKeyPressed('Z'))
+        if (ImGui::IsKeyPressed(ImGuiKey_Z))
         {
             Undo();
         }
-        else if (ImGui::IsKeyPressed('Y'))
+        else if (ImGui::IsKeyPressed(ImGuiKey_Y))
         {
             Redo();
         }
-        else if (ImGui::IsKeyPressed('S'))
+        else if (ImGui::IsKeyPressed(ImGuiKey_S))
         {
             io.KeysDown[17] = false;
             io.KeysDown['S'] = false;
 
             Save();
         }
-        else if (ImGui::IsKeyPressed('O'))
+        else if (ImGui::IsKeyPressed(ImGuiKey_O))
         {
             io.KeysDown[17] = false;
             io.KeysDown['O'] = false;
 
             Load();
         }
-        else if (ImGui::IsKeyPressed('N'))
+        else if (ImGui::IsKeyPressed(ImGuiKey_N))
         {
             ImGui::OpenPopup("NewScene");
         }
     }
     // if (ImGui::IsKeyPressed(112)) ImGui::OpenPopup("HelpScreen");
-    if (ImGui::IsKeyPressed(46) && m_CurrentObject && m_CurrentObject->GetName() != "EditorCamera")
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete) && m_CurrentObject && m_CurrentObject->GetName() != "EditorCamera")
     {
         ActionDeleteObject* act = new ActionDeleteObject(m_CurrentObject, m_CurrentLayer);
         act->Execute();
@@ -384,6 +392,11 @@ void Editor::DrawHelp()
         ImGui::EndPopup();
     }
 }
+
+#ifdef USE_VULKAN_RENDERER
+void Editor::DrawViewport() {}
+
+#else   // !USE_VULKAN_RENDERER
 
 void Editor::DrawViewport()
 {
@@ -805,7 +818,7 @@ void Editor::DrawViewport()
         }
     }
 }
-
+#endif  // USE_VULKAN_RENDERER
 void Editor::DrawArchetype()
 {
     static int selected = -1;
@@ -992,7 +1005,7 @@ void Editor::DrawArchetype()
                             else
                             {
                                 ImGui::InputText(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
-                                if (ImGui::IsKeyPressed(KEY_RETURN) && *string != tmp) *string = std::string(tmp);
+                                if (ImGui::IsKeyPressed(ImGuiKey_Enter) && *string != tmp) *string = std::string(tmp);
                             }
                         }
                         else if (properties[i].type == typeid(iVector2).name())
@@ -1066,7 +1079,7 @@ void Editor::DrawArchetype()
                             ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                             m_Global_Spaces += " ";
                             ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
-                            if (ImGui::IsKeyPressed(KEY_RETURN))
+                            if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                             {
                                 if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
                                 {
@@ -1287,7 +1300,7 @@ void Editor::DrawArchetype()
         ImGui::NewLine();
         ImGui::InvisibleButton("OKCANCELSPACING1", ImVec2(60, 1));
         ImGui::SameLine();
-        if (ImGui::Button("OK", ImVec2(120, 0)) || ImGui::IsKeyPressed(KEY_RETURN))
+        if (ImGui::Button("OK", ImVec2(120, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter))
         {
             if (std::string {} != string)
             {
@@ -1334,7 +1347,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 std::string* string = reinterpret_cast<std::string*>(address + properties[i].offset);
                 std::copy(string->begin(), string->end(), tmp);
                 ImGui::InputText(m_Global_Spaces.c_str(), tmp, MAX_STRING_LENGTH);
-                if (ImGui::IsKeyPressed(KEY_RETURN) && *string != tmp) *string = std::string(tmp);
+                if (ImGui::IsKeyPressed(ImGuiKey_Enter) && *string != tmp) *string = std::string(tmp);
             }
             else if (properties[i].type == typeid(iVector2).name())
             {
@@ -1407,7 +1420,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                 m_Global_Spaces += " ";
                 ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
-                if (ImGui::IsKeyPressed(KEY_RETURN))
+                if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                 {
                     if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
                     {
@@ -2076,7 +2089,7 @@ void Editor::DrawFullScreenViewport()
             static Vector3 tmp;
             static Vector3 current;
 
-            if (ImGui::IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
+            if (ImGui::IsKeyPressed(ImGuiKey_F) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject) m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
             m_CurrentLayer->GetEditorCamera()->SetUpdate(true);
             m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
             m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
@@ -2119,7 +2132,7 @@ void Editor::DrawTagsEditor()
         char newString[MAX_STRING_LENGTH];
         SecureZeroMemory(newString, MAX_STRING_LENGTH);
         ImGui::InputText(m_Global_Spaces.c_str(), newString, MAX_STRING_LENGTH);
-        if (ImGui::IsKeyPressed(KEY_RETURN))
+        if (ImGui::IsKeyPressed(ImGuiKey_Enter))
         {
             std::string s = newString;
             if (!s.empty() && std::find(tags.begin(), tags.end(), s) == tags.end())
@@ -2148,7 +2161,7 @@ void Editor::DrawTagsEditor()
     m_Global_Spaces += " ";
     static char string[MAX_STRING_LENGTH];
     ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-    if (ImGui::Button("Add Tag") || ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::Button("Add Tag") || ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         std::string s = string;
         SecureZeroMemory(string, MAX_STRING_LENGTH);
@@ -2598,7 +2611,7 @@ void Editor::PhysicsOptionsFloat(float* f)
     float tmp = *f;
     m_Global_Spaces += " ";
     ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && tmp != *f)
     {
         // Physics Action here
         float oldValue = *f;
@@ -2631,7 +2644,7 @@ void Editor::PhysicsOptionsVector3(Vector3* v)
     Vector3 tmp = *v;
     m_Global_Spaces += " ";
     ImGui::InputFloat3(m_Global_Spaces.c_str(), &tmp.x);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp.x != v->x || tmp.y != v->y || tmp.z != v->z)
         {
@@ -2650,7 +2663,7 @@ void Editor::PhysicsOptionsUint(uint* u)
     int tmp = (int)*u;
     m_Global_Spaces += " ";
     ImGui::InputInt(m_Global_Spaces.c_str(), &tmp, 0);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != (int)*u && tmp >= 0.0f)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && tmp != (int)*u && tmp >= 0.0f)
     {
         uint newValue = (uint)tmp;
         uint oldValue = *u;
@@ -2673,7 +2686,7 @@ void Editor::Options(std::string* s, GameObject* go, std::string c, std::string 
         ImGui::InputTextMultiline(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
     if (c != "TextRenderer" && p != "m_Text")
     {
-        if (ImGui::IsKeyPressed(KEY_RETURN) && *s != string)
+        if (ImGui::IsKeyPressed(ImGuiKey_Enter) && *s != string)
         {
             std::string oldValue = *s;
             std::string newValue = string;
@@ -2704,7 +2717,7 @@ void Editor::Options(std::string* s)
     std::copy(s->c_str(), s->c_str() + s->size(), string);
     m_Global_Spaces += " ";
     ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && *s != string)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && *s != string)
     {
         std::string oldValue = *s;
         std::string newValue = string;
@@ -2722,7 +2735,7 @@ void Editor::Options(Vector2* vec2, GameObject* go, std::string c, std::string p
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
     ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
@@ -2744,7 +2757,7 @@ void Editor::Options(Vector3* vec3, GameObject* go, std::string c, std::string p
     tmp[2] = vec3->z;
     m_Global_Spaces += " ";
     ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != vec3->x || tmp[1] != vec3->y || tmp[2] != vec3->z)
         {
@@ -2763,7 +2776,7 @@ void Editor::Options(float* f, GameObject* go, std::string c, std::string p)
     float tmp = *f;
     m_Global_Spaces += " ";
     ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && tmp != *f)
     {
         float oldValue = *f;
         float newValue = tmp;
@@ -2779,7 +2792,7 @@ void Editor::Options(int* i, GameObject* go, std::string c, std::string p)
     int tmp = *i;
     m_Global_Spaces += " ";
     ImGui::InputInt(m_Global_Spaces.c_str(), &tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *i)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && tmp != *i)
     {
         int oldValue = *i;
         int newValue = tmp;
@@ -2820,7 +2833,7 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
     ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
     m_Global_Spaces += " ";
     ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
         {
@@ -2961,7 +2974,7 @@ void Editor::Options(TVector2<int>* vec2, GameObject* go, std::string c, std::st
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
     ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
@@ -3036,7 +3049,7 @@ void Editor::ParentStructOptions(std::string* s, GameObject* go, std::string c)
     std::copy(s->c_str(), s->c_str() + s->size(), string);
     m_Global_Spaces += " ";
     ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && *s != string)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && *s != string)
     {
         ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *s = string;
@@ -3052,7 +3065,7 @@ void Editor::ParentStructOptions(float* f, GameObject*& go, std::string c)
     float tmp = *f;
     m_Global_Spaces += " ";
     ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *f)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && tmp != *f)
     {
         ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *f = tmp;
@@ -3069,7 +3082,7 @@ void Editor::ParentStructOptions(int* i, GameObject*& go, std::string c)
     int tmp = *i;
     m_Global_Spaces += " ";
     ImGui::InputInt(m_Global_Spaces.c_str(), &tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN) && tmp != *i)
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) && tmp != *i)
     {
         ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
         *i = tmp;
@@ -3105,7 +3118,7 @@ void Editor::ParentStructOptions(Vector2* vec2, GameObject*& go, std::string c)
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
     ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
@@ -3128,7 +3141,7 @@ void Editor::ParentStructOptions(Vector3* vec3, GameObject*& go, std::string c)
     tmp[2] = vec3->z;
     m_Global_Spaces += " ";
     ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != vec3->x || tmp[1] != vec3->y || tmp[2] != vec3->z)
         {
@@ -3150,7 +3163,7 @@ void Editor::ParentStructOptions(TVector2<int>* vec2, GameObject*& go, std::stri
     tmp[1] = vec2->y;
     m_Global_Spaces += " ";
     ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != vec2->x || tmp[1] != vec2->y)
         {
@@ -3179,7 +3192,7 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
     ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
     m_Global_Spaces += " ";
     ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
-    if (ImGui::IsKeyPressed(KEY_RETURN))
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
         if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
         {
@@ -3417,7 +3430,7 @@ void Editor::LoadData()
 
         m_Console.m_IsActiveWindow = (bool)std::stoi(boolean);
 
-        for (int i = 0; i < NUM_OF_WINDOWS; ++i)
+        for (int i = 0; i < static_cast<unsigned>(WindowType::Count); ++i)
         {
             if (!Data) return;
             if (!Data->Attribute(("Window" + std::to_string(i)).c_str())) break;
@@ -3439,7 +3452,7 @@ void Editor::SaveData()
 
     rootNode->InsertEndChild(dataElement);
 
-    for (int i = 0; i < NUM_OF_WINDOWS; ++i)
+    for (int i = 0; i < static_cast<unsigned>(WindowType::Count); ++i)
     {
         dataElement->SetAttribute(("Window" + std::to_string(i)).c_str(), (int)m_WindowStates[i]);
     }
@@ -4297,6 +4310,25 @@ void Editor::SystemTimer(float input, float phy, float Comps, float renderer, fl
     m_Timings[8] = ai;
 }
 
+void Editor::SetCurrentObject(GameObject* go)
+{
+    m_CurrentObject = go;
+    if (m_CurrentObject == nullptr)
+    {
+        m_SelectedObjects.clear();
+    }
+}
+
+GameObject* Editor::GetCurrentObject()
+{
+    return m_CurrentObject;
+}
+
+std::set<std::string> Editor::GetTags()
+{
+    return m_Tags;
+}
+
 void Editor::AddTag(std::string t)
 {
     m_Tags.insert(t);
@@ -4682,7 +4714,7 @@ void Editor::DrawInspector()
                                 m_Global_Spaces += " ";
                                 ImGui::SameLine();
                                 ImGui::InputFloat(m_Global_Spaces.c_str(), &tmp);
-                                if (ImGui::IsKeyPressed(KEY_RETURN) && f != tmp)
+                                if (ImGui::IsKeyPressed(ImGuiKey_Enter) && f != tmp)
                                 {
                                     float oldValue = f;
                                     float newValue = tmp;
@@ -4700,7 +4732,7 @@ void Editor::DrawInspector()
                                 m_Global_Spaces += " ";
                                 ImGui::SameLine();
                                 ImGui::InputInt(m_Global_Spaces.c_str(), &tmp);
-                                if (ImGui::IsKeyPressed(KEY_RETURN) && i != tmp)
+                                if (ImGui::IsKeyPressed(ImGuiKey_Enter) && i != tmp)
                                 {
                                     int oldValue = i;
                                     int newValue = tmp;
@@ -4720,7 +4752,7 @@ void Editor::DrawInspector()
                                 m_Global_Spaces += " ";
                                 ImGui::SameLine();
                                 ImGui::InputText(m_Global_Spaces.c_str(), string, MAX_STRING_LENGTH);
-                                if (ImGui::IsKeyPressed(KEY_RETURN) && s != string)
+                                if (ImGui::IsKeyPressed(ImGuiKey_Enter) && s != string)
                                 {
                                     std::string oldValue = s;
                                     std::string newValue = string;
@@ -4774,16 +4806,20 @@ Editor::Editor(HWND hwnd, float x, float y)
     , m_IsTransformInLocalSpace(false)
     , m_IsGameCameraAcitve(false)
 {
+#ifndef USE_VULKAN_RENDERER
     ImGui::CreateContext();
+#endif  // USE_VULKAN_RENDERER
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui_ImplWin32_Init(static_cast<void*>(hwnd));
+#ifndef USE_VULKAN_RENDERER
     ImGui_ImplOpenGL3_Init();
+#endif  // USE_VULKAN_RENDERER
 
     unsigned char* pixels;
     int width, height;
 
-    for (int i = 0; i < NUM_OF_WINDOWS; ++i)
+    for (int i = 0; i < static_cast<unsigned>(WindowType::Count); ++i)
     {
         m_WindowStates[i] = false;
     }
@@ -4821,7 +4857,9 @@ Editor::~Editor()
     }
     // Need to save the archetype
 
+#ifndef USE_VULKAN_RENDERER
     ImGui_ImplOpenGL3_Shutdown();
+#endif
     ImGui_ImplWin32_Shutdown();
 
     ImGui::DestroyContext();
@@ -4840,7 +4878,10 @@ void Editor::Update(float dt)
     }
 
     ImGui_ImplWin32_NewFrame();
+#ifndef USE_VULKAN_RENDERER
     ImGui_ImplOpenGL3_NewFrame();
+#endif  // USE_VULKAN_RENDERER
+
     ImGui::NewFrame();
 
     SetEditorMouse();
@@ -4865,7 +4906,7 @@ void Editor::Update(float dt)
 
     if (Application::Instance().GetGameTimer().IsEditorPaused() || !m_IsViewportFullScreen)
     {
-        if (m_WindowStates[(int)EditorWindowType::Viewport])
+        if (m_WindowStates[(int)WindowType::Viewport])
         {
             ImGui::Begin("ViewPort");
             DrawViewport();
@@ -4878,63 +4919,63 @@ void Editor::Update(float dt)
         DrawFullScreenViewport();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Physics])
+    if (m_WindowStates[(int)WindowType::Physics])
     {
         ImGui::Begin("Physics");
         DrawPhysicsEditor();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Outliner])
+    if (m_WindowStates[(int)WindowType::Outliner])
     {
         ImGui::Begin("Outliner");
         DrawOutliner();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Inspector])
+    if (m_WindowStates[(int)WindowType::Inspector])
     {
         ImGui::Begin("Inspector");
         DrawInspector();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Archetype])
+    if (m_WindowStates[(int)WindowType::Archetype])
     {
         ImGui::Begin("Archetype");
         DrawArchetype();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::LayerEditor])
+    if (m_WindowStates[(int)WindowType::LayerEditor])
     {
         ImGui::Begin("LayerEditor");
         DrawLayerEditor();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Profiler])
+    if (m_WindowStates[(int)WindowType::Profiler])
     {
         ImGui::Begin("Profiler");
         DrawProfiler();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Tags])
+    if (m_WindowStates[(int)WindowType::Tags])
     {
         ImGui::Begin("Tags");
         DrawTagsEditor();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::TextEditor])
+    if (m_WindowStates[(int)WindowType::TextEditor])
     {
         ImGui::Begin("TextEditor");
         DrawTextEditor();
         ImGui::End();
     }
 
-    if (m_WindowStates[(int)EditorWindowType::Resource])
+    if (m_WindowStates[(int)WindowType::Resource])
     {
         ImGui::Begin("ResourceManager");
         DrawResourceManager();
@@ -4951,7 +4992,10 @@ void Editor::Update(float dt)
 
     ImGui::ShowDemoWindow();
     ImGui::Render();
+
+#ifndef USE_VULKAN_RENDERER
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
 
     m_DeltaMousePos = ImGui::GetMousePos();
 }

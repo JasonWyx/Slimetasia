@@ -223,6 +223,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="ConvexCollider.cpp" />
     <ClCompile Include="ConvexPolygonVsConvexPolygon.cpp" />
     <ClCompile Include="DebugPass.cpp" />
+    <ClCompile Include="DeviceObject.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="EditorCamera.cpp" />
@@ -339,6 +340,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="DDS.h" />
     <ClInclude Include="DebugPass.h" />
     <ClInclude Include="DefaultMemAllocator.h" />
+    <ClInclude Include="DeviceObject.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="DynamicAABBTree.h" />
     <ClInclude Include="External Libraries\ImGuizmo\GraphEditor.h" />

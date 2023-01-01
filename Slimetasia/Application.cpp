@@ -616,9 +616,6 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
 #endif  // #if defined(USE_VULKAN_RENDERER)
 
-    // Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
-    // RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
-
     Input::Initialize();
     Editor::Initialize(m_Window, static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
     ParticleSystem ::Initialize(MAXCOUNT);
@@ -637,10 +634,6 @@ Application::~Application()
 
     Editor::Shutdown();
     Input::Shutdown();
-
-    // RendererVk::Shutdown();
-    Renderer::Shutdown();
-
 #if defined(USE_VULKAN_RENDERER)
     RendererVk::Shutdown();
 #else
@@ -790,15 +783,11 @@ void Application::RunMainLoop()
         audioTime = m_ComputeTimer.GetTimePassed();
 
         m_ComputeTimer.StartTimer();
-
 #if defined(USE_VULKAN_RENDERER)
         RendererVk::Instance().Update(scaledFrameTime);
 #else
         Renderer::Instance().Update(scaledFrameTime);
 #endif  // #if defined(USE_VULKAN_RENDERER)
-
-        // RendererVk::Instance().Update(scaledFrameTime);
-        // Renderer::Instance().Update(scaledFrameTime);
         renderTime = m_ComputeTimer.GetTimePassed();
 
 #ifdef EDITOR
