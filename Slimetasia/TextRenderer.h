@@ -39,20 +39,8 @@ public:
     void OnActive() override;
     void OnInactive() override;
 
-private:
-
-    // Owner transform
-    std::size_t m_TextHash;
-
-    GLuint m_VertexArray;
-    GLuint m_VertexBuffer;
-    GLuint m_IndexBuffer;
-    unsigned m_TotalIndices;
-    TextAnchorPoint m_PrevAnchorPoint;
-
-    void GenerateGeometryData();
-
-public:
+    GLuint GetVertexArrayObject();
+    unsigned GetTotalIndices();
 
     // Text rendering related stuff
     Transform* m_Transform;
@@ -67,8 +55,18 @@ public:
     bool m_FaceCamera;
     TextAnchorPoint m_AnchorPoint;
 
-    GLuint GetVertexArrayObject();
-    unsigned GetTotalIndices();
-
     REFLECT();
+
+private:
+    void GenerateGeometryData();
+
+    // Owner transform
+    std::size_t m_TextHash;
+
+    GLuint m_VertexArray;
+    GLuint m_VertexBuffer;
+    GLuint m_IndexBuffer;
+    unsigned m_TotalIndices;
+    TextAnchorPoint m_PrevAnchorPoint;
+
 };

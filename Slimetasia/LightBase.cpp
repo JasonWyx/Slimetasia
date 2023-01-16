@@ -11,19 +11,12 @@ LightBase::LightBase(GameObject* owner, char const* componentName)
     , m_CastShadows(true)
     , m_ShadowResolution(1024)
     , m_ShadowResolutionPrev(m_ShadowResolution)
-    ,
-    // m_ShadowDistance(100.0f),
-    m_ShadowBias(0.0f)
+    , m_ShadowBias(0.0f)
     , m_ShadowMap(0)
 {
 }
 
 LightBase::~LightBase() {}
-
-Transform* LightBase::GetTransform() const
-{
-    return m_Transform;
-}
 
 void LightBase::OnActive()
 {
@@ -35,63 +28,9 @@ void LightBase::OnInactive()
     m_OwnerObject->GetParentLayer()->GetRenderLayer().RemoveLight(this);
 }
 
-float LightBase::GetIntensity() const
-{
-    return m_Intensity;
-}
-
-void LightBase::SetIntensity(float intensity)
-{
-    m_Intensity = intensity;
-}
-
-Color3 LightBase::GetLightColor() const
-{
-    return m_LightColor;
-}
-
-void LightBase::SetLightColor(Color3 const& lightColor)
-{
-    m_LightColor = lightColor;
-}
-
-bool LightBase::IsCastShadows() const
-{
-    return m_CastShadows;
-}
-
-void LightBase::SetCastShadows(bool flag)
-{
-    if (!m_CastShadows && flag)
-    {
-    }
-
-    m_CastShadows = flag;
-}
-
-GLsizei LightBase::GetShadowResolution() const
-{
-    return m_ShadowResolution;
-}
-
 float LightBase::GetShadowDistance() const
 {
     return std::sqrtf(4 * (256 * std::max({ m_LightColor.r, m_LightColor.g, m_LightColor.b }) * m_Intensity)) * 0.5f;
-}
-
-// void LightBase::SetShadowDistance(float dist)
-//{
-//  m_ShadowDistance = dist;
-//}
-
-float LightBase::GetShadowBias() const
-{
-    return m_ShadowBias;
-}
-
-void LightBase::SetShadowBias(float bias)
-{
-    m_ShadowBias = bias;
 }
 
 GLuint LightBase::GetShadowMapTexture()

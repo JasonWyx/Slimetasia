@@ -27,6 +27,7 @@ void DirectionalLight::SetDirection(Vector3 const& direction)
 
 void DirectionalLight::BuildShadowMap()
 {
+#ifndef USE_VULKAN_RENDERER
     if (m_ShadowMap == 0)
     {
         glDeleteTextures(1, &m_ShadowMap);
@@ -40,6 +41,7 @@ void DirectionalLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
+#endif // USE_VULKAN_RENDERER
 }
 
 float DirectionalLight::GetShadowDistance() const
@@ -50,7 +52,6 @@ float DirectionalLight::GetShadowDistance() const
 std::vector<Matrix4> DirectionalLight::GetLightViewProjMatricies()
 {
     Vector3 pos = m_Transform->GetWorldPosition();
-    // Vector3 posToCam = m_Transform->GetWorldPosition() - pos;
     Vector3 dirNorm = m_Direction.Normalized();
     Vector3 up = dirNorm.y == 1 ? Vector3(0.0f, 0.0f, -1.0f) : dirNorm.y == -1 ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
 

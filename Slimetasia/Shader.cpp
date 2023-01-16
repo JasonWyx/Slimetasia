@@ -23,6 +23,16 @@ Shader::~Shader()
     }
 }
 
+void Shader::Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root)
+{
+    ResourceBase::Serialize(doc, root);
+}
+
+void Shader::Unserialize(tinyxml2::XMLElement* root)
+{
+    ResourceBase::Unserialize(root);
+}
+
 void Shader::Compile()
 {
     if (m_ShaderProgram != 0)
@@ -49,61 +59,6 @@ bool Shader::Enable()
 void Shader::Disable()
 {
     glUseProgram(0);
-}
-
-GLuint Shader::GetProgramHandle() const
-{
-    return m_ShaderProgram;
-}
-
-std::string const& Shader::GetVertShaderFilePath() const
-{
-    return m_VertShaderFilePath;
-}
-
-void Shader::SetVertShaderFilePath(std::string const& vertShaderFilePath)
-{
-    m_VertShaderFilePath = vertShaderFilePath;
-}
-
-std::string const& Shader::GetFragShaderFilePath() const
-{
-    return m_FragShaderFilePath;
-}
-
-void Shader::SetFragShaderFilePath(std::string const& fragShaderFilePath)
-{
-    m_FragShaderFilePath = fragShaderFilePath;
-}
-
-std::string const& Shader::GetGeomShaderFilePath() const
-{
-    return m_GeomShaderFilePath;
-}
-
-void Shader::SetGeomShaderFilePath(std::string const& geomShaderFilePath)
-{
-    m_GeomShaderFilePath = geomShaderFilePath;
-}
-
-std::string const& Shader::GetTessShaderFilePath() const
-{
-    return m_TessShaderFilePath;
-}
-
-void Shader::SetTessShaderFilePath(std::string const& tessShaderFilePath)
-{
-    m_TessShaderFilePath = tessShaderFilePath;
-}
-
-void Shader::Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root)
-{
-    ResourceBase::Serialize(doc, root);
-}
-
-void Shader::Unserialize(tinyxml2::XMLElement* root)
-{
-    ResourceBase::Unserialize(root);
 }
 
 /*static*/ GLuint Shader::CompileShader(std::string filePath, GLenum shaderType)

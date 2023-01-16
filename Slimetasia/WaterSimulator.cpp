@@ -37,8 +37,10 @@ WaterSimulator::WaterSimulator(GameObject* parentObject, const char* componentNa
 
 WaterSimulator::~WaterSimulator()
 {
+#ifndef USE_VULKAN_RENDERER
     glDeleteTextures(1, &m_ReflectionTexture);
     glDeleteTextures(1, &m_RefractionTexture);
+#endif // USE_VULKAN_RENDERER
 }
 
 void WaterSimulator::OnActive()
@@ -56,32 +58,13 @@ void WaterSimulator::OnUpdate(float dt)
     m_WaveFactor = std::fmodf(m_WaveFactor + dt * m_WaveSpeed, 1.0f);
 }
 
-Transform* WaterSimulator::GetTransform()
-{
-    return m_Transform;
-}
-
-GLuint WaterSimulator::GetReflectionTexture() const
-{
-    return m_ReflectionTexture;
-}
-
-GLuint WaterSimulator::GetRefractionTexture() const
-{
-    return m_RefractionTexture;
-}
-
-float WaterSimulator::GetWaveFactor() const
-{
-    return m_WaveFactor;
-}
-
 void WaterSimulator::GenerateTextures(const iVector2& viewportSize)
 {
     if (viewportSize != m_ViewportSize)
     {
         m_ViewportSize = viewportSize;
 
+#ifndef USE_VULKAN_RENDERER
         glDeleteTextures(1, &m_ReflectionTexture);
         glDeleteTextures(1, &m_RefractionTexture);
 
@@ -98,5 +81,6 @@ void WaterSimulator::GenerateTextures(const iVector2& viewportSize)
         glTextureParameteri(m_RefractionTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(m_RefractionTexture, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(m_RefractionTexture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#endif USE_VULKAN_RENDERER
     }
 }

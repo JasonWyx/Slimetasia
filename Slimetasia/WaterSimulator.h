@@ -26,10 +26,10 @@ public:
     void OnInactive() override;
     void OnUpdate(float dt) override;
 
-    Transform* GetTransform();
-    GLuint GetReflectionTexture() const;
-    GLuint GetRefractionTexture() const;
-    float GetWaveFactor() const;
+    Transform* GetTransform() { return m_Transform; }
+    GLuint GetReflectionTexture() const { return m_ReflectionTexture; }
+    GLuint GetRefractionTexture() const { return m_RefractionTexture; }
+    float GetWaveFactor() const { return m_WaveFactor; }
     void GenerateTextures(const iVector2& viewportSize);
 
 private:

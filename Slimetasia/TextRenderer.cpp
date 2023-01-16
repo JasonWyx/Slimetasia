@@ -32,6 +32,7 @@ TextRenderer::TextRenderer(GameObject* owner)
     , m_AnchorPoint(TextAnchorPoint::eTextAnchorPoint_TopLeft)
     , m_PrevAnchorPoint(m_AnchorPoint)
 {
+#ifndef USE_VULKAN_RENDERER
     glCreateVertexArrays(1, &m_VertexArray);
 
     glEnableVertexArrayAttrib(m_VertexArray, 0);
@@ -43,13 +44,31 @@ TextRenderer::TextRenderer(GameObject* owner)
     glVertexArrayAttribFormat(m_VertexArray, 1, 2, GL_FLOAT, GL_FALSE, sizeof(Vector3));
 
     m_OutlineColor = Color4(0.f, 0.f, 0.f, 1.0f);
-    // GenerateGeometryData();
+#endif  // USE_VULKAN_RENDERER
 }
 
 TextRenderer::~TextRenderer()
 {
+#ifndef USE_VULKAN_RENDERER
     glDeleteVertexArrays(1, &m_VertexArray);
     glDeleteBuffers(1, &m_VertexBuffer);
+#endif  // USE_VULKAN_RENDERER
+}
+
+void TextRenderer::OnActive()
+{
+    if (m_OwnerObject->GetParentLayer())
+    {
+        m_OwnerObject->GetParentLayer()->GetRenderLayer().AddTextRenderer(this);
+    }
+}
+
+void TextRenderer::OnInactive()
+{
+    if (m_OwnerObject->GetParentLayer())
+    {
+        m_OwnerObject->GetParentLayer()->GetRenderLayer().RemoveTextRenderer(this);
+    }
 }
 
 void TextRenderer::GenerateGeometryData()
@@ -205,6 +224,7 @@ void TextRenderer::GenerateGeometryData()
 
     m_TotalIndices = static_cast<unsigned int>(indices.size());
 
+#ifndef USE_VULKAN_RENDERER
     // Clean up first
     glDeleteBuffers(1, &m_VertexBuffer);
     glDeleteBuffers(1, &m_IndexBuffer);
@@ -218,6 +238,7 @@ void TextRenderer::GenerateGeometryData()
 
     glNamedBufferStorage(m_IndexBuffer, indices.size() * sizeof(indices[0]), indices.data(), 0);
     glVertexArrayElementBuffer(m_VertexArray, m_IndexBuffer);
+#endif  // USE_VULKAN_RENDERER
 }
 
 GLuint TextRenderer::GetVertexArrayObject()
@@ -238,14 +259,4 @@ GLuint TextRenderer::GetVertexArrayObject()
 unsigned TextRenderer::GetTotalIndices()
 {
     return m_TotalIndices;
-}
-
-void TextRenderer::OnActive()
-{
-    if (m_OwnerObject->GetParentLayer()) m_OwnerObject->GetParentLayer()->GetRenderLayer().AddTextRenderer(this);
-}
-
-void TextRenderer::OnInactive()
-{
-    if (m_OwnerObject->GetParentLayer()) m_OwnerObject->GetParentLayer()->GetRenderLayer().RemoveTextRenderer(this);
 }

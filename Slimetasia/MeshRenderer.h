@@ -22,21 +22,6 @@ REFLECT_ENUM(TilingMode)
 
 class MeshRenderer : public IComponent
 {
-    Transform* m_Transform;
-    HMesh m_Mesh;
-    Color4 m_MeshColor;
-    HTexture m_DiffuseTexture;
-    HTexture m_NormalTexture;
-    HTexture m_SpecularTexture;
-    HTexture m_EmissiveTexture;
-    Color3 m_EmissiveColor;
-    bool m_CastShadow;
-    GLuint m_TextureSampler;
-    bool m_TilingEnabled;
-    TilingAxis m_TilingAxis;
-    TilingMode m_TilingMode;
-    float m_TilingSize;
-
 public:
 
     MeshRenderer(GameObject* parentObject);
@@ -77,4 +62,21 @@ public:
     void SetTilingSize(float size);
 
     REFLECT()
+
+private:
+
+    Transform* m_Transform;
+    HMesh m_Mesh;
+    Color4 m_MeshColor;
+    HTexture m_DiffuseTexture;
+    HTexture m_NormalTexture;
+    HTexture m_SpecularTexture;
+    HTexture m_EmissiveTexture;
+    Color3 m_EmissiveColor;
+    bool m_CastShadow;
+    GLuint m_TextureSampler;
+    bool m_TilingEnabled;
+    TilingAxis m_TilingAxis;
+    TilingMode m_TilingMode;
+    float m_TilingSize;
 };

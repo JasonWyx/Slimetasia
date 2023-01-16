@@ -15,51 +15,14 @@ SpotLight::SpotLight(GameObject* parentObject)
 
 SpotLight::~SpotLight()
 {
+#ifndef USE_VULKAN_RENDERER
     glDeleteTextures(1, &m_ShadowMap);
-}
-
-Vector3 SpotLight::GetDirection() const
-{
-    return m_Direction;
-}
-
-void SpotLight::SetDirection(Vector3 const& direction)
-{
-    m_Direction = direction;
-}
-
-float SpotLight::GetInnerAngle() const
-{
-    return m_InnerAngle;
-}
-
-void SpotLight::SetInnerAngle(float angle)
-{
-    m_InnerAngle = angle;
-}
-
-float SpotLight::GetOuterAngle() const
-{
-    return m_OuterAngle;
-}
-
-void SpotLight::SetOuterAngle(float angle)
-{
-    m_OuterAngle = angle;
-}
-
-float SpotLight::GetFalloffExponent() const
-{
-    return m_FalloffExponent;
-}
-
-void SpotLight::SetFalloffExponent(float exponent)
-{
-    m_FalloffExponent = exponent;
+#endif // USE_VULKAN_RENDERER
 }
 
 void SpotLight::BuildShadowMap()
 {
+#ifndef USE_VULKAN_RENDERER
     if (m_ShadowMap == 0)
     {
         glDeleteTextures(1, &m_ShadowMap);
@@ -73,6 +36,7 @@ void SpotLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
+#endif // USE_VULKAN_RENDERER
 }
 
 std::vector<Matrix4> SpotLight::GetLightViewProjMatricies()

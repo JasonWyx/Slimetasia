@@ -12,27 +12,23 @@ public:
     Shader(const std::string& resourceName = "Shader", const std::filesystem::path& filePath = "");
     ~Shader();
 
+    // Inherited via ResourceBase
+    void Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root) override;
+    void Unserialize(tinyxml2::XMLElement* root) override;
+
     void Compile();
     bool Enable();
     void Disable();
 
-    GLuint GetProgramHandle() const;
-
-    std::string const& GetVertShaderFilePath() const;
-    void SetVertShaderFilePath(std::string const& vertShaderFilePath);
-
-    std::string const& GetFragShaderFilePath() const;
-    void SetFragShaderFilePath(std::string const& fragShaderFilePath);
-
-    std::string const& GetGeomShaderFilePath() const;
-    void SetGeomShaderFilePath(std::string const& geomShaderFilePath);
-
-    std::string const& GetTessShaderFilePath() const;
-    void SetTessShaderFilePath(std::string const& tessShaderFilePath);
-
-    // Inherited via ResourceBase
-    virtual void Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* root) override;
-    virtual void Unserialize(tinyxml2::XMLElement* root) override;
+    GLuint GetProgramHandle() const { return m_ShaderProgram; }
+    std::string const& GetVertShaderFilePath() const { return m_VertShaderFilePath; }
+    void SetVertShaderFilePath(std::string const& vertShaderFilePath) { m_VertShaderFilePath = vertShaderFilePath; }
+    std::string const& GetFragShaderFilePath() const { return m_FragShaderFilePath; }
+    void SetFragShaderFilePath(std::string const& fragShaderFilePath) { m_FragShaderFilePath = fragShaderFilePath; }
+    std::string const& GetGeomShaderFilePath() const { return m_GeomShaderFilePath; }
+    void SetGeomShaderFilePath(std::string const& geomShaderFilePath) { m_GeomShaderFilePath = geomShaderFilePath; }
+    std::string const& GetTessShaderFilePath() const { return m_TessShaderFilePath; }
+    void SetTessShaderFilePath(std::string const& tessShaderFilePath) { m_TessShaderFilePath = tessShaderFilePath; }
 
 private:
 

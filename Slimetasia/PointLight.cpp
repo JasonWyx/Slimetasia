@@ -11,7 +11,9 @@ PointLight::PointLight(GameObject* parentObject)
 
 PointLight::~PointLight()
 {
+#ifndef USE_VULKAN_RENDERER
     glDeleteTextures(1, &m_ShadowMap);
+#endif // USE_VULKAN_RENDERER
 }
 
 float PointLight::GetShadowDistance() const
@@ -21,6 +23,7 @@ float PointLight::GetShadowDistance() const
 
 void PointLight::BuildShadowMap()
 {
+#ifndef USE_VULKAN_RENDERER
     if (m_ShadowMap == 0)
     {
         glDeleteTextures(1, &m_ShadowMap);
@@ -34,6 +37,7 @@ void PointLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
+#endif // USE_VULKAN_RENDERER
 }
 
 std::vector<Matrix4> PointLight::GetLightViewProjMatricies()

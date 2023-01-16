@@ -4,38 +4,22 @@
 #include "Layer.h"
 #include "MeshAnimator.h"
 
-REFLECT_INIT(MeshRenderer)
-REFLECT_PARENT(IComponent)
-REFLECT_PROPERTY(m_Mesh)
-REFLECT_PROPERTY(m_MeshColor)
-REFLECT_PROPERTY(m_DiffuseTexture)
-REFLECT_PROPERTY(m_NormalTexture)
-REFLECT_PROPERTY(m_SpecularTexture)
-REFLECT_PROPERTY(m_EmissiveEnabled)
-REFLECT_PROPERTY(m_EmissiveTexture)
-REFLECT_PROPERTY(m_EmissiveColor)
-REFLECT_PROPERTY(m_CastShadow)
-REFLECT_PROPERTY(m_TilingEnabled)
-REFLECT_PROPERTY(m_TilingAxis)
-REFLECT_PROPERTY(m_TilingMode)
-REFLECT_PROPERTY(m_TilingSize)
-REFLECT_END()
-
 MeshRenderer::MeshRenderer(GameObject* parentObject)
     : IComponent(parentObject, "MeshRenderer")
-    , m_Transform(nullptr)
-    , m_Mesh()
-    ,
-    // m_Materials(),
-    m_MeshColor(1.0f, 1.0f, 1.0f, 1.0f)
-    , m_DiffuseTexture()
-    , m_NormalTexture()
-    , m_SpecularTexture()
-    , m_CastShadow(true)
-    , m_TilingEnabled(false)
-    , m_TilingAxis(TilingAxis::eTilingAxis_XZ)
-    , m_TilingMode(TilingMode::eTilingMode_Repeat)
-    , m_TilingSize(1.0f)
+    , m_Transform { nullptr }
+    , m_Mesh {}
+    , m_MeshColor { 1.0f, 1.0f, 1.0f, 1.0f }
+    , m_DiffuseTexture {}
+    , m_NormalTexture {}
+    , m_SpecularTexture {}
+    , m_EmissiveTexture {}
+    , m_EmissiveColor {}
+    , m_CastShadow { true }
+    , m_TextureSampler {}
+    , m_TilingEnabled { false }
+    , m_TilingAxis { TilingAxis::eTilingAxis_XZ }
+    , m_TilingMode { TilingMode::eTilingMode_Repeat }
+    , m_TilingSize { 1.0f }
 {
     if (parentObject)
     {
@@ -43,36 +27,40 @@ MeshRenderer::MeshRenderer(GameObject* parentObject)
         m_Transform = GetOwner()->GetComponent<Transform>();
     }
 
+#ifndef USE_VULKAN_RENDERER
     glCreateSamplers(1, &m_TextureSampler);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#endif // !USE_VULKAN_RENDERER
 }
 
 MeshRenderer::~MeshRenderer()
 {
     OnInactive();
+#ifndef USE_VULKAN_RENDERER
     glDeleteSamplers(1, &m_TextureSampler);
+#endif  // !USE_VULKAN_RENDERER
 }
 
 void MeshRenderer::OnActive()
 {
-    m_OwnerObject->GetParentLayer()->GetRenderLayer().AddMeshRenderer(this);
+    if (m_OwnerObject != nullptr)
+    {
+        m_OwnerObject->GetParentLayer()->GetRenderLayer().AddMeshRenderer(this);
+    }
 }
 
 void MeshRenderer::OnInactive()
 {
-    if (m_OwnerObject && m_OwnerObject->GetParentLayer()) m_OwnerObject->GetParentLayer()->GetRenderLayer().RemoveMeshRenderer(this);
+    if (m_OwnerObject && m_OwnerObject->GetParentLayer())
+    {
+        m_OwnerObject->GetParentLayer()->GetRenderLayer().RemoveMeshRenderer(this);
+    }
 }
 
-void MeshRenderer::RevalidateResources()
-{
-    // m_Mesh.Validate();
-    // m_DiffuseTexture.Validate();
-    // m_NormalTexture.Validate();
-    // m_SpecularTexture.Validate();
-}
+void MeshRenderer::RevalidateResources() {}
 
 Transform* MeshRenderer::GetTransform()
 {
@@ -87,6 +75,7 @@ HMesh MeshRenderer::GetMesh() const
 void MeshRenderer::SetMesh(HMesh mesh)
 {
     m_Mesh = mesh;
+
     if (MeshAnimator* meshAnimator = m_OwnerObject->GetComponent<MeshAnimator>())
     {
         meshAnimator->InitMeshAnimator();
@@ -170,23 +159,6 @@ void MeshRenderer::SetCastShadow(bool cast)
 
 GLuint MeshRenderer::GetTextureSampler() const
 {
-    switch (m_TilingMode)
-    {
-        case eTilingMode_Repeat:
-        {
-            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        }
-        break;
-
-        case eTilingMode_Mirror:
-        {
-            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        }
-        break;
-    }
-
     return m_TextureSampler;
 }
 
@@ -217,6 +189,25 @@ TilingMode MeshRenderer::GetTilingMode() const
 
 void MeshRenderer::SetTilingMode(TilingMode mode)
 {
+#ifndef USE_VULKAN_RENDERER
+    switch (m_TilingMode)
+    {
+        case eTilingMode_Repeat:
+        {
+            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+        break;
+
+        case eTilingMode_Mirror:
+        {
+            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+            glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        }
+        break;
+    }
+#endif  // !USE_VULKAN_RENDERER
+
     m_TilingMode = mode;
 }
 
@@ -229,3 +220,20 @@ void MeshRenderer::SetTilingSize(float size)
 {
     m_TilingSize = size;
 }
+
+REFLECT_INIT(MeshRenderer)
+REFLECT_PARENT(IComponent)
+REFLECT_PROPERTY(m_Mesh)
+REFLECT_PROPERTY(m_MeshColor)
+REFLECT_PROPERTY(m_DiffuseTexture)
+REFLECT_PROPERTY(m_NormalTexture)
+REFLECT_PROPERTY(m_SpecularTexture)
+REFLECT_PROPERTY(m_EmissiveEnabled)
+REFLECT_PROPERTY(m_EmissiveTexture)
+REFLECT_PROPERTY(m_EmissiveColor)
+REFLECT_PROPERTY(m_CastShadow)
+REFLECT_PROPERTY(m_TilingEnabled)
+REFLECT_PROPERTY(m_TilingAxis)
+REFLECT_PROPERTY(m_TilingMode)
+REFLECT_PROPERTY(m_TilingSize)
+REFLECT_END()

@@ -102,6 +102,7 @@ void Camera::SetViewportSize(iVector2 const& viewportSize, bool rebuildTextures)
     {
         m_ViewportSize = viewportSize;
 
+#ifndef USE_VULKAN_RENDERER
         if (rebuildTextures)
         {
             glDeleteTextures(1, &m_RenderTarget);
@@ -111,6 +112,7 @@ void Camera::SetViewportSize(iVector2 const& viewportSize, bool rebuildTextures)
             glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         }
+#endif  // USE_VULKAN_RENDERER
     }
 }
 
@@ -230,6 +232,7 @@ GLuint Camera::GetRenderTarget()
     {
         m_PrevViewportSize = m_ViewportSize;
 
+#ifndef USE_VULKAN_RENDERER
         glDeleteTextures(1, &m_RenderTarget);
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderTarget);
@@ -237,6 +240,7 @@ GLuint Camera::GetRenderTarget()
         glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
         glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#endif  // USE_VULKAN_RENDERER
     }
     return m_RenderTarget;
 }
@@ -365,16 +369,24 @@ Matrix4 Camera::GetProjTransform() const
     float aspectRatio = static_cast<float>(m_ViewportSize.x) / m_ViewportSize.y;
     switch (m_ProjectionMode)
     {
-        case CameraProjectionMode::eCameraProjectionMode_Perspective: return Matrix4::Perspective(m_FieldOfView, aspectRatio, m_NearPlane, m_FarPlane);
+        case CameraProjectionMode::eCameraProjectionMode_Perspective:
+        {
+            return Matrix4::Perspective(m_FieldOfView, aspectRatio, m_NearPlane, m_FarPlane);
+        }
 
         case CameraProjectionMode::eCameraProjectionMode_Orthographic:
+        {
             float halfHeight = m_OrthoVerticalSize / 2;
             float halfWidth = halfHeight * aspectRatio;
             return Matrix4::SetFrustumOrtho(-halfWidth, halfWidth, -halfHeight, halfHeight, m_NearPlane, m_FarPlane);
-    }
+        }
 
-    // Should not reach here
-    return Matrix4();
+            // Should not reach here
+        default:
+        {
+            return Matrix4();
+        }
+    }
 }
 
 void Camera::SetUpDirection(Vector3 const& direction)

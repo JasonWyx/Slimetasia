@@ -34,15 +34,15 @@ std::ostringstream Application::os;
 bool Application::s_IsGameRunning = false;
 
 #define MAXCOUNT 1000000
-
 #define DESIRED_FRAME_RATE 1.f / 60.f
 
-const DWORD Application::s_WindowStyles[] = {
+constexpr DWORD Application::s_WindowStyles[] = {
     WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,  // windowed
     WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,                        // borderless
     WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE                         // fullscreen
 };
-const DWORD Application::s_WindowStylesEx[] = {
+
+constexpr DWORD Application::s_WindowStylesEx[] = {
     WS_EX_APPWINDOW | WS_EX_ACCEPTFILES,  // windowed
     WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,   // borderless
     WS_EX_APPWINDOW | WS_EX_WINDOWEDGE    // fullscreen
@@ -302,39 +302,30 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         MessageBox(NULL, TEXT("Program requires Windows NT!"), appName, MB_ICONERROR);
     }
 
-// #define LEGACY_GL_INIT
-#ifndef LEGACY_GL_INIT
-
+#ifndef USE_VULKAN_RENDERER
     HWND dummyWND = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], 0, 0, 1, 1, nullptr, nullptr, hInstance, nullptr);
-
     HDC dummyDC = GetDC(dummyWND);
 
-    PIXELFORMATDESCRIPTOR dummyPFD = { sizeof(PIXELFORMATDESCRIPTOR),
-                                       1,
-                                       PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,  // Flags
-                                       PFD_TYPE_RGBA,                                               // The kind of framebuffer. RGBA or palette.
-                                       32,                                                          // Colordepth of the framebuffer.
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       24,  // Number of bits for the depthbuffer
-                                       8,   // Number of bits for the stencilbuffer
-                                       0,   // Number of Aux buffers in the framebuffer.
-                                       PFD_MAIN_PLANE,
-                                       0,
-                                       0,
-                                       0,
-                                       0 };
+    // clang-format off
+    PIXELFORMATDESCRIPTOR dummyPFD  { 
+        sizeof(PIXELFORMATDESCRIPTOR),
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,  // Flags
+        PFD_TYPE_RGBA,                                               // The kind of framebuffer. RGBA or palette.
+        32,                                                          // Colordepth of the framebuffer.
+        0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0, 0, 0, 0,
+        24,  // Number of bits for the depthbuffer
+        8,   // Number of bits for the stencilbuffer
+        0,   // Number of Aux buffers in the framebuffer.
+        PFD_MAIN_PLANE,
+        0,
+        0, 0, 0 
+    };
+    // clang-format on
 
     int dummyPF = ChoosePixelFormat(dummyDC, &dummyPFD);
 
@@ -377,6 +368,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     {
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
+#endif  // !USE_VULKAN_RENDERER
 
 #ifndef EDITOR
 
@@ -397,7 +389,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     // Minus task bar
     wndRect.bottom -= GetSystemMetrics(SM_CYCAPTION);
 
-#endif
+#endif  // EDITOR
 
     m_WindowWidth = wndRect.right - wndRect.left;
     m_WindowHeight = wndRect.bottom - wndRect.top;
@@ -411,31 +403,38 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     ShowWindow(m_Window, SW_SHOWMAXIMIZED);
     UpdateWindow(m_Window);
 
+#ifdef EDITOR
+    DragAcceptFiles(m_Window, true);
+#endif
+
+    AllocConsole();
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+
+#ifndef USE_VULKAN_RENDERER
     DEVMODE devMode;
     devMode.dmSize = sizeof(DEVMODE);
 
     // Retrieve current device settings into devMode
-    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &devMode)) return;
+    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &devMode))
+    {
+        return;
+    }
 
-    const int pixelAttribs[] = { WGL_DRAW_TO_WINDOW_ARB,
-                                 GL_TRUE,
-                                 WGL_SUPPORT_OPENGL_ARB,
-                                 GL_TRUE,
-                                 WGL_DOUBLE_BUFFER_ARB,
-                                 GL_TRUE,
-                                 WGL_PIXEL_TYPE_ARB,
-                                 WGL_TYPE_RGBA_ARB,
-                                 WGL_ACCELERATION_ARB,
-                                 WGL_FULL_ACCELERATION_ARB,
-                                 WGL_COLOR_BITS_ARB,
-                                 32,
-                                 WGL_ALPHA_BITS_ARB,
-                                 8,
-                                 WGL_DEPTH_BITS_ARB,
-                                 24,
-                                 WGL_STENCIL_BITS_ARB,
-                                 8,
-                                 0 };
+    // clang-format off
+    const int pixelAttribs[] = { 
+        WGL_DRAW_TO_WINDOW_ARB,    GL_TRUE,
+        WGL_SUPPORT_OPENGL_ARB,    GL_TRUE,
+        WGL_DOUBLE_BUFFER_ARB,     GL_TRUE,
+        WGL_PIXEL_TYPE_ARB,        WGL_TYPE_RGBA_ARB,
+        WGL_ACCELERATION_ARB,      WGL_FULL_ACCELERATION_ARB,
+        WGL_COLOR_BITS_ARB,        32,
+        WGL_ALPHA_BITS_ARB,        8,
+        WGL_DEPTH_BITS_ARB,        24,
+        WGL_STENCIL_BITS_ARB,      8,
+        0 
+    };
+    // clang-format on
 
     int pfdIndex = 0;
     unsigned numFormats = 0;
@@ -454,19 +453,20 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
 
     const int majorMin = 4;
     const int minorMin = 5;
-    int contextAttribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB,
-                             majorMin,
-                             WGL_CONTEXT_MINOR_VERSION_ARB,
-                             minorMin,
-                             WGL_CONTEXT_FLAGS_ARB,
+
+    // clang-format off
+    int contextAttribs[] = { 
+        WGL_CONTEXT_MAJOR_VERSION_ARB,  majorMin,
+        WGL_CONTEXT_MINOR_VERSION_ARB,  minorMin,
+        WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 #ifdef EDITOR
-                             WGL_CONTEXT_DEBUG_BIT_ARB,
+        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_DEBUG_BIT_ARB,
 #else
-                             WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 #endif
-                             WGL_CONTEXT_PROFILE_MASK_ARB,
-                             WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                             0 };
+        0 
+    };
+    // clang-format on
 
     m_GLRenderContext = wglCreateContextAttribsARB(m_DeviceContext, 0, contextAttribs);
     if (m_GLRenderContext == NULL)
@@ -499,108 +499,15 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
 
-#else  // #ifndef MODERN_GL_INIT
-
-    // Get screen resolution
-    m_MaxWindowWidth = GetSystemMetrics(SM_CXSCREEN);
-    m_MaxWindowHeight = GetSystemMetrics(SM_CYSCREEN);
-
-    RECT rect;
-    SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
-
-    uint y = GetSystemMetrics(SM_CYCAPTION);
-
-    rect.bottom -= y;
-
-    RECT wndRect = rect;
-
-    // Get actual usable window size
-    // AdjustWindowRectEx(&wndRect, dwStyle, FALSE, 0);
-
-    m_WindowWidth = wndRect.right - wndRect.left;
-    m_WindowHeight = wndRect.bottom - wndRect.top;
-
-    m_Window = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], wndRect.top, wndRect.left, m_WindowWidth,
-                              m_WindowHeight,  // Let AdjustWindowRectEx calculate window size for us
-                              nullptr, nullptr, hInstance, nullptr);
-
-    // Set window size and show
-    ShowWindow(m_Window, SW_SHOWMAXIMIZED);
-
-    UpdateWindow(m_Window);
-
-    m_DeviceContext = GetDC(m_Window);
-
-    DEVMODE devMode;
-    devMode.dmSize = sizeof(DEVMODE);
-
-    // Retrieve current device settings into devMode
-    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &devMode)) return;
-
-    PIXELFORMATDESCRIPTOR pfd;
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = (BYTE)devMode.dmBitsPerPel;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-
-    int pf = ChoosePixelFormat(m_DeviceContext, &pfd);
-
-    if (!pf)
-    {
-        printf_s("ERROR - Failed to get PixelFormat\n");
-        ReleaseDC(m_Window, m_DeviceContext);
-        return;
-    }
-
-    if (!SetPixelFormat(m_DeviceContext, pf, &pfd))
-    {
-        std::cout << "ERROR: Failed to set PixelFormat" << std::endl;
-        ReleaseDC(m_Window, m_DeviceContext);
-        return;
-    }
-
-    if (!(m_GLRenderContext = wglCreateContext(m_DeviceContext)))
-    {
-        printf_s("ERROR - Failed to create GL context\n");
-        ReleaseDC(m_Window, m_DeviceContext);
-        return;
-    }
-
-    if (!(wglMakeCurrent(m_DeviceContext, m_GLRenderContext)))
-    {
-        printf_s("ERROR - Failed to make GL context current\n");
-        wglDeleteContext(m_GLRenderContext);
-        ReleaseDC(m_Window, m_DeviceContext);
-        return;
-    }
-    if (glewInit())
-    {
-        std::cout << "ERROR: GLEW failed to initialize!" << std::endl;
-    }
-    if (wglewInit())
-    {
-        std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
-    }
-
-#endif  // #ifdef MODERN_GL_INIT
-
-#ifdef EDITOR
     wglSwapIntervalEXT(1);
-    DragAcceptFiles(m_Window, true);
-    // std::cout.rdbuf(os.rdbuf());
-#else
-    wglSwapIntervalEXT(1);
-#endif
-
-    AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
+#endif  // !USE_VULKAN_RENDERER
 
     m_GameTimer = Timer(1.f / 60.0f);
     m_ComputeTimer = Timer();
+
+#ifdef EDITOR
+    ImGui::CreateContext();
+#endif  // EDITOR
 
     Factory::Initialize();
     AudioSystem::Initialize();
@@ -634,11 +541,11 @@ Application::~Application()
 
     Editor::Shutdown();
     Input::Shutdown();
-#if defined(USE_VULKAN_RENDERER)
+#ifdef USE_VULKAN_RENDERER
     RendererVk::Shutdown();
 #else
     Renderer::Shutdown();
-#endif  // #if defined(USE_VULKAN_RENDERER)
+#endif  // USE_VULKAN_RENDERER
     AISystem::Shutdown();
     ResourceManager::Shutdown();
     AnimationSystem::Shutdown();
@@ -647,7 +554,14 @@ Application::~Application()
     Factory::Shutdown();
     ParticleSystem ::Shutdown();
 
+#ifndef USE_VULKAN_RENDERER
     wglDeleteContext(m_GLRenderContext);
+#endif  // !USE_VULKAN_RENDERER
+
+#ifdef EDITOR
+    ImGui::DestroyContext();
+#endif  // EDITOR
+
     ReleaseDC(m_Window, m_DeviceContext);
     DestroyWindow(m_Window);
     UnregisterClass("Slimetasia", m_Instance);
