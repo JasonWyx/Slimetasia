@@ -2105,7 +2105,7 @@ void Editor::DrawFullScreenViewport()
         Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
         Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
 
-        ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
+        // ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
     }
 }
@@ -4991,6 +4991,7 @@ void Editor::Update(float dt)
     ImGui::PopStyleVar();
 
     ImGui::ShowDemoWindow();
+    ImGui::EndFrame();
     ImGui::Render();
 
 #ifndef USE_VULKAN_RENDERER

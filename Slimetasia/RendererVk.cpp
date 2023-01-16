@@ -52,8 +52,6 @@ RendererVk::~RendererVk()
 
 void RendererVk::Update(const float deltaTime)
 {
-    m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-
     const vk::Result waitResult = m_Device.waitForFences(m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
     m_Device.resetFences(m_InFlightFences[m_CurrentFrame]);
 
@@ -113,6 +111,8 @@ void RendererVk::Update(const float deltaTime)
     };
 
     const vk::Result presentResult = m_PresentQueue.presentKHR(presentInfo);
+
+    m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void RendererVk::CreateInstance()
@@ -310,6 +310,84 @@ void RendererVk::CreateCommandPool()
 
     m_CommandBuffers = m_Device.allocateCommandBuffers(allocateInfo);
 }
+void RendererVk::CreateRenderPass()
+{
+    ASSERT(static_cast<bool>(m_SwapchainHandler));
+    ASSERT(m_Device);
+
+    const vk::AttachmentDescription colorAttachment {
+        .format = m_SwapchainHandler->GetSurfaceFormat().format,
+        .samples = vk::SampleCountFlagBits::e1,
+        .loadOp = vk::AttachmentLoadOp::eClear,
+        .storeOp = vk::AttachmentStoreOp::eStore,
+        .initialLayout = vk::ImageLayout::eUndefined,
+        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
+    };
+
+    const vk::AttachmentReference colorAttachmentRef {
+        .attachment = 0,
+        .layout = vk::ImageLayout::eColorAttachmentOptimal,
+    };
+
+    const vk::SubpassDescription subpass {
+        .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachmentRef,
+    };
+
+    // Initial dependency to transition 
+    const vk::SubpassDependency dependency {
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .srcAccessMask = vk::AccessFlagBits::eNone,
+        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+    };
+
+    const vk::RenderPassCreateInfo createInfo {
+        .attachmentCount = 1,
+        .pAttachments = &colorAttachment,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &dependency,
+    };
+
+    m_RenderPass = m_Device.createRenderPass(createInfo);
+}
+
+void RendererVk::CreateFramebuffers()
+{
+    const vk::Extent2D extent = m_SwapchainHandler->GetExtent();
+    const std::vector<vk::ImageView> imageViews = m_SwapchainHandler->GetImageViews();
+
+    for (size_t i = 0; i < imageViews.size(); ++i)
+    {
+        const vk::ImageView imageView = imageViews[i];
+
+        vk::FramebufferCreateInfo createInfo {
+            .renderPass = m_RenderPass,
+            .attachmentCount = 1,
+            .pAttachments = &imageView,
+            .width = extent.width,
+            .height = extent.height,
+            .layers = 1,
+        };
+
+        m_Framebuffers.push_back(m_Device.createFramebuffer(createInfo));
+    }
+}
+
+void RendererVk::CreatePipelineLayout()
+{
+    ASSERT(m_Device);
+
+    // For uniform data and sorts
+    const vk::PipelineLayoutCreateInfo createInfo {};
+
+    m_PipelineLayout = m_Device.createPipelineLayout(createInfo);
+}
 
 void RendererVk::CreatePipeline()
 {
@@ -334,13 +412,11 @@ void RendererVk::CreatePipeline()
 
     const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages {
         {
-            // vert shader stage
             .stage = vk::ShaderStageFlagBits::eVertex,
             .module = vertShader,
             .pName = "main",
         },
         {
-            // frag shader stage
             .stage = vk::ShaderStageFlagBits::eFragment,
             .module = fragShader,
             .pName = "main",
@@ -446,85 +522,9 @@ void RendererVk::CreatePipeline()
     ASSERT(resultValue.result == vk::Result::eSuccess);
 
     m_Pipeline = resultValue.value;
-}
 
-void RendererVk::CreateRenderPass()
-{
-    ASSERT(static_cast<bool>(m_SwapchainHandler));
-    ASSERT(m_Device);
-
-    const vk::AttachmentDescription colorAttachment {
-        .format = m_SwapchainHandler->GetSurfaceFormat().format,
-        .samples = vk::SampleCountFlagBits::e1,
-        .loadOp = vk::AttachmentLoadOp::eClear,
-        .storeOp = vk::AttachmentStoreOp::eStore,
-        .initialLayout = vk::ImageLayout::eUndefined,
-        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
-    };
-
-    const vk::AttachmentReference colorAttachmentRef {
-        .attachment = 0,
-        .layout = vk::ImageLayout::eColorAttachmentOptimal,
-    };
-
-    const vk::SubpassDescription subpass {
-        .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
-        .colorAttachmentCount = 1,
-        .pColorAttachments = &colorAttachmentRef,
-    };
-
-    // Initial dependency to transition 
-    const vk::SubpassDependency dependency {
-        .srcSubpass = VK_SUBPASS_EXTERNAL,
-        .dstSubpass = 0,
-        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        .srcAccessMask = vk::AccessFlagBits::eNone,
-        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
-    };
-
-    const vk::RenderPassCreateInfo createInfo {
-        .attachmentCount = 1,
-        .pAttachments = &colorAttachment,
-        .subpassCount = 1,
-        .pSubpasses = &subpass,
-        .dependencyCount = 1,
-        .pDependencies = &dependency,
-    };
-
-    m_RenderPass = m_Device.createRenderPass(createInfo);
-}
-
-void RendererVk::CreateFramebuffers()
-{
-    const vk::Extent2D extent = m_SwapchainHandler->GetExtent();
-    const std::vector<vk::ImageView> imageViews = m_SwapchainHandler->GetImageViews();
-
-    for (size_t i = 0; i < imageViews.size(); ++i)
-    {
-        const vk::ImageView imageView = imageViews[i];
-
-        vk::FramebufferCreateInfo createInfo {
-            .renderPass = m_RenderPass,
-            .attachmentCount = 1,
-            .pAttachments = &imageView,
-            .width = extent.width,
-            .height = extent.height,
-            .layers = 1,
-        };
-
-        m_Framebuffers.push_back(m_Device.createFramebuffer(createInfo));
-    }
-}
-
-void RendererVk::CreatePipelineLayout()
-{
-    ASSERT(m_Device);
-
-    // For uniform data and sorts
-    const vk::PipelineLayoutCreateInfo createInfo {};
-
-    m_PipelineLayout = m_Device.createPipelineLayout(createInfo);
+    m_Device.destroyShaderModule(vertShader);
+    m_Device.destroyShaderModule(fragShader);
 }
 
 void RendererVk::CreateSyncObjects()

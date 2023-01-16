@@ -4,20 +4,7 @@
 
 class EditorCamera : public Camera
 {
-private:
-
-    float m_Latitude;
-    float m_Azimuth;
-
-    bool m_IsPanning;
-    bool m_IsRotating;
-    bool m_IsZooming;
-    float m_FocalDistance;
-    float m_ZoomDampenFactor;
-    bool m_Update;
-
 public:
-
     EditorCamera(GameObject* parentObject);
     ~EditorCamera() = default;
 
@@ -28,4 +15,15 @@ public:
     void SetUpdate(bool b) { m_Update = b; }
 
     REFLECT()
+
+private:
+    float m_Latitude;
+    float m_Azimuth;
+    bool m_IsPanning;
+    bool m_IsRotating;
+    bool m_IsZooming;
+    float m_FocalDistance;
+    float m_ZoomDampenFactor;
+    bool m_Update;
+
 };

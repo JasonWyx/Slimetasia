@@ -80,14 +80,6 @@ void EditorCamera::OnUpdate(float dt)
 
     if (m_IsZooming)
     {
-        /*m_ZoomDampenFactor += mouseDelta.y / 100;
-        m_ZoomDampenFactor = m_ZoomDampenFactor < 1.0f ? 1.0f : m_ZoomDampenFactor;
-
-        if (mouseDelta.y > 0)
-          m_Position += (m_LookAtDirection * (m_ZoomDampenFactor / m_FocalDistance));
-        if (mouseDelta.y < 0)
-          m_Position -= (m_LookAtDirection * (m_ZoomDampenFactor / m_FocalDistance));*/
-
         m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() + m_LookAtDirection * mouseDelta.y / 100);
         m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() + m_LookAtDirection * mouseDelta.x / 100);
     }
