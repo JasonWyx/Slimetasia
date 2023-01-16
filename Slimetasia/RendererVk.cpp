@@ -8,6 +8,7 @@
 #include <set>
 
 #include "External Libraries/imgui/backends/imgui_impl_vulkan.h"
+#include "ShaderHelper.h"
 
 static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -21,8 +22,10 @@ RendererVk::RendererVk(HINSTANCE appInstance, HWND appWindow, const uint32_t win
     CreateSwapchain(appWindow);
     CreateDescriptorPool();
     CreateCommandPool();
-    CreatePipeline();
     CreateRenderPass();
+    CreateFramebuffers();
+    CreatePipelineLayout();
+    CreatePipeline();
     CreateSyncObjects();
 
     InitializeImGui();
@@ -32,14 +35,14 @@ RendererVk::~RendererVk()
 {
     ShutdownImGui();
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        m_Device.destroyFence(m_InFlightFences[i]);
-        m_Device.destroySemaphore(m_RenderFinishedSemaphores[i]);
-        m_Device.destroySemaphore(m_ImageAvailableSemaphores[i]);
-    }
+    std::ranges::for_each(m_InFlightFences, [this](const vk::Fence& fence) { m_Device.destroyFence(fence); });
+    std::ranges::for_each(m_RenderFinishedSemaphores, [this](const vk::Semaphore& semaphore) { m_Device.destroySemaphore(semaphore); });
+    std::ranges::for_each(m_ImageAvailableSemaphores, [this](const vk::Semaphore& semaphore) { m_Device.destroySemaphore(semaphore); });
     m_Device.freeCommandBuffers(m_CommandPool, m_CommandBuffers);
     m_Device.destroyCommandPool(m_CommandPool);
+    m_Device.destroyPipeline(m_Pipeline);
+    m_Device.destroyPipelineLayout(m_PipelineLayout);
+    std::ranges::for_each(m_Framebuffers, [this](const vk::Framebuffer& framebuffer) { m_Device.destroyFramebuffer(framebuffer); });
     m_Device.destroyRenderPass(m_RenderPass);
     m_Device.destroyDescriptorPool(m_DescriptorPool);
     m_SwapchainHandler.release();
@@ -49,14 +52,67 @@ RendererVk::~RendererVk()
 
 void RendererVk::Update(const float deltaTime)
 {
+    m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
     const vk::Result waitResult = m_Device.waitForFences(m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
     m_Device.resetFences(m_InFlightFences[m_CurrentFrame]);
 
     const uint32_t imageIndex = m_SwapchainHandler->AcquireNextImageIndex(m_ImageAvailableSemaphores[m_CurrentFrame]);
 
-    DrawImGui();
+    const std::vector<vk::Semaphore> waitSemaphores { m_ImageAvailableSemaphores[m_CurrentFrame] };
+    const std::vector<vk::Semaphore> signalSemaphores { m_RenderFinishedSemaphores[m_CurrentFrame] };
 
-    m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    const vk::CommandBuffer commandBuffer { m_CommandBuffers[m_CurrentFrame] };
+    commandBuffer.reset();
+
+    const vk::CommandBufferBeginInfo beginInfo {};
+    commandBuffer.begin(beginInfo);
+
+    const vk::ClearValue clearColor {
+        .color = { .float32 = {{ 0.0f, 0.0f, 0.0f, 1.0f }}, },
+    };
+    const vk::RenderPassBeginInfo renderPassBeginInfo {
+        .renderPass = m_RenderPass,
+        .framebuffer = m_Framebuffers[imageIndex],
+        .renderArea = { .extent = m_SwapchainHandler->GetExtent() },
+        .clearValueCount = 1,
+        .pClearValues = &clearColor,
+    };
+    commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+
+    // DrawImGui(commandBuffer);
+
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
+    commandBuffer.draw(3, 1, 0, 0);
+
+    commandBuffer.endRenderPass();
+    commandBuffer.end();
+
+    const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+
+    const vk::SubmitInfo commandSubmitInfo {
+        .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
+        .pWaitSemaphores = waitSemaphores.data(),
+        .pWaitDstStageMask = &waitStages,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBuffer,
+        .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()),
+        .pSignalSemaphores = signalSemaphores.data(),
+    };
+
+    m_GraphicsQueue.submit(commandSubmitInfo, m_InFlightFences[m_CurrentFrame]);
+
+    const vk::SwapchainKHR swapchain = m_SwapchainHandler->GetSwapchain();
+
+    vk::PresentInfoKHR presentInfo {
+        .waitSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()),
+        .pWaitSemaphores = signalSemaphores.data(),
+        .swapchainCount = 1,
+        .pSwapchains = &swapchain,
+        .pImageIndices = &imageIndex,
+    };
+
+    const vk::Result presentResult = m_PresentQueue.presentKHR(presentInfo);
 }
 
 void RendererVk::CreateInstance()
@@ -215,23 +271,21 @@ void RendererVk::CreateDescriptorPool()
 {
     ASSERT(m_Device);
 
-    std::vector<vk::DescriptorPoolSize> poolSizes {
-        vk::DescriptorPoolSize {
-            .type = vk::DescriptorType::eUniformBuffer,
-            .descriptorCount = 1000,  // MAX_FRAMES_IN_FLIGHT,
-        },
-        vk::DescriptorPoolSize {
-            .type = vk::DescriptorType::eSampledImage,
-            .descriptorCount = 1000,  // MAX_FRAMES_IN_FLIGHT,
-        },
-        vk::DescriptorPoolSize {
-            .type = vk::DescriptorType::eCombinedImageSampler,
-            .descriptorCount = 1000,  // MAX_FRAMES_IN_FLIGHT,
-        },
-    };
+    std::vector<vk::DescriptorPoolSize> poolSizes { { vk::DescriptorType::eSampler, 1000 },
+                                                    { vk::DescriptorType::eCombinedImageSampler, 1000 },
+                                                    { vk::DescriptorType::eSampledImage, 1000 },
+                                                    { vk::DescriptorType::eStorageImage, 1000 },
+                                                    { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+                                                    { vk::DescriptorType::eStorageTexelBuffer, 1000 },
+                                                    { vk::DescriptorType::eUniformBuffer, 1000 },
+                                                    { vk::DescriptorType::eStorageBuffer, 1000 },
+                                                    { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+                                                    { vk::DescriptorType::eStorageBufferDynamic, 1000 },
+                                                    { vk::DescriptorType::eInputAttachment, 1000 } };
 
     vk::DescriptorPoolCreateInfo createInfo {
-        .maxSets = MAX_FRAMES_IN_FLIGHT,
+        .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+        .maxSets = 1 << 10,
         .poolSizeCount = static_cast<uint32_t>(poolSizes.size()),
         .pPoolSizes = poolSizes.data(),
     };
@@ -254,10 +308,145 @@ void RendererVk::CreateCommandPool()
         .commandBufferCount = MAX_FRAMES_IN_FLIGHT,
     };
 
-    m_ImGuiCommandBuffers = m_Device.allocateCommandBuffers(allocateInfo);
+    m_CommandBuffers = m_Device.allocateCommandBuffers(allocateInfo);
 }
 
-void RendererVk::CreatePipeline() {}
+void RendererVk::CreatePipeline()
+{
+    ASSERT(m_Device);
+    ASSERT(static_cast<bool>(m_SwapchainHandler));
+
+    const std::vector<char>& vertSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.vert");
+    const std::vector<char>& fragSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.frag");
+
+    const vk::ShaderModuleCreateInfo vertModuleCreateInfo {
+        .codeSize = vertSpirv.size(),
+        .pCode = reinterpret_cast<const uint32_t*>(vertSpirv.data()),
+    };
+
+    const vk::ShaderModuleCreateInfo fragModuleCreateInfo {
+        .codeSize = fragSpirv.size(),
+        .pCode = reinterpret_cast<const uint32_t*>(fragSpirv.data()),
+    };
+
+    const vk::ShaderModule vertShader { m_Device.createShaderModule(vertModuleCreateInfo) };
+    const vk::ShaderModule fragShader { m_Device.createShaderModule(fragModuleCreateInfo) };
+
+    const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages {
+        {
+            // vert shader stage
+            .stage = vk::ShaderStageFlagBits::eVertex,
+            .module = vertShader,
+            .pName = "main",
+        },
+        {
+            // frag shader stage
+            .stage = vk::ShaderStageFlagBits::eFragment,
+            .module = fragShader,
+            .pName = "main",
+        },
+    };
+
+    const vk::PipelineVertexInputStateCreateInfo vertexInputState {
+        .vertexBindingDescriptionCount = 0,
+        .pVertexBindingDescriptions = nullptr,
+        .vertexAttributeDescriptionCount = 0,
+        .pVertexAttributeDescriptions = nullptr,
+    };
+
+    const vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState {
+        .topology = vk::PrimitiveTopology::eTriangleList,
+    };
+
+    const vk::Extent2D swapchainExtent = m_SwapchainHandler->GetExtent();
+
+    const vk::Viewport viewport {
+        .x = 0.0f,
+        .y = 0.0f,
+        .width = static_cast<float>(swapchainExtent.width),
+        .height = static_cast<float>(swapchainExtent.height),
+        .minDepth = 0.0f,
+        .maxDepth = 1.0f,
+    };
+
+    const vk::Rect2D scissor {
+        .offset = { 0, 0 },
+        .extent = swapchainExtent,
+    };
+
+    const vk::PipelineViewportStateCreateInfo viewportState {
+        .viewportCount = 1,
+        .pViewports = &viewport,
+        .scissorCount = 1,
+        .pScissors = &scissor,
+    };
+
+    const vk::PipelineRasterizationStateCreateInfo rasterizationState {
+        .depthClampEnable = VK_FALSE,
+        .rasterizerDiscardEnable = VK_FALSE,
+        .polygonMode = vk::PolygonMode::eFill,
+        .cullMode = vk::CullModeFlagBits::eBack,
+        .frontFace = vk::FrontFace::eCounterClockwise,
+        .depthBiasEnable = VK_FALSE,
+        .lineWidth = 1.0f,
+    };
+
+    const vk::PipelineMultisampleStateCreateInfo multisampleState {
+        .rasterizationSamples = vk::SampleCountFlagBits::e1,
+        .sampleShadingEnable = VK_FALSE,
+        .minSampleShading = 1.0f,
+        .pSampleMask = nullptr,
+        .alphaToCoverageEnable = VK_FALSE,
+        .alphaToOneEnable = VK_FALSE,
+    };
+
+    const vk::PipelineDepthStencilStateCreateInfo depthStencilState {};  // todo: setup depth stencil
+
+    const vk::PipelineColorBlendAttachmentState colorBlendAttachmentState {
+        .blendEnable = VK_FALSE,
+        .srcColorBlendFactor = vk::BlendFactor::eOne,
+        .dstColorBlendFactor = vk::BlendFactor::eZero,
+        .colorBlendOp = vk::BlendOp::eAdd,
+        .srcAlphaBlendFactor = vk::BlendFactor::eOne,
+        .dstAlphaBlendFactor = vk::BlendFactor::eZero,
+        .alphaBlendOp = vk::BlendOp::eAdd,
+        .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
+    };
+
+    const vk::PipelineColorBlendStateCreateInfo colorBlendState {
+        .attachmentCount = 1,
+        .pAttachments = &colorBlendAttachmentState,
+        .blendConstants = { { 0.0f, 0.0f, 0.0f, 0.0f } },
+    };
+
+    const std::vector<vk::DynamicState> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+
+    const vk::PipelineDynamicStateCreateInfo dynamicState {
+        .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
+        .pDynamicStates = dynamicStates.data(),
+    };
+
+    const vk::GraphicsPipelineCreateInfo pipelineCreateInfo {
+        .stageCount = static_cast<uint32_t>(shaderStages.size()),
+        .pStages = shaderStages.data(),
+        .pVertexInputState = &vertexInputState,
+        .pInputAssemblyState = &inputAssemblyState,
+        .pViewportState = &viewportState,
+        .pRasterizationState = &rasterizationState,
+        .pMultisampleState = &multisampleState,
+        .pDepthStencilState = &depthStencilState,
+        .pColorBlendState = &colorBlendState,
+        //.pDynamicState = &dynamicState,
+        .layout = m_PipelineLayout,
+        .renderPass = m_RenderPass,
+        .subpass = 0,
+    };
+
+    const vk::ResultValue<vk::Pipeline>& resultValue = m_Device.createGraphicsPipeline({}, pipelineCreateInfo);
+    ASSERT(resultValue.result == vk::Result::eSuccess);
+
+    m_Pipeline = resultValue.value;
+}
 
 void RendererVk::CreateRenderPass()
 {
@@ -284,14 +473,58 @@ void RendererVk::CreateRenderPass()
         .pColorAttachments = &colorAttachmentRef,
     };
 
+    // Initial dependency to transition 
+    const vk::SubpassDependency dependency {
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .srcAccessMask = vk::AccessFlagBits::eNone,
+        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+    };
+
     const vk::RenderPassCreateInfo createInfo {
         .attachmentCount = 1,
         .pAttachments = &colorAttachment,
         .subpassCount = 1,
         .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &dependency,
     };
 
     m_RenderPass = m_Device.createRenderPass(createInfo);
+}
+
+void RendererVk::CreateFramebuffers()
+{
+    const vk::Extent2D extent = m_SwapchainHandler->GetExtent();
+    const std::vector<vk::ImageView> imageViews = m_SwapchainHandler->GetImageViews();
+
+    for (size_t i = 0; i < imageViews.size(); ++i)
+    {
+        const vk::ImageView imageView = imageViews[i];
+
+        vk::FramebufferCreateInfo createInfo {
+            .renderPass = m_RenderPass,
+            .attachmentCount = 1,
+            .pAttachments = &imageView,
+            .width = extent.width,
+            .height = extent.height,
+            .layers = 1,
+        };
+
+        m_Framebuffers.push_back(m_Device.createFramebuffer(createInfo));
+    }
+}
+
+void RendererVk::CreatePipelineLayout()
+{
+    ASSERT(m_Device);
+
+    // For uniform data and sorts
+    const vk::PipelineLayoutCreateInfo createInfo {};
+
+    m_PipelineLayout = m_Device.createPipelineLayout(createInfo);
 }
 
 void RendererVk::CreateSyncObjects()
@@ -354,10 +587,10 @@ void RendererVk::InitializeImGui()
         .DescriptorPool = m_DescriptorPool,
         .Subpass = 0,
         .MinImageCount = MAX_FRAMES_IN_FLIGHT,
-        .ImageCount = MAX_FRAMES_IN_FLIGHT,
+        .ImageCount = static_cast<uint32_t>(m_SwapchainHandler->GetImageViews().size()),
     };
-    ImGui_ImplVulkan_Init(&imguiInitInfo, m_RenderPass);
 
+    ImGui_ImplVulkan_Init(&imguiInitInfo, m_RenderPass);
     const vk::CommandBuffer createFontCommands = CreateOneShotCommandBuffer();
     ImGui_ImplVulkan_CreateFontsTexture(createFontCommands);
     SubmitOneShotCommandBuffer(createFontCommands);
@@ -369,7 +602,7 @@ void RendererVk::ShutdownImGui()
     ImGui_ImplVulkan_Shutdown();
 }
 
-void RendererVk::DrawImGui()
+void RendererVk::DrawImGui(const vk::CommandBuffer commandBuffer)
 {
     ImDrawData* drawData = ImGui::GetDrawData();
     if (drawData == nullptr)
@@ -378,18 +611,5 @@ void RendererVk::DrawImGui()
     }
 
     ImGui_ImplVulkan_NewFrame();
-
-    const vk::CommandBuffer commandBuffer = m_ImGuiCommandBuffers[m_CurrentFrame];
-    const vk::CommandBufferBeginInfo beginInfo {};
-    commandBuffer.reset();
-    commandBuffer.begin(beginInfo);
     ImGui_ImplVulkan_RenderDrawData(drawData, commandBuffer);
-    commandBuffer.end();
-
-    const vk::SubmitInfo submitInfo {
-        .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer,
-    };
-
-    m_GraphicsQueue.submit(submitInfo);
 }

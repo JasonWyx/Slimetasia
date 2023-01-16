@@ -44,8 +44,10 @@ private:
     void CreateSwapchain(const HWND appWindow);
     void CreateDescriptorPool();
     void CreateCommandPool();
-    void CreatePipeline();
     void CreateRenderPass();
+    void CreateFramebuffers();
+    void CreatePipelineLayout();
+    void CreatePipeline();
     void CreateSyncObjects();
 
     vk::CommandBuffer CreateOneShotCommandBuffer();
@@ -54,7 +56,7 @@ private:
     // ImGui
     void InitializeImGui();
     void ShutdownImGui();
-    void DrawImGui();
+    void DrawImGui(const vk::CommandBuffer commandBuffer);
 
     vk::Instance m_Instance;
     vk::SurfaceKHR m_Surface;
@@ -70,11 +72,11 @@ private:
     vk::DescriptorPool m_DescriptorPool;
     vk::CommandPool m_CommandPool;
     std::vector<vk::CommandBuffer> m_CommandBuffers;
-    std::vector<vk::CommandBuffer> m_ImGuiCommandBuffers;
 
-    // TODO: these will need to be abstracted away
-    vk::Pipeline m_Pipeline;
     vk::RenderPass m_RenderPass;
+    std::vector<vk::Framebuffer> m_Framebuffers;
+    vk::PipelineLayout m_PipelineLayout;
+    vk::Pipeline m_Pipeline;
 
     std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
     std::vector<vk::Semaphore> m_RenderFinishedSemaphores;

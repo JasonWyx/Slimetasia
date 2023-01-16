@@ -14,9 +14,10 @@ public:
 
     vk::SurfaceFormatKHR GetSurfaceFormat() const { return m_SurfaceFormat; }
     vk::Extent2D GetExtent() const { return m_Extent; }
+    vk::SwapchainKHR GetSwapchain() const { return m_Swapchain; }
+    std::vector<vk::ImageView> GetImageViews() const { return m_ImageViews; }
 
     uint32_t AcquireNextImageIndex(const vk::Semaphore imageAvailableSemaphore);
-
 
 private:
 

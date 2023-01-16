@@ -119,6 +119,9 @@
     <Filter Include="Engine Files\Core\Graphics\Vulkan\Handlers">
       <UniqueIdentifier>{68856b71-7b64-427a-9d89-cf0815d04a10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine Files\Core\Graphics\Vulkan\Helpers">
+      <UniqueIdentifier>{0ddaff72-5b9e-4d30-b8f6-a4ce3422238b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -441,6 +444,9 @@
     </ClCompile>
     <ClCompile Include="SwapchainHandler.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderHelper.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -835,6 +841,9 @@
     <ClInclude Include="SwapchainHandler.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderHelper.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugLine.vert">
@@ -955,6 +964,13 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="Shaders\ParticleStencil.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="cpp.hint" />
+    <None Include="SimpleTriangle.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="SimpleTriangle.frag">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
