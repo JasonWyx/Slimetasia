@@ -9,21 +9,21 @@
 #include "AudioEmitter.h"
 #include "AudioSystem.h"
 #include "External Libraries/ImGuizmo/ImGuizmo.h"
-#ifdef USE_VULKAN_RENDERER
+#ifdef USE_VULKAN
 #include "External Libraries/imgui/backends/imgui_impl_vulkan.h"
 #else
 #include "External Libraries/imgui/backends/imgui_impl_opengl3.h"
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
 #include "External Libraries/imgui/backends/imgui_impl_win32.h"
 #include "MeshAnimator.h"
 #include "MeshRenderer.h"
 #include "ParticleSystem.h"
 #include "PhysicsSystem.h"
-// #ifdef USE_VULKAN_RENDERER
+#ifdef USE_VULKAN
 #include "RendererVk.h"
-// #else
+#else
 #include "Renderer.h"
-// #endif // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
 #include "ResourceManager.h"
 #include "RigidbodyComponent.h"
 #include "Timer.h"
@@ -66,13 +66,19 @@ void Editor::Undo()
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
         Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
     }
     if (dynamic_cast<ActionCreateObjectArchetype*>(act))
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
         Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
     }
     m_Undo.pop_back();
     act->Revert();
@@ -334,7 +340,10 @@ void Editor::ShortcutButtons()
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
 
+#ifdef USE_VULKAN
+#else
         Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
     }
 }
 
@@ -393,11 +402,6 @@ void Editor::DrawHelp()
     }
 }
 
-#ifdef USE_VULKAN_RENDERER
-void Editor::DrawViewport() {}
-
-#else   // !USE_VULKAN_RENDERER
-
 void Editor::DrawViewport()
 {
     if (Input::Instance().GetKeyPressed(KEY_F8))
@@ -422,7 +426,7 @@ void Editor::DrawViewport()
 
     if (Application::Instance().GetGameTimer().IsEditorPaused())
     {
-        if (ImGui::Button("Play") || ImGui::IsKeyPressed(116))
+        if (ImGui::Button("Play") || ImGui::IsKeyPressed(ImGuiKey_F5))
         {
             std::cout << "============================================================" << std::endl;
             std::cout << "PLAY MODE START" << std::endl;
@@ -447,9 +451,15 @@ void Editor::DrawViewport()
             if (Application::InstancePtr())
             {
                 for (auto& ly : Application::Instance().GetCurrentScene()->GetLayers())
+                {
                     for (auto go : ly->GetObjectsList())
+                    {
                         for (auto c : go->GetLuaScripts())
+                        {
                             c->InitScript();
+                        }
+                    }
+                }
             }
         }
         if (Input::Instance().GetKeyDown(KEY_LCTRL) && Input::Instance().GetKeyPressed(KEY_D))
@@ -511,13 +521,19 @@ void Editor::DrawViewport()
                 }
                 m_SavedLayers.clear();
                 m_CurrentLayer = Scene->GetLayers().back();
+#ifdef USE_VULKAN
+#else
                 Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
+#endif  // USE_VULKAN
             }
             m_CurrentObject = nullptr;
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
             m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetSelectedObjects({ 0 });
             Renderer::Instance().ChangeCamera(false);
+#endif  // USE_VULKAN
             ParticleSystem::Instance().Reset();
             AISystem::Instance().RevertBase();
         }
@@ -528,7 +544,7 @@ void Editor::DrawViewport()
         static Vector3 tmp;
         static Vector3 current;
 
-        if (ImGui::IsKeyPressed(70) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject)
+        if (ImGui::IsKeyPressed(ImGuiKey_F) && !Input::Instance().GetKeyDown(KEY_LALT) && m_CurrentObject)
         {
             m_CurrentLayer->GetEditorCamera()->LookAt(m_CurrentObject);
         }
@@ -559,7 +575,12 @@ void Editor::DrawViewport()
         if ((ImGui::IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !ImGuizmo::IsUsing() && !deltaGizmoState && !over) ||
             (ImGui::IsMouseClicked(0) && !Input::Instance().GetKeyDown(KEY_LALT) && !m_CurrentObject))
         {
+#ifdef USE_VULKAN
+            unsigned picked = 0;
+#else
             unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(ImGui::GetIO().MousePos.x - minusx), (int)y));
+#endif  // USE_VULKAN  // USE_VULKAN
+
             if (picked != 0)
             {
                 m_CurrentObject = m_CurrentLayer->GetObjectById(picked);
@@ -576,12 +597,20 @@ void Editor::DrawViewport()
                             m_CurrentObject = m_SelectedObjects.front();
                             std::vector<unsigned> tmp;
                             for (auto& o : m_SelectedObjects)
+                            {
                                 tmp.push_back(o->GetID());
+                            }
+#ifdef USE_VULKAN
+#else
                             Renderer::Instance().SetSelectedObjects(tmp);
+#endif  // USE_VULKAN
                         }
                         else
                         {
+#ifdef USE_VULKAN
+#else
                             Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
                             m_CurrentObject = nullptr;
                         }
                     }
@@ -590,34 +619,54 @@ void Editor::DrawViewport()
                 {
                     m_SelectedObjects.clear();
                     m_SelectedObjects.push_back(m_CurrentObject);
+#ifdef USE_VULKAN
+#else
                     Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
+#endif  // USE_VULKAN
                 }
                 std::vector<unsigned> selecteds;
                 for (auto& obj : m_SelectedObjects)
+                {
                     selecteds.push_back(obj->GetID());
+                }
+#ifdef USE_VULKAN
+#else
                 Renderer::Instance().SetSelectedObjects(selecteds);
+#endif  // USE_VULKAN
             }
             else
             {
+#ifdef USE_VULKAN
+#else
                 Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
                 m_CurrentObject = nullptr;
                 m_SelectedObjects.clear();
             }
         }
     }
 
+#ifdef USE_VULKAN
+#else
     Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
     Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
+#endif  // USE_VULKAN
 
     ImVec2 GameCameraSize = ImVec2((float)Application::Instance().GetWindowHeight(), (float)Application::Instance().GetWindowHeight());
     GameCameraSize.x /= 10.0f;
     GameCameraSize.y /= 10.0f;
 
+#ifdef USE_VULKAN
+#else
     ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
+#endif  // USE_VULKAN
 
     if (m_IsGameCameraAcitve)
     {
+#ifdef USE_VULKAN
+#else
         ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), GameCameraSize, ImVec2(0, 1), ImVec2(1, 0));
+#endif  // USE_VULKAN
     }
 
     if (Application::Instance().GetGameTimer().IsEditorPaused())
@@ -628,8 +677,14 @@ void Editor::DrawViewport()
             {
                 std::vector<unsigned> selecteds;
                 for (auto& obj : m_SelectedObjects)
+                {
                     selecteds.push_back(obj->GetID());
+                }
+
+#ifdef USE_VULKAN
+#else
                 Renderer::Instance().SetSelectedObjects(selecteds);
+#endif  // USE_VULKAN
             }
             Transform* t = m_CurrentObject->GetComponent<Transform>();
             if (t)
@@ -642,22 +697,22 @@ void Editor::DrawViewport()
                 static float rot[3];
                 static float scale[3];
 
-                if (ImGui::IsKeyPressed(81))
+                if (ImGui::IsKeyPressed(ImGuiKey_Q))
                 {
                     currOperation = (ImGuizmo::OPERATION)3;
                     state = 0;
                 }
-                if (ImGui::IsKeyPressed(87))
+                if (ImGui::IsKeyPressed(ImGuiKey_W))
                 {
                     state = 1;
                     currOperation = ImGuizmo::TRANSLATE;
                 }
-                if (ImGui::IsKeyPressed(69))
+                if (ImGui::IsKeyPressed(ImGuiKey_E))
                 {
                     state = 1;
                     currOperation = ImGuizmo::ROTATE;
                 }
-                if (ImGui::IsKeyPressed(82))
+                if (ImGui::IsKeyPressed(ImGuiKey_R))
                 {
                     state = 1;
                     currOperation = ImGuizmo::SCALE;
@@ -668,7 +723,11 @@ void Editor::DrawViewport()
                 memcpy(scale, t->GetWorldScale().GetVector(), sizeof(float) * 3);
 
                 bool useSnap(false);
-                if (Input::Instance().GetKeyDown(KEY_LSHIFT)) useSnap = true;
+                if (Input::Instance().GetKeyDown(KEY_LSHIFT))
+                {
+                    useSnap = true;
+                }
+
                 float snap[3];
                 switch (currOperation)
                 {
@@ -681,13 +740,19 @@ void Editor::DrawViewport()
                 if (currOperation != (ImGuizmo::OPERATION)3)
                 {
                     if (!m_IsTransformInLocalSpace)
+                    {
                         ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::WORLD, m, NULL,
                                              useSnap ? snap : NULL);
+                    }
                     else
+                    {
                         ImGuizmo::Manipulate(editorCamera->GetViewTransform().GetMatrix(), editorCamera->GetProjTransform().GetMatrix(), currOperation, ImGuizmo::LOCAL, m, NULL,
                                              useSnap ? snap : NULL);
+                    }
                 }
+
                 ImGuizmo::DecomposeMatrixToComponents(m, trans, rot, scale);
+
                 if (!deltaGizmoState && ImGuizmo::IsUsing())
                 {
                     savedTrans = t->GetWorldPosition();
@@ -818,7 +883,7 @@ void Editor::DrawViewport()
         }
     }
 }
-#endif  // USE_VULKAN_RENDERER
+
 void Editor::DrawArchetype()
 {
     static int selected = -1;
@@ -975,15 +1040,19 @@ void Editor::DrawArchetype()
             if (ImGui::TreeNode((std::string("Comp ") + std::to_string(i) + std::string(" : ") + comp->GetName()).c_str()))
             {
                 char* address = reinterpret_cast<char*>(comp);
-                // ImGui::Text("Component Num : %d", i);
-                // ImGui::Text("Component Name : %s", comp->GetName().c_str());
+
                 try
                 {
                     if (!Factory::m_Reflection->at(comp->GetName())->getParents().empty())
+                    {
                         ParentArchetypeInspector(address, Factory::m_Reflection->at(comp->GetName())->getParents().back().key, currentArchetype);
+                    }
+
                     auto component = (*Factory::m_Reflection).at(comp->GetName().c_str());
                     auto properties = component->getProperties();
-                    ImGui::Indent(5.0f);
+
+                    ImGui::Indent();
+
                     for (int i = 0; i < properties.size(); ++i)
                     {
                         ImGui::Text("%s : ", properties[i].name.c_str());
@@ -1278,7 +1347,7 @@ void Editor::DrawArchetype()
                             sound->SetAudioClip(newValue);
                         }
                     }
-                    ImGui::Unindent(5.0f);
+                    ImGui::Unindent();
                 }
                 catch (...)
                 {
@@ -1331,7 +1400,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
     if (parent == "IComponent" || parent == "") return;
     if (!Factory::m_Reflection->at(parent)->getParents().empty()) ParentArchetypeInspector(address, Factory::m_Reflection->at(parent)->getParents().back().key, currentArchetype);
     auto properties = Factory::m_Reflection->at(parent)->getProperties();
-    ImGui::Indent(5.0f);
+    ImGui::Indent();
     if (ImGui::TreeNode((std::string("Parent ") + std::string(" : ") + parent).c_str()))
     {
         for (int i = 0; i < properties.size(); ++i)
@@ -1526,54 +1595,61 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
         }
         ImGui::TreePop();
     }
-    ImGui::Unindent(5.0f);
+    ImGui::Unindent();
 }
 
 void Editor::ParentInspector(char* address, std::string comp, std::string parent)
 {
-    if (parent == "IComponent" || parent == "") return;
-    if (!Factory::m_Reflection->at(parent)->getParents().empty()) ParentInspector(address, comp, Factory::m_Reflection->at(parent)->getParents().back().key);
+    if (parent == "IComponent" || parent == "")
+    {
+        return;
+    }
+    if (!Factory::m_Reflection->at(parent)->getParents().empty())
+    {
+        ParentInspector(address, comp, Factory::m_Reflection->at(parent)->getParents().back().key);
+    }
+
     auto properties = Factory::m_Reflection->at(parent)->getProperties();
-    // ImGui::Indent(5.0f);
-    // if (ImGui::TreeNode((std::string("Parent ") + std::string(" : ") + parent).c_str()))
-    // {
+
     for (auto& prop : properties)
     {
-        ImGui::Text("%s : ", prop.name.c_str());
+        ImGui::Text("%s", prop.name.substr(prop.name.find_first_not_of("m_")).c_str());
+        ImGui::SameLine(/*ImGui::GetWindowContentRegionMax().x - 300*/);
+
         if (prop.type == typeid(std::string).name())
         {
-            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<std::string*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(float).name())
         {
-            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<float*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(Vector3).name())
+        {
             ParentStructOptions(reinterpret_cast<Vector3*>(address + prop.offset), m_CurrentObject, comp);
+        }
         else if (prop.type == typeid(Vector2).name())
+        {
             ParentStructOptions(reinterpret_cast<Vector2*>(address + prop.offset), m_CurrentObject, comp);
+        }
         else if (prop.type == typeid(TVector2<int>).name())
+        {
             ParentStructOptions(reinterpret_cast<TVector2<int>*>(address + prop.offset), m_CurrentObject, comp);
+        }
         else if (prop.type == typeid(float).name())
         {
-            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<float*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(int).name())
         {
-            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<int*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(bool).name())
         {
-            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<bool*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(Color4).name())
         {
-            ImGui::SameLine();
             ParentStructOptions(reinterpret_cast<Color4*>(address + prop.offset), m_CurrentObject, comp, prop.name);
         }
         else if (prop.type.find("enum") != std::string::npos)
@@ -1642,9 +1718,6 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
             }
         }
     }
-    // ImGui::TreePop();
-    //}
-    // ImGui::Unindent(5.0f);
 }
 
 void Editor::StructInspector(char* address, std::string comp)
@@ -1655,17 +1728,22 @@ void Editor::StructInspector(char* address, std::string comp)
     {
         if (ImGui::TreeNode((std::string("Struct ") + std::string(" : ") + type).c_str()))
         {
-            if (!Factory::m_Reflection->at(type)->getParents().empty()) ParentInspector(address, type, Factory::m_Reflection->at(type.c_str())->getParents().back().key);
+            if (!Factory::m_Reflection->at(type)->getParents().empty())
+            {
+                ParentInspector(address, type, Factory::m_Reflection->at(type.c_str())->getParents().back().key);
+            }
+
             auto component = (*Factory::m_Reflection).at(type);
             auto properties = component->getProperties();
-            ImGui::Indent(5.0f);
+            ImGui::Indent();
             for (int i = 0; i < properties.size(); ++i)
             {
-                ImGui::Text("%s : ", properties[i].name.c_str());
+                ImGui::Text("%s", properties[i].name.substr(properties[i].name.find_first_not_of("m_")).c_str());
+                ImGui::SameLine(/*ImGui::GetWindowContentRegionMax().x - 300*/);
+
                 // if else for each type
                 if (properties[i].type == typeid(std::string).name())
                 {
-                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<std::string*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(Vector3).name())
@@ -1682,22 +1760,18 @@ void Editor::StructInspector(char* address, std::string comp)
                 }
                 else if (properties[i].type == typeid(float).name())
                 {
-                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<float*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(int).name())
                 {
-                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<int*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(bool).name())
                 {
-                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<bool*>(address + properties[i].offset), m_CurrentObject, type);
                 }
                 else if (properties[i].type == typeid(Color4).name())
                 {
-                    ImGui::SameLine();
                     ParentStructOptions(reinterpret_cast<Color4*>(address + properties[i].offset), m_CurrentObject, type, properties[i].name);
                 }
                 else if (properties[i].type.find("enum") != std::string::npos)
@@ -1709,7 +1783,7 @@ void Editor::StructInspector(char* address, std::string comp)
                     StructInspector(address + properties[i].offset, properties[i].type);
                 }
             }
-            ImGui::Unindent(5.0f);
+            ImGui::Unindent();
             ImGui::TreePop();
         }
     }
@@ -1871,23 +1945,39 @@ void Editor::DrawLayerEditor()
             ClearRedo();
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
+
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
+
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
+#endif  // USE_VULKAN
         }
     }
-    auto lys = Application::Instance().GetCurrentScene()->GetLayers();
-    for (auto& ly : lys)
+    auto layers = Application::Instance().GetCurrentScene()->GetLayers();
+    for (auto& layer : layers)
     {
-        if (ly == m_CurrentLayer)
-            ImGui::Selectable(ly->GetName().c_str(), true);
-        else if (ImGui::Selectable(ly->GetName().c_str()))
+        if (layer == m_CurrentLayer)
         {
-            m_CurrentLayer = ly;
-            Renderer::Instance().SetCurrentLayer(ly);
+            ImGui::Selectable(layer->GetName().c_str(), true);
+        }
+        else if (ImGui::Selectable(layer->GetName().c_str()))
+        {
+            m_CurrentLayer = layer;
+#ifdef USE_VULKAN
+#else
+            Renderer::Instance().SetCurrentLayer(layer);
+#endif  // USE_VULKAN
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
         }
     }
 }
@@ -2074,12 +2164,18 @@ void Editor::DrawFullScreenViewport()
                 }
                 m_SavedLayers.clear();
                 m_CurrentLayer = Scene->GetLayers().back();
+#ifdef USE_VULKAN
+#else
                 Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
+#endif  // USE_VULKAN
             }
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetSelectedObjects({ 0 });
             Renderer::Instance().ChangeCamera(false);
+#endif  // USE_VULKAN
             ParticleSystem::Instance().Reset();
             AISystem::Instance().RevertBase();
         }
@@ -2102,8 +2198,11 @@ void Editor::DrawFullScreenViewport()
         ImVec2 windowSize = ImGui::GetWindowSize();
         windowSize.y -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
 
+#ifdef USE_VULKAN
+#else
         Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
         Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
+#endif  // USE_VULKAN
 
         // ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
@@ -2116,7 +2215,9 @@ void Editor::DrawTagsEditor()
     m_Global_Spaces += " ";
     std::vector<std::string> tags;
     for (auto& s : m_Tags)
+    {
         tags.push_back(s);
+    }
     int height = (int)tags.size() > 33 ? 33 : (int)tags.size();
     ImGui::PushItemWidth(300.0f);
     ImGui::ListBox(m_Global_Spaces.c_str(), &selected_tag, vector_getter, static_cast<void*>(&tags), (int)tags.size(), height);
@@ -2215,7 +2316,10 @@ void Editor::DrawPhysicsEditor()
         ofn.nMaxFile = MAX_PATH;
         ofn.lpstrFileTitle = (LPSTR) "Load File";
         ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-        if (GetOpenFileNameA(&ofn)) PhysicsWorld.LoadFromFile(filename);
+        if (GetOpenFileNameA(&ofn))
+        {
+            PhysicsWorld.LoadFromFile(filename);
+        }
     }
     ImGui::Separator();
     ImGui::Text("World Name : %s", PhysicsWorld.m_WorldName.c_str());
@@ -2509,9 +2613,7 @@ void Editor::DrawResourceManager()
         }
     }
     ImGui::Separator();
-    ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Meshes");
-    ImGui::PopFont();
     static int mesh_selected = -1;
     static int mesh_height = static_cast<int>(m_MeshNames.size()) > 6 ? 6 : static_cast<int>(m_MeshNames.size());
     if (ImGui::Button("Delete Mesh"))
@@ -2534,9 +2636,7 @@ void Editor::DrawResourceManager()
     ImGui::PopItemWidth();
     ImGui::Separator();
 
-    ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Animations");
-    ImGui::PopFont();
     static int anim_selected = -1;
     static int anim_height = static_cast<int>(m_AnimationNames.size()) > 6 ? 6 : static_cast<int>(m_AnimationNames.size());
     if (ImGui::Button("Delete Animation"))
@@ -2558,9 +2658,7 @@ void Editor::DrawResourceManager()
     ImGui::PopItemWidth();
     ImGui::Separator();
 
-    ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Textures");
-    ImGui::PopFont();
     static int tex_selected = -1;
     static int tex_height = static_cast<int>(m_TextureNames.size()) > 6 ? 6 : static_cast<int>(m_TextureNames.size());
     if (ImGui::Button("Delete Texture"))
@@ -2582,9 +2680,7 @@ void Editor::DrawResourceManager()
     ImGui::PopItemWidth();
     ImGui::Separator();
 
-    ImGui::PushFont(m_ImGuiFontBold);
     ImGui::Text("Fonts");
-    ImGui::PopFont();
     static int font_selected = -1;
     static int font_height = static_cast<int>(m_FontNames.size()) > 6 ? 6 : static_cast<int>(m_FontNames.size());
     if (ImGui::Button("Delete Font"))
@@ -2896,8 +2992,6 @@ void Editor::Options(HMesh mesh, GameObject* go, std::string c, std::string p)
             name = m_MeshNames[i];
         }
     int tmp = selected;
-    ImGui::SameLine();
-    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
     ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_MeshNames, (int)m_MeshNames.size());
     if (selected != tmp)
@@ -2916,16 +3010,21 @@ void Editor::Options(HTexture texture, GameObject* go, std::string c, std::strin
     std::string name;
     int selected = -1;
     ResourceGUID currId = 0;
-    if (texture.Validate()) currId = texture->GetGUID();
+    if (texture.Validate())
+    {
+        currId = texture->GetGUID();
+    }
+
     for (int i = 0; i < m_TextureIDs.size(); ++i)
+    {
         if (currId == m_TextureIDs[i])
         {
             selected = i;
             name = m_TextureNames[i];
         }
+    }
+
     int tmp = selected;
-    ImGui::SameLine();
-    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
     ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_TextureNames, (int)m_TextureNames.size());
     if (selected != tmp)
@@ -2944,16 +3043,19 @@ void Editor::Options(HAnimationSet anim, GameObject* go, std::string c, std::str
     std::string name;
     int selected = -1;
     ResourceGUID currId = 0;
-    if (anim.Validate()) currId = anim->GetGUID();
+    if (anim.Validate())
+    {
+        currId = anim->GetGUID();
+    }
     for (int i = 0; i < m_AnimationIDs.size(); ++i)
+    {
         if (currId == m_AnimationIDs[i])
         {
             selected = i;
             name = m_AnimationNames[i];
         }
+    }
     int tmp = selected;
-    ImGui::SameLine();
-    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
     ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_AnimationNames, (int)m_AnimationNames.size());
     if (selected != tmp)
@@ -2993,16 +3095,19 @@ void Editor::Options(HFont font, GameObject* go, std::string c, std::string p)
     std::string name;
     int selected = -1;
     ResourceGUID currId = 0;
-    if (font.Validate()) currId = font->GetGUID();
+    if (font.Validate())
+    {
+        currId = font->GetGUID();
+    }
     for (int i = 0; i < m_FontIDs.size(); ++i)
+    {
         if (currId == m_FontIDs[i])
         {
             selected = i;
             name = m_FontNames[i];
         }
+    }
     int tmp = selected;
-    ImGui::SameLine();
-    ImGui::Text("%s", name.c_str());
     m_Global_Spaces += " ";
     ImGui::Combo(m_Global_Spaces.c_str(), &selected, vector_getter, &m_FontNames, (int)m_FontNames.size());
     if (selected != tmp)
@@ -3339,13 +3444,19 @@ void Editor::Load()
     {
         m_CurrentObject = nullptr;
         m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
         Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
         ClearRedoUndo();
         Serializer { filename }.LoadScene();
     }
     m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
+#ifdef USE_VULKAN
+#else
     Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
     Renderer::Instance().ChangeCamera(false);
+#endif  // USE_VULKAN
     Application::Instance().GetGameTimer().SetEditorPaused(true);
 }
 
@@ -3367,12 +3478,18 @@ void Editor::CreateNewSceneTab()
         {
             m_CurrentObject = nullptr;
             m_SelectedObjects.clear();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
             ClearRedoUndo();
             Application::Instance().NewScene("Scene");
             Application::Instance().GetCurrentScene()->CreateLayer(name);
             m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetCurrentLayer(m_CurrentLayer);
+#endif  // USE_VULKAN
             SecureZeroMemory(LayerName, MAX_STRING_LENGTH);
             ImGui::CloseCurrentPopup();
         }
@@ -3515,11 +3632,17 @@ void Editor::RecursionSaveArchetypeParent(const char* name, unsigned char* base,
                 pElem->SetAttribute("Type", comp.type.c_str());
             }
             else if (comp.type.find("ptr") != std::string::npos)
+            {
                 continue;
+            }
             else if (comp.type.find("std::") != std::string::npos)
+            {
                 continue;
+            }
             else if (comp.type.find("*") != std::string::npos)
+            {
                 continue;
+            }
             else
             {
                 std::string value;
@@ -4088,12 +4211,20 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                         m_CurrentObject = m_SelectedObjects.front();
                         std::vector<unsigned> tmp;
                         for (auto& o : m_SelectedObjects)
+                        {
                             tmp.push_back(o->GetID());
+                        }
+#ifdef USE_VULKAN
+#else
                         Renderer::Instance().SetSelectedObjects(tmp);
+#endif  // USE_VULKAN
                     }
                     else
                     {
+#ifdef USE_VULKAN
+#else
                         Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
                         m_CurrentObject = nullptr;
                     }
                 }
@@ -4102,7 +4233,10 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
             {
                 m_SelectedObjects.clear();
                 m_SelectedObjects.push_back(m_CurrentObject);
+#ifdef USE_VULKAN
+#else
                 Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
+#endif  // USE_VULKAN
             }
             selected = go->GetID();
         }
@@ -4135,7 +4269,10 @@ void Editor::RecursiveParentAndChildObject(GameObject* go, std::string s, int& s
                     {
                         m_SelectedObjects.clear();
                         m_SelectedObjects.push_back(m_CurrentObject);
+#ifdef USE_VULKAN
+#else
                         Renderer::Instance().SetSelectedObjects({ m_CurrentObject->GetID() });
+#endif  // USE_VULKAN
                     }
                     selected = *begin;
                 }
@@ -4291,10 +4428,13 @@ GameObject* Editor::LuaCreateArchetypeObject(std::string n, Layer* layer)
     }
 }
 
-void Editor::SetLayer(Layer* ly)
+void Editor::SetLayer(Layer* layer)
 {
-    m_CurrentLayer = ly;
-    Renderer::Instance().SetCurrentLayer(ly);
+    m_CurrentLayer = layer;
+#ifdef USE_VULKAN
+#else
+    Renderer::Instance().SetCurrentLayer(layer);
+#endif  // USE_VULKAN
 }
 
 void Editor::SystemTimer(float input, float phy, float Comps, float renderer, float editor, float audio, float anim, float particle, float ai)
@@ -4370,8 +4510,13 @@ void Editor::DrawOutliner()
                             m_SelectedObjects.push_back(m_CurrentObject);
                             std::vector<unsigned> tmp;
                             for (auto& o : m_SelectedObjects)
+                            {
                                 tmp.push_back(o->GetID());
+                            }
+#ifdef USE_VULKAN
+#else
                             Renderer::Instance().SetSelectedObjects(tmp);
+#endif  // USE_VULKAN
                         }
                         else
                         {
@@ -4381,13 +4526,21 @@ void Editor::DrawOutliner()
                                 m_CurrentObject = m_SelectedObjects.front();
                                 std::vector<unsigned> tmp;
                                 for (auto& o : m_SelectedObjects)
+                                {
                                     tmp.push_back(o->GetID());
+                                }
+#ifdef USE_VULKAN
+#else
                                 Renderer::Instance().SetSelectedObjects(tmp);
+#endif  // USE_VULKAN
                             }
                             else
                             {
                                 m_CurrentObject = nullptr;
+#ifdef USE_VULKAN
+#else
                                 Renderer::Instance().SetSelectedObjects({ 0 });
+#endif  // USE_VULKAN
                             }
                         }
                     }
@@ -4395,7 +4548,10 @@ void Editor::DrawOutliner()
                     {
                         m_SelectedObjects.clear();
                         m_SelectedObjects.push_back(go);
+#ifdef USE_VULKAN
+#else
                         Renderer::Instance().SetSelectedObjects({ go->GetID() });
+#endif  // USE_VULKAN
                     }
                     selected = go->GetID();
                 }
@@ -4516,6 +4672,7 @@ void Editor::DrawInspector()
             ImGui::Text("Components");
             ImGui::Separator();
             for (int i = 0; i < AddComp.size(); ++i)
+            {
                 if (ImGui::Selectable(AddComp[i].c_str()))
                 {
                     ActionAddComponent* act = new ActionAddComponent(m_CurrentObject, AddComp[i], m_CurrentLayer);
@@ -4523,6 +4680,7 @@ void Editor::DrawInspector()
                     m_Undo.push_back(std::move(act));
                     ClearRedo();
                 }
+            }
             ImGui::EndPopup();
         }
         ImGui::SameLine();
@@ -4558,53 +4716,66 @@ void Editor::DrawInspector()
             ImGui::EndPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Refresh")) m_CurrentObject->UpdateComponents();
+        if (ImGui::Button("Refresh")) 
+{
+            m_CurrentObject->UpdateComponents();
+        }
         ImGui::Separator();
         int i = 0;
         for (auto& comp : list)
         {
-            if (ImGui::TreeNode((std::string("Comp ") + std::to_string(i) + std::string(" : ") + comp->GetName()).c_str()))
+            if (ImGui::TreeNode((std::string { '[' } + std::to_string(i) + "] " + comp->GetName() + " Component").c_str()))
             {
                 char* address = reinterpret_cast<char*>(comp);
-                // ImGui::Text("Component Num : %d", i);
-                // ImGui::Text("Component Name : %s", comp->GetName().c_str());
+
                 try
                 {
                     if (!Factory::m_Reflection->at(comp->GetName().c_str())->getParents().empty())
+                    {
                         ParentInspector(address, comp->GetName(), Factory::m_Reflection->at(comp->GetName().c_str())->getParents().back().key);
+                    }
+
                     auto component = (*Factory::m_Reflection).at(comp->GetName().c_str());
                     auto properties = component->getProperties();
-                    ImGui::Indent(5.0f);
+
+                    ImGui::Indent();
+
                     for (int i = 0; i < properties.size(); ++i)
                     {
-                        ImGui::Text("%s : ", properties[i].name.c_str());
+                        ImGui::Text("%s", properties[i].name.substr(properties[i].name.find_first_not_of("m_")).c_str());
+                        ImGui::SameLine(/*ImGui::GetWindowContentRegionMax().x - 300*/);
+
                         // if else for each type
                         if (properties[i].type == typeid(std::string).name())
                         {
-                            ImGui::SameLine();
                             Options(reinterpret_cast<std::string*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(Vector3).name())
+                        {
                             Options(reinterpret_cast<Vector3*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
+                        }
                         else if (properties[i].type == typeid(Vector2).name())
+                        {
                             Options(reinterpret_cast<Vector2*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
+                        }
                         else if (properties[i].type == typeid(TVector2<int>).name())
+                        {
                             Options(reinterpret_cast<TVector2<int>*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
+                        }
                         else if (properties[i].type == typeid(Vector4).name())
+                        {
                             Options(reinterpret_cast<Vector4*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
+                        }
                         else if (properties[i].type == typeid(float).name())
                         {
-                            ImGui::SameLine();
                             Options(reinterpret_cast<float*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(int).name())
                         {
-                            ImGui::SameLine();
                             Options(reinterpret_cast<int*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(bool).name())
                         {
-                            ImGui::SameLine();
                             Options(reinterpret_cast<bool*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type.find("enum") != std::string::npos)
@@ -4641,7 +4812,10 @@ void Editor::DrawInspector()
                         int currentSound = -1;
                         for (int i = 0; start != AudioSystem::Instance().GetSoundMap().end(); ++start)
                         {
-                            if (start->first == dynamic_cast<AudioEmitter*>(comp)->GetSoundName()) currentSound = i;
+                            if (start->first == dynamic_cast<AudioEmitter*>(comp)->GetSoundName())
+                            {
+                                currentSound = i;
+                            }
                             SoundTracks.push_back(start->first);
                             ++i;
                         }
@@ -4650,9 +4824,13 @@ void Editor::DrawInspector()
                         if (currentSound != s)
                         {
                             if (!sound->IsPlaying())
+                            {
                                 sound->SetAudioClip(SoundTracks[currentSound]);
+                            }
                             else
+                            {
                                 sound->SetAndPlayAudioClip(SoundTracks[currentSound]);
+                            }
                             std::string oldValue = s < 0 ? std::string {} : SoundTracks[s];
                             std::string newValue = SoundTracks[currentSound];
                             ActionInput<std::string>* act =
@@ -4667,9 +4845,18 @@ void Editor::DrawInspector()
                         std::string stop("Stop");
                         stop += "##";
                         stop += std::to_string(m_CurrentObject->GetID());
-                        if (ImGui::Button(p.c_str())) sound->Play();
+
+                        if (ImGui::Button(p.c_str()))
+                        {
+                            sound->Play();
+                        }
+
                         ImGui::SameLine();
-                        if (ImGui::Button(stop.c_str())) sound->Stop();
+
+                        if (ImGui::Button(stop.c_str()))
+                        {
+                            sound->Stop();
+                        }
                     }
                     if (comp->GetName() == "LuaScript")
                     {
@@ -4764,7 +4951,7 @@ void Editor::DrawInspector()
                             }
                         }
                     }
-                    ImGui::Unindent(5.0f);
+                    ImGui::Unindent();
                 }
                 catch (...)
                 {
@@ -4806,18 +4993,11 @@ Editor::Editor(HWND hwnd, float x, float y)
     , m_IsTransformInLocalSpace(false)
     , m_IsGameCameraAcitve(false)
 {
-#ifndef USE_VULKAN_RENDERER
-    ImGui::CreateContext();
-#endif  // USE_VULKAN_RENDERER
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    ImGui_ImplWin32_Init(static_cast<void*>(hwnd));
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     ImGui_ImplOpenGL3_Init();
-#endif  // USE_VULKAN_RENDERER
-
-    unsigned char* pixels;
-    int width, height;
+#endif  // USE_VULKAN  // USE_VULKAN
 
     for (int i = 0; i < static_cast<unsigned>(WindowType::Count); ++i)
     {
@@ -4835,10 +5015,6 @@ Editor::Editor(HWND hwnd, float x, float y)
     SecureZeroMemory(m_EditorStringBuffer, 2 << 23);
     DeSerializeArchetypes();
     LoadTags();
-
-    m_ImGuiFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibri.ttf", 13.0f);
-    m_ImGuiFontBold = ImGui::GetIO().Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\calibrib.ttf", 23.0f);
-    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 }
 
 Editor::~Editor()
@@ -4857,12 +5033,10 @@ Editor::~Editor()
     }
     // Need to save the archetype
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     ImGui_ImplOpenGL3_Shutdown();
-#endif
-    ImGui_ImplWin32_Shutdown();
+#endif  // USE_VULKAN
 
-    ImGui::DestroyContext();
     free(m_CurrentWorkingDirectory);
 }
 
@@ -4877,10 +5051,11 @@ void Editor::Update(float dt)
         m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayers().back();
     }
 
-    ImGui_ImplWin32_NewFrame();
-#ifndef USE_VULKAN_RENDERER
+#ifdef USE_VULKAN
+    ImGui_ImplVulkan_NewFrame();
+#else
     ImGui_ImplOpenGL3_NewFrame();
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN  // USE_VULKAN
 
     ImGui::NewFrame();
 
@@ -4991,12 +5166,11 @@ void Editor::Update(float dt)
     ImGui::PopStyleVar();
 
     ImGui::ShowDemoWindow();
-    ImGui::EndFrame();
     ImGui::Render();
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif
+#endif  // USE_VULKAN
 
     m_DeltaMousePos = ImGui::GetMousePos();
 }

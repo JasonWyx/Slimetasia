@@ -102,7 +102,10 @@ void Renderer::BuildRenderTargets()
 void Renderer::Update(float dt)
 {
 #ifdef EDITOR
-    if (Input::Instance().GetKeyUp(KEY_O)) m_IsDebugDrawOn = !m_IsDebugDrawOn;
+    if (Input::Instance().GetKeyUp(KEY_O))
+    {
+        m_IsDebugDrawOn = !m_IsDebugDrawOn;
+    }
 #endif
     // Update light positions
     m_CurrentLayer->GetRenderLayer().UpdateAabbTree();
@@ -119,7 +122,10 @@ void Renderer::Update(float dt)
     // Editor mode render
     if (Application::Instance().GetGameTimer().IsEditorPaused() || Application::Instance().GetGameTimer().IsPlayModePaused())
     {
-        if (m_CurrentLayer == nullptr) return;
+        if (m_CurrentLayer == nullptr)
+        {
+            return;
+        }
 
         if (EditorCamera* camera = m_CurrentLayer->GetEditorCamera())
         {

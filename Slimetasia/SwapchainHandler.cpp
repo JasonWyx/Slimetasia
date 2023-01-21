@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <ranges>
 
 #include "Logger.h"
 #include "RendererVk.h"
@@ -14,55 +15,49 @@ SwapchainHandler::SwapchainHandler(const vk::PhysicalDevice physicalDevice, cons
     ASSERT(surface);
     ASSERT(window);
 
-    SwapchainSupportDetails details = QuerySwapchainSupportDetails(physicalDevice, surface);
-    m_SurfaceFormat = ChooseSurfaceFormat(details.m_Formats);
-    m_PresentMode = ChoosePresentMode(details.m_PresentModes);
-    m_Extent = ChooseExtent(details.m_Capabilities, window);
-
-    vk::SwapchainCreateInfoKHR swapchainCreateInfo {
-        .surface = surface,
-        .minImageCount = details.m_Capabilities.minImageCount + 1,
-        .imageFormat = m_SurfaceFormat.format,
-        .imageColorSpace = m_SurfaceFormat.colorSpace,
-        .imageExtent = m_Extent,
-        .imageArrayLayers = 1,
-        .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-        .preTransform = details.m_Capabilities.currentTransform,
-        .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-        .presentMode = m_PresentMode,
-        .clipped = VK_TRUE,
-    };
-
-    m_Swapchain = device.createSwapchainKHR(swapchainCreateInfo);
-    ASSERT(m_Swapchain);
-
-    m_Images = device.getSwapchainImagesKHR(m_Swapchain);
-
-    for (const vk::Image image : m_Images)
-    {
-        vk::ImageViewCreateInfo imageViewCreateInfo {
-            .image = image,
-            .viewType = vk::ImageViewType::e2D,
-            .format = m_SurfaceFormat.format,
-            .subresourceRange = { .levelCount = 1, .layerCount = 1 },
-        };
-
-        m_ImageViews.push_back(device.createImageView(imageViewCreateInfo));
-    }
+    CreateSwapchain(physicalDevice, device, surface, window);
 }
 
 SwapchainHandler::~SwapchainHandler()
 {
-    for (const vk::ImageView imageView : m_ImageViews)
-    {
-        m_OwningDevice.destroyImageView(imageView);
-    }
-    m_OwningDevice.destroySwapchainKHR(m_Swapchain);
+    DestroySwapchain();
 }
 
-uint32_t SwapchainHandler::AcquireNextImageIndex(const vk::Semaphore imageAvailableSemaphore) 
+void SwapchainHandler::CreateFramebuffers(const vk::RenderPass renderPass)
 {
-    return m_OwningDevice.acquireNextImageKHR(m_Swapchain, UINT64_MAX, imageAvailableSemaphore).value;
+    for (size_t i = 0; i < m_ImageViews.size(); ++i)
+    {
+        const vk::ImageView imageView = m_ImageViews[i];
+
+        vk::FramebufferCreateInfo createInfo {
+            .renderPass = renderPass,
+            .attachmentCount = 1,
+            .pAttachments = &imageView,
+            .width = m_Extent.width,
+            .height = m_Extent.height,
+            .layers = 1,
+        };
+
+        m_Framebuffers.push_back(m_OwnerDevice.createFramebuffer(createInfo));
+    }
+}
+
+void SwapchainHandler::RecreateSwapchain(const vk::PhysicalDevice physicalDevice, const vk::Device device, const vk::SurfaceKHR surface, const HWND window)
+{
+    ASSERT(physicalDevice);
+    ASSERT(device);
+    ASSERT(surface);
+    ASSERT(window);
+
+    m_OwnerDevice.waitIdle();
+
+    DestroySwapchain();
+    CreateSwapchain(physicalDevice, device, surface, window);
+}
+
+vk::ResultValue<uint32_t> SwapchainHandler::AcquireNextImageIndex(const vk::Semaphore imageAvailableSemaphore)
+{
+    return m_OwnerDevice.acquireNextImageKHR(m_Swapchain, UINT64_MAX, imageAvailableSemaphore);
 }
 
 /*static*/ SwapchainHandler::SwapchainSupportDetails SwapchainHandler::QuerySwapchainSupportDetails(const vk::PhysicalDevice physicalDevice, const vk::SurfaceKHR surface)
@@ -127,4 +122,56 @@ uint32_t SwapchainHandler::AcquireNextImageIndex(const vk::Semaphore imageAvaila
 
         return extent;
     }
+}
+
+void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, const vk::Device device, const vk::SurfaceKHR surface, const HWND window)
+{
+    SwapchainSupportDetails details = QuerySwapchainSupportDetails(physicalDevice, surface);
+    m_SurfaceFormat = ChooseSurfaceFormat(details.m_Formats);
+    m_PresentMode = ChoosePresentMode(details.m_PresentModes);
+    m_Extent = ChooseExtent(details.m_Capabilities, window);
+
+    vk::SwapchainCreateInfoKHR swapchainCreateInfo {
+        .surface = surface,
+        .minImageCount = details.m_Capabilities.minImageCount + 1,
+        .imageFormat = m_SurfaceFormat.format,
+        .imageColorSpace = m_SurfaceFormat.colorSpace,
+        .imageExtent = m_Extent,
+        .imageArrayLayers = 1,
+        .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+        .preTransform = details.m_Capabilities.currentTransform,
+        .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+        .presentMode = m_PresentMode,
+        .clipped = VK_TRUE,
+    };
+
+    m_Swapchain = device.createSwapchainKHR(swapchainCreateInfo);
+    ASSERT(m_Swapchain);
+
+    m_Images = device.getSwapchainImagesKHR(m_Swapchain);
+
+    for (const vk::Image image : m_Images)
+    {
+        vk::ImageViewCreateInfo imageViewCreateInfo {
+            .image = image,
+            .viewType = vk::ImageViewType::e2D,
+            .format = m_SurfaceFormat.format,
+            .subresourceRange = { .levelCount = 1, .layerCount = 1 },
+        };
+
+        m_ImageViews.push_back(device.createImageView(imageViewCreateInfo));
+    }
+}
+
+void SwapchainHandler::DestroySwapchain()
+{
+    std::ranges::for_each(m_Framebuffers, [this](const vk::Framebuffer& framebuffer) { m_OwnerDevice.destroyFramebuffer(framebuffer); });
+    std::ranges::for_each(m_ImageViews, [this](const vk::ImageView& imageView) { m_OwnerDevice.destroyImageView(imageView); });
+    m_OwnerDevice.destroySwapchainKHR(m_Swapchain);
+    m_Framebuffers.clear();
+    m_ImageViews.clear();
+    m_Images.clear();
+    m_SurfaceFormat = {};
+    m_PresentMode = {};
+    m_Extent = {};
 }

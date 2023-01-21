@@ -3,9 +3,9 @@
 #include "Logger.h"
 
 DeviceObject::DeviceObject(const vk::Device device)
-    : m_OwningDevice { device }
+    : m_OwnerDevice { device }
 {
-    ASSERT(m_OwningDevice);
+    ASSERT(m_OwnerDevice);
 }
 
 DeviceObject::~DeviceObject() {}

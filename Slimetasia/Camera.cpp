@@ -102,7 +102,7 @@ void Camera::SetViewportSize(iVector2 const& viewportSize, bool rebuildTextures)
     {
         m_ViewportSize = viewportSize;
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
         if (rebuildTextures)
         {
             glDeleteTextures(1, &m_RenderTarget);
@@ -112,7 +112,7 @@ void Camera::SetViewportSize(iVector2 const& viewportSize, bool rebuildTextures)
             glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         }
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
     }
 }
 
@@ -232,7 +232,7 @@ GLuint Camera::GetRenderTarget()
     {
         m_PrevViewportSize = m_ViewportSize;
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
         glDeleteTextures(1, &m_RenderTarget);
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderTarget);
@@ -240,7 +240,7 @@ GLuint Camera::GetRenderTarget()
         glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
         glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
     }
     return m_RenderTarget;
 }

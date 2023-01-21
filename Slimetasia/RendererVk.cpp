@@ -8,12 +8,15 @@
 #include <set>
 
 #include "External Libraries/imgui/backends/imgui_impl_vulkan.h"
+#include "External Libraries/imgui/backends/imgui_impl_win32.h"
 #include "ShaderHelper.h"
 
 static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+static RendererVk* g_Renderer = nullptr;
 
 RendererVk::RendererVk(HINSTANCE appInstance, HWND appWindow, const uint32_t windowWidth, const uint32_t windowHeight)
-    : m_CurrentFrame { 0 }
+    : m_AppWindow { appWindow }
+    , m_CurrentFrame { 0 }
 {
     CreateInstance();
     CreateSurface(appInstance, appWindow);
@@ -28,7 +31,9 @@ RendererVk::RendererVk(HINSTANCE appInstance, HWND appWindow, const uint32_t win
     CreatePipeline();
     CreateSyncObjects();
 
-    InitializeImGui();
+    InitializeImGui(appWindow);
+
+    g_Renderer = this;
 }
 
 RendererVk::~RendererVk()
@@ -36,13 +41,14 @@ RendererVk::~RendererVk()
     ShutdownImGui();
 
     std::ranges::for_each(m_InFlightFences, [this](const vk::Fence& fence) { m_Device.destroyFence(fence); });
+    std::ranges::for_each(m_ImguiRenderFinishedSemaphores, [this](const vk::Semaphore& semaphore) { m_Device.destroySemaphore(semaphore); });
     std::ranges::for_each(m_RenderFinishedSemaphores, [this](const vk::Semaphore& semaphore) { m_Device.destroySemaphore(semaphore); });
     std::ranges::for_each(m_ImageAvailableSemaphores, [this](const vk::Semaphore& semaphore) { m_Device.destroySemaphore(semaphore); });
     m_Device.freeCommandBuffers(m_CommandPool, m_CommandBuffers);
     m_Device.destroyCommandPool(m_CommandPool);
+    m_Device.destroyCommandPool(m_OneShotCommandPool);
     m_Device.destroyPipeline(m_Pipeline);
     m_Device.destroyPipelineLayout(m_PipelineLayout);
-    std::ranges::for_each(m_Framebuffers, [this](const vk::Framebuffer& framebuffer) { m_Device.destroyFramebuffer(framebuffer); });
     m_Device.destroyRenderPass(m_RenderPass);
     m_Device.destroyDescriptorPool(m_DescriptorPool);
     m_SwapchainHandler.release();
@@ -55,8 +61,16 @@ void RendererVk::Update(const float deltaTime)
     const vk::Result waitResult = m_Device.waitForFences(m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
     m_Device.resetFences(m_InFlightFences[m_CurrentFrame]);
 
-    const uint32_t imageIndex = m_SwapchainHandler->AcquireNextImageIndex(m_ImageAvailableSemaphores[m_CurrentFrame]);
+    const vk::ResultValue<uint32_t>& swapchainAcquireResult = m_SwapchainHandler->AcquireNextImageIndex(m_ImageAvailableSemaphores[m_CurrentFrame]);
 
+    if (swapchainAcquireResult.result == vk::Result::eErrorOutOfDateKHR)
+    {
+        m_SwapchainHandler->RecreateSwapchain(m_PhysicalDevice, m_Device, m_Surface, m_AppWindow);
+        return;
+    }
+
+    const uint32_t imageIndex = swapchainAcquireResult.value;
+    const std::vector<vk::Framebuffer>& framebuffers { m_SwapchainHandler->GetFramebuffers() };
     const std::vector<vk::Semaphore> waitSemaphores { m_ImageAvailableSemaphores[m_CurrentFrame] };
     const std::vector<vk::Semaphore> signalSemaphores { m_RenderFinishedSemaphores[m_CurrentFrame] };
 
@@ -71,19 +85,18 @@ void RendererVk::Update(const float deltaTime)
     };
     const vk::RenderPassBeginInfo renderPassBeginInfo {
         .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[imageIndex],
+        .framebuffer = framebuffers[imageIndex],
         .renderArea = { .extent = m_SwapchainHandler->GetExtent() },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
     };
+
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
-
-    // DrawImGui(commandBuffer);
-
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
-    commandBuffer.draw(3, 1, 0, 0);
-
+    DrawImGui(commandBuffer);
+    // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
+    // commandBuffer.draw(3, 1, 0, 0);
     commandBuffer.endRenderPass();
+
     commandBuffer.end();
 
     const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
@@ -112,14 +125,25 @@ void RendererVk::Update(const float deltaTime)
 
     const vk::Result presentResult = m_PresentQueue.presentKHR(presentInfo);
 
+    if (presentResult == vk::Result::eErrorOutOfDateKHR || presentResult == vk::Result::eSuboptimalKHR)
+    {
+        m_SwapchainHandler->RecreateSwapchain(m_PhysicalDevice, m_Device, m_Surface, m_AppWindow);
+    }
+
     m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void RendererVk::OnWindowResize()
+{
+    // Wait idle is called internally
+    m_SwapchainHandler->RecreateSwapchain(m_PhysicalDevice, m_Device, m_Surface, m_AppWindow);
+    m_SwapchainHandler->CreateFramebuffers(m_RenderPass);
 }
 
 void RendererVk::CreateInstance()
 {
     // Instance layers
-    const std::vector<const char*> layerNames
-    {
+    const std::vector<const char*> layerNames = {
 #if defined(_DEBUG)
         "VK_LAYER_KHRONOS_validation"
 #endif  // #if defined(_DEBUG)
@@ -127,11 +151,11 @@ void RendererVk::CreateInstance()
     };
 
     // Instance extensions
-    const std::vector<const char*> extensionNames
-    {
-        VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+    const std::vector<const char*> extensionNames = {
+        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #if defined(_DEBUG)
-            VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+        VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
 #endif  // #if defined(_DEBUG)
     };
 
@@ -215,7 +239,12 @@ void RendererVk::CreateDevice()
             m_GraphicsQueueIndex = queueIndex;
         }
 
-        if (m_PresentQueueIndex.has_value() && m_GraphicsQueueIndex.has_value())
+        if (queueFamilyProperties.queueFlags | vk::QueueFlagBits::eTransfer)
+        {
+            m_TransferQueueIndex = queueIndex;
+        }
+
+        if (m_PresentQueueIndex.has_value() && m_GraphicsQueueIndex.has_value() && m_TransferQueueIndex.has_value())
         {
             break;
         }
@@ -225,7 +254,7 @@ void RendererVk::CreateDevice()
 
     // Create queue only for each unique index
     const float queuePriority = 1.0f;
-    const std::set<uint32_t> uniqueQueueIndices { m_PresentQueueIndex.value(), m_GraphicsQueueIndex.value() };
+    const std::set<uint32_t> uniqueQueueIndices { m_PresentQueueIndex.value(), m_GraphicsQueueIndex.value(), m_TransferQueueIndex.value() };
 
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos {};
 
@@ -242,6 +271,7 @@ void RendererVk::CreateDevice()
 
     const std::vector<const char*> extensions {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        // VK_EXT_GRAPHICS_PIPELINE_LIBRARY_EXTENSION_NAME,
     };
 
     vk::DeviceCreateInfo createInfo {
@@ -260,6 +290,7 @@ void RendererVk::CreateDevice()
 
     m_PresentQueue = m_Device.getQueue(m_PresentQueueIndex.value(), 0);
     m_GraphicsQueue = m_Device.getQueue(m_GraphicsQueueIndex.value(), 0);
+    m_TransferQueue = m_Device.getQueue(m_TransferQueueIndex.value(), 0);
 }
 
 void RendererVk::CreateSwapchain(HWND appWindow)
@@ -285,7 +316,7 @@ void RendererVk::CreateDescriptorPool()
 
     vk::DescriptorPoolCreateInfo createInfo {
         .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-        .maxSets = 1 << 10,
+        .maxSets = static_cast<uint32_t>(1000 * poolSizes.size()),
         .poolSizeCount = static_cast<uint32_t>(poolSizes.size()),
         .pPoolSizes = poolSizes.data(),
     };
@@ -299,16 +330,16 @@ void RendererVk::CreateCommandPool()
         .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
         .queueFamilyIndex = m_GraphicsQueueIndex.value(),
     };
-
     m_CommandPool = m_Device.createCommandPool(createInfo);
 
-    // Create command buffer for imgui
     vk::CommandBufferAllocateInfo allocateInfo {
         .commandPool = m_CommandPool,
         .commandBufferCount = MAX_FRAMES_IN_FLIGHT,
     };
-
     m_CommandBuffers = m_Device.allocateCommandBuffers(allocateInfo);
+
+    createInfo.flags = vk::CommandPoolCreateFlagBits::eTransient;
+    m_OneShotCommandPool = m_Device.createCommandPool(createInfo);
 }
 void RendererVk::CreateRenderPass()
 {
@@ -335,7 +366,7 @@ void RendererVk::CreateRenderPass()
         .pColorAttachments = &colorAttachmentRef,
     };
 
-    // Initial dependency to transition 
+    // Initial dependency to transition
     const vk::SubpassDependency dependency {
         .srcSubpass = VK_SUBPASS_EXTERNAL,
         .dstSubpass = 0,
@@ -359,24 +390,10 @@ void RendererVk::CreateRenderPass()
 
 void RendererVk::CreateFramebuffers()
 {
-    const vk::Extent2D extent = m_SwapchainHandler->GetExtent();
-    const std::vector<vk::ImageView> imageViews = m_SwapchainHandler->GetImageViews();
+    ASSERT(m_RenderPass);
+    ASSERT(static_cast<bool>(m_SwapchainHandler));
 
-    for (size_t i = 0; i < imageViews.size(); ++i)
-    {
-        const vk::ImageView imageView = imageViews[i];
-
-        vk::FramebufferCreateInfo createInfo {
-            .renderPass = m_RenderPass,
-            .attachmentCount = 1,
-            .pAttachments = &imageView,
-            .width = extent.width,
-            .height = extent.height,
-            .layers = 1,
-        };
-
-        m_Framebuffers.push_back(m_Device.createFramebuffer(createInfo));
-    }
+    m_SwapchainHandler->CreateFramebuffers(m_RenderPass);
 }
 
 void RendererVk::CreatePipelineLayout()
@@ -540,12 +557,12 @@ void RendererVk::CreateSyncObjects()
     }
 }
 
-vk::CommandBuffer RendererVk::CreateOneShotCommandBuffer()
+vk::CommandBuffer RendererVk::CreateInstantCommandBuffer()
 {
     ASSERT(m_Device);
 
     const vk::CommandBufferAllocateInfo allocateInfo {
-        .commandPool = m_CommandPool,
+        .commandPool = m_OneShotCommandPool,
         .commandBufferCount = 1,
     };
 
@@ -560,7 +577,7 @@ vk::CommandBuffer RendererVk::CreateOneShotCommandBuffer()
     return commandBuffer;
 }
 
-void RendererVk::SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffer)
+void RendererVk::SubmitInstantCommandBuffer(const vk::CommandBuffer commandBuffer, const vk::QueueFlagBits targetQueue)
 {
     commandBuffer.end();
 
@@ -569,15 +586,16 @@ void RendererVk::SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffe
         .pCommandBuffers = &commandBuffer,
     };
 
-    m_GraphicsQueue.submit(submitInfo);
+    const vk::Queue queue = targetQueue == vk::QueueFlagBits::eTransfer ? m_TransferQueue : m_GraphicsQueue;
+    
+    queue.submit(submitInfo);
+
     m_Device.waitIdle();
-    m_Device.freeCommandBuffers(m_CommandPool, { commandBuffer });
+    m_Device.freeCommandBuffers(m_OneShotCommandPool, { commandBuffer });
 }
 
-void RendererVk::InitializeImGui()
+void RendererVk::InitializeImGui(const HWND appWindow)
 {
-    ImGui::CreateContext();
-
     ImGui_ImplVulkan_InitInfo imguiInitInfo {
         .Instance = m_Instance,
         .PhysicalDevice = m_PhysicalDevice,
@@ -591,14 +609,15 @@ void RendererVk::InitializeImGui()
     };
 
     ImGui_ImplVulkan_Init(&imguiInitInfo, m_RenderPass);
-    const vk::CommandBuffer createFontCommands = CreateOneShotCommandBuffer();
+
+    const vk::CommandBuffer createFontCommands = CreateInstantCommandBuffer();
     ImGui_ImplVulkan_CreateFontsTexture(createFontCommands);
-    SubmitOneShotCommandBuffer(createFontCommands);
+    SubmitInstantCommandBuffer(createFontCommands, vk::QueueFlagBits::eTransfer);
+    ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 void RendererVk::ShutdownImGui()
 {
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
     ImGui_ImplVulkan_Shutdown();
 }
 
@@ -610,6 +629,5 @@ void RendererVk::DrawImGui(const vk::CommandBuffer commandBuffer)
         return;
     }
 
-    ImGui_ImplVulkan_NewFrame();
     ImGui_ImplVulkan_RenderDrawData(drawData, commandBuffer);
 }

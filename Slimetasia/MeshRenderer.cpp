@@ -27,21 +27,21 @@ MeshRenderer::MeshRenderer(GameObject* parentObject)
         m_Transform = GetOwner()->GetComponent<Transform>();
     }
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     glCreateSamplers(1, &m_TextureSampler);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(m_TextureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
-#endif // !USE_VULKAN_RENDERER
+#endif // !USE_VULKAN
 }
 
 MeshRenderer::~MeshRenderer()
 {
     OnInactive();
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     glDeleteSamplers(1, &m_TextureSampler);
-#endif  // !USE_VULKAN_RENDERER
+#endif  // !USE_VULKAN
 }
 
 void MeshRenderer::OnActive()
@@ -189,7 +189,7 @@ TilingMode MeshRenderer::GetTilingMode() const
 
 void MeshRenderer::SetTilingMode(TilingMode mode)
 {
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     switch (m_TilingMode)
     {
         case eTilingMode_Repeat:
@@ -206,7 +206,7 @@ void MeshRenderer::SetTilingMode(TilingMode mode)
         }
         break;
     }
-#endif  // !USE_VULKAN_RENDERER
+#endif  // !USE_VULKAN
 
     m_TilingMode = mode;
 }

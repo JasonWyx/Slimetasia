@@ -17,6 +17,11 @@ public:
     ~RendererVk();
 
     void Update(const float deltaTime);
+    void OnWindowResize();
+
+    vk::CommandBuffer CreateInstantCommandBuffer();
+    void SubmitInstantCommandBuffer(const vk::CommandBuffer commandBuffer, const vk::QueueFlagBits targetQueue);
+
     // void SetCurrentLayer(Layer* layer);
     // void SetWindowSize(iVector2 const& windowSize);
     // iVector2 GetWindowSize() const;
@@ -50,13 +55,13 @@ private:
     void CreatePipeline();
     void CreateSyncObjects();
 
-    vk::CommandBuffer CreateOneShotCommandBuffer();
-    void SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffer);
 
     // ImGui
-    void InitializeImGui();
+    void InitializeImGui(const HWND appWindow);
     void ShutdownImGui();
     void DrawImGui(const vk::CommandBuffer commandBuffer);
+
+    HWND m_AppWindow;
 
     vk::Instance m_Instance;
     vk::SurfaceKHR m_Surface;
@@ -65,21 +70,27 @@ private:
 
     std::optional<uint32_t> m_PresentQueueIndex;
     std::optional<uint32_t> m_GraphicsQueueIndex;
+    std::optional<uint32_t> m_TransferQueueIndex;
     vk::Queue m_PresentQueue;
     vk::Queue m_GraphicsQueue;
+    vk::Queue m_TransferQueue;
     std::unique_ptr<SwapchainHandler> m_SwapchainHandler;
 
     vk::DescriptorPool m_DescriptorPool;
     vk::CommandPool m_CommandPool;
     std::vector<vk::CommandBuffer> m_CommandBuffers;
 
+    vk::CommandPool m_OneShotCommandPool;
+
     vk::RenderPass m_RenderPass;
-    std::vector<vk::Framebuffer> m_Framebuffers;
     vk::PipelineLayout m_PipelineLayout;
     vk::Pipeline m_Pipeline;
 
     std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
     std::vector<vk::Semaphore> m_RenderFinishedSemaphores;
+    std::vector<vk::Semaphore> m_ImguiRenderFinishedSemaphores;
     std::vector<vk::Fence> m_InFlightFences;
     uint32_t m_CurrentFrame;
 };
+
+extern RendererVk* g_Renderer;

@@ -15,6 +15,7 @@
 #include "AudioSystem.h"
 #include "CollisionMesh_3D.h"
 #include "Editor.h"
+#include "External Libraries/imgui/backends/imgui_impl_win32.h"
 #include "Factory.h"
 #include "Input.h"
 #include "MeshRenderer.h"
@@ -33,8 +34,8 @@ std::streambuf* Application::oss = std::cout.rdbuf();
 std::ostringstream Application::os;
 bool Application::s_IsGameRunning = false;
 
-#define MAXCOUNT 1000000
-#define DESIRED_FRAME_RATE 1.f / 60.f
+#define MAXCOUNT 1000
+#define DESIRED_FRAME_RATE 0.0f  // 1.f / 60.f
 
 constexpr DWORD Application::s_WindowStyles[] = {
     WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,  // windowed
@@ -236,7 +237,11 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
             {
                 Application::Instance().SetWindowWidth(LOWORD(lParam));
                 Application::Instance().SetWindowHeight(HIWORD(lParam));
+#ifdef USE_VULKAN
+                RendererVk::Instance().OnWindowResize();
+#else
                 Renderer::Instance().SetWindowSize(iVector2(LOWORD(lParam), HIWORD(lParam)));
+#endif  // USE_VULKAN
             }
             return 0;
         }
@@ -302,7 +307,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
         MessageBox(NULL, TEXT("Program requires Windows NT!"), appName, MB_ICONERROR);
     }
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     HWND dummyWND = CreateWindowEx(s_WindowStylesEx[(int)WindowMode::Windowed], appName, "Slimetasia", s_WindowStyles[(int)WindowMode::Windowed], 0, 0, 1, 1, nullptr, nullptr, hInstance, nullptr);
     HDC dummyDC = GetDC(dummyWND);
 
@@ -368,7 +373,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     {
         std::cout << "ERROR: WGLEW failed to initialize!" << std::endl;
     }
-#endif  // !USE_VULKAN_RENDERER
+#endif  // !USE_VULKAN
 
 #ifndef EDITOR
 
@@ -411,7 +416,7 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     freopen("CONOUT$", "w", stdout);
     freopen("CONOUT$", "w", stderr);
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     DEVMODE devMode;
     devMode.dmSize = sizeof(DEVMODE);
 
@@ -500,13 +505,14 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     }
 
     wglSwapIntervalEXT(1);
-#endif  // !USE_VULKAN_RENDERER
+#endif  // !USE_VULKAN
 
     m_GameTimer = Timer(1.f / 60.0f);
     m_ComputeTimer = Timer();
 
 #ifdef EDITOR
     ImGui::CreateContext();
+    ImGui_ImplWin32_Init(static_cast<void*>(m_Window));
 #endif  // EDITOR
 
     Factory::Initialize();
@@ -517,11 +523,11 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     ResourceManager::Instance().RefreshResources();
     AISystem::Initialize();
 
-#if defined(USE_VULKAN_RENDERER)
+#if defined(USE_VULKAN)
     RendererVk::Initialize(hInstance, m_Window, m_WindowWidth, m_WindowHeight);
 #else
     Renderer::Initialize(iVector2(m_WindowWidth, m_WindowHeight));
-#endif  // #if defined(USE_VULKAN_RENDERER)
+#endif  // #if defined(USE_VULKAN)
 
     Input::Initialize();
     Editor::Initialize(m_Window, static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
@@ -541,11 +547,11 @@ Application::~Application()
 
     Editor::Shutdown();
     Input::Shutdown();
-#ifdef USE_VULKAN_RENDERER
+#ifdef USE_VULKAN
     RendererVk::Shutdown();
 #else
     Renderer::Shutdown();
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
     AISystem::Shutdown();
     ResourceManager::Shutdown();
     AnimationSystem::Shutdown();
@@ -554,11 +560,12 @@ Application::~Application()
     Factory::Shutdown();
     ParticleSystem ::Shutdown();
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     wglDeleteContext(m_GLRenderContext);
-#endif  // !USE_VULKAN_RENDERER
+#endif  // !USE_VULKAN
 
 #ifdef EDITOR
+    ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 #endif  // EDITOR
 
@@ -641,6 +648,7 @@ void Application::RunMainLoop()
     while (!m_IsQuitting)
     {
         ProcessWindowMessages();
+        ImGui_ImplWin32_NewFrame();
 
         float accumulator = 0.f;
 
@@ -658,9 +666,13 @@ void Application::RunMainLoop()
         }
 
         if (m_GameTimer.GetScaledFrameTime())
+        {
             Input::Instance().ToggleMouseWrap(true);
+        }
         else
+        {
             Input::Instance().ToggleMouseWrap(false);
+        }
 
         m_GameTimer.EndTimer();
         float scaledFrameTime = m_GameTimer.GetScaledFrameTime();
@@ -696,19 +708,19 @@ void Application::RunMainLoop()
         AUDIOSYSTEM.Update(scaledFrameTime);
         audioTime = m_ComputeTimer.GetTimePassed();
 
-        m_ComputeTimer.StartTimer();
-#if defined(USE_VULKAN_RENDERER)
-        RendererVk::Instance().Update(scaledFrameTime);
-#else
-        Renderer::Instance().Update(scaledFrameTime);
-#endif  // #if defined(USE_VULKAN_RENDERER)
-        renderTime = m_ComputeTimer.GetTimePassed();
-
 #ifdef EDITOR
         m_ComputeTimer.StartTimer();
         Editor::Instance().Update(actualFrameTime);
         editorTime = m_ComputeTimer.GetTimePassed();
 #endif
+
+        m_ComputeTimer.StartTimer();
+#if defined(USE_VULKAN)
+        RendererVk::Instance().Update(scaledFrameTime);
+#else
+        Renderer::Instance().Update(scaledFrameTime);
+#endif  // #if defined(USE_VULKAN)
+        renderTime = m_ComputeTimer.GetTimePassed();
 
         scaledFrameTime -= physicsFrameTime;
 

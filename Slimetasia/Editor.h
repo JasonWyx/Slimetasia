@@ -70,8 +70,6 @@ class Editor : public ISystem<Editor>
     std::set<std::string> m_Tags;
     bool m_IsTransformInLocalSpace;
     bool m_IsGameCameraAcitve;
-    ImFont* m_ImGuiFont;
-    ImFont* m_ImGuiFontBold;
 
     void DrawOutliner();
     void DrawInspector();

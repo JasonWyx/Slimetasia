@@ -27,7 +27,7 @@ void DirectionalLight::SetDirection(Vector3 const& direction)
 
 void DirectionalLight::BuildShadowMap()
 {
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     if (m_ShadowMap == 0)
     {
         glDeleteTextures(1, &m_ShadowMap);
@@ -41,7 +41,7 @@ void DirectionalLight::BuildShadowMap()
     glTextureParameteri(m_ShadowMap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTextureParameterfv(m_ShadowMap, GL_TEXTURE_BORDER_COLOR, borderColor);
-#endif // USE_VULKAN_RENDERER
+#endif // USE_VULKAN
 }
 
 float DirectionalLight::GetShadowDistance() const

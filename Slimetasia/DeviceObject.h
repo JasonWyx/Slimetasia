@@ -9,5 +9,5 @@ protected:
     DeviceObject(const vk::Device device);
     virtual ~DeviceObject();
 
-    const vk::Device m_OwningDevice;
+    const vk::Device m_OwnerDevice;
 };

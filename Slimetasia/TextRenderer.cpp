@@ -32,7 +32,7 @@ TextRenderer::TextRenderer(GameObject* owner)
     , m_AnchorPoint(TextAnchorPoint::eTextAnchorPoint_TopLeft)
     , m_PrevAnchorPoint(m_AnchorPoint)
 {
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     glCreateVertexArrays(1, &m_VertexArray);
 
     glEnableVertexArrayAttrib(m_VertexArray, 0);
@@ -44,15 +44,15 @@ TextRenderer::TextRenderer(GameObject* owner)
     glVertexArrayAttribFormat(m_VertexArray, 1, 2, GL_FLOAT, GL_FALSE, sizeof(Vector3));
 
     m_OutlineColor = Color4(0.f, 0.f, 0.f, 1.0f);
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
 }
 
 TextRenderer::~TextRenderer()
 {
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     glDeleteVertexArrays(1, &m_VertexArray);
     glDeleteBuffers(1, &m_VertexBuffer);
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
 }
 
 void TextRenderer::OnActive()
@@ -224,7 +224,7 @@ void TextRenderer::GenerateGeometryData()
 
     m_TotalIndices = static_cast<unsigned int>(indices.size());
 
-#ifndef USE_VULKAN_RENDERER
+#ifndef USE_VULKAN
     // Clean up first
     glDeleteBuffers(1, &m_VertexBuffer);
     glDeleteBuffers(1, &m_IndexBuffer);
@@ -238,7 +238,7 @@ void TextRenderer::GenerateGeometryData()
 
     glNamedBufferStorage(m_IndexBuffer, indices.size() * sizeof(indices[0]), indices.data(), 0);
     glVertexArrayElementBuffer(m_VertexArray, m_IndexBuffer);
-#endif  // USE_VULKAN_RENDERER
+#endif  // USE_VULKAN
 }
 
 GLuint TextRenderer::GetVertexArrayObject()
