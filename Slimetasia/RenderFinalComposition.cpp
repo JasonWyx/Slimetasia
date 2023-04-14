@@ -19,9 +19,9 @@ RenderFinalComposition::~RenderFinalComposition()
     DestroyPipeline();
 }
 
-vk::Semaphore RenderFinalComposition::Render(const uint32_t currentFrame, const std::vector<vk::Semaphore>& waitSemaphores)
+RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores)
 {
-    const vk::CommandBuffer& commandBuffer = m_CommandBuffers[currentFrame];
+    const vk::CommandBuffer& commandBuffer = m_CommandBuffers[frameInfo.frameIndex];
     commandBuffer.reset();
 
     const vk::CommandBufferBeginInfo commandBufferBeginInfo {};
@@ -30,7 +30,7 @@ vk::Semaphore RenderFinalComposition::Render(const uint32_t currentFrame, const 
     const vk::ClearValue clearColor { .color { .float32 { { 1.0f, 1.0f, 1.0f, 1.0f } } } };
     const vk::RenderPassBeginInfo renderPassBeginInfo {
         .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[currentFrame],
+        .framebuffer = m_Framebuffers[frameInfo.frameIndex],
         .renderArea { .extent { m_Context.m_Extent } },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
@@ -42,7 +42,7 @@ vk::Semaphore RenderFinalComposition::Render(const uint32_t currentFrame, const 
     commandBuffer.endRenderPass();
     commandBuffer.end();
 
-    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[currentFrame];
+    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.frameIndex];
     const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     const vk::SubmitInfo commandSubmitInfo {
         .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
@@ -54,7 +54,7 @@ vk::Semaphore RenderFinalComposition::Render(const uint32_t currentFrame, const 
         .pSignalSemaphores = &signalSemaphore,
     };
 
-    return signalSemaphore;
+    return RenderSyncObjects { signalSemaphore, {} };
 }
 
 void RenderFinalComposition::CreateDescriptors()

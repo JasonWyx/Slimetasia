@@ -8,7 +8,7 @@ public:
     RenderFinalComposition(const RenderContext& renderContext);
     ~RenderFinalComposition();
 
-    vk::Semaphore Render(const uint32_t currentFrame, const std::vector<vk::Semaphore>& waitSemaphores) override;
+    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) override;
 
 protected:
 

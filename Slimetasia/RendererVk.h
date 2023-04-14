@@ -8,6 +8,7 @@
 #include "MemoryHandler.h"
 #include "RenderFinalComposition.h"
 #include "RenderGBuffer.h"
+#include "RenderImGui.h"
 #include "SwapchainHandler.h"
 #include "QueueType.h"
 
@@ -20,7 +21,6 @@ public:
     RendererVk(const HINSTANCE appInstance, const HWND appWindow, const uint32_t windowWidth, const uint32_t windowHeight);
     ~RendererVk();
 
-    void InitializeRenderers();
     void Update(const float deltaTime);
     void OnWindowResize();
 
@@ -59,16 +59,11 @@ private:
     void ChoosePhysicalDevice();
     void CreateDevice();
     void CreateSwapchain(const HWND appWindow);
-    void CreateDescriptorPool();
+    void CreateHandlers();
+    void CreateRenderers();
     void CreateCommandPool();
-    void CreateRenderPass();
     void CreateFramebuffers();
     void CreateSyncObjects();
-
-    // ImGui
-    void InitializeImGui(const HWND appWindow);
-    void ShutdownImGui();
-    void DrawImGui(const vk::CommandBuffer commandBuffer);
 
     HWND m_AppWindow;
 
@@ -82,24 +77,14 @@ private:
     std::unique_ptr<SwapchainHandler> m_SwapchainHandler;
     std::unique_ptr<MemoryHandler> m_MemoryHandler;
 
-    // ImGui resources
-    vk::DescriptorPool m_DescriptorPool;
-#ifdef EDITOR
-    vk::CommandPool m_ImGuiCommandPool;
-    std::vector<vk::CommandBuffer> m_ImGuiCommandBuffers;
-#endif  // EDITOR
-
     vk::CommandPool m_OneShotCommandPool;
 
-    vk::RenderPass m_RenderPass;
-
     std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
-    std::vector<vk::Semaphore> m_RenderFinishedSemaphores;
-    std::vector<vk::Fence> m_InFlightFences;
     uint32_t m_CurrentFrame;
 
     std::unique_ptr<RenderGBuffer> m_RenderGBuffer;
     std::unique_ptr<RenderFinalComposition> m_RenderFinalComposition;
+    std::unique_ptr<RenderImGui> m_RenderImGui;
 };
 
 #define g_Renderer RendererVk::InstancePtr()

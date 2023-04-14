@@ -61,9 +61,9 @@ void RenderGBuffer::CreatePipeline() {}
 
 void RenderGBuffer::DestroyPipeline() {}
 
-vk::Semaphore RenderGBuffer::Render(const uint32_t currentFrame, const std::vector<vk::Semaphore>& waitSemaphores)
+RenderSyncObjects RenderGBuffer::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores)
 {
-    return vk::Semaphore();
+    return {};
 }
 
 void RenderGBuffer::OnExtentChanged(const vk::Extent2D& extent) {}

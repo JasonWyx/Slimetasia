@@ -16,6 +16,18 @@ struct RenderContext
     vk::Extent2D m_Extent {};
 };
 
+struct RenderSyncObjects
+{
+    vk::Semaphore signaledSemaphore;
+    vk::Fence signaledFence;
+};
+
+struct FrameInfo
+{
+    const uint32_t frameIndex {};
+    const uint32_t swapchainIndex {};
+};
+
 class RenderObject
 {
 public:
@@ -24,10 +36,12 @@ public:
     virtual ~RenderObject();
 
     // Returns semaphore for other render commands to wait on
-    virtual vk::Semaphore Render(const uint32_t currentFrame, const std::vector<vk::Semaphore>& waitSemaphores) = 0;
+    virtual RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) = 0;
     virtual void OnExtentChanged(const vk::Extent2D& extent);
     virtual std::vector<vk::ImageView> GatherOutputImages(const uint32_t currentFrame) { return {}; }
     virtual std::vector<vk::BufferView> GatherOutputBuffers(const uint32_t currentFrame) { return {}; }
+
+    vk::RenderPass GetRenderPass() const { return m_RenderPass; }
 
 protected:
 
@@ -42,6 +56,7 @@ protected:
 
     RenderContext m_Context;
     std::vector<vk::Semaphore> m_SignalSemaphores;
+    std::vector<vk::Fence> m_SignalFences;
 
     // Assuming only need 1 command buffer per "render pass" for now
     vk::CommandPool m_CommandPool;

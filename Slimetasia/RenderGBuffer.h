@@ -19,7 +19,7 @@ public:
     void DestroyPipeline() override;
 
     // Returns semaphore for other render commands to wait on
-    vk::Semaphore Render(const uint32_t currentFrame, const std::vector<vk::Semaphore>& waitSemaphores) override;
+    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) override;
     void OnExtentChanged(const vk::Extent2D& extent) override;
     std::vector<vk::ImageView> GatherOutputImages(const uint32_t currentFrame) override;
     std::vector<vk::BufferView> GatherOutputBuffers(const uint32_t currentFrame) override;

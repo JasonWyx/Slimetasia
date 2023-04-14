@@ -256,6 +256,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="ImageObject.cpp" />
     <ClCompile Include="MemoryHandler.cpp" />
     <ClCompile Include="RenderGBuffer.cpp" />
+    <ClCompile Include="RenderImGui.cpp" />
     <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="RendererVk.cpp" />
     <ClCompile Include="IComponent.cpp" />
@@ -380,6 +381,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="MemoryHandler.h" />
     <ClInclude Include="QueueType.h" />
     <ClInclude Include="RenderGBuffer.h" />
+    <ClInclude Include="RenderImGui.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="RendererVk.h" />
     <ClInclude Include="Manifold.h" />

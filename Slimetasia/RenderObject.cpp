@@ -6,9 +6,11 @@ RenderObject::RenderObject(const RenderContext& renderContext)
     : m_Context { renderContext }
 {
     const vk::SemaphoreCreateInfo semaphoreCreateInfo {};
+    const vk::FenceCreateInfo fenceCreateInfo {};
     for (uint32_t i = 0; i < renderContext.m_FramesInFlight; ++i)
     {
         m_SignalSemaphores.push_back(m_Context.m_Device.createSemaphore(semaphoreCreateInfo));
+        m_SignalFences.push_back(m_Context.m_Device.createFence(fenceCreateInfo));
     }
 
     const vk::CommandPoolCreateInfo commandPoolCreateInfo {
