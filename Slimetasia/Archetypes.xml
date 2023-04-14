@@ -1073,7 +1073,7 @@
         <MeshAnimator>
             <m_Name Value="MeshAnimator" Type="class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt;"/>
             <m_IsPlaying Value="1," Type="bool"/>
-            <m_AnimationSet Value="0,0,0,0,0,0,52,66,212,126,226,103,179,150,4,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
+            <m_AnimationSet Value="0,0,0,0,0,0,52,66,0,0,0,0,0,0,0,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
             <m_AnimationTimeScale Value="0,0,64,64," Type="float"/>
             <m_CurrentAnimationTick Value="0,0,0,0," Type="float"/>
             <m_CrossFadeAnimations Value="1," Type="bool"/>
@@ -1174,7 +1174,7 @@
         <MeshAnimator>
             <m_Name Value="MeshAnimator" Type="class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt;"/>
             <m_IsPlaying Value="1," Type="bool"/>
-            <m_AnimationSet Value="224,207,21,208,152,2,0,0,219,163,222,120,57,151,4,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
+            <m_AnimationSet Value="224,207,21,208,152,2,0,0,0,0,0,0,0,0,0,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
             <m_AnimationTimeScale Value="0,0,64,64," Type="float"/>
             <m_CurrentAnimationTick Value="0,0,0,0," Type="float"/>
             <m_CrossFadeAnimations Value="1," Type="bool"/>
@@ -1270,7 +1270,7 @@
         <MeshAnimator>
             <m_Name Value="MeshAnimator" Type="class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt;"/>
             <m_IsPlaying Value="1," Type="bool"/>
-            <m_AnimationSet Value="62,244,62,57,0,0,0,0,173,238,5,63,59,151,4,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
+            <m_AnimationSet Value="62,244,62,57,0,0,0,0,0,0,0,0,0,0,0,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
             <m_AnimationTimeScale Value="0,0,64,64," Type="float"/>
             <m_CurrentAnimationTick Value="0,0,0,0," Type="float"/>
             <m_CrossFadeAnimations Value="1," Type="bool"/>
@@ -1373,7 +1373,7 @@
         <MeshAnimator>
             <m_Name Value="MeshAnimator" Type="class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt;"/>
             <m_IsPlaying Value="1," Type="bool"/>
-            <m_AnimationSet Value="184,72,16,55,0,0,0,0,107,26,144,119,60,151,4,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
+            <m_AnimationSet Value="184,72,16,55,0,0,0,0,0,0,0,0,0,0,0,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
             <m_AnimationTimeScale Value="0,0,128,63," Type="float"/>
             <m_CurrentAnimationTick Value="0,0,0,0," Type="float"/>
             <m_CrossFadeAnimations Value="1," Type="bool"/>
@@ -2209,7 +2209,7 @@
         <MeshAnimator>
             <m_Name Value="MeshAnimator" Type="class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt;"/>
             <m_IsPlaying Value="1," Type="bool"/>
-            <m_AnimationSet Value="250,193,137,55,0,0,0,0,235,108,66,131,60,151,4,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
+            <m_AnimationSet Value="250,193,137,55,0,0,0,0,0,0,0,0,0,0,0,0," Type="class ResourceHandle&lt;class AnimationSet&gt;"/>
             <m_AnimationTimeScale Value="0,0,112,65," Type="float"/>
             <m_CurrentAnimationTick Value="0,0,0,0," Type="float"/>
             <m_CrossFadeAnimations Value="1," Type="bool"/>

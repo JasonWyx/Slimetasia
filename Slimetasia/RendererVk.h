@@ -5,7 +5,11 @@
 #include <vulkan/vulkan.hpp>
 
 #include "ISystem.h"
+#include "MemoryHandler.h"
+#include "RenderFinalComposition.h"
+#include "RenderGBuffer.h"
 #include "SwapchainHandler.h"
+#include "QueueType.h"
 
 struct ImDrawData;
 
@@ -16,11 +20,19 @@ public:
     RendererVk(const HINSTANCE appInstance, const HWND appWindow, const uint32_t windowWidth, const uint32_t windowHeight);
     ~RendererVk();
 
+    void InitializeRenderers();
     void Update(const float deltaTime);
     void OnWindowResize();
 
-    vk::CommandBuffer CreateInstantCommandBuffer();
-    void SubmitInstantCommandBuffer(const vk::CommandBuffer commandBuffer, const vk::QueueFlagBits targetQueue);
+    vk::CommandBuffer CreateOneShotCommandBuffer();
+    void SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffer, const vk::QueueFlagBits targetQueue, const vk::Fence signalFence = {});
+
+    vk::Device GetDevice() const { return m_Device; }
+    uint32_t GetQueueIndex(const QueueType queueType) const { return m_QueueIndices[queueType]; }
+    vk::Queue GetQueue(const QueueType queueType) const { return m_Queues[queueType]; }
+
+    const std::unique_ptr<SwapchainHandler>& GetSwapchainHandler() const { return m_SwapchainHandler; }
+    const std::unique_ptr<MemoryHandler>& GetMemoryHandler() const { return m_MemoryHandler; }
 
     // void SetCurrentLayer(Layer* layer);
     // void SetWindowSize(iVector2 const& windowSize);
@@ -51,10 +63,7 @@ private:
     void CreateCommandPool();
     void CreateRenderPass();
     void CreateFramebuffers();
-    void CreatePipelineLayout();
-    void CreatePipeline();
     void CreateSyncObjects();
-
 
     // ImGui
     void InitializeImGui(const HWND appWindow);
@@ -68,29 +77,29 @@ private:
     vk::PhysicalDevice m_PhysicalDevice;
     vk::Device m_Device;
 
-    std::optional<uint32_t> m_PresentQueueIndex;
-    std::optional<uint32_t> m_GraphicsQueueIndex;
-    std::optional<uint32_t> m_TransferQueueIndex;
-    vk::Queue m_PresentQueue;
-    vk::Queue m_GraphicsQueue;
-    vk::Queue m_TransferQueue;
+    std::array<uint32_t, QueueType::Count> m_QueueIndices;
+    std::array<vk::Queue, QueueType::Count> m_Queues;
     std::unique_ptr<SwapchainHandler> m_SwapchainHandler;
+    std::unique_ptr<MemoryHandler> m_MemoryHandler;
 
+    // ImGui resources
     vk::DescriptorPool m_DescriptorPool;
-    vk::CommandPool m_CommandPool;
-    std::vector<vk::CommandBuffer> m_CommandBuffers;
+#ifdef EDITOR
+    vk::CommandPool m_ImGuiCommandPool;
+    std::vector<vk::CommandBuffer> m_ImGuiCommandBuffers;
+#endif  // EDITOR
 
     vk::CommandPool m_OneShotCommandPool;
 
     vk::RenderPass m_RenderPass;
-    vk::PipelineLayout m_PipelineLayout;
-    vk::Pipeline m_Pipeline;
 
     std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
     std::vector<vk::Semaphore> m_RenderFinishedSemaphores;
-    std::vector<vk::Semaphore> m_ImguiRenderFinishedSemaphores;
     std::vector<vk::Fence> m_InFlightFences;
     uint32_t m_CurrentFrame;
+
+    std::unique_ptr<RenderGBuffer> m_RenderGBuffer;
+    std::unique_ptr<RenderFinalComposition> m_RenderFinalComposition;
 };
 
-extern RendererVk* g_Renderer;
+#define g_Renderer RendererVk::InstancePtr()

@@ -122,6 +122,12 @@
     <Filter Include="Engine Files\Core\Graphics\Vulkan\Helpers">
       <UniqueIdentifier>{0ddaff72-5b9e-4d30-b8f6-a4ce3422238b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine Files\Core\Graphics\Vulkan\Objects">
+      <UniqueIdentifier>{e8aab501-68e7-41fc-9dda-4942be9db859}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine Files\Core\Graphics\Vulkan\RenderPasses">
+      <UniqueIdentifier>{17b4dc9e-6976-4089-a7a6-6976f4115655}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -439,14 +445,32 @@
     <ClCompile Include="RendererVk.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="DeviceObject.cpp">
-      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="SwapchainHandler.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
     </ClCompile>
     <ClCompile Include="ShaderHelper.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderFinalComposition.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObject.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryHandler.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferObject.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceObject.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageObject.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderGBuffer.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -835,14 +859,35 @@
     <ClInclude Include="RendererVk.h">
       <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="DeviceObject.h">
-      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="SwapchainHandler.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
     </ClInclude>
     <ClInclude Include="ShaderHelper.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderFinalComposition.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryHandler.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferObject.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceObject.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageObject.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderGBuffer.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="QueueType.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObject.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

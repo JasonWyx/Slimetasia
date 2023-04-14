@@ -3,6 +3,7 @@
 #include <list>
 #include <memory>
 #include <vector>
+#include <array>
 
 #include "Logger.h"
 

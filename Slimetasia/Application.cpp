@@ -238,7 +238,7 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hwnd, UINT message, WPARAM wP
                 Application::Instance().SetWindowWidth(LOWORD(lParam));
                 Application::Instance().SetWindowHeight(HIWORD(lParam));
 #ifdef USE_VULKAN
-                RendererVk::Instance().OnWindowResize();
+                g_Renderer->OnWindowResize();
 #else
                 Renderer::Instance().SetWindowSize(iVector2(LOWORD(lParam), HIWORD(lParam)));
 #endif  // USE_VULKAN
@@ -716,7 +716,7 @@ void Application::RunMainLoop()
 
         m_ComputeTimer.StartTimer();
 #if defined(USE_VULKAN)
-        RendererVk::Instance().Update(scaledFrameTime);
+        g_Renderer->Update(scaledFrameTime);
 #else
         Renderer::Instance().Update(scaledFrameTime);
 #endif  // #if defined(USE_VULKAN)

@@ -38,7 +38,7 @@ void SwapchainHandler::CreateFramebuffers(const vk::RenderPass renderPass)
             .layers = 1,
         };
 
-        m_Framebuffers.push_back(m_OwnerDevice.createFramebuffer(createInfo));
+        m_Framebuffers.push_back(m_ContextDevice.createFramebuffer(createInfo));
     }
 }
 
@@ -49,7 +49,7 @@ void SwapchainHandler::RecreateSwapchain(const vk::PhysicalDevice physicalDevice
     ASSERT(surface);
     ASSERT(window);
 
-    m_OwnerDevice.waitIdle();
+    m_ContextDevice.waitIdle();
 
     DestroySwapchain();
     CreateSwapchain(physicalDevice, device, surface, window);
@@ -57,7 +57,7 @@ void SwapchainHandler::RecreateSwapchain(const vk::PhysicalDevice physicalDevice
 
 vk::ResultValue<uint32_t> SwapchainHandler::AcquireNextImageIndex(const vk::Semaphore imageAvailableSemaphore)
 {
-    return m_OwnerDevice.acquireNextImageKHR(m_Swapchain, UINT64_MAX, imageAvailableSemaphore);
+    return m_ContextDevice.acquireNextImageKHR(m_Swapchain, UINT64_MAX, imageAvailableSemaphore);
 }
 
 /*static*/ SwapchainHandler::SwapchainSupportDetails SwapchainHandler::QuerySwapchainSupportDetails(const vk::PhysicalDevice physicalDevice, const vk::SurfaceKHR surface)
@@ -156,7 +156,7 @@ void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, 
             .image = image,
             .viewType = vk::ImageViewType::e2D,
             .format = m_SurfaceFormat.format,
-            .subresourceRange = { .levelCount = 1, .layerCount = 1 },
+            .subresourceRange = { .levelCount = 1, .layerCount = 1, },
         };
 
         m_ImageViews.push_back(device.createImageView(imageViewCreateInfo));
@@ -165,9 +165,9 @@ void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, 
 
 void SwapchainHandler::DestroySwapchain()
 {
-    std::ranges::for_each(m_Framebuffers, [this](const vk::Framebuffer& framebuffer) { m_OwnerDevice.destroyFramebuffer(framebuffer); });
-    std::ranges::for_each(m_ImageViews, [this](const vk::ImageView& imageView) { m_OwnerDevice.destroyImageView(imageView); });
-    m_OwnerDevice.destroySwapchainKHR(m_Swapchain);
+    std::ranges::for_each(m_Framebuffers, [this](const vk::Framebuffer& framebuffer) { m_ContextDevice.destroyFramebuffer(framebuffer); });
+    std::ranges::for_each(m_ImageViews, [this](const vk::ImageView& imageView) { m_ContextDevice.destroyImageView(imageView); });
+    m_ContextDevice.destroySwapchainKHR(m_Swapchain);
     m_Framebuffers.clear();
     m_ImageViews.clear();
     m_Images.clear();

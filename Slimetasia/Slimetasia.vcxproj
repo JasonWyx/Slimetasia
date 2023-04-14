@@ -105,7 +105,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -130,7 +130,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -157,7 +157,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -184,7 +184,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN_RENDERER;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -210,6 +210,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="AISystem.cpp" />
     <ClCompile Include="AnimationSystem.cpp" />
     <ClCompile Include="BoxCollider.cpp" />
+    <ClCompile Include="BufferObject.cpp" />
     <ClCompile Include="CapsuleCollider.cpp" />
     <ClCompile Include="CapsuleVsCapsule.cpp" />
     <ClCompile Include="CapsuleVsConvexPolygon.cpp" />
@@ -252,6 +253,10 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GeometryPass.cpp" />
     <ClCompile Include="EdgeData.cpp" />
+    <ClCompile Include="ImageObject.cpp" />
+    <ClCompile Include="MemoryHandler.cpp" />
+    <ClCompile Include="RenderGBuffer.cpp" />
+    <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="RendererVk.cpp" />
     <ClCompile Include="IComponent.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -288,6 +293,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderLayer.cpp" />
     <ClCompile Include="RenderPass.cpp" />
+    <ClCompile Include="RenderFinalComposition.cpp" />
     <ClCompile Include="ResourceBase.cpp" />
     <ClCompile Include="ResourceEntry.cpp" />
     <ClCompile Include="ResourceHandle.cpp" />
@@ -324,6 +330,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="AnimationSystem.h" />
     <ClInclude Include="BaseDetectionAlgorithm.h" />
     <ClInclude Include="BoxCollider.h" />
+    <ClInclude Include="BufferObject.h" />
     <ClInclude Include="CapsuleCollider.h" />
     <ClInclude Include="CapsuleVsCapsule.h" />
     <ClInclude Include="CapsuleVsConvexPolygon.h" />
@@ -369,6 +376,11 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="EdgeData.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Frustum.h" />
+    <ClInclude Include="ImageObject.h" />
+    <ClInclude Include="MemoryHandler.h" />
+    <ClInclude Include="QueueType.h" />
+    <ClInclude Include="RenderGBuffer.h" />
+    <ClInclude Include="RenderObject.h" />
     <ClInclude Include="RendererVk.h" />
     <ClInclude Include="Manifold.h" />
     <ClInclude Include="ParticlePass.h" />
@@ -396,6 +408,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderLayer.h" />
     <ClInclude Include="RenderPass.h" />
+    <ClInclude Include="RenderFinalComposition.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceEntry.h" />
     <ClInclude Include="ShaderHelper.h" />
