@@ -1,6 +1,6 @@
 #pragma once
-#include "RenderObject.h"
 #include "ImageObject.h"
+#include "RenderObject.h"
 
 class RenderGBuffer : public RenderObject
 {
@@ -9,20 +9,18 @@ public:
     RenderGBuffer(const RenderContext& renderContext);
     ~RenderGBuffer();
 
-    void CreateDescriptors() override;
-    void DestroyDescriptors() override;
-    void CreateRenderPass() override;
-    void DestroyRenderPass() override;
-    void CreateFramebuffers() override;
-    void DestroyFramebuffers() override;
-    void CreatePipeline() override;
-    void DestroyPipeline() override;
-
     // Returns semaphore for other render commands to wait on
-    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) override;
+    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence) override;
     void OnExtentChanged(const vk::Extent2D& extent) override;
     std::vector<vk::ImageView> GatherOutputImages(const uint32_t currentFrame) override;
     std::vector<vk::BufferView> GatherOutputBuffers(const uint32_t currentFrame) override;
+
+protected:
+
+    void CreateDescriptors() override;
+    void CreateRenderPass() override;
+    void CreateFramebuffers() override;
+    void CreatePipeline() override;
 
 private:
 

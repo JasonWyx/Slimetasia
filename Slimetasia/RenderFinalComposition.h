@@ -1,23 +1,28 @@
 #pragma once
 #include "RenderObject.h"
 
+#include "SwapchainHandler.h"
+
 class RenderFinalComposition : public RenderObject
 {
 public:
 
-    RenderFinalComposition(const RenderContext& renderContext);
+    RenderFinalComposition(const RenderContext& renderContext, const std::unique_ptr<SwapchainHandler>& swapchain);
     ~RenderFinalComposition();
 
-    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) override;
+    // Inherited via RenderObject
+    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence) override;
+
+    void InitializeAfterSwapchain();
 
 protected:
 
     void CreateDescriptors() override;
-    void DestroyDescriptors() override;
     void CreateRenderPass() override;
-    void DestroyRenderPass() override;
     void CreateFramebuffers() override;
-    void DestroyFramebuffers() override;
     void CreatePipeline() override;
-    void DestroyPipeline() override;
+
+private:
+
+    const std::unique_ptr<SwapchainHandler>& m_SwapchainCache;
 };

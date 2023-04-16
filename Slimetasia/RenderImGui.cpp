@@ -9,7 +9,7 @@ RenderImGui::RenderImGui(const RenderContext& renderContext, const vk::Instance 
     , m_SwapchainCache { swapchain }
 {
     CreateDescriptors();
-    CreateFramebuffers();
+    // CreateFramebuffers(); // Framebuffer is managed direct from swapchain
     CreateRenderPass();
 
     ImGui_ImplVulkan_InitInfo imguiInitInfo {
@@ -33,40 +33,32 @@ RenderImGui::RenderImGui(const RenderContext& renderContext, const vk::Instance 
 
     const vk::SubmitInfo submitInfo { .commandBufferCount = 1, .pCommandBuffers = &(m_CommandBuffers[0]) };
     renderContext.m_Queues[QueueType::Transfer].submit(submitInfo);
+    renderContext.m_Device.waitIdle(); // todo: maybe wait on fence?
+    
     ImGui_ImplVulkan_DestroyFontUploadObjects();
-
-    // todo: maybe wait on fence?
-    renderContext.m_Device.waitIdle();
 }
 
 RenderImGui::~RenderImGui()
 {
     ImGui_ImplVulkan_Shutdown();
 
-    DestroyRenderPass();
-    DestroyFramebuffers();
-    DestroyDescriptors();
+    RenderObject::DestroyRenderPass();
+    // RenderObject::DestroyFramebuffers(); // Framebuffer is managed direct from swapchain
+    RenderObject::DestroyDescriptors();
 }
 
-RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores)
+RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
 {
-    const vk::Fence& signalFence = m_SignalFences[frameInfo.frameIndex];
-    const vk::Result waitResult = m_Context.m_Device.waitForFences(signalFence, VK_TRUE, UINT64_MAX);
-    m_Context.m_Device.resetFences(signalFence);
-
     const vk::CommandBuffer commandBuffer { m_CommandBuffers[frameInfo.frameIndex] };
     commandBuffer.reset();
 
     const vk::CommandBufferBeginInfo beginInfo {};
     commandBuffer.begin(beginInfo);
 
-    const vk::ClearValue clearColor {
-        .color = { .float32 = {{ 0.0f, 0.0f, 0.0f, 1.0f }}, },
-    };
-
+    const vk::ClearValue clearColor { .color = { .float32 = { { 0.0f, 0.0f, 0.0f, 1.0f } } } };
     const vk::RenderPassBeginInfo renderPassBeginInfo {
         .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[frameInfo.frameIndex],
+        .framebuffer = m_Framebuffers[frameInfo.swapchainIndex],
         .renderArea = { .extent = m_SwapchainCache->GetExtent() },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
@@ -82,8 +74,8 @@ RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vec
     commandBuffer.endRenderPass();
     commandBuffer.end();
 
-    const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.frameIndex];
+    const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     const vk::SubmitInfo commandSubmitInfo {
         .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
         .pWaitSemaphores = waitSemaphores.data(),
@@ -96,12 +88,12 @@ RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vec
 
     m_Context.m_Queues[QueueType::Graphics].submit(commandSubmitInfo, signalFence);
 
-    return RenderSyncObjects { signalSemaphore, signalFence };
+    return RenderSyncObjects { signalSemaphore };
 }
 
 void RenderImGui::InitializeAfterSwapchain()
 {
-    m_Framebuffers = m_SwapchainCache->GetFramebuffers();
+    CreateFramebuffers();
 }
 
 void RenderImGui::CreateDescriptors()
@@ -126,11 +118,6 @@ void RenderImGui::CreateDescriptors()
     };
 
     m_DescriptorPool = m_Context.m_Device.createDescriptorPool(createInfo);
-}
-
-void RenderImGui::DestroyDescriptors()
-{
-    m_Context.m_Device.destroyDescriptorPool(m_DescriptorPool);
 }
 
 void RenderImGui::CreateRenderPass()
@@ -162,7 +149,7 @@ void RenderImGui::CreateRenderPass()
         .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
         .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
         .srcAccessMask = vk::AccessFlagBits::eNone,
-        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead,
     };
 
     const vk::RenderPassCreateInfo createInfo {
@@ -177,15 +164,9 @@ void RenderImGui::CreateRenderPass()
     m_RenderPass = m_Context.m_Device.createRenderPass(createInfo);
 }
 
-void RenderImGui::DestroyRenderPass() {}
-
-void RenderImGui::CreateFramebuffers() {}
-
-void RenderImGui::DestroyFramebuffers()
+void RenderImGui::CreateFramebuffers()
 {
-    m_Framebuffers.clear();
+    m_Framebuffers = m_SwapchainCache->GetFramebuffers();
 }
 
 void RenderImGui::CreatePipeline() {}
-
-void RenderImGui::DestroyPipeline() {}

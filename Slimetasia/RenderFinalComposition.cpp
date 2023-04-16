@@ -2,36 +2,37 @@
 
 #include "Logger.h"
 
-RenderFinalComposition::RenderFinalComposition(const RenderContext& renderContext)
+RenderFinalComposition::RenderFinalComposition(const RenderContext& renderContext, const std::unique_ptr<SwapchainHandler>& swapchain)
     : RenderObject { renderContext }
+    , m_SwapchainCache { swapchain }
 {
     CreateDescriptors();
     CreateRenderPass();
-    CreateFramebuffers();
+    // CreateFramebuffers(); // Framebuffer is managed direct from swapchain
     CreatePipeline();
 }
 
 RenderFinalComposition::~RenderFinalComposition()
 {
-    DestroyDescriptors();
-    DestroyRenderPass();
-    DestroyFramebuffers();
-    DestroyPipeline();
+    RenderObject::DestroyDescriptors();
+    RenderObject::DestroyRenderPass();
+    // RenderObject::DestroyFramebuffers(); // Framebuffer is managed direct from swapchain
+    RenderObject::DestroyPipeline();
 }
 
-RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores)
+RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
 {
-    const vk::CommandBuffer& commandBuffer = m_CommandBuffers[frameInfo.frameIndex];
+    const vk::CommandBuffer& commandBuffer { m_CommandBuffers[frameInfo.frameIndex] };
     commandBuffer.reset();
 
-    const vk::CommandBufferBeginInfo commandBufferBeginInfo {};
-    commandBuffer.begin(commandBufferBeginInfo);
+    const vk::CommandBufferBeginInfo beginInfo {};
+    commandBuffer.begin(beginInfo);
 
     const vk::ClearValue clearColor { .color { .float32 { { 1.0f, 1.0f, 1.0f, 1.0f } } } };
     const vk::RenderPassBeginInfo renderPassBeginInfo {
         .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[frameInfo.frameIndex],
-        .renderArea { .extent { m_Context.m_Extent } },
+        .framebuffer = m_Framebuffers[frameInfo.swapchainIndex],
+        .renderArea = { .extent { m_Context.m_Extent } },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
     };
@@ -39,6 +40,13 @@ RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, con
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
 
+    const vk::Viewport viewport { .width = static_cast<float>(m_Context.m_Extent.width), .height = static_cast<float>(m_Context.m_Extent.height) };
+    const vk::Rect2D scissor { .extent = m_Context.m_Extent };
+
+    commandBuffer.setViewport(0, viewport);
+    commandBuffer.setScissor(0, scissor);
+
+    commandBuffer.draw(3, 1, 0, 0);
     commandBuffer.endRenderPass();
     commandBuffer.end();
 
@@ -54,7 +62,14 @@ RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, con
         .pSignalSemaphores = &signalSemaphore,
     };
 
-    return RenderSyncObjects { signalSemaphore, {} };
+    m_Context.m_Queues[QueueType::Graphics].submit(commandSubmitInfo, signalFence);
+
+    return RenderSyncObjects { signalSemaphore };
+}
+
+void RenderFinalComposition::InitializeAfterSwapchain()
+{
+    m_Framebuffers = m_SwapchainCache->GetFramebuffers();
 }
 
 void RenderFinalComposition::CreateDescriptors()
@@ -70,30 +85,30 @@ void RenderFinalComposition::CreateDescriptors()
         .poolSizeCount = static_cast<uint32_t>(poolSizes.size()),
         .pPoolSizes = poolSizes.data(),
     };
-    const vk::DescriptorSetAllocateInfo allocateInfo {
-        .descriptorPool = m_DescriptorPool,
-    };
-
     m_DescriptorPool = m_Context.m_Device.createDescriptorPool(poolCreateInfo);
-    m_DescriptorSets = m_Context.m_Device.allocateDescriptorSets(allocateInfo);
-}
 
-void RenderFinalComposition::DestroyDescriptors()
-{
-    m_Context.m_Device.freeDescriptorSets(m_DescriptorPool, m_DescriptorSets);
-    m_Context.m_Device.destroyDescriptorPool(m_DescriptorPool);
+    // const vk::DescriptorSetAllocateInfo allocateInfo {
+    //     .descriptorPool = m_DescriptorPool,
+    //     .descriptorSetCount = 1,
+    // };
+    // m_DescriptorSets = m_Context.m_Device.allocateDescriptorSets(allocateInfo);
 }
 
 void RenderFinalComposition::CreateRenderPass()
 {
     const vk::AttachmentDescription colorAttachment {
-        .format = vk::Format::eR16G16B16A16Sfloat,
+#ifdef EDITOR
+        .format = m_SwapchainCache->GetSurfaceFormat().format,  // vk::Format::eR16G16B16A16Sfloat,
+#else
+        .format = m_SwapchainCache->GetSurfaceFormat().format,  // vk::Format::eR16G16B16A16Sfloat,
+#endif  // EDITOR
         .samples = vk::SampleCountFlagBits::e1,
         .loadOp = vk::AttachmentLoadOp::eClear,
         .storeOp = vk::AttachmentStoreOp::eStore,
         .initialLayout = vk::ImageLayout::eUndefined,
 #ifdef EDITOR
-        .finalLayout = vk::ImageLayout::eColorAttachmentOptimal,
+        //.finalLayout = vk::ImageLayout::eColorAttachmentOptimal,
+        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
 #else
         .finalLayout = vk::ImageLayout::ePresentSrcKHR,
 #endif  // EDITOR
@@ -131,11 +146,6 @@ void RenderFinalComposition::CreateRenderPass()
     m_RenderPass = m_Context.m_Device.createRenderPass(createInfo);
 }
 
-void RenderFinalComposition::DestroyRenderPass()
-{
-    m_Context.m_Device.destroyRenderPass(m_RenderPass);
-}
-
 void RenderFinalComposition::CreateFramebuffers()
 {
     for (uint32_t i = 0; i < m_Context.m_FramesInFlight; ++i)
@@ -152,11 +162,6 @@ void RenderFinalComposition::CreateFramebuffers()
     }
 }
 
-void RenderFinalComposition::DestroyFramebuffers()
-{
-    std::ranges::for_each(m_Framebuffers, [this](const vk::Framebuffer& framebuffer) { m_Context.m_Device.destroyFramebuffer(framebuffer); });
-}
-
 void RenderFinalComposition::CreatePipeline()
 {
     // For uniform data and sorts
@@ -164,8 +169,8 @@ void RenderFinalComposition::CreatePipeline()
 
     m_PipelineLayout = m_Context.m_Device.createPipelineLayout(layoutCreateInfo);
 
-    const std::vector<char>& vertSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.vert");
-    const std::vector<char>& fragSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.frag");
+    const std::vector<char>& vertSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.vert.hlsl");
+    const std::vector<char>& fragSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.frag.hlsl");
 
     const vk::ShaderModuleCreateInfo vertModuleCreateInfo {
         .codeSize = vertSpirv.size(),
@@ -295,10 +300,4 @@ void RenderFinalComposition::CreatePipeline()
 
     m_Context.m_Device.destroyShaderModule(vertShader);
     m_Context.m_Device.destroyShaderModule(fragShader);
-}
-
-void RenderFinalComposition::DestroyPipeline()
-{
-    m_Context.m_Device.destroyPipelineLayout(m_PipelineLayout);
-    m_Context.m_Device.destroyPipeline(m_Pipeline);
 }

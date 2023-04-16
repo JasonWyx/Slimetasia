@@ -1,6 +1,5 @@
 #pragma once
 #include "RenderObject.h"
-
 #include "SwapchainHandler.h"
 
 class RenderImGui : public RenderObject
@@ -11,21 +10,16 @@ public:
     ~RenderImGui();
 
     // Inherited via RenderObject
-    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) override;
-
+    RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence) override;
 
     void InitializeAfterSwapchain();
 
 protected:
 
     virtual void CreateDescriptors() override;
-    virtual void DestroyDescriptors() override;
     virtual void CreateRenderPass() override;
-    virtual void DestroyRenderPass() override;
     virtual void CreateFramebuffers() override;
-    virtual void DestroyFramebuffers() override;
     virtual void CreatePipeline() override;
-    virtual void DestroyPipeline() override;
 
 private:
 

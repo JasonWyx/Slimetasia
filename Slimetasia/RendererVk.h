@@ -80,6 +80,7 @@ private:
     vk::CommandPool m_OneShotCommandPool;
 
     std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
+    std::vector<vk::Fence> m_InFlightFences;
     uint32_t m_CurrentFrame;
 
     std::unique_ptr<RenderGBuffer> m_RenderGBuffer;

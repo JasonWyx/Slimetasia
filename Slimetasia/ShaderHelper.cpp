@@ -37,19 +37,20 @@ namespace ShaderHelper
 
         LPCWSTR targetProfile {};
         const std::wstring& filePathString = filePath.wstring();
-        const std::size_t idx = filePathString.rfind('.');
+        const std::size_t idx = filePathString.find('.');
         if (idx != std::string::npos)
         {
             const std::wstring& extension = filePathString.substr(idx + 1);
-            if (extension == L"vert")
+
+            if (extension == L"vert.hlsl")
             {
                 targetProfile = L"vs_6_3";
             }
-            if (extension == L"frag")
+            if (extension == L"frag.hlsl")
             {
                 targetProfile = L"ps_6_3";
             }
-            if (extension == L"geom")
+            if (extension == L"geom.hlsl")
             {
                 targetProfile = L"gs_6_3";
             }

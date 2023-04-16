@@ -25,19 +25,16 @@ SwapchainHandler::~SwapchainHandler()
 
 void SwapchainHandler::CreateFramebuffers(const vk::RenderPass renderPass)
 {
+    vk::FramebufferCreateInfo createInfo {
+        .renderPass = renderPass,
+        .width = m_Extent.width,
+        .height = m_Extent.height,
+        .layers = 1,
+    };
+
     for (size_t i = 0; i < m_ImageViews.size(); ++i)
     {
-        const vk::ImageView imageView = m_ImageViews[i];
-
-        vk::FramebufferCreateInfo createInfo {
-            .renderPass = renderPass,
-            .attachmentCount = 1,
-            .pAttachments = &imageView,
-            .width = m_Extent.width,
-            .height = m_Extent.height,
-            .layers = 1,
-        };
-
+        createInfo.setAttachments(m_ImageViews[i]);
         m_Framebuffers.push_back(m_ContextDevice.createFramebuffer(createInfo));
     }
 }
@@ -75,7 +72,7 @@ vk::ResultValue<uint32_t> SwapchainHandler::AcquireNextImageIndex(const vk::Sema
 {
     for (const vk::SurfaceFormatKHR& surfaceFormat : formats)
     {
-        if (surfaceFormat.format == vk::Format::eB8G8R8A8Srgb && surfaceFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+        if (surfaceFormat.format == vk::Format::eB8G8R8A8Unorm && surfaceFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
         {
             return surfaceFormat;
         }
@@ -139,6 +136,8 @@ void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, 
         .imageExtent = m_Extent,
         .imageArrayLayers = 1,
         .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+        .imageSharingMode = vk::SharingMode::eExclusive,
+        .queueFamilyIndexCount = 0,
         .preTransform = details.m_Capabilities.currentTransform,
         .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
         .presentMode = m_PresentMode,
@@ -156,7 +155,11 @@ void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, 
             .image = image,
             .viewType = vk::ImageViewType::e2D,
             .format = m_SurfaceFormat.format,
-            .subresourceRange = { .levelCount = 1, .layerCount = 1, },
+            .subresourceRange {
+                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .levelCount = 1,
+                .layerCount = 1,
+            },
         };
 
         m_ImageViews.push_back(device.createImageView(imageViewCreateInfo));

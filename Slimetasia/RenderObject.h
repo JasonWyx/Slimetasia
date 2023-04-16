@@ -19,7 +19,7 @@ struct RenderContext
 struct RenderSyncObjects
 {
     vk::Semaphore signaledSemaphore;
-    vk::Fence signaledFence;
+    // vk::Fence signaledFence;
 };
 
 struct FrameInfo
@@ -36,7 +36,7 @@ public:
     virtual ~RenderObject();
 
     // Returns semaphore for other render commands to wait on
-    virtual RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores) = 0;
+    virtual RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence) = 0;
     virtual void OnExtentChanged(const vk::Extent2D& extent);
     virtual std::vector<vk::ImageView> GatherOutputImages(const uint32_t currentFrame) { return {}; }
     virtual std::vector<vk::BufferView> GatherOutputBuffers(const uint32_t currentFrame) { return {}; }
@@ -45,18 +45,20 @@ public:
 
 protected:
 
-    virtual void CreateDescriptors() = 0;
-    virtual void DestroyDescriptors() = 0;
-    virtual void CreateRenderPass() = 0;
-    virtual void DestroyRenderPass() = 0;
-    virtual void CreateFramebuffers() = 0;
-    virtual void DestroyFramebuffers() = 0;
-    virtual void CreatePipeline() = 0;
-    virtual void DestroyPipeline() = 0;
+    virtual void CreateDescriptors() {};
+    virtual void DestroyDescriptors();
+
+    virtual void CreateRenderPass() {};
+    virtual void DestroyRenderPass();
+
+    virtual void CreateFramebuffers() {};
+    virtual void DestroyFramebuffers();
+
+    virtual void CreatePipeline() {};
+    virtual void DestroyPipeline();
 
     RenderContext m_Context;
     std::vector<vk::Semaphore> m_SignalSemaphores;
-    std::vector<vk::Fence> m_SignalFences;
 
     // Assuming only need 1 command buffer per "render pass" for now
     vk::CommandPool m_CommandPool;
