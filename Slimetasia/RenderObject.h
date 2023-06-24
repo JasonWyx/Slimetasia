@@ -2,30 +2,35 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
-#include "ShaderHelper.h"
 #include "QueueType.h"
+#include "ShaderModuleObject.h"
 
 // Commonly used constructs
 struct RenderContext
 {
     const vk::Device m_Device {};
-    const std::array<uint32_t, QueueType::Count> m_QueueIndices;
-    const std::array<vk::Queue, QueueType::Count> m_Queues;
+    const std::array<uint32_t, QueueType::Count> m_QueueIndices {};
+    const std::array<vk::Queue, QueueType::Count> m_Queues {};
     const uint32_t m_FramesInFlight {};
+    const uint32_t m_SwapchainCount {};
 
-    vk::Extent2D m_Extent {};
+    vk::Extent2D m_WindowExtent {};
+    vk::Extent2D m_RenderExtent {};
+    bool m_IsRenderToTarget {};
 };
 
-struct RenderSyncObjects
+struct RenderOutputs
 {
-    vk::Semaphore signaledSemaphore;
-    // vk::Fence signaledFence;
+    vk::Semaphore m_SignaledSemaphore {};
+    vk::Fence m_SignaledFence {};
+    std::vector<vk::ImageView> m_OutputImages {};
+    std::vector<vk::BufferView> m_OutputBuffers {};
 };
 
 struct FrameInfo
 {
-    const uint32_t frameIndex {};
-    const uint32_t swapchainIndex {};
+    const uint32_t m_FrameIndex {};
+    const uint32_t m_SwapchainIndex {};
 };
 
 class RenderObject
@@ -36,10 +41,10 @@ public:
     virtual ~RenderObject();
 
     // Returns semaphore for other render commands to wait on
-    virtual RenderSyncObjects Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence) = 0;
-    virtual void OnExtentChanged(const vk::Extent2D& extent);
-    virtual std::vector<vk::ImageView> GatherOutputImages(const uint32_t currentFrame) { return {}; }
-    virtual std::vector<vk::BufferView> GatherOutputBuffers(const uint32_t currentFrame) { return {}; }
+    virtual RenderOutputs Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence) = 0;
+    virtual void SetWindowExtent(const vk::Extent2D& extent);
+    virtual void SetRenderExtent(const vk::Extent2D& extent);
+    virtual void SetIsRenderToTarget(const bool isRenderToTarget);
 
     vk::RenderPass GetRenderPass() const { return m_RenderPass; }
 

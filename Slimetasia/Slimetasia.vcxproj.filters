@@ -128,6 +128,12 @@
     <Filter Include="Engine Files\Core\Graphics\Vulkan\RenderPasses">
       <UniqueIdentifier>{17b4dc9e-6976-4089-a7a6-6976f4115655}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Vulkan">
+      <UniqueIdentifier>{b2ae340f-af70-4599-a99c-1eeb1883594f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\OpenGL">
+      <UniqueIdentifier>{e7656898-aa5a-4088-b25e-a1a65c61819f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -451,7 +457,7 @@
     <ClCompile Include="ShaderHelper.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="RenderFinalComposition.cpp">
+    <ClCompile Include="RenderFinal.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="RenderObject.cpp">
@@ -868,7 +874,7 @@
     <ClInclude Include="ShaderHelper.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="RenderFinalComposition.h">
+    <ClInclude Include="RenderFinal.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="MemoryHandler.h">
@@ -895,134 +901,143 @@
     <ClInclude Include="RenderImGui.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderModuleObject.h">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\DebugLine.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\DebugOutline.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\DebugOutline.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\FinalPass.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\GeometryPass.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\GeometryPass.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\LightAmbient.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\LightDirectional.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\LightPoint.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\LightSpot.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\ParticleBillboard.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\ParticleBillboard.geom">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\ParticleBillboard.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\PostProcess.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\ShadowPoint.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\ShadowPoint.geom">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\ShadowTransform.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\Skybox.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\Skybox.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\BasicDraw.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\BasicEmpty.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\BasicTransform.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\BloomPrePass.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\DebugGizmos.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\DebugGizmos.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\DebugLine.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\TextRender.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\TextRender.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\GaussianBlur.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\SSAO.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shaders\SimpleBlur.frag">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="WaterSimulator.h">
       <Filter>Engine Files\Components\Graphics</Filter>
     </None>
-    <None Include="Shaders\WaterShader.frag">
-      <Filter>Shader Files</Filter>
+    <None Include="cpp.hint" />
+    <None Include="SimpleTriangle.frag.hlsl">
+      <Filter>Shader Files\Vulkan</Filter>
     </None>
-    <None Include="Shaders\WaterShader.vert">
-      <Filter>Shader Files</Filter>
+    <None Include="SimpleTriangle.vert.hlsl">
+      <Filter>Shader Files\Vulkan</Filter>
     </None>
-    <None Include="Shaders\VideoShader.frag">
-      <Filter>Shader Files</Filter>
+    <None Include="Shaders\BasicDraw.frag">
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
-    <None Include="Shaders\VideoShader.vert">
-      <Filter>Shader Files</Filter>
+    <None Include="Shaders\BasicEmpty.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\BasicTransform.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\BloomPrePass.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\DebugGizmos.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\DebugGizmos.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\DebugLine.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\DebugLine.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\DebugOutline.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\DebugOutline.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\FinalPass.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\GaussianBlur.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\GeometryPass.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\GeometryPass.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\LightAmbient.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\LightDirectional.frag">
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
     <None Include="Shaders\LightEmissive.frag">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
-    <None Include="Shaders\ShadowDirectional.frag">
-      <Filter>Shader Files</Filter>
+    <None Include="Shaders\LightPoint.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\LightSpot.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\ParticleBillboard.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\ParticleBillboard.geom">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\ParticleBillboard.vert">
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
     <None Include="Shaders\ParticleStencil.geom">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
     <None Include="Shaders\ParticleStencil.vert">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
-    <None Include="cpp.hint" />
-    <None Include="SimpleTriangle.vert.hlsl">
-      <Filter>Shader Files</Filter>
+    <None Include="Shaders\PostProcess.frag">
+      <Filter>Shader Files\OpenGL</Filter>
     </None>
-    <None Include="SimpleTriangle.frag.hlsl">
-      <Filter>Shader Files</Filter>
+    <None Include="Shaders\ShadowDirectional.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\ShadowPoint.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\ShadowPoint.geom">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\ShadowTransform.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\SimpleBlur.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\Skybox.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\Skybox.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\SSAO.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\TextRender.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\TextRender.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\VideoShader.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\VideoShader.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\WaterShader.frag">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="Shaders\WaterShader.vert">
+      <Filter>Shader Files\OpenGL</Filter>
+    </None>
+    <None Include="gbuffer.frag.hlsl">
+      <Filter>Shader Files\Vulkan</Filter>
+    </None>
+    <None Include="gbuffer.vert.hlsl">
+      <Filter>Shader Files\Vulkan</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

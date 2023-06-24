@@ -1,38 +1,39 @@
-#include "RenderFinalComposition.h"
+#include "RenderFinal.h"
 
+#include "External Libraries/imgui/backends/imgui_impl_vulkan.h"
 #include "Logger.h"
+#include "RendererVk.h"
 
-RenderFinalComposition::RenderFinalComposition(const RenderContext& renderContext, const std::unique_ptr<SwapchainHandler>& swapchain)
+RenderFinal::RenderFinal(const RenderContext& renderContext)
     : RenderObject { renderContext }
-    , m_SwapchainCache { swapchain }
 {
     CreateDescriptors();
     CreateRenderPass();
-    // CreateFramebuffers(); // Framebuffer is managed direct from swapchain
+    CreateFramebuffers();
     CreatePipeline();
 }
 
-RenderFinalComposition::~RenderFinalComposition()
+RenderFinal::~RenderFinal()
 {
-    RenderObject::DestroyDescriptors();
-    RenderObject::DestroyRenderPass();
-    // RenderObject::DestroyFramebuffers(); // Framebuffer is managed direct from swapchain
-    RenderObject::DestroyPipeline();
+    DestroyDescriptors();
+    DestroyRenderPass();
+    DestroyFramebuffers();
+    DestroyPipeline();
 }
 
-RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
+RenderOutputs RenderFinal::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
 {
-    const vk::CommandBuffer& commandBuffer { m_CommandBuffers[frameInfo.frameIndex] };
+    const vk::CommandBuffer& commandBuffer { m_CommandBuffers[frameInfo.m_FrameIndex] };
     commandBuffer.reset();
 
     const vk::CommandBufferBeginInfo beginInfo {};
     commandBuffer.begin(beginInfo);
 
-    const vk::ClearValue clearColor { .color { .float32 { { 1.0f, 1.0f, 1.0f, 1.0f } } } };
+    const vk::ClearValue clearColor { vk::ClearColorValue{ 1.0f, 1.0f, 1.0f, 1.0f } };
     const vk::RenderPassBeginInfo renderPassBeginInfo {
         .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[frameInfo.swapchainIndex],
-        .renderArea = { .extent { m_Context.m_Extent } },
+        .framebuffer = m_Framebuffers[frameInfo.m_SwapchainIndex],
+        .renderArea = { .extent { m_Context.m_WindowExtent } },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
     };
@@ -40,17 +41,18 @@ RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, con
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
 
-    const vk::Viewport viewport { .width = static_cast<float>(m_Context.m_Extent.width), .height = static_cast<float>(m_Context.m_Extent.height) };
-    const vk::Rect2D scissor { .extent = m_Context.m_Extent };
+    const vk::Viewport viewport { .width = static_cast<float>(m_Context.m_WindowExtent.width), .height = static_cast<float>(m_Context.m_WindowExtent.height) };
+    const vk::Rect2D scissor { .extent = m_Context.m_WindowExtent };
 
     commandBuffer.setViewport(0, viewport);
     commandBuffer.setScissor(0, scissor);
 
     commandBuffer.draw(3, 1, 0, 0);
+
     commandBuffer.endRenderPass();
     commandBuffer.end();
 
-    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.frameIndex];
+    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.m_FrameIndex];
     const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     const vk::SubmitInfo commandSubmitInfo {
         .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
@@ -64,15 +66,48 @@ RenderSyncObjects RenderFinalComposition::Render(const FrameInfo& frameInfo, con
 
     m_Context.m_Queues[QueueType::Graphics].submit(commandSubmitInfo, signalFence);
 
-    return RenderSyncObjects { signalSemaphore };
+    return RenderOutputs { signalSemaphore };
 }
 
-void RenderFinalComposition::InitializeAfterSwapchain()
+void RenderFinal::SetWindowExtent(const vk::Extent2D& extent)
 {
-    m_Framebuffers = m_SwapchainCache->GetFramebuffers();
+    RenderObject::SetWindowExtent(extent);
 }
 
-void RenderFinalComposition::CreateDescriptors()
+void RenderFinal::SetRenderExtent(const vk::Extent2D& extent)
+{
+    if (extent != m_Context.m_RenderExtent)
+    {
+    }
+
+    RenderObject::SetRenderExtent(extent);
+}
+
+void RenderFinal::SetIsRenderToTarget(const bool isRenderToTarget)
+{
+    if (isRenderToTarget != m_Context.m_IsRenderToTarget)
+    {
+        DestroyFramebuffers();
+        DestroyRenderPass();
+
+        m_Context.m_IsRenderToTarget = isRenderToTarget;
+
+        CreateFramebuffers();
+        CreateRenderPass();
+    }
+}
+
+void RenderFinal::OnSwapchainFramebuffersChanged()
+{
+    m_Framebuffers = g_Renderer->GetSwapchainHandler()->GetFramebuffers();
+}
+
+VkDescriptorSet RenderFinal::GetRenderAttachment(const uint32_t frameIndex) const
+{
+    return m_RenderAttachments[frameIndex];
+}
+
+void RenderFinal::CreateDescriptors()
 {
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
         vk::DescriptorPoolSize {
@@ -86,32 +121,31 @@ void RenderFinalComposition::CreateDescriptors()
         .pPoolSizes = poolSizes.data(),
     };
     m_DescriptorPool = m_Context.m_Device.createDescriptorPool(poolCreateInfo);
-
-    // const vk::DescriptorSetAllocateInfo allocateInfo {
-    //     .descriptorPool = m_DescriptorPool,
-    //     .descriptorSetCount = 1,
-    // };
-    // m_DescriptorSets = m_Context.m_Device.allocateDescriptorSets(allocateInfo);
 }
 
-void RenderFinalComposition::CreateRenderPass()
+void RenderFinal::CreateRenderPass()
 {
+    vk::Format targetFormat {};
+    vk::ImageLayout targetLayout {};
+
+    if (m_Context.m_IsRenderToTarget)
+    {
+        targetFormat = g_Renderer->GetSwapchainHandler()->GetSurfaceFormat().format;
+        targetLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+    }
+    else
+    {
+        targetFormat = g_Renderer->GetSwapchainHandler()->GetSurfaceFormat().format;
+        targetLayout = vk::ImageLayout::ePresentSrcKHR;
+    }
+
     const vk::AttachmentDescription colorAttachment {
-#ifdef EDITOR
-        .format = m_SwapchainCache->GetSurfaceFormat().format,  // vk::Format::eR16G16B16A16Sfloat,
-#else
-        .format = m_SwapchainCache->GetSurfaceFormat().format,  // vk::Format::eR16G16B16A16Sfloat,
-#endif  // EDITOR
+        .format = targetFormat,
         .samples = vk::SampleCountFlagBits::e1,
         .loadOp = vk::AttachmentLoadOp::eClear,
         .storeOp = vk::AttachmentStoreOp::eStore,
         .initialLayout = vk::ImageLayout::eUndefined,
-#ifdef EDITOR
-        //.finalLayout = vk::ImageLayout::eColorAttachmentOptimal,
-        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
-#else
-        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
-#endif  // EDITOR
+        .finalLayout = targetLayout,
     };
 
     const vk::AttachmentReference colorAttachmentRef {
@@ -146,54 +180,79 @@ void RenderFinalComposition::CreateRenderPass()
     m_RenderPass = m_Context.m_Device.createRenderPass(createInfo);
 }
 
-void RenderFinalComposition::CreateFramebuffers()
+void RenderFinal::CreateFramebuffers()
 {
-    for (uint32_t i = 0; i < m_Context.m_FramesInFlight; ++i)
+    if (m_Context.m_IsRenderToTarget)
     {
-        const vk::FramebufferCreateInfo createInfo {
-            .attachmentCount = 1,
-            // .pAttachments = // todo: assign allocated frame buffer image
-            .width = m_Context.m_Extent.width,
-            .height = m_Context.m_Extent.height,
-            .layers = 1,
-        };
+        const vk::Extent3D extent { m_Context.m_RenderExtent.width, m_Context.m_RenderExtent.height, 1 };
+        const vk::Format renderFormat = g_Renderer->GetSwapchainHandler()->GetSurfaceFormat().format;
+        const vk::ImageUsageFlags usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled;
 
-        m_Framebuffers.push_back(m_Context.m_Device.createFramebuffer(createInfo));
+        for (uint32_t i = 0; i < m_Context.m_FramesInFlight; ++i)
+        {
+            ImageObject* renderTarget = ImageObject::CreateImage(renderFormat, extent, usageFlags, false, nullptr);
+            renderTarget->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+            renderTarget->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToBorder);
+
+            const vk::ImageView renderView = renderTarget->GetView();
+
+            m_RenderTargets.push_back(renderTarget);
+            m_RenderAttachments.push_back(ImGui_ImplVulkan_AddTexture(renderTarget->GetSampler(), renderTarget->GetView(), (VkImageLayout)vk::ImageLayout::eShaderReadOnlyOptimal));
+
+            const vk::FramebufferCreateInfo createInfo {
+                .renderPass = m_RenderPass,
+                .attachmentCount = 1,
+                .pAttachments = &renderView,
+                .width = extent.width,
+                .height = extent.height,
+                .layers = 1,
+            };
+
+            m_Framebuffers.push_back(m_Context.m_Device.createFramebuffer(createInfo));
+        }
     }
 }
 
-void RenderFinalComposition::CreatePipeline()
+void RenderFinal::DestroyFramebuffers()
+{
+    // If not render to target, framebuffer is managed by swapchain
+    if (m_Context.m_IsRenderToTarget)
+    {
+        for (const VkDescriptorSet& renderAttachment : m_RenderAttachments)
+        {
+            ImGui_ImplVulkan_RemoveTexture(renderAttachment);
+        }
+        m_RenderAttachments.clear();
+
+        for (const ImageObject* renderTarget : m_RenderTargets)
+        {
+            delete renderTarget;
+        }
+        m_RenderTargets.clear();
+
+        RenderObject::DestroyFramebuffers();
+    }
+}
+
+void RenderFinal::CreatePipeline()
 {
     // For uniform data and sorts
     const vk::PipelineLayoutCreateInfo layoutCreateInfo {};
 
     m_PipelineLayout = m_Context.m_Device.createPipelineLayout(layoutCreateInfo);
 
-    const std::vector<char>& vertSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.vert.hlsl");
-    const std::vector<char>& fragSpirv = ShaderHelper::CompileToSpirv("SimpleTriangle.frag.hlsl");
-
-    const vk::ShaderModuleCreateInfo vertModuleCreateInfo {
-        .codeSize = vertSpirv.size(),
-        .pCode = reinterpret_cast<const uint32_t*>(vertSpirv.data()),
-    };
-
-    const vk::ShaderModuleCreateInfo fragModuleCreateInfo {
-        .codeSize = fragSpirv.size(),
-        .pCode = reinterpret_cast<const uint32_t*>(fragSpirv.data()),
-    };
-
-    const vk::ShaderModule vertShader { m_Context.m_Device.createShaderModule(vertModuleCreateInfo) };
-    const vk::ShaderModule fragShader { m_Context.m_Device.createShaderModule(fragModuleCreateInfo) };
+    ShaderModuleObject vertModule { "SimpleTriangle.vert.hlsl", m_Context.m_Device };
+    ShaderModuleObject fragModule { "SimpleTriangle.frag.hlsl", m_Context.m_Device };
 
     const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
         {
             .stage = vk::ShaderStageFlagBits::eVertex,
-            .module = vertShader,
+            .module = vertModule.GetModule(),
             .pName = "main",
         },
         {
             .stage = vk::ShaderStageFlagBits::eFragment,
-            .module = fragShader,
+            .module = fragModule.GetModule(),
             .pName = "main",
         },
     };
@@ -209,7 +268,7 @@ void RenderFinalComposition::CreatePipeline()
         .topology = vk::PrimitiveTopology::eTriangleList,
     };
 
-    const vk::Extent2D swapchainExtent = m_Context.m_Extent;
+    const vk::Extent2D swapchainExtent = m_Context.m_WindowExtent;
 
     const vk::Viewport viewport {
         .x = 0.0f,
@@ -297,7 +356,4 @@ void RenderFinalComposition::CreatePipeline()
     ASSERT(resultValue.result == vk::Result::eSuccess);
 
     m_Pipeline = resultValue.value;
-
-    m_Context.m_Device.destroyShaderModule(vertShader);
-    m_Context.m_Device.destroyShaderModule(fragShader);
 }

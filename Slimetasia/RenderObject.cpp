@@ -31,15 +31,24 @@ RenderObject::~RenderObject()
 
     m_CommandBuffers.clear();
     m_SignalSemaphores.clear();
-    m_Framebuffers.clear();
 }
 
-void RenderObject::OnExtentChanged(const vk::Extent2D& extent)
+void RenderObject::SetWindowExtent(const vk::Extent2D& extent)
 {
-    m_Context.m_Extent = extent;
+    m_Context.m_WindowExtent = extent;
 }
 
-void RenderObject::DestroyDescriptors() 
+void RenderObject::SetRenderExtent(const vk::Extent2D& extent)
+{
+    m_Context.m_RenderExtent = extent;
+}
+
+void RenderObject::SetIsRenderToTarget(const bool isRenderToTarget)
+{
+    m_Context.m_IsRenderToTarget = isRenderToTarget;
+}
+
+void RenderObject::DestroyDescriptors()
 {
     if (m_DescriptorPool)
     {
@@ -47,7 +56,7 @@ void RenderObject::DestroyDescriptors()
     }
 }
 
-void RenderObject::DestroyRenderPass() 
+void RenderObject::DestroyRenderPass()
 {
     if (m_RenderPass)
     {
@@ -55,7 +64,7 @@ void RenderObject::DestroyRenderPass()
     }
 }
 
-void RenderObject::DestroyFramebuffers() 
+void RenderObject::DestroyFramebuffers()
 {
     for (const vk::Framebuffer& framebuffer : m_Framebuffers)
     {
@@ -64,9 +73,10 @@ void RenderObject::DestroyFramebuffers()
             m_Context.m_Device.destroyFramebuffer(framebuffer);
         }
     }
+    m_Framebuffers.clear();
 }
 
-void RenderObject::DestroyPipeline() 
+void RenderObject::DestroyPipeline()
 {
     if (m_Pipeline)
     {

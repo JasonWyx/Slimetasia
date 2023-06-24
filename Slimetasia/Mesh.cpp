@@ -278,6 +278,7 @@ void Mesh::Load()
 
     inFile.close();
 
+#ifndef USE_VULKAN
     glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Index], m_Indices.size() * sizeof(m_Indices[0]), m_Indices.data(), 0);
     glVertexArrayElementBuffer(m_VertexArray, m_VertexBuffers[(int)MeshBufferID::Index]);
 
@@ -349,6 +350,7 @@ void Mesh::Load()
         glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointWeight);
         glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointWeight, m_VertexBuffers[(int)MeshBufferID::JointWeight], 0, sizeof(m_JointWeights[0]));
     }
+#endif  // !USE_VULKAN
 
 #ifndef EDITOR
 
@@ -547,6 +549,7 @@ void Mesh::ImportFromAssimp(aiScene const* scene)
     ParseNodes(rootNode);
     ParseNodesChildren(rootNode);
 
+#ifndef USE_VULKAN
     glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Index], m_Indices.size() * sizeof(m_Indices[0]), m_Indices.data(), 0);
     glVertexArrayElementBuffer(m_VertexArray, m_VertexBuffers[(int)MeshBufferID::Index]);
 
@@ -618,6 +621,7 @@ void Mesh::ImportFromAssimp(aiScene const* scene)
         glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointWeight);
         glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointWeight, m_VertexBuffers[(int)MeshBufferID::JointWeight], 0, sizeof(m_JointWeights[0]));
     }
+#endif  // !USE_VULKAN
 
     m_LoadStatus = ResourceStatus::Loaded;
 

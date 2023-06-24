@@ -22,36 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}</ProjectGuid>
     <RootNamespace>Slimetasia</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>Slimetasia</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -74,30 +70,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VULKAN_SDK)\Lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VULKAN_SDK)\Include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VULKAN_SDK)\Lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VULKAN_SDK)\Include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VULKAN_SDK)\Lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VULKAN_SDK)\Include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">
     <IntDir>Build Objects\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VULKAN_SDK)\Include</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VULKAN_SDK)\Lib</LibraryPath>
     <TargetName>Slimetasia</TargetName>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\assimp\lib\x64;$(SolutionDir)Dependencies\fmod\core\lib\x64;$(SolutionDir)Dependencies\fmod\studio\lib\x64;$(SolutionDir)Dependencies\glew\lib\x64;$(SolutionDir)Dependencies\lua\lib\x64;$(SolutionDir)Dependencies\opencv\lib;$(VULKAN_SDK)\Lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\External Libraries\imgui;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\fmod\core\inc;$(SolutionDir)Dependencies\fmod\studio\inc;$(SolutionDir)Dependencies\glew\include;$(SolutionDir)Dependencies\lua\include;$(SolutionDir)Dependencies\opencv\include;$(SolutionDir)Dependencies\stb;$(VULKAN_SDK)\Include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -105,11 +101,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;dxcompiler.lib;assimp-vc143-mt.lib;opengl32.lib;glew32s.lib;xinput.lib;fmod_vc.lib;fmodstudio_vc.lib;lua54.lib;$(SolutionDir)Dependencies\opencv\lib\*.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -130,11 +127,12 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -157,11 +155,12 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -184,11 +183,12 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NOMINMAX;GLEW_STATIC;USE_VULKAN;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;EDITOR;ENABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableModules>true</EnableModules>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -294,7 +294,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderLayer.cpp" />
     <ClCompile Include="RenderPass.cpp" />
-    <ClCompile Include="RenderFinalComposition.cpp" />
+    <ClCompile Include="RenderFinal.cpp" />
     <ClCompile Include="ResourceBase.cpp" />
     <ClCompile Include="ResourceEntry.cpp" />
     <ClCompile Include="ResourceHandle.cpp" />
@@ -379,6 +379,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="ImageObject.h" />
     <ClInclude Include="MemoryHandler.h" />
+    <ClInclude Include="ShaderModuleObject.h" />
     <ClInclude Include="QueueType.h" />
     <ClInclude Include="RenderGBuffer.h" />
     <ClInclude Include="RenderImGui.h" />
@@ -410,7 +411,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderLayer.h" />
     <ClInclude Include="RenderPass.h" />
-    <ClInclude Include="RenderFinalComposition.h" />
+    <ClInclude Include="RenderFinal.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceEntry.h" />
     <ClInclude Include="ShaderHelper.h" />
@@ -525,6 +526,22 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
       <FileType>Document</FileType>
     </None>
     <None Include="SimpleTriangle.frag.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gbuffer.frag.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="gbuffer.vert.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release with Asserts|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release without Editor|x64'">Vertex</ShaderType>

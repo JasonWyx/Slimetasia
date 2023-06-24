@@ -6,11 +6,14 @@
 
 #include "ISystem.h"
 #include "MemoryHandler.h"
-#include "RenderFinalComposition.h"
-#include "RenderGBuffer.h"
-#include "RenderImGui.h"
-#include "SwapchainHandler.h"
 #include "QueueType.h"
+#include "RenderFinal.h"
+#include "RenderGBuffer.h"
+#include "SwapchainHandler.h"
+
+#ifdef EDITOR
+#include "RenderImGui.h"
+#endif  // EDITOR
 
 struct ImDrawData;
 
@@ -21,8 +24,9 @@ public:
     RendererVk(const HINSTANCE appInstance, const HWND appWindow, const uint32_t windowWidth, const uint32_t windowHeight);
     ~RendererVk();
 
+    void PostInitialize();
     void Update(const float deltaTime);
-    void OnWindowResize();
+    void OnWindowResized();
 
     vk::CommandBuffer CreateOneShotCommandBuffer();
     void SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffer, const vk::QueueFlagBits targetQueue, const vk::Fence signalFence = {});
@@ -33,6 +37,8 @@ public:
 
     const std::unique_ptr<SwapchainHandler>& GetSwapchainHandler() const { return m_SwapchainHandler; }
     const std::unique_ptr<MemoryHandler>& GetMemoryHandler() const { return m_MemoryHandler; }
+
+    VkDescriptorSet GetRenderAttachment() const;
 
     // void SetCurrentLayer(Layer* layer);
     // void SetWindowSize(iVector2 const& windowSize);
@@ -65,27 +71,30 @@ private:
     void CreateFramebuffers();
     void CreateSyncObjects();
 
-    HWND m_AppWindow;
+    HWND m_AppWindow {};
 
-    vk::Instance m_Instance;
-    vk::SurfaceKHR m_Surface;
-    vk::PhysicalDevice m_PhysicalDevice;
-    vk::Device m_Device;
+    vk::Instance m_Instance {};
+    vk::SurfaceKHR m_Surface {};
+    vk::PhysicalDevice m_PhysicalDevice {};
+    vk::Device m_Device {};
 
-    std::array<uint32_t, QueueType::Count> m_QueueIndices;
-    std::array<vk::Queue, QueueType::Count> m_Queues;
-    std::unique_ptr<SwapchainHandler> m_SwapchainHandler;
-    std::unique_ptr<MemoryHandler> m_MemoryHandler;
+    std::array<uint32_t, QueueType::Count> m_QueueIndices {};
+    std::array<vk::Queue, QueueType::Count> m_Queues {};
+    std::unique_ptr<SwapchainHandler> m_SwapchainHandler {};
+    std::unique_ptr<MemoryHandler> m_MemoryHandler {};
 
-    vk::CommandPool m_OneShotCommandPool;
+    vk::CommandPool m_OneShotCommandPool {};
 
-    std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
-    std::vector<vk::Fence> m_InFlightFences;
-    uint32_t m_CurrentFrame;
+    std::vector<vk::Semaphore> m_ImageAvailableSemaphores {};
+    std::vector<vk::Fence> m_InFlightFences {};
+    uint32_t m_CurrentFrame {};
+    bool m_IsRenderToTarget {};
 
     std::unique_ptr<RenderGBuffer> m_RenderGBuffer;
-    std::unique_ptr<RenderFinalComposition> m_RenderFinalComposition;
+    std::unique_ptr<RenderFinal> m_RenderFinal;
+#ifdef EDITOR
     std::unique_ptr<RenderImGui> m_RenderImGui;
+#endif  // EDITOR
 };
 
 #define g_Renderer RendererVk::InstancePtr()

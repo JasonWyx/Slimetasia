@@ -11,6 +11,8 @@ public:
     BufferObject(const vk::BufferCreateInfo& createInfo, const vk::MemoryPropertyFlags& memoryProperties);
     ~BufferObject();
 
+    void GenerateView();
+
     void Write(const void* source, const size_t size);
     void CopyFrom(const BufferObject& sourceBuffer, const vk::DeviceSize offset, const vk::DeviceSize size);
 

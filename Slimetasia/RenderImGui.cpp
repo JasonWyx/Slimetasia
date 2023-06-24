@@ -4,9 +4,8 @@
 #include "External Libraries/imgui/backends/imgui_impl_win32.h"
 #include "RendererVk.h"
 
-RenderImGui::RenderImGui(const RenderContext& renderContext, const vk::Instance instance, const vk::PhysicalDevice physicalDevice, const std::unique_ptr<SwapchainHandler>& swapchain)
+RenderImGui::RenderImGui(const RenderContext& renderContext, const vk::Instance instance, const vk::PhysicalDevice physicalDevice)
     : RenderObject { renderContext }
-    , m_SwapchainCache { swapchain }
 {
     CreateDescriptors();
     // CreateFramebuffers(); // Framebuffer is managed direct from swapchain
@@ -21,7 +20,7 @@ RenderImGui::RenderImGui(const RenderContext& renderContext, const vk::Instance 
         .DescriptorPool = m_DescriptorPool,
         .Subpass = 0,
         .MinImageCount = renderContext.m_FramesInFlight,
-        .ImageCount = static_cast<uint32_t>(swapchain->GetImageViews().size()),
+        .ImageCount = renderContext.m_SwapchainCount,
     };
 
     ImGui_ImplVulkan_Init(&imguiInitInfo, m_RenderPass);
@@ -33,8 +32,8 @@ RenderImGui::RenderImGui(const RenderContext& renderContext, const vk::Instance 
 
     const vk::SubmitInfo submitInfo { .commandBufferCount = 1, .pCommandBuffers = &(m_CommandBuffers[0]) };
     renderContext.m_Queues[QueueType::Transfer].submit(submitInfo);
-    renderContext.m_Device.waitIdle(); // todo: maybe wait on fence?
-    
+    renderContext.m_Device.waitIdle();  // todo: maybe wait on fence?
+
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
@@ -42,24 +41,24 @@ RenderImGui::~RenderImGui()
 {
     ImGui_ImplVulkan_Shutdown();
 
-    RenderObject::DestroyRenderPass();
-    // RenderObject::DestroyFramebuffers(); // Framebuffer is managed direct from swapchain
-    RenderObject::DestroyDescriptors();
+    DestroyRenderPass();
+    // DestroyFramebuffers(); // Framebuffer is managed direct from swapchain
+    DestroyDescriptors();
 }
 
-RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
+RenderOutputs RenderImGui::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
 {
-    const vk::CommandBuffer commandBuffer { m_CommandBuffers[frameInfo.frameIndex] };
+    const vk::CommandBuffer commandBuffer { m_CommandBuffers[frameInfo.m_FrameIndex] };
     commandBuffer.reset();
 
     const vk::CommandBufferBeginInfo beginInfo {};
     commandBuffer.begin(beginInfo);
 
-    const vk::ClearValue clearColor { .color = { .float32 = { { 0.0f, 0.0f, 0.0f, 1.0f } } } };
+    const vk::ClearValue clearColor { vk::ClearColorValue{ 0.0f, 0.0f, 0.0f, 1.0f } };
     const vk::RenderPassBeginInfo renderPassBeginInfo {
         .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[frameInfo.swapchainIndex],
-        .renderArea = { .extent = m_SwapchainCache->GetExtent() },
+        .framebuffer = m_Framebuffers[frameInfo.m_SwapchainIndex],
+        .renderArea = { .extent = m_Context.m_WindowExtent, },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
     };
@@ -74,7 +73,7 @@ RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vec
     commandBuffer.endRenderPass();
     commandBuffer.end();
 
-    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.frameIndex];
+    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.m_FrameIndex];
     const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     const vk::SubmitInfo commandSubmitInfo {
         .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
@@ -88,10 +87,10 @@ RenderSyncObjects RenderImGui::Render(const FrameInfo& frameInfo, const std::vec
 
     m_Context.m_Queues[QueueType::Graphics].submit(commandSubmitInfo, signalFence);
 
-    return RenderSyncObjects { signalSemaphore };
+    return RenderOutputs { signalSemaphore };
 }
 
-void RenderImGui::InitializeAfterSwapchain()
+void RenderImGui::OnSwapchainFramebuffersChanged()
 {
     CreateFramebuffers();
 }
@@ -122,8 +121,10 @@ void RenderImGui::CreateDescriptors()
 
 void RenderImGui::CreateRenderPass()
 {
+    const vk::Format targetFormat = g_Renderer->GetSwapchainHandler()->GetSurfaceFormat().format;
+
     const vk::AttachmentDescription colorAttachment {
-        .format = m_SwapchainCache->GetSurfaceFormat().format,
+        .format = targetFormat,
         .samples = vk::SampleCountFlagBits::e1,
         .loadOp = vk::AttachmentLoadOp::eClear,
         .storeOp = vk::AttachmentStoreOp::eStore,
@@ -166,7 +167,7 @@ void RenderImGui::CreateRenderPass()
 
 void RenderImGui::CreateFramebuffers()
 {
-    m_Framebuffers = m_SwapchainCache->GetFramebuffers();
+    m_Framebuffers = g_Renderer->GetSwapchainHandler()->GetFramebuffers();
 }
 
 void RenderImGui::CreatePipeline() {}

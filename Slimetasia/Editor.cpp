@@ -657,6 +657,7 @@ void Editor::DrawViewport()
     GameCameraSize.y /= 10.0f;
 
 #ifdef USE_VULKAN
+    ImGui::Image((ImTextureID)(g_Renderer->GetRenderAttachment()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 #else
     ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 #endif  // USE_VULKAN
@@ -664,6 +665,7 @@ void Editor::DrawViewport()
     if (m_IsGameCameraAcitve)
     {
 #ifdef USE_VULKAN
+        ImGui::Image((ImTextureID)(g_Renderer->GetRenderAttachment()), GameCameraSize, ImVec2(0, 1), ImVec2(1, 0));
 #else
         ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), GameCameraSize, ImVec2(0, 1), ImVec2(1, 0));
 #endif  // USE_VULKAN
@@ -2199,12 +2201,13 @@ void Editor::DrawFullScreenViewport()
         windowSize.y -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
 
 #ifdef USE_VULKAN
+        ImGui::Image((ImTextureID)(g_Renderer->GetRenderAttachment()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 #else
         Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
         Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
+        ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 #endif  // USE_VULKAN
 
-        // ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();
     }
 }

@@ -5,7 +5,7 @@
 #include "BufferObject.h"
 #include "RendererVk.h"
 
-ImageObject::ImageObject(const vk::ImageCreateInfo& imageCreateInfo, const vk::MemoryPropertyFlags& memoryProperties, const vk::ImageViewType& viewType, const vk::ImageAspectFlags& aspect)
+ImageObject::ImageObject(const vk::ImageCreateInfo& imageCreateInfo, const vk::MemoryPropertyFlags& memoryProperties)
     : DeviceObject {}
     , m_Extent { imageCreateInfo.extent }
     , m_Format { imageCreateInfo.format }
@@ -20,21 +20,7 @@ ImageObject::ImageObject(const vk::ImageCreateInfo& imageCreateInfo, const vk::M
     m_Image = m_ContextDevice.createImage(imageCreateInfo);
     m_MemoryInfo = memoryHandler->AllocateImageMemory(m_Image, memoryProperties);
 
-    // todo: might want to split view from image object
-    const vk::ImageViewCreateInfo imageViewCreateInfo {
-        .image = m_Image,
-        .viewType = viewType,
-        .format = imageCreateInfo.format,
-        .subresourceRange {
-            .aspectMask = aspect,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1,
-        },
-    };
-
-    m_View = m_ContextDevice.createImageView(imageViewCreateInfo);
+    m_ContextDevice.bindImageMemory(m_Image, m_MemoryInfo.m_Memory, m_MemoryInfo.m_Offset);
 }
 
 ImageObject::~ImageObject()
@@ -47,6 +33,46 @@ ImageObject::~ImageObject()
     {
         m_ContextDevice.destroyImageView(m_View);
     }
+    if (m_Sampler)
+    {
+        m_ContextDevice.destroySampler(m_Sampler);
+    }
+}
+
+void ImageObject::GenerateView(const vk::ImageViewType& viewType, const vk::ImageAspectFlags& aspectFlags)
+{
+    ASSERT(!m_View);
+    ASSERT(m_Image);
+
+    const vk::ImageViewCreateInfo imageViewCreateInfo {
+        .image = m_Image,
+        .viewType = viewType,
+        .format = m_Format,
+        .subresourceRange {
+            .aspectMask = aspectFlags,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
+    };
+
+    m_View = m_ContextDevice.createImageView(imageViewCreateInfo);
+}
+
+void ImageObject::GenerateSampler(const vk::Filter filter, const vk::SamplerAddressMode addressMode)
+{
+    ASSERT(!m_Sampler);
+
+    vk::SamplerCreateInfo createInfo {
+        .magFilter { filter },
+        .minFilter { filter },
+        .addressModeU { addressMode },
+        .addressModeV { addressMode },
+        .addressModeW { addressMode },
+    };
+
+    m_Sampler = m_ContextDevice.createSampler(createInfo);
 }
 
 void ImageObject::TransitionImageLayout(const vk::ImageLayout layout)
@@ -129,8 +155,7 @@ void ImageObject::CopyFrom(const BufferObject& source, const vk::DeviceSize& off
 }
 
 /* static */
-ImageObject* ImageObject::CreateImage(const vk::Format& format, const vk::Extent3D extent, const vk::ImageUsageFlags& usageFlags, const vk::ImageViewType& viewType,
-                                      const vk::ImageAspectFlags& aspectFlags, const bool isHostVisible, const void* source)
+ImageObject* ImageObject::CreateImage(const vk::Format& format, const vk::Extent3D extent, const vk::ImageUsageFlags& usageFlags, const bool isHostVisible, const void* source)
 {
     const std::set<uint32_t> uniqueIndices { g_Renderer->GetQueueIndex(QueueType::Graphics), g_Renderer->GetQueueIndex(QueueType::Transfer) };
     const std::vector<uint32_t> indices { uniqueIndices.begin(), uniqueIndices.end() };
@@ -150,7 +175,7 @@ ImageObject* ImageObject::CreateImage(const vk::Format& format, const vk::Extent
 
     const vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
 
-    ImageObject* imageObject = new ImageObject { imageCreateInfo, memoryProperties, viewType, aspectFlags };
+    ImageObject* imageObject = new ImageObject { imageCreateInfo, memoryProperties};
 
     if (source != nullptr)
     {
@@ -164,6 +189,31 @@ ImageObject* ImageObject::CreateImage(const vk::Format& format, const vk::Extent
         // Free staging resources
         delete stagingBuffer;
     }
+
+    return imageObject;
+}
+
+ImageObject* ImageObject::CreateDepthImage(const vk::Format& format, const vk::Extent3D extent, const vk::ImageUsageFlags& usageFlags)
+{
+    const std::set<uint32_t> uniqueIndices { g_Renderer->GetQueueIndex(QueueType::Graphics), g_Renderer->GetQueueIndex(QueueType::Transfer) };
+    const std::vector<uint32_t> indices { uniqueIndices.begin(), uniqueIndices.end() };
+
+    const vk::ImageCreateInfo imageCreateInfo {
+        .imageType = vk::ImageType::e2D,
+        .format = format,
+        .extent = extent,
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .tiling = vk::ImageTiling::eOptimal,
+        .usage = usageFlags,
+        .queueFamilyIndexCount = static_cast<uint32_t>(indices.size()),
+        .pQueueFamilyIndices = indices.data(),
+        .initialLayout = vk::ImageLayout::eUndefined,
+    };
+
+    const vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+
+    ImageObject* imageObject = new ImageObject { imageCreateInfo, memoryProperties };
 
     return imageObject;
 }

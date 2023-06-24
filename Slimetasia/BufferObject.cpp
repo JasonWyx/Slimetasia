@@ -11,6 +11,8 @@ BufferObject::BufferObject(const vk::BufferCreateInfo& createInfo, const vk::Mem
 
     m_Buffer = m_ContextDevice.createBuffer(createInfo);
     m_MemoryInfo = memoryHandler->AllocateBufferMemory(m_Buffer, memoryProperties);
+
+    m_ContextDevice.bindBufferMemory(m_Buffer, m_MemoryInfo.m_Memory, m_MemoryInfo.m_Offset);
 }
 
 BufferObject::~BufferObject()
@@ -23,6 +25,11 @@ BufferObject::~BufferObject()
     {
         m_ContextDevice.destroyBufferView(m_View);
     }
+}
+
+void BufferObject::GenerateView()
+{
+    // todo
 }
 
 void BufferObject::Write(const void* source, const size_t size)

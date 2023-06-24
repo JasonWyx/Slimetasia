@@ -15,6 +15,9 @@ static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 RendererVk::RendererVk(HINSTANCE appInstance, HWND appWindow, const uint32_t windowWidth, const uint32_t windowHeight)
     : m_AppWindow { appWindow }
     , m_CurrentFrame { 0 }
+#ifdef EDITOR
+    , m_IsRenderToTarget { true }
+#endif
 {
     CreateInstance();
     CreateSurface(appInstance, appWindow);
@@ -22,9 +25,7 @@ RendererVk::RendererVk(HINSTANCE appInstance, HWND appWindow, const uint32_t win
     CreateDevice();
     CreateSwapchain(appWindow);
     CreateHandlers();
-    CreateRenderers();
     CreateCommandPool();
-    CreateFramebuffers();
     CreateSyncObjects();
 }
 
@@ -33,25 +34,37 @@ RendererVk::~RendererVk()
     m_Device.waitIdle();
 
     // Release renderers
-    m_RenderImGui.release();
-    m_RenderFinalComposition.release();
-    m_RenderGBuffer.release();
+    m_RenderFinal.reset();
+    m_RenderGBuffer.reset();
+#ifdef EDITOR
+    m_RenderImGui.reset();
+#endif  // EDITOR
 
     // Release device objects
     std::ranges::for_each(m_ImageAvailableSemaphores, [this](const vk::Semaphore& semaphore) { m_Device.destroySemaphore(semaphore); });
+    std::ranges::for_each(m_InFlightFences, [this](const vk::Fence& fence) { m_Device.destroyFence(fence); });
     m_Device.destroyCommandPool(m_OneShotCommandPool);
 
     // Release handlers
-    m_MemoryHandler.release();
-    m_SwapchainHandler.release();
+    m_MemoryHandler.reset();
+    m_SwapchainHandler.reset();
+
+    m_Instance.destroySurfaceKHR(m_Surface);
 
     // Release core objects
     m_Device.destroy();
     m_Instance.destroy();
 }
 
+void RendererVk::PostInitialize()
+{
+    CreateRenderers();
+    CreateFramebuffers();
+}
+
 void RendererVk::Update(const float deltaTime)
 {
+    // Check frame in flight
     const vk::Fence& inFlightFence = m_InFlightFences[m_CurrentFrame];
     const vk::Result waitResult = m_Device.waitForFences(inFlightFence, VK_TRUE, UINT64_MAX);
     m_Device.resetFences(inFlightFence);
@@ -60,28 +73,33 @@ void RendererVk::Update(const float deltaTime)
 
     if (swapchainAcquireResult.result == vk::Result::eErrorOutOfDateKHR)
     {
-        OnWindowResize();
+        OnWindowResized();
         return;
     }
 
     const uint32_t imageIndex = swapchainAcquireResult.value;
     const std::vector<vk::Framebuffer>& framebuffers { m_SwapchainHandler->GetFramebuffers() };
-    const std::vector<vk::Semaphore> waitSemaphores { m_ImageAvailableSemaphores[m_CurrentFrame] };
-    std::vector<vk::Semaphore> renderFinishedSemaphores {};
+    std::vector<vk::Semaphore> waitRenderSemaphores { m_ImageAvailableSemaphores[m_CurrentFrame] };
+    std::vector<vk::Semaphore> waitPresentSemaphores {};
 
     const FrameInfo& frameInfo { m_CurrentFrame, imageIndex };
 
-    // const RenderSyncObjects finalCompRenderSync = m_RenderFinalComposition->Render(frameInfo, waitSemaphores);
-    // renderFinishedSemaphores.push_back(finalCompRenderSync.signaledSemaphore);
+#ifdef EDITOR
+    const RenderOutputs& renderFinalOutputs = m_RenderFinal->Render(frameInfo, {}, {});
+    waitRenderSemaphores.push_back(renderFinalOutputs.m_SignaledSemaphore);
 
-    const RenderSyncObjects imguiRenderSync = m_RenderImGui->Render(frameInfo, waitSemaphores, inFlightFence);
-    renderFinishedSemaphores.push_back(imguiRenderSync.signaledSemaphore);
+    const RenderOutputs& renderImGuiOutputs = m_RenderImGui->Render(frameInfo, waitRenderSemaphores, inFlightFence);
+    waitPresentSemaphores.push_back(renderImGuiOutputs.m_SignaledSemaphore);
+#else
+    const RenderOutputs& renderFinalOutputs = m_RenderFinal->Render(frameInfo, waitRenderSemaphores, inFlightFence);
+    waitPresentSemaphores.push_back(renderFinalOutputs.m_SignaledSemaphore);
+#endif  // EDITOR
 
     const vk::SwapchainKHR swapchain = m_SwapchainHandler->GetSwapchain();
 
     vk::PresentInfoKHR presentInfo {
-        .waitSemaphoreCount = static_cast<uint32_t>(renderFinishedSemaphores.size()),
-        .pWaitSemaphores = renderFinishedSemaphores.data(),
+        .waitSemaphoreCount = static_cast<uint32_t>(waitPresentSemaphores.size()),
+        .pWaitSemaphores = waitPresentSemaphores.data(),
         .swapchainCount = 1,
         .pSwapchains = &swapchain,
         .pImageIndices = &imageIndex,
@@ -91,13 +109,13 @@ void RendererVk::Update(const float deltaTime)
 
     if (presentResult == vk::Result::eErrorOutOfDateKHR || presentResult == vk::Result::eSuboptimalKHR)
     {
-        OnWindowResize();
+        OnWindowResized();
     }
 
     m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void RendererVk::OnWindowResize()
+void RendererVk::OnWindowResized()
 {
     // Wait idle is called internally
     m_SwapchainHandler->RecreateSwapchain(m_PhysicalDevice, m_Device, m_Surface, m_AppWindow);
@@ -106,9 +124,11 @@ void RendererVk::OnWindowResize()
 
     const vk::Extent2D& extent = m_SwapchainHandler->GetExtent();
 
-    // m_RenderGBuffer->OnExtentChanged(extent);
-    m_RenderFinalComposition->OnExtentChanged(extent);
-    m_RenderImGui->OnExtentChanged(extent);
+    m_RenderGBuffer->SetWindowExtent(extent);
+    m_RenderFinal->SetWindowExtent(extent);
+#ifdef EDITOR
+    m_RenderImGui->SetWindowExtent(extent);
+#endif  // EDITOR
 }
 
 void RendererVk::CreateInstance()
@@ -128,7 +148,7 @@ void RendererVk::CreateInstance()
 #ifdef EDITOR
         VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
         VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
-#endif // EDITOR
+#endif  // EDITOR
     };
 
     // Check instance layers exists
@@ -249,15 +269,20 @@ void RendererVk::CreateDevice()
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
+    // todo: Assuming that we have device features
+    vk::PhysicalDeviceFeatures physicalDeviceFeatures {
+        .samplerAnisotropy = VK_TRUE,
+    };
+
     vk::DeviceCreateInfo createInfo {
         .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
         .pQueueCreateInfos = queueCreateInfos.data(),
         .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
         .ppEnabledExtensionNames = extensions.data(),
+        .pEnabledFeatures = &physicalDeviceFeatures,
     };
     // No Layers
     // No Extensions
-    // No PhysicalDeviceFeatures
 
     m_Device = m_PhysicalDevice.createDevice(createInfo);
 
@@ -281,11 +306,16 @@ void RendererVk::CreateHandlers()
 
 void RendererVk::CreateRenderers()
 {
-    const RenderContext renderContext { m_Device, m_QueueIndices, m_Queues, MAX_FRAMES_IN_FLIGHT, m_SwapchainHandler->GetExtent() };
+    const vk::Extent2D extent { m_SwapchainHandler->GetExtent() };
+    const RenderContext renderContext { m_Device, m_QueueIndices, m_Queues, MAX_FRAMES_IN_FLIGHT, m_SwapchainHandler->GetImageViews().size(), extent, extent, EDITOR };
 
-    // m_RenderGBuffer = std::make_unique<RenderGBuffer>(renderContext);
-    m_RenderFinalComposition = std::make_unique<RenderFinalComposition>(renderContext, m_SwapchainHandler);
-    m_RenderImGui = std::make_unique<RenderImGui>(renderContext, m_Instance, m_PhysicalDevice, m_SwapchainHandler);
+#ifdef EDITOR
+    // ImGui renderer needs to initialize first as we need to create image texture attachments from other render passes
+    m_RenderImGui = std::make_unique<RenderImGui>(renderContext, m_Instance, m_PhysicalDevice);
+#endif  // EDITOR
+
+    m_RenderGBuffer = std::make_unique<RenderGBuffer>(renderContext);
+    m_RenderFinal = std::make_unique<RenderFinal>(renderContext);
 }
 
 void RendererVk::CreateCommandPool()
@@ -301,15 +331,20 @@ void RendererVk::CreateCommandPool()
 
 void RendererVk::CreateFramebuffers()
 {
-    ASSERT(static_cast<bool>(m_SwapchainHandler));
-
-    // m_SwapchainHandler->CreateFramebuffers(m_RenderFinalComposition->GetRenderPass());
-    // m_RenderFinalComposition->InitializeAfterSwapchain();
+    ASSERT(m_SwapchainHandler != nullptr);
 
 #ifdef EDITOR
-    m_SwapchainHandler->CreateFramebuffers(m_RenderImGui->GetRenderPass());
-    m_RenderImGui->InitializeAfterSwapchain();
+    if (m_IsRenderToTarget)
+    {
+        m_SwapchainHandler->CreateFramebuffers(m_RenderImGui->GetRenderPass());
+        m_RenderImGui->OnSwapchainFramebuffersChanged();
+    }
+    else
 #endif  // EDITOR
+    {
+        m_SwapchainHandler->CreateFramebuffers(m_RenderFinal->GetRenderPass());
+        m_RenderFinal->OnSwapchainFramebuffersChanged();
+    }
 }
 
 void RendererVk::CreateSyncObjects()
@@ -359,4 +394,9 @@ void RendererVk::SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffe
 
     m_Device.waitIdle();
     m_Device.freeCommandBuffers(m_OneShotCommandPool, { commandBuffer });
+}
+
+VkDescriptorSet RendererVk::GetRenderAttachment() const
+{
+    return m_RenderFinal->GetRenderAttachment(m_CurrentFrame);
 }
