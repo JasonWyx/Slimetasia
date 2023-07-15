@@ -11,15 +11,10 @@ RenderObject::RenderObject(const RenderContext& renderContext)
         m_SignalSemaphores.push_back(m_Context.m_Device.createSemaphore(semaphoreCreateInfo));
     }
 
-    const vk::CommandPoolCreateInfo commandPoolCreateInfo {
-        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-    };
+    const vk::CommandPoolCreateInfo commandPoolCreateInfo { vk::CommandPoolCreateFlagBits::eResetCommandBuffer };
     m_CommandPool = m_Context.m_Device.createCommandPool(commandPoolCreateInfo);
 
-    const vk::CommandBufferAllocateInfo commandBufferAllocateInfo {
-        .commandPool = m_CommandPool,
-        .commandBufferCount = renderContext.m_FramesInFlight,
-    };
+    const vk::CommandBufferAllocateInfo commandBufferAllocateInfo { m_CommandPool, vk::CommandBufferLevel::ePrimary, renderContext.m_FramesInFlight };
     m_CommandBuffers = m_Context.m_Device.allocateCommandBuffers(commandBufferAllocateInfo);
 }
 

@@ -25,13 +25,13 @@ protected:
 private:
 
     // Copied from GeometryPass.h
-    enum GBuffer
+    enum GBufferIndex
     {
         Diffuse = 0,
         Specular,
         Emissive,
-        WorldPosition,
-        WorldNormal,
+        Position,  // In world space
+        Normal,    // In world space
 #ifdef EDITOR
         TexCoords,
         PickingID,
@@ -39,5 +39,5 @@ private:
         Count
     };
 
-    std::vector<ImageObject*> m_GBufferImages;
+    std::vector<std::vector<ImageObject*>> m_GBufferImages;
 };

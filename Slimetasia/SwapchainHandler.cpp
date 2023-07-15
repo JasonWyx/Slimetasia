@@ -25,16 +25,10 @@ SwapchainHandler::~SwapchainHandler()
 
 void SwapchainHandler::CreateFramebuffers(const vk::RenderPass renderPass)
 {
-    vk::FramebufferCreateInfo createInfo {
-        .renderPass = renderPass,
-        .width = m_Extent.width,
-        .height = m_Extent.height,
-        .layers = 1,
-    };
-
     for (size_t i = 0; i < m_ImageViews.size(); ++i)
     {
-        createInfo.setAttachments(m_ImageViews[i]);
+        const vk::FramebufferCreateInfo createInfo { {}, renderPass, m_ImageViews[i], m_Extent.width, m_Extent.height, 1 };
+
         m_Framebuffers.push_back(m_ContextDevice.createFramebuffer(createInfo));
     }
 }
@@ -59,11 +53,7 @@ vk::ResultValue<uint32_t> SwapchainHandler::AcquireNextImageIndex(const vk::Sema
 
 /*static*/ SwapchainHandler::SwapchainSupportDetails SwapchainHandler::QuerySwapchainSupportDetails(const vk::PhysicalDevice physicalDevice, const vk::SurfaceKHR surface)
 {
-    SwapchainSupportDetails details {
-        .m_Capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface),
-        .m_Formats = physicalDevice.getSurfaceFormatsKHR(surface),
-        .m_PresentModes = physicalDevice.getSurfacePresentModesKHR(surface),
-    };
+    SwapchainSupportDetails details { physicalDevice.getSurfaceCapabilitiesKHR(surface), physicalDevice.getSurfaceFormatsKHR(surface), physicalDevice.getSurfacePresentModesKHR(surface) };
 
     return details;
 }
@@ -128,21 +118,20 @@ void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, 
     m_PresentMode = ChoosePresentMode(details.m_PresentModes);
     m_Extent = ChooseExtent(details.m_Capabilities, window);
 
-    vk::SwapchainCreateInfoKHR swapchainCreateInfo {
-        .surface = surface,
-        .minImageCount = details.m_Capabilities.minImageCount + 1,
-        .imageFormat = m_SurfaceFormat.format,
-        .imageColorSpace = m_SurfaceFormat.colorSpace,
-        .imageExtent = m_Extent,
-        .imageArrayLayers = 1,
-        .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-        .imageSharingMode = vk::SharingMode::eExclusive,
-        .queueFamilyIndexCount = 0,
-        .preTransform = details.m_Capabilities.currentTransform,
-        .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-        .presentMode = m_PresentMode,
-        .clipped = VK_TRUE,
-    };
+    vk::SwapchainCreateInfoKHR swapchainCreateInfo { {},
+                                                     surface,
+                                                     details.m_Capabilities.minImageCount + 1,
+                                                     m_SurfaceFormat.format,
+                                                     m_SurfaceFormat.colorSpace,
+                                                     m_Extent,
+                                                     1,
+                                                     vk::ImageUsageFlagBits::eColorAttachment,
+                                                     vk::SharingMode::eExclusive,
+                                                     {},
+                                                     details.m_Capabilities.currentTransform,
+                                                     vk::CompositeAlphaFlagBitsKHR::eOpaque,
+                                                     m_PresentMode,
+                                                     VK_TRUE };
 
     m_Swapchain = device.createSwapchainKHR(swapchainCreateInfo);
     ASSERT(m_Swapchain);
@@ -151,16 +140,7 @@ void SwapchainHandler::CreateSwapchain(const vk::PhysicalDevice physicalDevice, 
 
     for (const vk::Image image : m_Images)
     {
-        vk::ImageViewCreateInfo imageViewCreateInfo {
-            .image = image,
-            .viewType = vk::ImageViewType::e2D,
-            .format = m_SurfaceFormat.format,
-            .subresourceRange {
-                .aspectMask = vk::ImageAspectFlagBits::eColor,
-                .levelCount = 1,
-                .layerCount = 1,
-            },
-        };
+        const vk::ImageViewCreateInfo imageViewCreateInfo { {}, image, vk::ImageViewType::e2D, m_SurfaceFormat.format, {}, vk::ImageSubresourceRange { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 } };
 
         m_ImageViews.push_back(device.createImageView(imageViewCreateInfo));
     }
@@ -174,7 +154,7 @@ void SwapchainHandler::DestroySwapchain()
     m_Framebuffers.clear();
     m_ImageViews.clear();
     m_Images.clear();
-    m_SurfaceFormat = {};
+    m_SurfaceFormat = vk::SurfaceFormatKHR {};
     m_PresentMode = {};
-    m_Extent = {};
+    m_Extent = vk::Extent2D {};
 }

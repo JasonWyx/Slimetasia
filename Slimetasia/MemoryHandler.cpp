@@ -16,19 +16,11 @@ MemoryHandler::~MemoryHandler() {}
 MemoryInfo MemoryHandler::AllocateBufferMemory(const vk::Buffer buffer, const vk::MemoryPropertyFlags propertyFlags)
 {
     const vk::MemoryRequirements& memoryRequirements { m_ContextDevice.getBufferMemoryRequirements(buffer) };
-    const vk::MemoryAllocateInfo allocateInfo {
-        .allocationSize { memoryRequirements.size },
-        .memoryTypeIndex { FindMemoryType(memoryRequirements.memoryTypeBits, propertyFlags) },
-    };
-
-    const vk::FenceCreateInfo fenceCreateInfo { .flags = vk::FenceCreateFlagBits::eSignaled };
+    const vk::MemoryAllocateInfo allocateInfo { memoryRequirements.size, FindMemoryType(memoryRequirements.memoryTypeBits, propertyFlags) };
+    const vk::FenceCreateInfo fenceCreateInfo { vk::FenceCreateFlagBits::eSignaled };
 
     // todo: do bulk allocation rather than individual allocations
-    MemoryInfo memoryInfo {
-        .m_Memory { m_ContextDevice.allocateMemory(allocateInfo) },
-        .m_Size { memoryRequirements.size },
-        .m_TransferFence { m_ContextDevice.createFence(fenceCreateInfo) },
-    };
+    MemoryInfo memoryInfo { m_ContextDevice.allocateMemory(allocateInfo), {}, memoryRequirements.size, m_ContextDevice.createFence(fenceCreateInfo) };
 
     return memoryInfo;
 }
@@ -36,19 +28,11 @@ MemoryInfo MemoryHandler::AllocateBufferMemory(const vk::Buffer buffer, const vk
 MemoryInfo MemoryHandler::AllocateImageMemory(const vk::Image image, const vk::MemoryPropertyFlags propertyFlags)
 {
     const vk::MemoryRequirements& memoryRequirements { m_ContextDevice.getImageMemoryRequirements(image) };
-    const vk::MemoryAllocateInfo allocateInfo {
-        .allocationSize { memoryRequirements.size },
-        .memoryTypeIndex { FindMemoryType(memoryRequirements.memoryTypeBits, propertyFlags) },
-    };
-
-    const vk::FenceCreateInfo fenceCreateInfo { .flags = vk::FenceCreateFlagBits::eSignaled };
+    const vk::MemoryAllocateInfo allocateInfo { memoryRequirements.size, FindMemoryType(memoryRequirements.memoryTypeBits, propertyFlags) };
+    const vk::FenceCreateInfo fenceCreateInfo { vk::FenceCreateFlagBits::eSignaled };
 
     // todo: do bulk allocation rather than individual allocations
-    MemoryInfo memoryInfo {
-        .m_Memory { m_ContextDevice.allocateMemory(allocateInfo) },
-        .m_Size { memoryRequirements.size },
-        .m_TransferFence { m_ContextDevice.createFence(fenceCreateInfo) },
-    };
+    const MemoryInfo memoryInfo { m_ContextDevice.allocateMemory(allocateInfo), {}, memoryRequirements.size, m_ContextDevice.createFence(fenceCreateInfo) };
 
     return memoryInfo;
 }

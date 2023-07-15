@@ -1,5 +1,4 @@
 #pragma once
-#include <vulkan/vulkan.hpp>
 
 #include "DeviceObject.h"
 #include "MemoryHandler.h"

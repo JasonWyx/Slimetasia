@@ -44,18 +44,7 @@ void ImageObject::GenerateView(const vk::ImageViewType& viewType, const vk::Imag
     ASSERT(!m_View);
     ASSERT(m_Image);
 
-    const vk::ImageViewCreateInfo imageViewCreateInfo {
-        .image = m_Image,
-        .viewType = viewType,
-        .format = m_Format,
-        .subresourceRange {
-            .aspectMask = aspectFlags,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1,
-        },
-    };
+    const vk::ImageViewCreateInfo imageViewCreateInfo { {}, m_Image, viewType, m_Format, {}, vk::ImageSubresourceRange { aspectFlags, 0, 1, 0, 1 } };
 
     m_View = m_ContextDevice.createImageView(imageViewCreateInfo);
 }
@@ -64,13 +53,12 @@ void ImageObject::GenerateSampler(const vk::Filter filter, const vk::SamplerAddr
 {
     ASSERT(!m_Sampler);
 
-    vk::SamplerCreateInfo createInfo {
-        .magFilter { filter },
-        .minFilter { filter },
-        .addressModeU { addressMode },
-        .addressModeV { addressMode },
-        .addressModeW { addressMode },
-    };
+    vk::SamplerCreateInfo createInfo {};
+    createInfo.setMagFilter(filter);
+    createInfo.setMinFilter(filter);
+    createInfo.setAddressModeU(addressMode);
+    createInfo.setAddressModeV(addressMode);
+    createInfo.setAddressModeW(addressMode);
 
     m_Sampler = m_ContextDevice.createSampler(createInfo);
 }
@@ -103,22 +91,8 @@ void ImageObject::TransitionImageLayout(const vk::ImageLayout layout)
     // todo: need layout transition
     const vk::CommandBuffer command = g_Renderer->CreateOneShotCommandBuffer();
 
-    const vk::ImageMemoryBarrier barrier {
-        .srcAccessMask = srcAccessMask,
-        .dstAccessMask = dstAccessMask,
-        .oldLayout = m_Layout,
-        .newLayout = layout,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .image = m_Image,
-        .subresourceRange {
-            .aspectMask = vk::ImageAspectFlagBits::eColor,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1,
-        },
-    };
+    const vk::ImageMemoryBarrier barrier { srcAccessMask,           dstAccessMask,           m_Layout, layout,
+                                           VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, m_Image,  vk::ImageSubresourceRange { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 } };
 
     command.pipelineBarrier(srcStage, dstStage, {}, {}, {}, barrier);
 
@@ -131,20 +105,7 @@ void ImageObject::TransitionImageLayout(const vk::ImageLayout layout)
 void ImageObject::CopyFrom(const BufferObject& source, const vk::DeviceSize& offset)
 {
     const vk::CommandBuffer copyCommand = g_Renderer->CreateOneShotCommandBuffer();
-
-    const vk::BufferImageCopy copyRegion {
-        .bufferOffset = source.GetMemoryInfo().m_Offset + offset,
-        .bufferRowLength = 0,
-        .bufferImageHeight = 0,
-        .imageSubresource {
-            .aspectMask = vk::ImageAspectFlagBits::eColor,
-            .mipLevel = 0,
-            .baseArrayLayer = 0,
-            .layerCount = 1,
-        },
-        .imageOffset { 0, 0, 0 },  // todo: could support offset copy
-        .imageExtent = m_Extent,
-    };
+    const vk::BufferImageCopy copyRegion { source.GetMemoryInfo().m_Offset + offset, 0, 0, vk::ImageSubresourceLayers { vk::ImageAspectFlagBits::eColor, 0, 0, 1 }, {}, m_Extent };
 
     copyCommand.copyBufferToImage(source.GetBuffer(), m_Image, vk::ImageLayout::eTransferDstOptimal, copyRegion);
 
@@ -160,22 +121,13 @@ ImageObject* ImageObject::CreateImage(const vk::Format& format, const vk::Extent
     const std::set<uint32_t> uniqueIndices { g_Renderer->GetQueueIndex(QueueType::Graphics), g_Renderer->GetQueueIndex(QueueType::Transfer) };
     const std::vector<uint32_t> indices { uniqueIndices.begin(), uniqueIndices.end() };
 
-    const vk::ImageCreateInfo imageCreateInfo {
-        .imageType = vk::ImageType::e2D,
-        .format = format,
-        .extent = extent,
-        .mipLevels = 1,
-        .arrayLayers = 1,
-        .tiling = isHostVisible ? vk::ImageTiling::eLinear : vk::ImageTiling::eOptimal,
-        .usage = usageFlags,
-        .queueFamilyIndexCount = static_cast<uint32_t>(indices.size()),
-        .pQueueFamilyIndices = indices.data(),
-        .initialLayout = source == nullptr ? vk::ImageLayout::eUndefined : vk::ImageLayout::eTransferDstOptimal,
-    };
+    const vk::ImageTiling imageTiling = isHostVisible ? vk::ImageTiling::eLinear : vk::ImageTiling::eOptimal;
+    const vk::ImageLayout imageLayout = source == nullptr ? vk::ImageLayout::eUndefined : vk::ImageLayout::eTransferDstOptimal;
 
+    const vk::ImageCreateInfo imageCreateInfo { {}, vk::ImageType::e2D, format, extent, 1, 1, vk::SampleCountFlagBits::e1, imageTiling, usageFlags, {}, indices, imageLayout };
     const vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
 
-    ImageObject* imageObject = new ImageObject { imageCreateInfo, memoryProperties};
+    ImageObject* imageObject = new ImageObject { imageCreateInfo, memoryProperties };
 
     if (source != nullptr)
     {
@@ -198,19 +150,7 @@ ImageObject* ImageObject::CreateDepthImage(const vk::Format& format, const vk::E
     const std::set<uint32_t> uniqueIndices { g_Renderer->GetQueueIndex(QueueType::Graphics), g_Renderer->GetQueueIndex(QueueType::Transfer) };
     const std::vector<uint32_t> indices { uniqueIndices.begin(), uniqueIndices.end() };
 
-    const vk::ImageCreateInfo imageCreateInfo {
-        .imageType = vk::ImageType::e2D,
-        .format = format,
-        .extent = extent,
-        .mipLevels = 1,
-        .arrayLayers = 1,
-        .tiling = vk::ImageTiling::eOptimal,
-        .usage = usageFlags,
-        .queueFamilyIndexCount = static_cast<uint32_t>(indices.size()),
-        .pQueueFamilyIndices = indices.data(),
-        .initialLayout = vk::ImageLayout::eUndefined,
-    };
-
+    const vk::ImageCreateInfo imageCreateInfo { {}, vk::ImageType::e2D, format, extent, 1, 1, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, usageFlags, {}, indices, vk::ImageLayout::eUndefined };
     const vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
 
     ImageObject* imageObject = new ImageObject { imageCreateInfo, memoryProperties };

@@ -96,15 +96,7 @@ void RendererVk::Update(const float deltaTime)
 #endif  // EDITOR
 
     const vk::SwapchainKHR swapchain = m_SwapchainHandler->GetSwapchain();
-
-    vk::PresentInfoKHR presentInfo {
-        .waitSemaphoreCount = static_cast<uint32_t>(waitPresentSemaphores.size()),
-        .pWaitSemaphores = waitPresentSemaphores.data(),
-        .swapchainCount = 1,
-        .pSwapchains = &swapchain,
-        .pImageIndices = &imageIndex,
-    };
-
+    const vk::PresentInfoKHR presentInfo { waitPresentSemaphores, swapchain, imageIndex };
     const vk::Result presentResult = m_Queues[QueueType::Present].presentKHR(presentInfo);
 
     if (presentResult == vk::Result::eErrorOutOfDateKHR || presentResult == vk::Result::eSuboptimalKHR)
@@ -171,31 +163,15 @@ void RendererVk::CreateInstance()
         }
     }
 
-    const vk::ApplicationInfo applicationInfo {
-        .pApplicationName = "Slimetasia",
-        .applicationVersion = 1,
-        .pEngineName = "Slimetasia Engine",
-        .engineVersion = 1,
-        .apiVersion = VK_API_VERSION_1_3,
-    };
-
-    const vk::InstanceCreateInfo createInfo {
-        .pApplicationInfo = &applicationInfo,
-        .enabledLayerCount = static_cast<uint32_t>(layerNames.size()),
-        .ppEnabledLayerNames = layerNames.data(),
-        .enabledExtensionCount = static_cast<uint32_t>(extensionNames.size()),
-        .ppEnabledExtensionNames = extensionNames.data(),
-    };
+    const vk::ApplicationInfo applicationInfo { "Slimetasia", 1, "Slimetasia Engine", 1, VK_API_VERSION_1_3 };
+    const vk::InstanceCreateInfo createInfo { {}, &applicationInfo, layerNames, extensionNames };
 
     m_Instance = vk::createInstance(createInfo);
 }
 
 void RendererVk::CreateSurface(const HINSTANCE hInstance, const HWND hWindow)
 {
-    const vk::Win32SurfaceCreateInfoKHR createInfo {
-        .hinstance = hInstance,
-        .hwnd = hWindow,
-    };
+    const vk::Win32SurfaceCreateInfoKHR createInfo { {}, hInstance, hWindow };
 
     m_Surface = m_Instance.createWin32SurfaceKHR(createInfo);
 }
@@ -256,11 +232,7 @@ void RendererVk::CreateDevice()
 
     for (const uint32_t uniqueQueueIndex : uniqueQueueIndices)
     {
-        const vk::DeviceQueueCreateInfo queueCreateInfo {
-            .queueFamilyIndex = uniqueQueueIndex,
-            .queueCount = 1,
-            .pQueuePriorities = &queuePriority,
-        };
+        const vk::DeviceQueueCreateInfo queueCreateInfo { {}, uniqueQueueIndex, vk::ArrayProxyNoTemporaries(queuePriority) };
 
         queueCreateInfos.push_back(queueCreateInfo);
     }
@@ -270,21 +242,14 @@ void RendererVk::CreateDevice()
     };
 
     // todo: Assuming that we have device features
-    vk::PhysicalDeviceFeatures physicalDeviceFeatures {
-        .samplerAnisotropy = VK_TRUE,
-    };
+    vk::PhysicalDeviceFeatures physicalDeviceFeatures {};
+    physicalDeviceFeatures.setSamplerAnisotropy(VK_TRUE);
 
-    vk::DeviceCreateInfo createInfo {
-        .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
-        .pQueueCreateInfos = queueCreateInfos.data(),
-        .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-        .ppEnabledExtensionNames = extensions.data(),
-        .pEnabledFeatures = &physicalDeviceFeatures,
-    };
     // No Layers
     // No Extensions
+    const vk::DeviceCreateInfo deviceCreateInfo { {}, queueCreateInfos, {}, extensions, &physicalDeviceFeatures };
 
-    m_Device = m_PhysicalDevice.createDevice(createInfo);
+    m_Device = m_PhysicalDevice.createDevice(deviceCreateInfo);
 
     ASSERT(m_Device);
 
@@ -320,10 +285,7 @@ void RendererVk::CreateRenderers()
 
 void RendererVk::CreateCommandPool()
 {
-    vk::CommandPoolCreateInfo createInfo {
-        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-        .queueFamilyIndex = m_QueueIndices[QueueType::Graphics],
-    };
+    vk::CommandPoolCreateInfo createInfo { vk::CommandPoolCreateFlagBits::eResetCommandBuffer, m_QueueIndices[QueueType::Graphics] };
 
     createInfo.flags = vk::CommandPoolCreateFlagBits::eTransient;
     m_OneShotCommandPool = m_Device.createCommandPool(createInfo);
@@ -350,7 +312,7 @@ void RendererVk::CreateFramebuffers()
 void RendererVk::CreateSyncObjects()
 {
     vk::SemaphoreCreateInfo semaphoreCreateInfo {};
-    vk::FenceCreateInfo fenceCreateInfo { .flags = vk::FenceCreateFlagBits::eSignaled };
+    vk::FenceCreateInfo fenceCreateInfo { vk::FenceCreateFlagBits::eSignaled };
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -363,16 +325,11 @@ vk::CommandBuffer RendererVk::CreateOneShotCommandBuffer()
 {
     ASSERT(m_Device);
 
-    const vk::CommandBufferAllocateInfo allocateInfo {
-        .commandPool = m_OneShotCommandPool,
-        .commandBufferCount = 1,
-    };
+    const vk::CommandBufferAllocateInfo allocateInfo { m_OneShotCommandPool, {}, 1 };
 
     vk::CommandBuffer commandBuffer = m_Device.allocateCommandBuffers(allocateInfo).front();
 
-    const vk::CommandBufferBeginInfo beginInfo {
-        .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
-    };
+    const vk::CommandBufferBeginInfo beginInfo { vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
 
     commandBuffer.begin(beginInfo);
 
@@ -383,11 +340,7 @@ void RendererVk::SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffe
 {
     commandBuffer.end();
 
-    vk::SubmitInfo submitInfo {
-        .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer,
-    };
-
+    const vk::SubmitInfo submitInfo { {}, {}, commandBuffer };
     const vk::Queue queue = targetQueue & vk::QueueFlagBits::eTransfer ? m_Queues[QueueType::Transfer] : m_Queues[QueueType::Graphics];
 
     queue.submit(submitInfo, signalFence);

@@ -42,11 +42,7 @@ void BufferObject::CopyFrom(const BufferObject& sourceBuffer, const vk::DeviceSi
 {
     const vk::CommandBuffer copyCommand = g_Renderer->CreateOneShotCommandBuffer();
 
-    const vk::BufferCopy copyRegion {
-        .srcOffset = sourceBuffer.GetMemoryInfo().m_Offset,
-        .dstOffset = m_MemoryInfo.m_Offset + offset,
-        .size = size,
-    };
+    const vk::BufferCopy copyRegion { sourceBuffer.GetMemoryInfo().m_Offset, m_MemoryInfo.m_Offset + offset, size };
     copyCommand.copyBuffer(sourceBuffer.GetBuffer(), m_Buffer, copyRegion);
 
     g_Renderer->SubmitOneShotCommandBuffer(copyCommand, vk::QueueFlagBits::eTransfer, m_MemoryInfo.m_TransferFence);
@@ -67,13 +63,7 @@ BufferObject* BufferObject::CreateBuffer(vk::BufferUsageFlags usageFlags, const 
         usageFlags |= vk::BufferUsageFlagBits::eTransferDst;
     }
 
-    const vk::BufferCreateInfo createInfo {
-        .size = size,
-        .usage = usageFlags,
-        .sharingMode = vk::SharingMode::eExclusive,
-        .queueFamilyIndexCount = static_cast<uint32_t>(indices.size()),
-        .pQueueFamilyIndices = indices.data(),
-    };
+    const vk::BufferCreateInfo createInfo { {}, size, usageFlags, vk::SharingMode::eExclusive, indices };
 
     constexpr vk::MemoryPropertyFlags HOST_VISIBLE_MEMORY_FLAGS = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
     constexpr vk::MemoryPropertyFlags DEVICE_LOCAL_MEMORY_FLAGS = vk::MemoryPropertyFlagBits::eDeviceLocal;
@@ -90,13 +80,7 @@ BufferObject* BufferObject::CreateBuffer(vk::BufferUsageFlags usageFlags, const 
         }
         else  // Not host visible, needs staging transfer
         {
-            const vk::BufferCreateInfo stagingCreateInfo {
-                .size = size,
-                .usage = vk::BufferUsageFlagBits::eTransferSrc,
-                .sharingMode = vk::SharingMode::eExclusive,
-                .queueFamilyIndexCount = static_cast<uint32_t>(indices.size()),
-                .pQueueFamilyIndices = indices.data(),
-            };
+            const vk::BufferCreateInfo stagingCreateInfo { {}, size, vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, indices };
 
             BufferObject* staging = new BufferObject { stagingCreateInfo, HOST_VISIBLE_MEMORY_FLAGS };
             staging->Write(source, size);

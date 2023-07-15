@@ -22,258 +22,209 @@ RenderGBuffer::~RenderGBuffer()
 
 RenderOutputs RenderGBuffer::Render(const FrameInfo& frameInfo, const std::vector<vk::Semaphore>& waitSemaphores, const vk::Fence& signalFence)
 {
+    const vk::CommandBuffer& commandBuffer = m_CommandBuffers[frameInfo.m_FrameIndex];
+    commandBuffer.reset();
+
+    const vk::CommandBufferBeginInfo beginInfo {};
+    commandBuffer.begin(beginInfo);
+
+    const std::vector<vk::ClearValue> clearValues { GBufferIndex::Count + 1 };  // +1 for depth buffer
+
+    const vk::RenderPassBeginInfo renderPassBeginInfo { m_RenderPass, m_Framebuffers[frameInfo.m_FrameIndex], vk::Rect2D { {}, m_Context.m_RenderExtent }, clearValues };
     return {};
 }
 
 void RenderGBuffer::SetWindowExtent(const vk::Extent2D& extent) {}
 
-void RenderGBuffer::CreateDescriptors() {}
+void RenderGBuffer::CreateDescriptors()
+{
+    const std::vector<vk::DescriptorPoolSize> poolSizes {
+        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, m_Context.m_FramesInFlight * GBufferIndex::Count },
+    };
+    const vk::DescriptorPoolCreateInfo createInfo { {}, m_Context.m_FramesInFlight * GBufferIndex::Count, poolSizes };
 
-void RenderGBuffer::CreateRenderPass() {}
+    // note: Need 1 pool for each thread if doing threaded recording
+    m_DescriptorPool = m_Context.m_Device.createDescriptorPool(createInfo);
+}
+
+void RenderGBuffer::CreateRenderPass()
+{
+    const std::vector<vk::AttachmentDescription> attachmentDescriptions {
+        vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+#ifdef EDITOR
+        vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentDescription { {}, vk::Format::eR32Uint, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eColorAttachmentOptimal },
+#endif  // EDITOR
+        vk::AttachmentDescription { {}, vk::Format::eD32Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eDepthStencilAttachmentOptimal },
+    };
+
+    const std::vector<vk::AttachmentReference> colorAttachmentRefs {
+        vk::AttachmentReference { GBufferIndex::Diffuse, vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentReference { GBufferIndex::Specular, vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentReference { GBufferIndex::Emissive, vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentReference { GBufferIndex::Position, vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentReference { GBufferIndex::Normal, vk::ImageLayout::eColorAttachmentOptimal },
+#ifdef EDITOR
+        vk::AttachmentReference { GBufferIndex::TexCoords, vk::ImageLayout::eColorAttachmentOptimal },
+        vk::AttachmentReference { GBufferIndex::PickingID, vk::ImageLayout::eColorAttachmentOptimal },
+#endif
+    };
+
+    const vk::AttachmentReference depthAttachmentRef { static_cast<uint32_t>(colorAttachmentRefs.size()), vk::ImageLayout::eDepthStencilAttachmentOptimal };
+
+    const vk::SubpassDescription subpassDescription { {}, vk::PipelineBindPoint::eGraphics, {}, colorAttachmentRefs, {}, &depthAttachmentRef, {} };
+    const vk::SubpassDependency subpassDependency { VK_SUBPASS_EXTERNAL, 0, vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+        vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::AccessFlagBits::eNone,
+        vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite };
+
+    const vk::RenderPassCreateInfo createInfo { {}, attachmentDescriptions, subpassDescription, subpassDependency };
+
+    m_RenderPass = m_Context.m_Device.createRenderPass(createInfo);
+}
 
 void RenderGBuffer::CreateFramebuffers()
 {
     const vk::Extent3D extent { m_Context.m_RenderExtent.width, m_Context.m_RenderExtent.height, 1 };
 
-    // DepthStencil
-    m_GBufferImages.push_back(ImageObject::CreateDepthImage(vk::Format::eD32Sfloat, extent, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eDepth);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+    m_GBufferImages.resize(m_Context.m_FramesInFlight);
 
-    // Diffuse
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+    for (uint32_t i = 0; i < m_Context.m_FramesInFlight; ++i)
+    {
+        // Diffuse
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
 
-    // Specular
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+        // Specular
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
 
-    // Emissive - Only first 3 components used
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+        // Emissive - Only first 3 components used
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
 
-    // Position - Only first 3 components used
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+        // Position - Only first 3 components used
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
 
-    // Normal
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+        // Normal
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
 
 #ifdef EDITOR
-    // Debug TexCoords
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
-    m_GBufferImages.back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+        // Debug TexCoords
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR16G16B16A16Sfloat, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
 
-    // Picking ID
-    m_GBufferImages.push_back(ImageObject::CreateImage(vk::Format::eR32Uint, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
-    m_GBufferImages.back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        // Picking ID
+        m_GBufferImages[i].push_back(ImageObject::CreateImage(vk::Format::eR32Uint, extent, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, false, nullptr));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eColor);
+        // todo: need to find out how to read ID out of buffer
+
 #endif  // EDITOR
+
+        // DepthStencil
+        m_GBufferImages[i].push_back(ImageObject::CreateDepthImage(vk::Format::eD32Sfloat, extent, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled));
+        m_GBufferImages[i].back()->GenerateView(vk::ImageViewType::e2D, vk::ImageAspectFlagBits::eDepth);
+        m_GBufferImages[i].back()->GenerateSampler(vk::Filter::eNearest, vk::SamplerAddressMode::eClampToEdge);
+
+        std::vector<vk::ImageView> attachments {};
+        std::ranges::for_each(m_GBufferImages[i], [&attachments](const ImageObject* attachmentImage) { attachments.push_back(attachmentImage->GetView()); });
+
+        const vk::FramebufferCreateInfo createInfo { {}, m_RenderPass, attachments, extent.width, extent.height, 1 };
+
+        m_Framebuffers.push_back(m_Context.m_Device.createFramebuffer(createInfo));
+    }
 }
 
 void RenderGBuffer::DestroyFramebuffers()
 {
-    std::ranges::for_each(m_GBufferImages, [](const ImageObject* image) { delete image; });
+    for (std::vector<ImageObject*>& framebufferImages : m_GBufferImages)
+    {
+        std::ranges::for_each(framebufferImages, [](const ImageObject* image) { delete image; });
+        framebufferImages.clear();
+    }
     m_GBufferImages.clear();
 }
 
 void RenderGBuffer::CreatePipeline()
 {
-    const vk::PipelineLayoutCreateInfo layoutCreateInfo {
-
-    };
+    const vk::PipelineLayoutCreateInfo layoutCreateInfo {};
 
     m_PipelineLayout = m_Context.m_Device.createPipelineLayout(layoutCreateInfo);
 
-    ShaderModuleObject vertModule { "gbuffer.vert.hlsl", m_Context.m_Device };
-    ShaderModuleObject fragModule { "gbuffer.frag.hlsl", m_Context.m_Device };
+    const ShaderModuleObject vertModule { "gbuffer.vert.hlsl", m_Context.m_Device };
+    const ShaderModuleObject fragModule { "gbuffer.frag.hlsl", m_Context.m_Device };
 
-    const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages { {
-
-        {
-            .stage = vk::ShaderStageFlagBits::eVertex,
-            .module = vertModule.GetModule(),
-            .pName = "main",
-        },
-
-        {
-            .stage = vk::ShaderStageFlagBits::eFragment,
-            .module = fragModule.GetModule(),
-            .pName = "main",
-        },
-
-    } };
+    const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
+        vk::PipelineShaderStageCreateInfo { {}, vk::ShaderStageFlagBits::eVertex, vertModule.GetModule(), "main" },
+        vk::PipelineShaderStageCreateInfo { {}, vk::ShaderStageFlagBits::eFragment, fragModule.GetModule(), "main" },
+    };
 
     // todo: maybe this should be part of mesh description?
-    const std::vector<vk::VertexInputBindingDescription> bindingDescriptions { {
-
-        {
-            // Position
-            .binding = static_cast<uint32_t>(MeshBufferID::Position),
-            .stride = sizeof(Vector3),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Normal
-            .binding = static_cast<uint32_t>(MeshBufferID::Normal),
-            .stride = sizeof(Vector3),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Tangent
-            .binding = static_cast<uint32_t>(MeshBufferID::Tangent),
-            .stride = sizeof(Vector3),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Bitangent
-            .binding = static_cast<uint32_t>(MeshBufferID::Bitangent),
-            .stride = sizeof(Vector3),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Color
-            .binding = static_cast<uint32_t>(MeshBufferID::Color),
-            .stride = sizeof(Vector3),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Texture Coords
-            .binding = static_cast<uint32_t>(MeshBufferID::TexCoord),
-            .stride = sizeof(Vector2),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Joint ID
-            .binding = static_cast<uint32_t>(MeshBufferID::JointId),
-            .stride = sizeof(iVector4),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-        {
-            // Joint Weight
-            .binding = static_cast<uint32_t>(MeshBufferID::JointWeight),
-            .stride = sizeof(Vector4),
-            .inputRate = vk::VertexInputRate::eVertex,
-        },
-
-    } };
-
-    const std::vector<vk::VertexInputAttributeDescription> attributeDescriptions { {
-
-        {
-            // Position
-            .location = static_cast<uint32_t>(MeshBufferID::Position),
-            .binding = static_cast<uint32_t>(MeshBufferID::Position),
-            .format = vk::Format::eR32G32B32Sfloat,
-            .offset = 0,
-        },
-
-        {
-            // Normal
-            .location = static_cast<uint32_t>(MeshBufferID::Normal),
-            .binding = static_cast<uint32_t>(MeshBufferID::Normal),
-            .format = vk::Format::eR32G32B32Sfloat,
-            .offset = 0,
-        },
-
-        {
-            // Tangent
-            .location = static_cast<uint32_t>(MeshBufferID::Tangent),
-            .binding = static_cast<uint32_t>(MeshBufferID::Tangent),
-            .format = vk::Format::eR32G32B32Sfloat,
-            .offset = 0,
-        },
-
-        {
-            // Bitangent
-            .location = static_cast<uint32_t>(MeshBufferID::Bitangent),
-            .binding = static_cast<uint32_t>(MeshBufferID::Bitangent),
-            .format = vk::Format::eR32G32B32Sfloat,
-            .offset = 0,
-        },
-
-        {
-            // Color
-            .location = static_cast<uint32_t>(MeshBufferID::Color),
-            .binding = static_cast<uint32_t>(MeshBufferID::Color),
-            .format = vk::Format::eR32G32B32Sfloat,
-            .offset = 0,
-        },
-
-        {
-            // Texture Coords
-            .location = static_cast<uint32_t>(MeshBufferID::TexCoord),
-            .binding = static_cast<uint32_t>(MeshBufferID::TexCoord),
-            .format = vk::Format::eR32G32Sfloat,
-            .offset = 0,
-        },
-
-        {
-            // Joint IDs
-            .location = static_cast<uint32_t>(MeshBufferID::JointId),
-            .binding = static_cast<uint32_t>(MeshBufferID::JointId),
-            .format = vk::Format::eR32G32B32A32Sint,
-            .offset = 0,
-        },
-
-        {
-            // Joint Weights
-            .location = static_cast<uint32_t>(MeshBufferID::JointWeight),
-            .binding = static_cast<uint32_t>(MeshBufferID::JointWeight),
-            .format = vk::Format::eR32G32B32A32Sfloat,
-            .offset = 0,
-        },
-
-    } };
-
-    const vk::PipelineVertexInputStateCreateInfo inputStateCreateInfo {
-        .vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size()),
-        .pVertexBindingDescriptions = bindingDescriptions.data(),
-        .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
-        .pVertexAttributeDescriptions = attributeDescriptions.data(),
+    const std::vector<vk::VertexInputBindingDescription> bindingDescriptions = {
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::Position), sizeof(Vector3) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::Normal), sizeof(Vector3) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::Tangent), sizeof(Vector3) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::Bitangent), sizeof(Vector3) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::Color), sizeof(Vector3) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::TexCoord), sizeof(Vector2) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::JointId), sizeof(iVector4) },
+        vk::VertexInputBindingDescription { static_cast<uint32_t>(MeshBufferID::JointWeight), sizeof(Vector4) },
     };
 
-    const vk::PipelineInputAssemblyStateCreateInfo assemblyStateCreateInfo {
-        .topology = vk::PrimitiveTopology::eTriangleList,
+    const std::vector<vk::VertexInputAttributeDescription> attributeDescriptions = {
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::Position), static_cast<uint32_t>(MeshBufferID::Position), vk::Format::eR32G32B32Sfloat, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::Normal), static_cast<uint32_t>(MeshBufferID::Normal), vk::Format::eR32G32B32Sfloat, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::Tangent), static_cast<uint32_t>(MeshBufferID::Tangent), vk::Format::eR32G32B32Sfloat, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::Bitangent), static_cast<uint32_t>(MeshBufferID::Bitangent), vk::Format::eR32G32B32Sfloat, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::Color), static_cast<uint32_t>(MeshBufferID::Color), vk::Format::eR32G32B32Sfloat, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::TexCoord), static_cast<uint32_t>(MeshBufferID::TexCoord), vk::Format::eR32G32Sfloat, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::JointId), static_cast<uint32_t>(MeshBufferID::JointId), vk::Format::eR32G32B32A32Sint, 0 },
+        vk::VertexInputAttributeDescription { static_cast<uint32_t>(MeshBufferID::JointWeight), static_cast<uint32_t>(MeshBufferID::JointWeight), vk::Format::eR32G32B32A32Sfloat, 0 },
     };
 
-    const vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo { .cullMode = vk::CullModeFlagBits::eBack };
+    const vk::PipelineVertexInputStateCreateInfo vertexInput { {}, bindingDescriptions, attributeDescriptions };
+    const vk::PipelineInputAssemblyStateCreateInfo inputAssembly { {}, vk::PrimitiveTopology::eTriangleList };
 
-    // const void *                                                       pNext               = {};
-    // VULKAN_HPP_NAMESPACE::PipelineCreateFlags                          flags               = {};
-    // uint32_t                                                           stageCount          = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineShaderStageCreateInfo *        pStages             = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineVertexInputStateCreateInfo *   pVertexInputState   = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineInputAssemblyStateCreateInfo * pInputAssemblyState = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineTessellationStateCreateInfo *  pTessellationState  = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineViewportStateCreateInfo *      pViewportState      = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineRasterizationStateCreateInfo * pRasterizationState = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineMultisampleStateCreateInfo *   pMultisampleState   = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineDepthStencilStateCreateInfo *  pDepthStencilState  = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineColorBlendStateCreateInfo *    pColorBlendState    = {};
-    // const VULKAN_HPP_NAMESPACE::PipelineDynamicStateCreateInfo *       pDynamicState       = {};
-    // VULKAN_HPP_NAMESPACE::PipelineLayout                               layout              = {};
-    // VULKAN_HPP_NAMESPACE::RenderPass                                   renderPass          = {};
-    // uint32_t                                                           subpass             = {};
-    // VULKAN_HPP_NAMESPACE::Pipeline                                     basePipelineHandle  = {};
-    // int32_t                                                            basePipelineIndex   = {};
+    const vk::Extent2D renderExtent = m_Context.m_RenderExtent;
+    const vk::Viewport viewport { 0.0f, 0.0f, static_cast<float>(renderExtent.width), static_cast<float>(renderExtent.height), 0.0f, 1.0f };
+    const vk::Rect2D scissor { {}, renderExtent };
+    const vk::PipelineViewportStateCreateInfo viewportState { {}, viewport, scissor };
 
-    const vk::GraphicsPipelineCreateInfo pipelineCreateInfo {
-        .stageCount = static_cast<uint32_t>(shaderStages.size()),
-        .pStages = shaderStages.data(),
-        .pVertexInputState = &inputStateCreateInfo,
-    };
+    const vk::PipelineRasterizationStateCreateInfo rasterization { {}, VK_FALSE, VK_FALSE, vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise, VK_FALSE, 0.f, 0.f,
+        0.f, 1.0f };
+    const vk::PipelineMultisampleStateCreateInfo multisample { {}, vk::SampleCountFlagBits::e1, VK_FALSE, 1.0f };
+    const vk::PipelineDepthStencilStateCreateInfo depthStencil { {}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess };
+    const vk::PipelineColorBlendAttachmentState colorBlendState { VK_FALSE, vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd, vk::BlendFactor::eOne, vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd, vk::FlagTraits<vk::ColorComponentFlagBits>::allFlags };
+    const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachments(GBufferIndex::Count, colorBlendState);
+    const vk::PipelineColorBlendStateCreateInfo colorBlend { {}, VK_FALSE, vk::LogicOp::eClear, colorBlendAttachments };
+    const std::vector<vk::DynamicState> dynamicStates { { vk::DynamicState::eViewport, vk::DynamicState::eScissor } };
+    const vk::PipelineDynamicStateCreateInfo dynamic { {}, dynamicStates };
+
+    const vk::GraphicsPipelineCreateInfo pipelineCreateInfo { {}, shaderStages, &vertexInput, &inputAssembly, {}, &viewportState, &rasterization, &multisample, &depthStencil, &colorBlend, &dynamic,
+        m_PipelineLayout, m_RenderPass };
+
+    const vk::ResultValue<vk::Pipeline>& resultValue = m_Context.m_Device.createGraphicsPipeline({}, pipelineCreateInfo);
+    ASSERT(resultValue.result == vk::Result::eSuccess);
+
+    m_Pipeline = resultValue.value;
 }

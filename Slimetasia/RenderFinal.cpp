@@ -29,20 +29,14 @@ RenderOutputs RenderFinal::Render(const FrameInfo& frameInfo, const std::vector<
     const vk::CommandBufferBeginInfo beginInfo {};
     commandBuffer.begin(beginInfo);
 
-    const vk::ClearValue clearColor { vk::ClearColorValue{ 1.0f, 1.0f, 1.0f, 1.0f } };
-    const vk::RenderPassBeginInfo renderPassBeginInfo {
-        .renderPass = m_RenderPass,
-        .framebuffer = m_Framebuffers[frameInfo.m_SwapchainIndex],
-        .renderArea = { .extent { m_Context.m_WindowExtent } },
-        .clearValueCount = 1,
-        .pClearValues = &clearColor,
-    };
+    const vk::ClearValue clearColor { vk::ClearColorValue {} };
+    const vk::RenderPassBeginInfo renderPassBeginInfo { m_RenderPass, m_Framebuffers[frameInfo.m_SwapchainIndex], vk::Rect2D { {}, m_Context.m_WindowExtent }, clearColor };
 
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
 
-    const vk::Viewport viewport { .width = static_cast<float>(m_Context.m_WindowExtent.width), .height = static_cast<float>(m_Context.m_WindowExtent.height) };
-    const vk::Rect2D scissor { .extent = m_Context.m_WindowExtent };
+    const vk::Viewport viewport { 0.0f, 0.0f, static_cast<float>(m_Context.m_WindowExtent.width), static_cast<float>(m_Context.m_WindowExtent.height) };
+    const vk::Rect2D scissor { {}, m_Context.m_WindowExtent };
 
     commandBuffer.setViewport(0, viewport);
     commandBuffer.setScissor(0, scissor);
@@ -53,16 +47,8 @@ RenderOutputs RenderFinal::Render(const FrameInfo& frameInfo, const std::vector<
     commandBuffer.end();
 
     const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.m_FrameIndex];
-    const vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    const vk::SubmitInfo commandSubmitInfo {
-        .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
-        .pWaitSemaphores = waitSemaphores.data(),
-        .pWaitDstStageMask = &waitStages,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer,
-        .signalSemaphoreCount = 1,
-        .pSignalSemaphores = &signalSemaphore,
-    };
+    const std::vector<vk::PipelineStageFlags> waitStages { waitSemaphores.size(), vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    const vk::SubmitInfo commandSubmitInfo { waitSemaphores, waitStages, commandBuffer, signalSemaphore };
 
     m_Context.m_Queues[QueueType::Graphics].submit(commandSubmitInfo, signalFence);
 
@@ -110,16 +96,10 @@ VkDescriptorSet RenderFinal::GetRenderAttachment(const uint32_t frameIndex) cons
 void RenderFinal::CreateDescriptors()
 {
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
-        vk::DescriptorPoolSize {
-            .type = vk::DescriptorType::eCombinedImageSampler,
-            .descriptorCount = m_Context.m_FramesInFlight,
-        },
+        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, m_Context.m_FramesInFlight },
     };
-    const vk::DescriptorPoolCreateInfo poolCreateInfo {
-        .maxSets = m_Context.m_FramesInFlight,
-        .poolSizeCount = static_cast<uint32_t>(poolSizes.size()),
-        .pPoolSizes = poolSizes.data(),
-    };
+    const vk::DescriptorPoolCreateInfo poolCreateInfo { {}, m_Context.m_FramesInFlight, poolSizes };
+
     m_DescriptorPool = m_Context.m_Device.createDescriptorPool(poolCreateInfo);
 }
 
@@ -139,43 +119,15 @@ void RenderFinal::CreateRenderPass()
         targetLayout = vk::ImageLayout::ePresentSrcKHR;
     }
 
-    const vk::AttachmentDescription colorAttachment {
-        .format = targetFormat,
-        .samples = vk::SampleCountFlagBits::e1,
-        .loadOp = vk::AttachmentLoadOp::eClear,
-        .storeOp = vk::AttachmentStoreOp::eStore,
-        .initialLayout = vk::ImageLayout::eUndefined,
-        .finalLayout = targetLayout,
-    };
+    const vk::AttachmentDescription colorAttachment { {}, targetFormat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::AttachmentLoadOp::eClear,
+        vk::AttachmentStoreOp::eStore, vk::ImageLayout::eUndefined, targetLayout };
 
-    const vk::AttachmentReference colorAttachmentRef {
-        .attachment = 0,
-        .layout = vk::ImageLayout::eColorAttachmentOptimal,
-    };
+    const vk::AttachmentReference colorAttachmentRef { 0, vk::ImageLayout::eColorAttachmentOptimal };
+    const vk::SubpassDescription subpass { {}, vk::PipelineBindPoint::eGraphics, {}, colorAttachmentRef, {}, {}, {} };
+    const vk::SubpassDependency subpassDep { VK_SUBPASS_EXTERNAL, 0, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::AccessFlagBits::eNone,
+        vk::AccessFlagBits::eColorAttachmentWrite };
 
-    const vk::SubpassDescription subpass {
-        .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
-        .colorAttachmentCount = 1,
-        .pColorAttachments = &colorAttachmentRef,
-    };
-
-    const vk::SubpassDependency subpassDep {
-        .srcSubpass = VK_SUBPASS_EXTERNAL,
-        .dstSubpass = 0,
-        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        .srcAccessMask = vk::AccessFlagBits::eNone,
-        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
-    };
-
-    const vk::RenderPassCreateInfo createInfo {
-        .attachmentCount = 1,
-        .pAttachments = &colorAttachment,
-        .subpassCount = 1,
-        .pSubpasses = &subpass,
-        .dependencyCount = 1,
-        .pDependencies = &subpassDep,
-    };
+    const vk::RenderPassCreateInfo createInfo { {}, colorAttachment, subpass, subpassDep };
 
     m_RenderPass = m_Context.m_Device.createRenderPass(createInfo);
 }
@@ -199,14 +151,7 @@ void RenderFinal::CreateFramebuffers()
             m_RenderTargets.push_back(renderTarget);
             m_RenderAttachments.push_back(ImGui_ImplVulkan_AddTexture(renderTarget->GetSampler(), renderTarget->GetView(), (VkImageLayout)vk::ImageLayout::eShaderReadOnlyOptimal));
 
-            const vk::FramebufferCreateInfo createInfo {
-                .renderPass = m_RenderPass,
-                .attachmentCount = 1,
-                .pAttachments = &renderView,
-                .width = extent.width,
-                .height = extent.height,
-                .layers = 1,
-            };
+            const vk::FramebufferCreateInfo createInfo { {}, m_RenderPass, renderView, extent.width, extent.height, 1 };
 
             m_Framebuffers.push_back(m_Context.m_Device.createFramebuffer(createInfo));
         }
@@ -245,112 +190,31 @@ void RenderFinal::CreatePipeline()
     ShaderModuleObject fragModule { "SimpleTriangle.frag.hlsl", m_Context.m_Device };
 
     const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
-        {
-            .stage = vk::ShaderStageFlagBits::eVertex,
-            .module = vertModule.GetModule(),
-            .pName = "main",
-        },
-        {
-            .stage = vk::ShaderStageFlagBits::eFragment,
-            .module = fragModule.GetModule(),
-            .pName = "main",
-        },
+        vk::PipelineShaderStageCreateInfo { {}, vk::ShaderStageFlagBits::eVertex, vertModule.GetModule(), "main" },
+        vk::PipelineShaderStageCreateInfo { {}, vk::ShaderStageFlagBits::eFragment, fragModule.GetModule(), "main" },
     };
 
-    const vk::PipelineVertexInputStateCreateInfo vertexInputState {
-        .vertexBindingDescriptionCount = 0,
-        .pVertexBindingDescriptions = nullptr,
-        .vertexAttributeDescriptionCount = 0,
-        .pVertexAttributeDescriptions = nullptr,
-    };
-
-    const vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState {
-        .topology = vk::PrimitiveTopology::eTriangleList,
-    };
+    const vk::PipelineVertexInputStateCreateInfo vertexInputState {};
+    const vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState { {}, vk::PrimitiveTopology::eTriangleList };
 
     const vk::Extent2D swapchainExtent = m_Context.m_WindowExtent;
+    const vk::Viewport viewport { 0.0f, 0.0f, static_cast<float>(swapchainExtent.width), static_cast<float>(swapchainExtent.height), 0.0f, 1.0f };
+    const vk::Rect2D scissor { {}, swapchainExtent };
 
-    const vk::Viewport viewport {
-        .x = 0.0f,
-        .y = 0.0f,
-        .width = static_cast<float>(swapchainExtent.width),
-        .height = static_cast<float>(swapchainExtent.height),
-        .minDepth = 0.0f,
-        .maxDepth = 1.0f,
-    };
-
-    const vk::Rect2D scissor {
-        .offset = { 0, 0 },
-        .extent = swapchainExtent,
-    };
-
-    const vk::PipelineViewportStateCreateInfo viewportState {
-        .viewportCount = 1,
-        .pViewports = &viewport,
-        .scissorCount = 1,
-        .pScissors = &scissor,
-    };
-
-    const vk::PipelineRasterizationStateCreateInfo rasterizationState {
-        .depthClampEnable = VK_FALSE,
-        .rasterizerDiscardEnable = VK_FALSE,
-        .polygonMode = vk::PolygonMode::eFill,
-        .cullMode = vk::CullModeFlagBits::eBack,
-        .frontFace = vk::FrontFace::eCounterClockwise,
-        .depthBiasEnable = VK_FALSE,
-        .lineWidth = 1.0f,
-    };
-
-    const vk::PipelineMultisampleStateCreateInfo multisampleState {
-        .rasterizationSamples = vk::SampleCountFlagBits::e1,
-        .sampleShadingEnable = VK_FALSE,
-        .minSampleShading = 1.0f,
-        .pSampleMask = nullptr,
-        .alphaToCoverageEnable = VK_FALSE,
-        .alphaToOneEnable = VK_FALSE,
-    };
-
+    const vk::PipelineViewportStateCreateInfo viewportState { {}, viewport, scissor };
+    const vk::PipelineRasterizationStateCreateInfo rasterizationState { {}, VK_FALSE, VK_FALSE, vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise, VK_FALSE, 0.f,
+        0.f, 0.f, 1.0f };
+    const vk::PipelineMultisampleStateCreateInfo multisampleState { {}, vk::SampleCountFlagBits::e1, VK_FALSE, 1.0f };
     const vk::PipelineDepthStencilStateCreateInfo depthStencilState {};  // todo: setup depth stencil
-
-    const vk::PipelineColorBlendAttachmentState colorBlendAttachmentState {
-        .blendEnable = VK_FALSE,
-        .srcColorBlendFactor = vk::BlendFactor::eOne,
-        .dstColorBlendFactor = vk::BlendFactor::eZero,
-        .colorBlendOp = vk::BlendOp::eAdd,
-        .srcAlphaBlendFactor = vk::BlendFactor::eOne,
-        .dstAlphaBlendFactor = vk::BlendFactor::eZero,
-        .alphaBlendOp = vk::BlendOp::eAdd,
-        .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
-    };
-
-    const vk::PipelineColorBlendStateCreateInfo colorBlendState {
-        .attachmentCount = 1,
-        .pAttachments = &colorBlendAttachmentState,
-        .blendConstants = { { 0.0f, 0.0f, 0.0f, 0.0f } },
-    };
+    const vk::PipelineColorBlendAttachmentState colorBlendAttachmentState { VK_FALSE, vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd, vk::BlendFactor::eOne, vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd, vk::FlagTraits<vk::ColorComponentFlagBits>::allFlags };
+    const vk::PipelineColorBlendStateCreateInfo colorBlendState { {}, VK_FALSE, vk::LogicOp::eClear, colorBlendAttachmentState };
 
     const std::vector<vk::DynamicState> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+    const vk::PipelineDynamicStateCreateInfo dynamicState { {}, dynamicStates };
 
-    const vk::PipelineDynamicStateCreateInfo dynamicState {
-        .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
-        .pDynamicStates = dynamicStates.data(),
-    };
-
-    const vk::GraphicsPipelineCreateInfo pipelineCreateInfo {
-        .stageCount = static_cast<uint32_t>(shaderStages.size()),
-        .pStages = shaderStages.data(),
-        .pVertexInputState = &vertexInputState,
-        .pInputAssemblyState = &inputAssemblyState,
-        .pViewportState = &viewportState,
-        .pRasterizationState = &rasterizationState,
-        .pMultisampleState = &multisampleState,
-        .pDepthStencilState = &depthStencilState,
-        .pColorBlendState = &colorBlendState,
-        .pDynamicState = &dynamicState,
-        .layout = m_PipelineLayout,
-        .renderPass = m_RenderPass,
-        .subpass = 0,
-    };
+    const vk::GraphicsPipelineCreateInfo pipelineCreateInfo { {}, shaderStages, &vertexInputState, &inputAssemblyState, nullptr, &viewportState, &rasterizationState, &multisampleState,
+        &depthStencilState, &colorBlendState, &dynamicState, m_PipelineLayout, m_RenderPass };
 
     const vk::ResultValue<vk::Pipeline>& resultValue = m_Context.m_Device.createGraphicsPipeline({}, pipelineCreateInfo);
     ASSERT(resultValue.result == vk::Result::eSuccess);

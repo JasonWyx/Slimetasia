@@ -12,10 +12,7 @@ public:
         : m_OwnerDevice { device }
         , m_SpirV { ShaderHelper::CompileToSpirv(filePath) }
     {
-        const vk::ShaderModuleCreateInfo createInfo {
-            .codeSize = m_SpirV.size(),
-            .pCode = reinterpret_cast<const uint32_t*>(m_SpirV.data()),
-        };
+        const vk::ShaderModuleCreateInfo createInfo { {}, m_SpirV.size(), reinterpret_cast<const uint32_t*>(m_SpirV.data()) };
 
         m_Module = m_OwnerDevice.createShaderModule(createInfo);
     }
