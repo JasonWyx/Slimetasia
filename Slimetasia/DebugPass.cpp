@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "DebugPass.h"
 
 #include "Camera.h"
@@ -352,3 +354,5 @@ void DebugPass::SetHoveredGizmo(GizmoType gizmo)
 {
     m_HoveredGizmo = gizmo;
 }
+
+#endif // !USE_VULKAN

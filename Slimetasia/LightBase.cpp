@@ -12,7 +12,10 @@ LightBase::LightBase(GameObject* owner, char const* componentName)
     , m_ShadowResolution(1024)
     , m_ShadowResolutionPrev(m_ShadowResolution)
     , m_ShadowBias(0.0f)
+#ifdef USE_VULKAN
+#else
     , m_ShadowMap(0)
+#endif  // USE_VULKAN
 {
 }
 
@@ -33,6 +36,8 @@ float LightBase::GetShadowDistance() const
     return std::sqrtf(4 * (256 * std::max({ m_LightColor.r, m_LightColor.g, m_LightColor.b }) * m_Intensity)) * 0.5f;
 }
 
+#ifdef USE_VULKAN
+#else
 GLuint LightBase::GetShadowMapTexture()
 {
     // #ifdef EDITOR
@@ -45,6 +50,7 @@ GLuint LightBase::GetShadowMapTexture()
     // #endif
     return m_ShadowMap;
 }
+#endif  // USE_VULKAN
 
 // REFLECT_VIRTUAL(LightBase)
 // REFLECT_PARENT(IComponent)

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <future>
 
 #include "Camera.h"
@@ -32,3 +34,5 @@ private:
 
     static void SortParticleData(ParticlePass& particlePass, Camera& camera);
 };
+
+#endif // !USE_VULKAN

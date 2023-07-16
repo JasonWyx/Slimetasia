@@ -69,11 +69,24 @@ void InsertObject(std::shared_ptr<Node> pTree, GameObject* pObj)
         pObj->m_NextObj = pTree->m_ObjList;
         pTree->m_ObjList = pObj;
     }
-    Renderer::Instance().DrawCube(pTree->m_halfWidth, pTree->m_center);
-    auto pid = pObj->GetParentLayer()->GetId();
-    auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
 
-    if (pid != currentLayerID) return;
+#ifdef USE_VULKAN
+#else
+    Renderer::Instance().DrawCube(pTree->m_halfWidth, pTree->m_center);
+#endif  // USE_VULKAN
+
+    auto pid = pObj->GetParentLayer()->GetId();
+
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U;  // todo
+#else
+    auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
+#endif  // USE_VULKAN
+
+    if (pid != currentLayerID)
+    {
+        return;
+    }
 }
 static unsigned i_index = 0;
 void CollisionTestTree(std::shared_ptr<Node> pTree)

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include <vector>
@@ -31,3 +33,5 @@ public:
 
     void Render(RenderLayer const& renderLayer);
 };
+
+#endif // !USE_VULKAN

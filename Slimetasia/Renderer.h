@@ -1,4 +1,5 @@
 #pragma once
+#ifndef USE_VULKAN
 #include <GL\glew.h>
 #include <Windows.h>
 
@@ -81,3 +82,5 @@ public:
     void SetSelectedObjects(std::vector<unsigned> const& selectedObjects);
     void ChangeCamera(bool b);
 };
+
+#endif // !USE_VULKAN

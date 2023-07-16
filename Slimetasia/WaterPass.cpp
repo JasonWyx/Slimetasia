@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "WaterPass.h"
 
 #include <stb_image.h>
@@ -240,3 +242,5 @@ void WaterPass::BuildDUDVMaps()
 
     stbi_image_free(pixels);
 }
+
+#endif // !USE_VULKAN

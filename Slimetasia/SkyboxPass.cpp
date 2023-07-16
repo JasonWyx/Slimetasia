@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "SkyboxPass.h"
 
 #include "ResourceManager.h"
@@ -82,3 +84,5 @@ void SkyboxPass::Render(Camera& camera)
         }
     }
 }
+
+#endif // !USE_VULKAN

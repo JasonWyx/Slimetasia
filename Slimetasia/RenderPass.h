@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include "MathDefs.h"
 
 class Camera;
@@ -22,3 +24,5 @@ protected:  // Functions
 
     virtual void BuildRenderTargets() = 0;
 };
+
+#endif // !USE_VULKAN

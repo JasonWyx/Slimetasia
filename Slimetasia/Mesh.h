@@ -14,7 +14,11 @@ Creation date: 7/18/2018
 End Header ------------------------------------------------------------------ */
 
 #pragma once
+#ifdef USE_VULKAN
+#include <vulkan/vulkan.hpp>
+#else
 #include <GL\glew.h>
+#endif  // USE_VULKAN
 
 #include <map>
 #include <vector>
@@ -98,11 +102,18 @@ public:
     Matrix4 GetGlobalInverseTransform() const;
     AABB GetAABB() const;
 
+#ifdef USE_VULKAN
+    static constexpr vk::VertexInputBindingDescription GetVertexBindingDescription();
+    static constexpr std::vector<vk::VertexInputAttributeDescription> GetVertexAttributeDescriptions();
+#else
     GLuint GetVAO() const;
+#endif  // USE_VULKAN
 
-private:
+        private :
 
-    std::vector<GLuint> m_Indices;
+        // todo: data stored on CPU for debug only? should remove in engine build
+        std::vector<GLuint>
+            m_Indices;
     std::vector<Vector3> m_Vertices;
     std::vector<Vector3> m_Normals;
     std::vector<Vector3> m_Tangents;

@@ -12,11 +12,24 @@ SphereCollider::SphereCollider(GameObject* parentObject, const float& radius)
 void SphereCollider::DebugDraw()
 {
     auto parent = GetOwner();
-    if (!parent) return;
+    if (!parent)
+    {
+        return;
+    }
 
     auto pid = parent->GetParentLayer()->GetId();
+
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U;  // todo
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
-    if (pid != currentLayerID) return;
+#endif  // USE_VULKAN
+
+    if (pid != currentLayerID)
+    {
+        return;
+    }
+
     std::vector<Vector3> pts;
     auto u = Vector3 { 1.f, 0.f, 0.f }, v = Vector3 { 0.f, 1.f, 0.f }, w = Vector3 { 0.f, 0.f, 1.f };
     const auto mypos = GetPosition() + m_offset;
@@ -34,7 +47,12 @@ void SphereCollider::DebugDraw()
         pts.emplace_back(mypos + m_radius * (u * cosf(j * DITHER) + v * sinf(j * DITHER)));
         pts.emplace_back(mypos + m_radius * (u * cosf(i * DITHER) + v * sinf(i * DITHER)));
     }
+
+#ifdef USE_VULKAN
+    auto cam = static_cast<Camera*>(nullptr); // todo
+#else
     auto cam = const_cast<Layer*>(Renderer::Instance().GetCurrentEditorLayer())->GetEditorCamera();
+#endif  // USE_VULKAN
     if (cam)
     {
         const auto eye = cam->GetTransform()->GetWorldPosition();
@@ -58,7 +76,10 @@ void SphereCollider::DebugDraw()
         }
     }
 
+    #ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 0.0f, 1.0f), DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
 }
 
 bool SphereCollider::ContainsPoint(const Vector3& pt)

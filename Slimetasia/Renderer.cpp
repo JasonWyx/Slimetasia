@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "Renderer.h"
 
 #include "Application.h"
@@ -567,3 +569,5 @@ void Renderer::ChangeCamera(bool b)
 {
     m_UseCamera = b;
 }
+
+#endif // !USE_VULKAN

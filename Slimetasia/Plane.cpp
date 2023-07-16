@@ -43,8 +43,16 @@ void Plane::DebugDraw(const float& size, const unsigned int& parentID) const
 
 void Plane::DebugDraw(const float& x, const float& y, const unsigned int& parentID) const
 {
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U;  // todo
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
-    if (parentID != currentLayerID) return;
+#endif  // USE_VULKAN
+
+    if (parentID != currentLayerID)
+    {
+        return;
+    }
 
     std::vector<Vector3> pts;
 
@@ -67,7 +75,10 @@ void Plane::DebugDraw(const float& x, const float& y, const unsigned int& parent
     pts.emplace_back(pt - iv - jw);
     pts.emplace_back(pt - iv + jw);
 
+#ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 1.0f, 1.0f), DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
 
     DrawRay(Ray { pt, m_Normal }, 1.f, parentID, Color4(0.0f, 1.0f, 1.0f, 1.0f));
 }

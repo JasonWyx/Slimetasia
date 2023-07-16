@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "LightPass.h"
 
 #include <random>
@@ -718,3 +720,5 @@ void LightPass::BuildRenderTargets()
     glTextureParameteri(m_EmissiveSecondPass, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_EmissiveSecondPass, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
+
+#endif // !USE_VULKAN

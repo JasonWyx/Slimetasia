@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "PostProcessPass.h"
 
 #include "Input.h"
@@ -164,3 +166,5 @@ void PostProcessPass::BuildRenderTargets()
     // GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     // ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 }
+
+#endif // !USE_VULKAN

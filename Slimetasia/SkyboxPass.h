@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include "Camera.h"
@@ -19,3 +21,5 @@ public:
 
     void Render(Camera& camera);
 };
+
+#endif // !USE_VULKAN

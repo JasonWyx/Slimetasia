@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include "Camera.h"
@@ -31,3 +33,5 @@ private:
 
     void BuildRenderTargets();
 };
+
+#endif // !USE_VULKAN

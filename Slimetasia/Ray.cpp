@@ -5,7 +5,11 @@
 
 void DrawRay(const Ray& ray, float t, unsigned int layerID, Color4 color)
 {
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U;  // todo
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
+#endif  // USE_VULKAN
 
     if (layerID != currentLayerID) return;
 
@@ -44,5 +48,8 @@ void DrawRay(const Ray& ray, float t, unsigned int layerID, Color4 color)
         pts.emplace_back(arrowhead);
     }
 
+#ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, color, DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
 }

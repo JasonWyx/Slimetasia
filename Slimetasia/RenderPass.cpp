@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "RenderPass.h"
 
 RenderPass::RenderPass(const iVector2& viewportSize)
@@ -15,3 +17,5 @@ void RenderPass::SetViewportSize(const iVector2& viewportSize)
         BuildRenderTargets();
     }
 }
+
+#endif // !USE_VULKAN

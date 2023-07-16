@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "ParticlePass.h"
 
 #include <algorithm>
@@ -295,3 +297,5 @@ void ParticlePass::SortParticleData(ParticlePass& particlePass, Camera& camera)
     particlePass.m_SortedSizeData = std::move(drawSizeData);
     particlePass.m_SortedFadeData = std::move(drawFadeData);
 }
+
+#endif // !USE_VULKAN

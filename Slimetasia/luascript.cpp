@@ -89,320 +89,127 @@ static int pushCustomTypeArray(std::string name, lua_State* L, std::vector<T> in
 // LIBARIES
 // ============================================================================
 /// LAYER
-const luaL_Reg LuaScript::layerlib[] = { { "Name", layer_name },
-                                         { "Create", layer_createObject },
-                                         { "GetObject", layer_find },
-                                         { "GetObjectsList", layer_getObjects },
-                                         { "GetObjectsListByName", layer_getObjectsByName },
-                                         { "GetObjectByID", layer_getObjectByID },
-                                         { "GetObjectsListBySubName", layer_getObjectsBySubName },
-                                         { "GetObjectsListByTag", layer_getObjectsByTag },
-                                         { "DestroyObjectsWithTag", layer_DestroyAllObjectsWithTag },
-                                         { NULL, NULL } };
+const luaL_Reg LuaScript::layerlib[] = { { "Name", layer_name }, { "Create", layer_createObject }, { "GetObject", layer_find }, { "GetObjectsList", layer_getObjects },
+    { "GetObjectsListByName", layer_getObjectsByName }, { "GetObjectByID", layer_getObjectByID }, { "GetObjectsListBySubName", layer_getObjectsBySubName },
+    { "GetObjectsListByTag", layer_getObjectsByTag }, { "DestroyObjectsWithTag", layer_DestroyAllObjectsWithTag }, { NULL, NULL } };
 /// TYPES
-const luaL_Reg LuaScript::vector3lib[] = { { "__index", vector3_index },
-                                           { "__newindex", vector3_newindex },
-                                           { "__add", vector3_add },
-                                           { "__sub", vector3_sub },
-                                           { "__mul", vector3_mul },
-                                           { "__div", vector3_div },
-                                           { "__unm", vector3_unm },
-                                           { "__eq", vector3_eq },
-                                           { "Set", vector3_set },
-                                           { "Normalize", vector3_Normalize },
-                                           { "Normalized", vector3_Normalized },
-                                           { "Project", vector3_Projection },
-                                           { "Cross", vector3_Cross },
-                                           { "Dot", vector3_Dot },
-                                           { "Length", vector3_Length },
-                                           { "SquareLength", vector3_SquareLength },
-                                           { "DistanceTo", vector3_DistanceTo },
-                                           { "SquareDistanceTo", vector3_SquaredDistanceTo },
-                                           { "Rotate", vector3_Rotate },
-                                           { "x", vector3_X },
-                                           { "y", vector3_Y },
-                                           { "z", vector3_Z },
-                                           { "PolarAngle", vector3_polarAngle },
-                                           { NULL, NULL } };
-const luaL_Reg LuaScript::colorlib[] = { { "__index", color_index },
-                                         { "__newindex", color_newindex },
-                                         { "__add", color_add },
-                                         { "__sub", color_sub },
-                                         { "__mul", color_mul },
-                                         { "__div", color_div },
-                                         { "__eq", color_eq },
-                                         { "Set", color_set },
-                                         { "r", color_R },
-                                         { "g", color_G },
-                                         { "b", color_B },
-                                         { "a", color_A },
-                                         { NULL, NULL } };
+const luaL_Reg LuaScript::vector3lib[] = { { "__index", vector3_index }, { "__newindex", vector3_newindex }, { "__add", vector3_add }, { "__sub", vector3_sub }, { "__mul", vector3_mul },
+    { "__div", vector3_div }, { "__unm", vector3_unm }, { "__eq", vector3_eq }, { "Set", vector3_set }, { "Normalize", vector3_Normalize }, { "Normalized", vector3_Normalized },
+    { "Project", vector3_Projection }, { "Cross", vector3_Cross }, { "Dot", vector3_Dot }, { "Length", vector3_Length }, { "SquareLength", vector3_SquareLength }, { "DistanceTo", vector3_DistanceTo },
+    { "SquareDistanceTo", vector3_SquaredDistanceTo }, { "Rotate", vector3_Rotate }, { "x", vector3_X }, { "y", vector3_Y }, { "z", vector3_Z }, { "PolarAngle", vector3_polarAngle }, { NULL, NULL } };
+const luaL_Reg LuaScript::colorlib[] = { { "__index", color_index }, { "__newindex", color_newindex }, { "__add", color_add }, { "__sub", color_sub }, { "__mul", color_mul }, { "__div", color_div },
+    { "__eq", color_eq }, { "Set", color_set }, { "r", color_R }, { "g", color_G }, { "b", color_B }, { "a", color_A }, { NULL, NULL } };
 /// Physics Ray cast
-const luaL_Reg LuaScript::rayCastDatalib[] = {
-    { "Point", rayCastData_point }, { "Normal", rayCastData_normal }, { "HitFrac", rayCastData_hitFrac }, { "GameObject", rayCastData_gameObject }, { NULL, NULL }
-};
+const luaL_Reg LuaScript::rayCastDatalib[] = { { "Point", rayCastData_point }, { "Normal", rayCastData_normal }, { "HitFrac", rayCastData_hitFrac }, { "GameObject", rayCastData_gameObject },
+    { NULL, NULL } };
 /// Game object
-const luaL_Reg LuaScript::gameObjectlib[] = { { "Name", gameObject_name },
-                                              { "SetName", gameObject_Setname },
-                                              { "Destroy", gameObject_destroy },
-                                              { "SetActive", setGameObjectActive },
-                                              { "GetActive", getGameObjectActive },
-                                              { "GetComponent", getGameObjectComponent },
-                                              { "GetComponents", getGameObjectComponents },
-                                              { "AddComponent", addGameObjectComponent },
-                                              { "GetLayer", getGameObjectLayer },
-                                              { "GetLuaScript", gameObject_getLuaScript },
-                                              { "AddComponent", gameObject_addComponent },
-                                              { "GetID", gameObject_GetID },
-                                              { "RemoveComponent", gameObject_removeComponent },
-                                              { "Tag", gameObject_GetTag },
-                                              { "SetParent", gameObject_SetParent },
-                                              { "GetParent", gameObject_GetParent },
-                                              { "UnParent", gameObject_UnParent },
-                                              { "GetChild", gameObject_GetChild },
-                                              { NULL, NULL } };
+const luaL_Reg LuaScript::gameObjectlib[] = { { "Name", gameObject_name }, { "SetName", gameObject_Setname }, { "Destroy", gameObject_destroy }, { "SetActive", setGameObjectActive },
+    { "GetActive", getGameObjectActive }, { "GetComponent", getGameObjectComponent }, { "GetComponents", getGameObjectComponents }, { "AddComponent", addGameObjectComponent },
+    { "GetLayer", getGameObjectLayer }, { "GetLuaScript", gameObject_getLuaScript }, { "AddComponent", gameObject_addComponent }, { "GetID", gameObject_GetID },
+    { "RemoveComponent", gameObject_removeComponent }, { "Tag", gameObject_GetTag }, { "SetParent", gameObject_SetParent }, { "GetParent", gameObject_GetParent }, { "UnParent", gameObject_UnParent },
+    { "GetChild", gameObject_GetChild }, { NULL, NULL } };
 /// Components
-const luaL_Reg LuaScript::transformlib[] = { { "Owner", component_Owner },
-                                             { "SetActive", component_SetActive },
-                                             //{ "GetlocalPosition"         , transform_GetLocalPosition          },
-                                             //{ "GetlocalRotation"         , transform_GetLocalRotation          },
-                                             //{ "GetlocalScale"            , transform_GetLocalScale             },
-                                             { "GetWorldPosition", transform_GetWorldPosition },
-                                             { "GetWorldRotation", transform_GetWorldRotation },
-                                             { "GetWorldScale", transform_GetWorldScale },
-                                             //{ "SetLocalPosition"         , transform_SetLocalPosition          },
-                                             //{ "SetLocalRotation"         , transform_SetLocalRotation          },
-                                             //{ "SetLocalScale"            , transform_SetLocalScale             },
-                                             { "SetWorldPosition", transform_SetWorldPosition },
-                                             { "SetWorldRotation", transform_SetWorldRotation },
-                                             { "SetWorldScale", transform_SetWorldScale },
-                                             { "Translate", transform_Translate },
-                                             { "Rotate", transform_Rotate },
-                                             { "Scale", transform_Scale },
-                                             { "ForwardVector", transform_GetForwardVector },
-                                             { "UpwardVector", transform_GetUpwardVector },
-                                             { "RightVector", transform_GetRightVector },
-                                             { "LookAt", transform_LookAt },
-                                             { "LookAtV", transform_LookAtV },
-                                             { NULL, NULL } };
-const luaL_Reg LuaScript::rigidbodylib[] = { { "Owner", component_Owner },
-                                             { "SetActive", component_SetActive },
-                                             { "GetGhost", rigidbody_GetGhost },
-                                             //{ "GetCollisionWithStatic"   , rigidbody_GetCollideWithStatic      },
-                                             { "GetMass", rigidbody_GetMass },
-                                             //{ "GetDrag"                  , rigidbody_GetDrag                   },
-                                             { "GetBodyType", rigidbody_GetBodytype },
-                                             //{ "GetFreezeRotation"        , rigidbody_GetFreezeRotation         },
-                                             { "GetRestitution", rigidbody_GetRestitution },
-                                             { "GetVelocity", rigidbody_GetVelocity },
-                                             { "GetAcceleration", rigidbody_GetAcceleration },
-                                             //{ "GetOffset"                , rigidbody_GetOffset                 },
-                                             //{ "GetAngularVelocity"       , rigidbody_GetAngularVelocity        },
-                                             { "GetGravityEnabled", rigidbody_GetGravityEnabled },
-                                             //{ "GetAffectedByResistance"  , rigidbody_GetIsAffectedByResistance },
-                                             { "GetForce", rigidbody_GetForce },
-                                             { "SetGhost", rigidbody_SetGhost },
-                                             //{ "SetCollisionWithStatic"   , rigidbody_SetCollideWithStatic      },
-                                             { "SetMass", rigidbody_SetMass },
-                                             //{ "SetDrag"                  , rigidbody_SetDrag                   },
-                                             { "SetBodyType", rigidbody_SetBodytype },
-                                             //{ "SetFreezeRotation"        , rigidbody_SetFreezeRotation         },
-                                             { "SetRestitution", rigidbody_SetRestitution },
-                                             { "SetVelocity", rigidbody_SetVelocity },
-                                             { "SetAcceleration", rigidbody_SetAcceleration },
-                                             //{ "SetOffset"                , rigidbody_SetOffset                 },
-                                             //{ "SetAngularVelocity"       , rigidbody_SetAngularVelocity        },
-                                             { "SetGravityEnabled", rigidbody_SetGravityEnabled },
-                                             //{ "SetAffectedByResistance"  , rigidbody_SetIsAffectedByResistance },
-                                             { "AddVelocity", rigidbody_AddVelocity },
-                                             { "AddForce", rigidbody_AddForce },
-                                             { "SetYVelocity", rigidbody_SetYVelocity },
-                                             { NULL, NULL } };
-const luaL_Reg LuaScript::audioListenerlib[] = {
-    { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "IsMain", audioListener_IsMain }, { "SetMain", audioListener_SetMain }, { NULL, NULL }
-};
-const luaL_Reg LuaScript::audioEmitterlib[] = { { "Owner", component_Owner },
-                                                { "SetActive", component_SetActive },
-                                                { "Play", audioEmitter_Play },
-                                                { "Stop", audioEmitter_Stop },
-                                                { "Pause", audioEmitter_Pause },
-                                                { "IsPlaying", audioEmitter_IsPlaying },
-                                                { "IsPaused", audioEmitter_IsPaused },
-                                                { "SetVolume", audioEmitter_SetVolume },
-                                                { "GetVolume", audioEmitter_GetVolume },
-                                                { "SetPitch", audioEmitter_SetPitch },
-                                                { "GetPitch", audioEmitter_GetPitch },
-                                                { "SetLoop", audioEmitter_SetLoop },
-                                                { "SetLoopCount", audioEmitter_SetLoopCount },
-                                                { "GetLoopCount", audioEmitter_GetLoopCount },
-                                                { "SetAudioClip", audioEmitter_SetAudioClip },
-                                                { "SetAndPlayAudioClip", audioEmitter_SetAndPlayAudioClip },
-                                                { "SetMinDistance3D", audioEmitter_SetMinDistance3D },
-                                                { "GetMinDistance3D", audioEmitter_GetMinDistance3D },
-                                                { "SetMaxDistance3D", audioEmitter_SetMaxDistance3D },
-                                                { "GetMaxDistance3D", audioEmitter_GetMaxDistance3D },
-                                                { "GetAudioClip", audioEmitter_GetSoundName },
-                                                { "FadeOut", audioEmitter_FadeOut },
-                                                { "SetChannelGroup", audioEmitter_SetChannelGroup },
-                                                { NULL, NULL } };
-const luaL_Reg LuaScript::meshRendererlib[] = { { "Owner", component_Owner },
-                                                { "SetActive", component_SetActive },
-                                                { "SetColor", meshRenderer_SetColor },
-                                                { "GetColor", meshRenderer_GetColor },
-                                                { "SetDiffuseTexture", meshRenderer_SetDiffuse },
-                                                { "GetMesh", meshRenderer_GetMesh },
-                                                { "SetMesh", meshRenderer_SetMesh },
-                                                { "SetEmissive", meshRenderer_SetEmissive },
-                                                { "SetEmissiveTexture", meshRenderer_SetEmissiveTexture },
-                                                { "GetEnableEmissive", meshRenderer_GetEnableEmissive },
-                                                { "SetEnableEmissive", meshRenderer_SetEnableEmissive },
-                                                { NULL, NULL } };
-const luaL_Reg LuaScript::meshAnimatorlib[] = { { "Owner", component_Owner },
-                                                { "SetActive", component_SetActive },
-                                                { "Play", meshAnimator_PlayAnimation },
-                                                { "PlayOnce", meshAnimator_PlayAnimationOnce },
-                                                { "Stop", meshAnimator_StopAnimation },
-                                                { "Pause", meshAnimator_PauseAnimation },
-                                                { "GetAnimation", meshAnimator_GetAnimationSet },
-                                                { "SetAnimation", meshAnimator_SetAnimationSet },
-                                                { "IsPlaying", meshAnimator_IsPlaying },
-                                                { "SetCrossFade", meshAnimator_SetCrossFadeBoolean },
-                                                { "SetTimeScale", meshAnimator_SetTimeScale },
-                                                { NULL, NULL } };
-const luaL_Reg LuaScript::luaScriptlib[] = { { "Owner", component_Owner },         { "SetActive", component_SetActive },
-                                             { "GetVariable", lua_GetVariable },   { "GetVariableArray", lua_GetVariableArray },
-                                             { "SetVariable", lua_SetVariable },   { "CallFunction", lua_callFunction },
-                                             { "EnableScript", lua_EnableScript }, { NULL, NULL } };
-const luaL_Reg LuaScript::cameralib[] = { { "Owner", component_Owner },
-                                          { "SetActive", component_SetActive },
-                                          { "GetLookAt", camera_GetLookAt },
-                                          { "SetLookAt", camera_SetLookAt },
-                                          { "SetUp", camera_SetUp },
-                                          { "GetViewporSize", camera_GetViewportSize },
-                                          { "SetViewportSize", camera_SetViewportSize },
-                                          { "SetUICam", camera_SetUICamera },
-                                          { "SetLightIntensity", camera_SetDirectionalLightIntensity },
-                                          { "SetLightDirection", camera_SetDirectionalLightDirection },
-                                          { "SetShadowCasted", camera_SetShadowCasted },
-                                          { "SetColor", camera_SetColor },
-                                          { NULL, NULL } };
-const luaL_Reg LuaScript::boxParticlelib[] = { { "Owner", component_Owner },
-                                               { "SetActive", component_SetActive },
+const luaL_Reg LuaScript::transformlib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive },
+    //{ "GetlocalPosition"         , transform_GetLocalPosition          },
+    //{ "GetlocalRotation"         , transform_GetLocalRotation          },
+    //{ "GetlocalScale"            , transform_GetLocalScale             },
+    { "GetWorldPosition", transform_GetWorldPosition }, { "GetWorldRotation", transform_GetWorldRotation }, { "GetWorldScale", transform_GetWorldScale },
+    //{ "SetLocalPosition"         , transform_SetLocalPosition          },
+    //{ "SetLocalRotation"         , transform_SetLocalRotation          },
+    //{ "SetLocalScale"            , transform_SetLocalScale             },
+    { "SetWorldPosition", transform_SetWorldPosition }, { "SetWorldRotation", transform_SetWorldRotation }, { "SetWorldScale", transform_SetWorldScale }, { "Translate", transform_Translate },
+    { "Rotate", transform_Rotate }, { "Scale", transform_Scale }, { "ForwardVector", transform_GetForwardVector }, { "UpwardVector", transform_GetUpwardVector },
+    { "RightVector", transform_GetRightVector }, { "LookAt", transform_LookAt }, { "LookAtV", transform_LookAtV }, { NULL, NULL } };
+const luaL_Reg LuaScript::rigidbodylib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "GetGhost", rigidbody_GetGhost },
+    //{ "GetCollisionWithStatic"   , rigidbody_GetCollideWithStatic      },
+    { "GetMass", rigidbody_GetMass },
+    //{ "GetDrag"                  , rigidbody_GetDrag                   },
+    { "GetBodyType", rigidbody_GetBodytype },
+    //{ "GetFreezeRotation"        , rigidbody_GetFreezeRotation         },
+    { "GetRestitution", rigidbody_GetRestitution }, { "GetVelocity", rigidbody_GetVelocity }, { "GetAcceleration", rigidbody_GetAcceleration },
+    //{ "GetOffset"                , rigidbody_GetOffset                 },
+    //{ "GetAngularVelocity"       , rigidbody_GetAngularVelocity        },
+    { "GetGravityEnabled", rigidbody_GetGravityEnabled },
+    //{ "GetAffectedByResistance"  , rigidbody_GetIsAffectedByResistance },
+    { "GetForce", rigidbody_GetForce }, { "SetGhost", rigidbody_SetGhost },
+    //{ "SetCollisionWithStatic"   , rigidbody_SetCollideWithStatic      },
+    { "SetMass", rigidbody_SetMass },
+    //{ "SetDrag"                  , rigidbody_SetDrag                   },
+    { "SetBodyType", rigidbody_SetBodytype },
+    //{ "SetFreezeRotation"        , rigidbody_SetFreezeRotation         },
+    { "SetRestitution", rigidbody_SetRestitution }, { "SetVelocity", rigidbody_SetVelocity }, { "SetAcceleration", rigidbody_SetAcceleration },
+    //{ "SetOffset"                , rigidbody_SetOffset                 },
+    //{ "SetAngularVelocity"       , rigidbody_SetAngularVelocity        },
+    { "SetGravityEnabled", rigidbody_SetGravityEnabled },
+    //{ "SetAffectedByResistance"  , rigidbody_SetIsAffectedByResistance },
+    { "AddVelocity", rigidbody_AddVelocity }, { "AddForce", rigidbody_AddForce }, { "SetYVelocity", rigidbody_SetYVelocity }, { NULL, NULL } };
+const luaL_Reg LuaScript::audioListenerlib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "IsMain", audioListener_IsMain }, { "SetMain", audioListener_SetMain },
+    { NULL, NULL } };
+const luaL_Reg LuaScript::audioEmitterlib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "Play", audioEmitter_Play }, { "Stop", audioEmitter_Stop },
+    { "Pause", audioEmitter_Pause }, { "IsPlaying", audioEmitter_IsPlaying }, { "IsPaused", audioEmitter_IsPaused }, { "SetVolume", audioEmitter_SetVolume }, { "GetVolume", audioEmitter_GetVolume },
+    { "SetPitch", audioEmitter_SetPitch }, { "GetPitch", audioEmitter_GetPitch }, { "SetLoop", audioEmitter_SetLoop }, { "SetLoopCount", audioEmitter_SetLoopCount },
+    { "GetLoopCount", audioEmitter_GetLoopCount }, { "SetAudioClip", audioEmitter_SetAudioClip }, { "SetAndPlayAudioClip", audioEmitter_SetAndPlayAudioClip },
+    { "SetMinDistance3D", audioEmitter_SetMinDistance3D }, { "GetMinDistance3D", audioEmitter_GetMinDistance3D }, { "SetMaxDistance3D", audioEmitter_SetMaxDistance3D },
+    { "GetMaxDistance3D", audioEmitter_GetMaxDistance3D }, { "GetAudioClip", audioEmitter_GetSoundName }, { "FadeOut", audioEmitter_FadeOut }, { "SetChannelGroup", audioEmitter_SetChannelGroup },
+    { NULL, NULL } };
+const luaL_Reg LuaScript::meshRendererlib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "SetColor", meshRenderer_SetColor }, { "GetColor", meshRenderer_GetColor },
+    { "SetDiffuseTexture", meshRenderer_SetDiffuse }, { "GetMesh", meshRenderer_GetMesh }, { "SetMesh", meshRenderer_SetMesh }, { "SetEmissive", meshRenderer_SetEmissive },
+    { "SetEmissiveTexture", meshRenderer_SetEmissiveTexture }, { "GetEnableEmissive", meshRenderer_GetEnableEmissive }, { "SetEnableEmissive", meshRenderer_SetEnableEmissive }, { NULL, NULL } };
+const luaL_Reg LuaScript::meshAnimatorlib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "Play", meshAnimator_PlayAnimation },
+    { "PlayOnce", meshAnimator_PlayAnimationOnce }, { "Stop", meshAnimator_StopAnimation }, { "Pause", meshAnimator_PauseAnimation }, { "GetAnimation", meshAnimator_GetAnimationSet },
+    { "SetAnimation", meshAnimator_SetAnimationSet }, { "IsPlaying", meshAnimator_IsPlaying }, { "SetCrossFade", meshAnimator_SetCrossFadeBoolean }, { "SetTimeScale", meshAnimator_SetTimeScale },
+    { NULL, NULL } };
+const luaL_Reg LuaScript::luaScriptlib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "GetVariable", lua_GetVariable }, { "GetVariableArray", lua_GetVariableArray },
+    { "SetVariable", lua_SetVariable }, { "CallFunction", lua_callFunction }, { "EnableScript", lua_EnableScript }, { NULL, NULL } };
+const luaL_Reg LuaScript::cameralib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "GetLookAt", camera_GetLookAt }, { "SetLookAt", camera_SetLookAt },
+    { "SetUp", camera_SetUp }, { "GetViewporSize", camera_GetViewportSize }, { "SetViewportSize", camera_SetViewportSize }, { "SetUICam", camera_SetUICamera },
+    { "SetLightIntensity", camera_SetDirectionalLightIntensity }, { "SetLightDirection", camera_SetDirectionalLightDirection }, { "SetShadowCasted", camera_SetShadowCasted },
+    { "SetColor", camera_SetColor }, { NULL, NULL } };
+const luaL_Reg LuaScript::boxParticlelib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive },
 
-                                               { "GetStartMinColor", particle_GetStartMinColor },
-                                               { "GetStartMaxColor", particle_GetStartMaxColor },
-                                               { "GetEndMinColor", particle_GetEndMinColor },
-                                               { "GetEndMaxColor", particle_GetEndMaxColor },
-                                               { "GetMinSize", particle_GetMinSize },
-                                               { "GetMaxSize", particle_GetMaxSize },
-                                               { "GetEndTexture", particle_GetEndTexture },
-                                               { "GetTextureFade", particle_GetTextureFade },
-                                               { "SetStartMinColor", particle_SetStartMinColor },
-                                               { "SetStartMaxColor", particle_SetStartMaxColor },
-                                               { "SetEndMinColor", particle_SetEndMinColor },
-                                               { "SetEndMaxColor", particle_SetEndMaxColor },
-                                               { "SetMinSize", particle_SetMinSize },
-                                               { "SetMaxSize", particle_SetMaxSize },
-                                               { "SetEndTexture", particle_SetEndTexture },
-                                               { "SetTextureFade", particle_SetTextureFade },
-                                               { "SetFloorHeight", particle_SetFloorHeight },
+    { "GetStartMinColor", particle_GetStartMinColor }, { "GetStartMaxColor", particle_GetStartMaxColor }, { "GetEndMinColor", particle_GetEndMinColor }, { "GetEndMaxColor", particle_GetEndMaxColor },
+    { "GetMinSize", particle_GetMinSize }, { "GetMaxSize", particle_GetMaxSize }, { "GetEndTexture", particle_GetEndTexture }, { "GetTextureFade", particle_GetTextureFade },
+    { "SetStartMinColor", particle_SetStartMinColor }, { "SetStartMaxColor", particle_SetStartMaxColor }, { "SetEndMinColor", particle_SetEndMinColor }, { "SetEndMaxColor", particle_SetEndMaxColor },
+    { "SetMinSize", particle_SetMinSize }, { "SetMaxSize", particle_SetMaxSize }, { "SetEndTexture", particle_SetEndTexture }, { "SetTextureFade", particle_SetTextureFade },
+    { "SetFloorHeight", particle_SetFloorHeight },
 
-                                               { "GetPos", boxParticle_GetPos },
-                                               { "SetPos", boxParticle_SetPos },
-                                               { "GetOffset", boxParticle_GetStartPosOff },
-                                               { "SetOffset", boxParticle_SetStartPosOff },
-                                               { "GetMinVel", boxParticle_GetMinVel },
-                                               { "SetMinVel", boxParticle_SetMinVel },
-                                               { "GetMaxVel", boxParticle_GetMaxVel },
-                                               { "SetMaxVel", boxParticle_SetMaxVel },
-                                               { "GetMinTime", boxParticle_GetMinTime },
-                                               { "SetMinTime", boxParticle_SetMinTime },
-                                               { "GetMaxTime", boxParticle_GetMaxTime },
-                                               { "SetMaxTime", boxParticle_SetMaxTime },
-                                               { "GetEmitRate", boxParticle_GetEmitRate },
-                                               { "SetEmitRate", boxParticle_SetEmitRate },
-                                               { "AddAttractor", boxParticle_AddAttractor },
-                                               { "RemoveAttractor", boxParticle_RemoveAttractor },
-                                               { NULL, NULL } };
-const luaL_Reg LuaScript::circleParticlelib[] = { { "Owner", component_Owner },
-                                                  { "SetActive", component_SetActive },
-                                                  { "GetStartMinColor", particle_GetStartMinColor },
-                                                  { "GetStartMaxColor", particle_GetStartMaxColor },
-                                                  { "GetEndMinColor", particle_GetEndMinColor },
-                                                  { "GetEndMaxColor", particle_GetEndMaxColor },
-                                                  { "GetMinSize", particle_GetMinSize },
-                                                  { "GetMaxSize", particle_GetMaxSize },
-                                                  { "GetEndTexture", particle_GetEndTexture },
-                                                  { "GetTextureFade", particle_GetTextureFade },
-                                                  { "SetStartMinColor", particle_SetStartMinColor },
-                                                  { "SetStartMaxColor", particle_SetStartMaxColor },
-                                                  { "SetEndMinColor", particle_SetEndMinColor },
-                                                  { "SetEndMaxColor", particle_SetEndMaxColor },
-                                                  { "SetMinSize", particle_SetMinSize },
-                                                  { "SetMaxSize", particle_SetMaxSize },
-                                                  { "SetEndTexture", particle_SetEndTexture },
-                                                  { "SetTextureFade", particle_SetTextureFade },
-                                                  { "SetFloorHeight", particle_SetFloorHeight },
+    { "GetPos", boxParticle_GetPos }, { "SetPos", boxParticle_SetPos }, { "GetOffset", boxParticle_GetStartPosOff }, { "SetOffset", boxParticle_SetStartPosOff },
+    { "GetMinVel", boxParticle_GetMinVel }, { "SetMinVel", boxParticle_SetMinVel }, { "GetMaxVel", boxParticle_GetMaxVel }, { "SetMaxVel", boxParticle_SetMaxVel },
+    { "GetMinTime", boxParticle_GetMinTime }, { "SetMinTime", boxParticle_SetMinTime }, { "GetMaxTime", boxParticle_GetMaxTime }, { "SetMaxTime", boxParticle_SetMaxTime },
+    { "GetEmitRate", boxParticle_GetEmitRate }, { "SetEmitRate", boxParticle_SetEmitRate }, { "AddAttractor", boxParticle_AddAttractor }, { "RemoveAttractor", boxParticle_RemoveAttractor },
+    { NULL, NULL } };
+const luaL_Reg LuaScript::circleParticlelib[] = { { "Owner", component_Owner }, { "SetActive", component_SetActive }, { "GetStartMinColor", particle_GetStartMinColor },
+    { "GetStartMaxColor", particle_GetStartMaxColor }, { "GetEndMinColor", particle_GetEndMinColor }, { "GetEndMaxColor", particle_GetEndMaxColor }, { "GetMinSize", particle_GetMinSize },
+    { "GetMaxSize", particle_GetMaxSize }, { "GetEndTexture", particle_GetEndTexture }, { "GetTextureFade", particle_GetTextureFade }, { "SetStartMinColor", particle_SetStartMinColor },
+    { "SetStartMaxColor", particle_SetStartMaxColor }, { "SetEndMinColor", particle_SetEndMinColor }, { "SetEndMaxColor", particle_SetEndMaxColor }, { "SetMinSize", particle_SetMinSize },
+    { "SetMaxSize", particle_SetMaxSize }, { "SetEndTexture", particle_SetEndTexture }, { "SetTextureFade", particle_SetTextureFade }, { "SetFloorHeight", particle_SetFloorHeight },
 
-                                                  { "GetEmitRate", circleParticle_GetEmitRate },
-                                                  { "SetEmitRate", circleParticle_SetEmitRate },
-                                                  { "AddAttractor", circleParticle_AddAttractor },
-                                                  { "RemoveAttractor", circleParticle_RemoveAttractor },
-                                                  { NULL, NULL } };
-const luaL_Reg LuaScript::pathFindinglib[] = {
-    { "FindPath", pathFinding_AStarFindPath },        { "GetPath", pathFinding_GetPath },         { "ChangeLocalToBaseMap", pathFinding_ChangeLocalToBaseMap },
-    { "GetPathByIndex", pathFinding_GetPathByIndex }, { "GetPathSize", pathFinding_GetPathSize }, { NULL, NULL }
-};
+    { "GetEmitRate", circleParticle_GetEmitRate }, { "SetEmitRate", circleParticle_SetEmitRate }, { "AddAttractor", circleParticle_AddAttractor },
+    { "RemoveAttractor", circleParticle_RemoveAttractor }, { NULL, NULL } };
+const luaL_Reg LuaScript::pathFindinglib[] = { { "FindPath", pathFinding_AStarFindPath }, { "GetPath", pathFinding_GetPath }, { "ChangeLocalToBaseMap", pathFinding_ChangeLocalToBaseMap },
+    { "GetPathByIndex", pathFinding_GetPathByIndex }, { "GetPathSize", pathFinding_GetPathSize }, { NULL, NULL } };
 const luaL_Reg LuaScript::boxColliderlib[] = { { "GetHalfExtent", boxCollider_GetHalfExtent }, { NULL, NULL } };
 const luaL_Reg LuaScript::sphereColliderlib[] = { { "SetRadius", sphereCollider_SetRadius }, { "GetRadius", sphereCollider_GetRadius }, { NULL, NULL } };
-const luaL_Reg LuaScript::textRendererlib[] = { { "SetText", TextRenderer_SetText },
-                                                { "GetText", TextRenderer_GetText },
-                                                { "SetFontSize", TextRenderer_SetSize },
-                                                { "GetFontSize", TextRenderer_GetSize },
-                                                { "SetColor", TextRenderer_SetColor },
-                                                { "GetColor", TextRenderer_GetColor },
-                                                { "SetFaceCamera", TextRenderer_SetFaceCamera },
-                                                { "GetFaceCamera", TextRenderer_GetFaceCamera },
-                                                { "SetAnchorPoint", TextRenderer_SetAnchorPoint },
-                                                { "GetAnchorPoint", TextRenderer_GetAnchorPoint },
-                                                { "SetFont", TextRenderer_SetFont },
-                                                { "GetFont", TextRenderer_GetFont },
-                                                { "SetOutline", TextRenderer_SetOutline },
-                                                { "SetOutlineSize", TextRenderer_SetOutlineSize },
-                                                { NULL, NULL } };
+const luaL_Reg LuaScript::textRendererlib[] = { { "SetText", TextRenderer_SetText }, { "GetText", TextRenderer_GetText }, { "SetFontSize", TextRenderer_SetSize },
+    { "GetFontSize", TextRenderer_GetSize }, { "SetColor", TextRenderer_SetColor }, { "GetColor", TextRenderer_GetColor }, { "SetFaceCamera", TextRenderer_SetFaceCamera },
+    { "GetFaceCamera", TextRenderer_GetFaceCamera }, { "SetAnchorPoint", TextRenderer_SetAnchorPoint }, { "GetAnchorPoint", TextRenderer_GetAnchorPoint }, { "SetFont", TextRenderer_SetFont },
+    { "GetFont", TextRenderer_GetFont }, { "SetOutline", TextRenderer_SetOutline }, { "SetOutlineSize", TextRenderer_SetOutlineSize }, { NULL, NULL } };
 /// Resource
 const luaL_Reg LuaScript::resAnimationlib[] = { { "IsValid", resAnimation_Validate }, { NULL, NULL } };
 
 const luaL_Reg LuaScript::attractorlib[] = { { "SetForce", attractor_SetForce }, { "GetForce", attractor_GetForce }, { NULL, NULL } };
 
-const luaL_Reg LuaScript::directionalLightlib[] = { { "GetDirection", directionalLight_GetDirection },
-                                                    { "SetDirection", directionalLight_SetDirection },
-                                                    { "GetIntensity", Light_GetIntensity },
-                                                    { "SetIntensity", Light_SetIntensity },
-                                                    { "GetColor", Light_GetLightColor },
-                                                    { "SetColor", Light_SetLightColor },
-                                                    { "GetCastShadows", Light_IsCastShadows },
-                                                    { "SetCastShadows", Light_SetCastShadows },
-                                                    { "GetShadowDistance", Light_GetShadowDistance },
-                                                    { "GetShadowBias", Light_GetShadowBias },
-                                                    { "SetShadowBias", Light_SetShadowBias },
-                                                    { NULL, NULL } };
+const luaL_Reg LuaScript::directionalLightlib[] = { { "GetDirection", directionalLight_GetDirection }, { "SetDirection", directionalLight_SetDirection }, { "GetIntensity", Light_GetIntensity },
+    { "SetIntensity", Light_SetIntensity }, { "GetColor", Light_GetLightColor }, { "SetColor", Light_SetLightColor }, { "GetCastShadows", Light_IsCastShadows },
+    { "SetCastShadows", Light_SetCastShadows }, { "GetShadowDistance", Light_GetShadowDistance }, { "GetShadowBias", Light_GetShadowBias }, { "SetShadowBias", Light_SetShadowBias }, { NULL, NULL } };
 
-const luaL_Reg LuaScript::pointLightlib[] = { { "GetIntensity", Light_GetIntensity },
-                                              { "SetIntensity", Light_SetIntensity },
-                                              { "GetColor", Light_GetLightColor },
-                                              { "SetColor", Light_SetLightColor },
-                                              { "GetCastShadows", Light_IsCastShadows },
-                                              { "SetCastShadows", Light_SetCastShadows },
-                                              { "GetShadowDistance", Light_GetShadowDistance },
-                                              { "GetShadowBias", Light_GetShadowBias },
-                                              { "SetShadowBias", Light_SetShadowBias },
-                                              { NULL, NULL } };
+const luaL_Reg LuaScript::pointLightlib[] = { { "GetIntensity", Light_GetIntensity }, { "SetIntensity", Light_SetIntensity }, { "GetColor", Light_GetLightColor }, { "SetColor", Light_SetLightColor },
+    { "GetCastShadows", Light_IsCastShadows }, { "SetCastShadows", Light_SetCastShadows }, { "GetShadowDistance", Light_GetShadowDistance }, { "GetShadowBias", Light_GetShadowBias },
+    { "SetShadowBias", Light_SetShadowBias }, { NULL, NULL } };
 
 const luaL_Reg LuaScript::spotLightlib[] = { { "GetDirection", spotLight_GetDirection }, { "SetDirection", spotLight_SetDirection }, { "GetIntensity", Light_GetIntensity },
-                                             { "SetIntensity", Light_SetIntensity },     { "GetColor", Light_GetLightColor },        { "SetColor", Light_SetLightColor },
-                                             { "GetCastShadows", Light_IsCastShadows },  { "SetCastShadows", Light_SetCastShadows }, { "GetShadowDistance", Light_GetShadowDistance },
-                                             { "GetShadowBias", Light_GetShadowBias },   { "SetShadowBias", Light_SetShadowBias },   { NULL, NULL } };
+    { "SetIntensity", Light_SetIntensity }, { "GetColor", Light_GetLightColor }, { "SetColor", Light_SetLightColor }, { "GetCastShadows", Light_IsCastShadows },
+    { "SetCastShadows", Light_SetCastShadows }, { "GetShadowDistance", Light_GetShadowDistance }, { "GetShadowBias", Light_GetShadowBias }, { "SetShadowBias", Light_SetShadowBias }, { NULL, NULL } };
 
 // ============================================================================
 // Delta time
@@ -848,10 +655,13 @@ int LuaScript::debug_DrawLine(lua_State* L)
     Vector3* v2 = checkVector3(L, 2);
     Color4* c = checkColor(L, 3, false);
 
+#ifdef USE_VULKAN
+#else
     if (c)
         Renderer::Instance().DrawLine(*v1, *v2, *c);
     else
         Renderer::Instance().DrawLine(*v1, *v2);
+#endif  // USE_VULKAN
     return 0;
 }
 
@@ -1516,8 +1326,9 @@ int LuaScript::color_new(lua_State* L)
 {
     int params = lua_gettop(L);
     if (params == 4)
-        return pushColor(L, clampColor(Vector4 { static_cast<float>(luaL_checknumber(L, 1)), static_cast<float>(luaL_checknumber(L, 2)), static_cast<float>(luaL_checknumber(L, 3)),
-                                                 static_cast<float>(luaL_checknumber(L, 4)) }));
+        return pushColor(L,
+            clampColor(Vector4 {
+                static_cast<float>(luaL_checknumber(L, 1)), static_cast<float>(luaL_checknumber(L, 2)), static_cast<float>(luaL_checknumber(L, 3)), static_cast<float>(luaL_checknumber(L, 4)) }));
 
     return pushColor(L, Vector4 { 1, 1, 1, 1 });
 }
@@ -3247,12 +3058,12 @@ int LuaScript::audioSystem_PlayAudioAtLocation(lua_State* L)
         case 3: AudioSystem::Instance().PlayAtLocation(luaL_checkstring(L, 1), *checkVector3(L, 2), static_cast<float>(lua_tonumber(L, 3))); break;
         case 4: AudioSystem::Instance().PlayAtLocation(luaL_checkstring(L, 1), *checkVector3(L, 2), static_cast<float>(lua_tonumber(L, 3)), static_cast<float>(lua_tonumber(L, 4))); break;
         case 5:
-            AudioSystem::Instance().PlayAtLocation(luaL_checkstring(L, 1), *checkVector3(L, 2), static_cast<float>(lua_tonumber(L, 3)), static_cast<float>(lua_tonumber(L, 4)),
-                                                   static_cast<float>(lua_tonumber(L, 5)));
+            AudioSystem::Instance().PlayAtLocation(
+                luaL_checkstring(L, 1), *checkVector3(L, 2), static_cast<float>(lua_tonumber(L, 3)), static_cast<float>(lua_tonumber(L, 4)), static_cast<float>(lua_tonumber(L, 5)));
             break;
         case 6:
             AudioSystem::Instance().PlayAtLocation(luaL_checkstring(L, 1), *checkVector3(L, 2), static_cast<float>(lua_tonumber(L, 3)), static_cast<float>(lua_tonumber(L, 4)),
-                                                   static_cast<float>(lua_tonumber(L, 5)), luaL_checkstring(L, 6));
+                static_cast<float>(lua_tonumber(L, 5)), luaL_checkstring(L, 6));
             break;
     }
     return 0;

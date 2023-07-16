@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include "GeometryPass.h"
 #include "Gl\glew.h"
 #include "LightPass.h"
@@ -39,3 +41,5 @@ private:
     void BuildRenderTargets();
     void BuildDUDVMaps();
 };
+
+#endif // !USE_VULKAN

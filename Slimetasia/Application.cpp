@@ -656,7 +656,10 @@ void Application::RunMainLoop()
         if (m_IsLoadingNewScene)
         {
             Serializer(m_NewSceneFileName).LoadScene();
+#ifdef USE_VULKAN
+#else
             Renderer::Instance().SetCurrentLayer(m_CurrentScene->GetLayers().front());
+#endif  // USE_VULKAN
             Editor::Instance().SetLayer(m_CurrentScene->GetLayers().front());
             m_IsLoadingNewScene = false;
         }

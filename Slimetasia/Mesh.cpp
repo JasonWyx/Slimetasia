@@ -895,10 +895,24 @@ AABB Mesh::GetAABB() const
     return m_AABB;
 }
 
+#ifdef USE_VULKAN
+constexpr vk::VertexInputBindingDescription Mesh::GetVertexBindingDescription()
+{
+    return vk::VertexInputBindingDescription();
+}
+
+constexpr std::vector<vk::VertexInputAttributeDescription> Mesh::GetVertexAttributeDescriptions()
+{
+    return std::vector<vk::VertexInputAttributeDescription>();
+}
+
+#else
+
 GLuint Mesh::GetVAO() const
 {
     return m_VertexArray;
 }
+#endif  // USE_VULKAN
 
 void Mesh::ParseNodes(aiNode* currNode)
 {

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include "GeometryPass.h"
@@ -62,3 +64,5 @@ private:
 
     void BuildRenderTargets();
 };
+
+#endif // !USE_VULKAN

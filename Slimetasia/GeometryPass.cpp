@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "GeometryPass.h"
 
 #include "Camera.h"
@@ -544,3 +546,5 @@ void GeometryPass::StartMeshCulling(const Camera& camera, const RenderLayer& ren
 {
     culledMeshRenderers = Application::Instance().GetThreadPool().enqueue(RenderLayer::GetCulledMeshRenderers, std::ref(renderLayer), std::ref(camera));
 }
+
+#endif // !USE_VULKAN

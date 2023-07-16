@@ -58,7 +58,7 @@ bool AABB::Contains(const AABB& aabb) const
     // Return if aabb is completely contained in this
     // Warn("Assignment2: Required function un-implemented");
     return (aabb.m_Min.x <= m_Max.x && aabb.m_Min.x >= m_Min.x && aabb.m_Max.x <= m_Max.x && aabb.m_Max.x >= m_Min.x && aabb.m_Min.y <= m_Max.y && aabb.m_Min.y >= m_Min.y && aabb.m_Max.y <= m_Max.y &&
-            aabb.m_Max.y >= m_Min.y && aabb.m_Min.z <= m_Max.z && aabb.m_Min.z >= m_Min.z && aabb.m_Max.z <= m_Max.z && aabb.m_Max.z >= m_Min.z);
+        aabb.m_Max.y >= m_Min.y && aabb.m_Min.z <= m_Max.z && aabb.m_Min.z >= m_Min.z && aabb.m_Max.z <= m_Max.z && aabb.m_Max.z >= m_Min.z);
 }
 
 void AABB::Expand(const Vector3& point)
@@ -95,12 +95,11 @@ void AABB::Transform(const Vector3& scale, const Matrix3& rotation, const Vector
     Vector3 extent(m_Max - center);
     extent *= scale;
     const Vector3 newextent(abs(rotation[0]) * extent.x + abs(rotation[1]) * extent.y + abs(rotation[2]) * extent.z,
-                            abs(rotation[3]) * extent.x + abs(rotation[4]) * extent.y + abs(rotation[5]) * extent.z,
-                            abs(rotation[6]) * extent.x + abs(rotation[7]) * extent.y + abs(rotation[8]) * extent.z);
+        abs(rotation[3]) * extent.x + abs(rotation[4]) * extent.y + abs(rotation[5]) * extent.z, abs(rotation[6]) * extent.x + abs(rotation[7]) * extent.y + abs(rotation[8]) * extent.z);
 
     center *= scale;
     Vector3 newcenter(rotation[0] * center.x + rotation[1] * center.y + rotation[2] * center.z, rotation[3] * center.x + rotation[4] * center.y + rotation[5] * center.z,
-                      rotation[6] * center.x + rotation[7] * center.y + rotation[8] * center.z);
+        rotation[6] * center.x + rotation[7] * center.y + rotation[8] * center.z);
 
     newcenter += translation;
     m_Max = newcenter + newextent;
@@ -130,7 +129,12 @@ Vector3 AABB::GetHalfSize() const
 void AABB::DebugDraw(const unsigned int& parentID) const
 {
 #if EDITOR
+
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U; // todo
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
+#endif  // USE_VULKAN
     if (parentID != currentLayerID) return;
 
     std::vector<Vector3> pts;
@@ -171,7 +175,11 @@ void AABB::DebugDraw(const unsigned int& parentID) const
     pts.emplace_back(m_Min.x, m_Max.y, m_Min.z);
     pts.emplace_back(m_Max.x, m_Max.y, m_Min.z);
 
+#ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 1.0f, 1.0f), DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
+
 #endif
 }
 

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include <array>
@@ -65,3 +67,5 @@ private:
 
     std::future<std::vector<MeshRenderer*>> culledMeshRenderers;
 };
+
+#endif // !USE_VULKAN

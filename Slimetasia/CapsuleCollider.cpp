@@ -17,7 +17,11 @@ void CapsuleCollider::DebugDraw()
     if (parentLayer == nullptr) return;
 
     auto pid = parentLayer->GetId();
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U; // todo
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
+#endif  // USE_VULKAN
     if (pid != currentLayerID) return;
     std::vector<Vector3> pts;
     auto u = Vector3 { 1.f, 0.f, 0.f }, v = Vector3 { 0.f, 1.f, 0.f }, w = Vector3 { 0.f, 0.f, 1.f };
@@ -51,7 +55,10 @@ void CapsuleCollider::DebugDraw()
         pts.emplace_back(mypos.x + b.y, mypos.y + b.x + dud.z, mypos.z);
     }
 
+    #ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 0.0f, 1.0f), DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
 }
 
 bool CapsuleCollider::ContainsPoint(const Vector3& pt)

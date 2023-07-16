@@ -35,7 +35,11 @@ void Frustum::Set(const Vector3& lbn, const Vector3& rbn, const Vector3& rtn, co
 
 void Frustum::DebugDraw(const unsigned int& parentID)
 {
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U; // todo
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
+#endif  // USE_VULKAN
     if (parentID != currentLayerID) return;
 
     std::vector<Vector3> pts;
@@ -76,7 +80,10 @@ void Frustum::DebugDraw(const unsigned int& parentID)
     pts.emplace_back(m_Vertices[3]);
     pts.emplace_back(m_Vertices[7]);
 
+    #ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(1.0f, 0.0f, 1.0f, 1.0f), DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
 }
 
 IntersectionType::Type Frustum::FrustumAabb(const Vector4 planes[6], const Vector3& aabbMin, const Vector3& aabbMax, size_t& lastAxis)

@@ -130,7 +130,11 @@ void BoxCollider::Initialize()
 void BoxCollider::DebugDraw()
 {
     auto pid = GetOwner()->GetParentLayer()->GetId();
+#ifdef USE_VULKAN
+    auto currentLayerID = 0U;
+#else
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
+#endif  // USE_VULKAN
     if (pid != currentLayerID) return;
 
     std::vector<Vector3> pts;
@@ -175,7 +179,10 @@ void BoxCollider::DebugDraw()
     pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
     pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
 
+#ifdef USE_VULKAN
+#else
     Renderer::Instance().DrawDebug(currentLayerID, pts, Color4(0.0f, 1.0f, 0.0f, 1.0f), DebugPrimitiveType::Lines);
+#endif  // USE_VULKAN
 }
 
 void BoxCollider::ComputeInertiaTensor(Matrix3& tensor, const float& mass) const

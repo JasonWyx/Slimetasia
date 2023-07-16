@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include <map>
@@ -107,3 +109,5 @@ public:
     void SetGizmoMode(GizmoMode mode);
     void SetHoveredGizmo(GizmoType gizmo);
 };
+
+#endif // !USE_VULKAN

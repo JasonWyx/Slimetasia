@@ -51,7 +51,11 @@ public:
     void SetMeshColor(Color4 const& color);
     bool IsCastShadow() const;
     void SetCastShadow(bool cast);
+#ifdef USE_VULKAN
+
+#else
     GLuint GetTextureSampler() const;
+#endif  // USE_VULKAN
     bool IsTilingEnabled() const;
     void SetTilingEnabled(bool enabled);
     TilingAxis GetTilingAxis() const;
@@ -74,7 +78,10 @@ private:
     HTexture m_EmissiveTexture;
     Color3 m_EmissiveColor;
     bool m_CastShadow;
+#ifdef USE_VULKAN
+#else
     GLuint m_TextureSampler;
+#endif  // USE_VULKAN
     bool m_TilingEnabled;
     TilingAxis m_TilingAxis;
     TilingMode m_TilingMode;

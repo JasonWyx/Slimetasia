@@ -27,8 +27,11 @@ public:
     void OnUpdate(float dt) override;
 
     Transform* GetTransform() { return m_Transform; }
+#ifdef USE_VULKAN
+#else
     GLuint GetReflectionTexture() const { return m_ReflectionTexture; }
     GLuint GetRefractionTexture() const { return m_RefractionTexture; }
+#endif  // USE_VULKAN
     float GetWaveFactor() const { return m_WaveFactor; }
     void GenerateTextures(const iVector2& viewportSize);
 
@@ -36,8 +39,11 @@ private:
 
     Transform* m_Transform;
     iVector2 m_ViewportSize;
+#ifndef USE_VULKAN
+#else
     GLuint m_ReflectionTexture;
     GLuint m_RefractionTexture;
+#endif  // USE_VULKAN
     float m_WaveFactor;
 
     REFLECT();

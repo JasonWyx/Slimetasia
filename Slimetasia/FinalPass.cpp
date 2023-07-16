@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "FinalPass.h"
 
 #include "ResourceManager.h"
@@ -107,3 +109,5 @@ void FinalPass::BuildRenderTargets()
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 }
+
+#endif // !USE_VULKAN

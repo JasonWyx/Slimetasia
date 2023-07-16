@@ -1,3 +1,5 @@
+#ifndef USE_VULKAN
+
 #include "ShadowPass.h"
 
 #include "DirectionalLight.h"
@@ -290,3 +292,5 @@ void ShadowPass::Render(RenderLayer const& renderLayer)
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 }
+
+#endif // !USE_VULKAN
