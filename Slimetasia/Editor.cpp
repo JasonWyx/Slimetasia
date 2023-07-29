@@ -372,7 +372,7 @@ void Editor::DrawHelp()
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImU32 color = ImGui::GetColorU32(ImGuiCol_Text);
         ImVec2 pos = ImGui::GetCursorScreenPos();
-        draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 1.5f, ImVec2(pos.x, pos.y + 5.0f), color, "Welcome to Slimetasia's Troubleshoot/Help Screen.");
+        draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 1.5f, ImVec2(pos[0], pos[1] + 5.0f), color, "Welcome to Slimetasia's Troubleshoot/Help Screen.");
 
         ImGui::NewLine();
         ImGui::NewLine();
@@ -385,7 +385,7 @@ void Editor::DrawHelp()
             ImGui::NewLine();
             ImGui::NewLine();
             ImGui::NewLine();
-            draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 7.0f, ImVec2(pos.x + 50.0f, pos.y + 75.0f), IM_COL32(255, 0, 0, 255), "User Error!");
+            draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 7.0f, ImVec2(pos[0] + 50.0f, pos[1] + 75.0f), IM_COL32(255, 0, 0, 255), "User Error!");
             ImGui::TreePop();
             ImGui::TreePop();
         }
@@ -421,8 +421,8 @@ void Editor::DrawViewport()
     const ImVec2 windowSize = ImGui::GetWindowSize();
     const ImVec2 windowOffset = ImGui::GetWindowPos();
 
-    float minusy = ImGui::GetWindowPos().y;
-    float minusx = ImGui::GetWindowPos().x;
+    float minusy = ImGui::GetWindowPos()[1];
+    float minusx = ImGui::GetWindowPos()[0];
 
     if (Application::Instance().GetGameTimer().IsEditorPaused())
     {
@@ -553,7 +553,7 @@ void Editor::DrawViewport()
         m_CurrentLayer->GetEditorCamera()->OnUpdate(1 / 60.0f);
         m_CurrentLayer->GetEditorCamera()->SetUpdate(false);
 
-        float y = abs(ImGui::GetIO().MousePos.y - ImGui::GetWindowSize().y - minusy);
+        float y = abs(ImGui::GetIO().MousePos[1] - ImGui::GetWindowSize()[1] - minusy);
 
         // std::cout << "Input::Instance().GetKeyPressed(VK_LBUTTON) = " << Input::Instance().GetKeyPressed(VK_LBUTTON) << "\n";
         // std::cout << "!Input::Instance().GetKeyDown(KEY_LALT) = " << !Input::Instance().GetKeyDown(KEY_LALT) << "\n";
@@ -578,7 +578,7 @@ void Editor::DrawViewport()
 #ifdef USE_VULKAN
             unsigned picked = 0;
 #else
-            unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(ImGui::GetIO().MousePos.x - minusx), (int)y));
+            unsigned picked = Renderer::Instance().GetPickedObject(iVector2((int)(ImGui::GetIO().MousePos[0] - minusx), (int)y));
 #endif  // USE_VULKAN  // USE_VULKAN
 
             if (picked != 0)
@@ -648,13 +648,13 @@ void Editor::DrawViewport()
 
 #ifdef USE_VULKAN
 #else
-    Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
-    Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
+    Renderer::Instance().SetWindowSize(iVector2((int)windowSize[0], (int)windowSize[1]));
+    Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize[0], (int)windowSize[1]));
 #endif  // USE_VULKAN
 
     ImVec2 GameCameraSize = ImVec2((float)Application::Instance().GetWindowHeight(), (float)Application::Instance().GetWindowHeight());
-    GameCameraSize.x /= 10.0f;
-    GameCameraSize.y /= 10.0f;
+    GameCameraSize[0] /= 10.0f;
+    GameCameraSize[1] /= 10.0f;
 
 #ifdef USE_VULKAN
     ImGui::Image((ImTextureID)(g_Renderer->GetRenderAttachment()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
@@ -720,9 +720,9 @@ void Editor::DrawViewport()
                     currOperation = ImGuizmo::SCALE;
                 }
 
-                memcpy(trans, t->GetWorldPosition().GetVector(), sizeof(float) * 3);
-                memcpy(rot, t->GetWorldRotation().GetVector(), sizeof(float) * 3);
-                memcpy(scale, t->GetWorldScale().GetVector(), sizeof(float) * 3);
+                memcpy(trans, t->GetWorldPosition().GetData(), sizeof(float) * 3);
+                memcpy(rot, t->GetWorldRotation().GetData(), sizeof(float) * 3);
+                memcpy(scale, t->GetWorldScale().GetData(), sizeof(float) * 3);
 
                 bool useSnap(false);
                 if (Input::Instance().GetKeyDown(KEY_LSHIFT))
@@ -806,7 +806,7 @@ void Editor::DrawViewport()
                         t->SetWorldPosition(savedTrans);
                         t->SetWorldRotation(savedRot);
                         t->SetWorldScale(savedScale);
-                        if ((trans[0] != savedTrans.x || trans[1] != savedTrans.y || trans[2] != savedTrans.z) && currOperation == ImGuizmo::TRANSLATE)
+                        if ((trans[0] != savedTrans[0] || trans[1] != savedTrans[1] || trans[2] != savedTrans[2]) && currOperation == ImGuizmo::TRANSLATE)
                         {
                             Vector3 newValue = Vector3(trans[0], trans[1], trans[2]);
                             Vector3 oldValue = savedTrans;
@@ -815,7 +815,7 @@ void Editor::DrawViewport()
                             m_Undo.push_back(std::move(act));
                             ClearRedo();
                         }
-                        else if ((scale[0] != savedScale.x || scale[1] != savedScale.y || scale[2] != savedScale.z) && currOperation == ImGuizmo::SCALE)
+                        else if ((scale[0] != savedScale[0] || scale[1] != savedScale[1] || scale[2] != savedScale[2]) && currOperation == ImGuizmo::SCALE)
                         {
                             Vector3 newValue = Vector3(scale[0], scale[1], scale[2]);
                             Vector3 oldValue = savedScale;
@@ -824,7 +824,7 @@ void Editor::DrawViewport()
                             m_Undo.push_back(std::move(act));
                             ClearRedo();
                         }
-                        else if ((rot[0] != savedRot.x || rot[1] != savedRot.y || rot[2] != savedRot.z) && currOperation == ImGuizmo::ROTATE)
+                        else if ((rot[0] != savedRot[0] || rot[1] != savedRot[1] || rot[2] != savedRot[2]) && currOperation == ImGuizmo::ROTATE)
                         {
                             Vector3 newValue = Vector3(rot[0], rot[1], rot[2]);
                             Vector3 oldValue = savedRot;
@@ -1083,36 +1083,36 @@ void Editor::DrawArchetype()
                         {
                             iVector2* vec3 = reinterpret_cast<iVector2*>(address + properties[i].offset);
                             int tmp[2];
-                            tmp[0] = vec3->x;
-                            tmp[1] = vec3->y;
+                            tmp[0] = (*vec3)[0];
+                            tmp[1] = (*vec3)[1];
                             m_Global_Spaces += " ";
                             ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
-                            vec3->x = tmp[0];
-                            vec3->y = tmp[1];
+                            (*vec3)[0] = tmp[0];
+                            (*vec3)[1] = tmp[1];
                         }
                         else if (properties[i].type == typeid(Vector2).name())
                         {
                             Vector2* vec3 = reinterpret_cast<Vector2*>(address + properties[i].offset);
                             float tmp[2];
-                            tmp[0] = vec3->x;
-                            tmp[1] = vec3->y;
+                            tmp[0] = (*vec3)[0];
+                            tmp[1] = (*vec3)[1];
                             m_Global_Spaces += " ";
                             ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
-                            vec3->x = tmp[0];
-                            vec3->y = tmp[1];
+                            (*vec3)[0] = tmp[0];
+                            (*vec3)[1] = tmp[1];
                         }
                         else if (properties[i].type == typeid(Vector3).name())
                         {
                             Vector3* vec3 = reinterpret_cast<Vector3*>(address + properties[i].offset);
                             float tmp[3];
-                            tmp[0] = vec3->x;
-                            tmp[1] = vec3->y;
-                            tmp[2] = vec3->z;
+                            tmp[0] = (*vec3)[0];
+                            tmp[1] = (*vec3)[1];
+                            tmp[2] = (*vec3)[2];
                             m_Global_Spaces += " ";
                             ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
-                            vec3->x = tmp[0];
-                            vec3->y = tmp[1];
-                            vec3->z = tmp[2];
+                            (*vec3)[0] = tmp[0];
+                            (*vec3)[1] = tmp[1];
+                            (*vec3)[2] = tmp[2];
                         }
                         else if (properties[i].type == typeid(float).name())
                         {
@@ -1143,16 +1143,16 @@ void Editor::DrawArchetype()
                             Color4* clr = reinterpret_cast<Color4*>(address + properties[i].offset);
 
                             float tmp[4];
-                            tmp[0] = clr->x;
-                            tmp[1] = clr->y;
-                            tmp[2] = clr->z;
-                            tmp[3] = clr->w;
+                            tmp[0] = (*clr)[0];
+                            tmp[1] = (*clr)[1];
+                            tmp[2] = (*clr)[2];
+                            tmp[3] = (*clr)[3];
                             ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                             m_Global_Spaces += " ";
                             ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
                             if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                             {
-                                if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
+                                if (tmp[0] != (*clr)[0] || tmp[1] != (*clr)[1] || tmp[2] != (*clr)[2] || tmp[3] != (*clr)[3])
                                 {
                                     Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
                                     *clr = newValue;
@@ -1175,7 +1175,7 @@ void Editor::DrawArchetype()
                                 ImGui::ColorPicker4(("##picker" + properties[i].name).c_str(), (float*)&tmp_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
                                 if (Input::Instance().GetKeyUp(MOUSE_LEFT))
                                 {
-                                    if (tmp_color.x != clr->x || tmp_color.y != clr->y || tmp_color.z != clr->z || tmp_color.w != clr->w)
+                                    if (tmp_color.x != (*clr)[0] || tmp_color.y != (*clr)[1] || tmp_color.z != (*clr)[2] || tmp_color.w != (*clr)[3])
                                     {
                                         Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                                         *clr = newValue;
@@ -1424,36 +1424,36 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
             {
                 iVector2* vec3 = reinterpret_cast<iVector2*>(address + properties[i].offset);
                 int tmp[2];
-                tmp[0] = vec3->x;
-                tmp[1] = vec3->y;
+                tmp[0] = (*vec3)[0];
+                tmp[1] = (*vec3)[1];
                 m_Global_Spaces += " ";
                 ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
-                vec3->x = tmp[0];
-                vec3->y = tmp[1];
+                (*vec3)[0] = tmp[0];
+                (*vec3)[1] = tmp[1];
             }
             else if (properties[i].type == typeid(Vector2).name())
             {
                 Vector2* vec3 = reinterpret_cast<Vector2*>(address + properties[i].offset);
                 float tmp[2];
-                tmp[0] = vec3->x;
-                tmp[1] = vec3->y;
+                tmp[0] = (*vec3)[0];
+                tmp[1] = (*vec3)[1];
                 m_Global_Spaces += " ";
                 ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
-                vec3->x = tmp[0];
-                vec3->y = tmp[1];
+                (*vec3)[0] = tmp[0];
+                (*vec3)[1] = tmp[1];
             }
             else if (properties[i].type == typeid(Vector3).name())
             {
                 Vector3* vec3 = reinterpret_cast<Vector3*>(address + properties[i].offset);
                 float tmp[3];
-                tmp[0] = vec3->x;
-                tmp[1] = vec3->y;
-                tmp[2] = vec3->z;
+                tmp[0] = (*vec3)[0];
+                tmp[1] = (*vec3)[1];
+                tmp[2] = (*vec3)[2];
                 m_Global_Spaces += " ";
                 ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
-                vec3->x = tmp[0];
-                vec3->y = tmp[1];
-                vec3->z = tmp[2];
+                (*vec3)[0] = tmp[0];
+                (*vec3)[1] = tmp[1];
+                (*vec3)[2] = tmp[2];
             }
             else if (properties[i].type == typeid(float).name())
             {
@@ -1484,16 +1484,16 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                 Color4* clr = reinterpret_cast<Color4*>(address + properties[i].offset);
 
                 float tmp[4];
-                tmp[0] = clr->x;
-                tmp[1] = clr->y;
-                tmp[2] = clr->z;
-                tmp[3] = clr->w;
+                tmp[0] = (*clr)[0];
+                tmp[1] = (*clr)[1];
+                tmp[2] = (*clr)[2];
+                tmp[3] = (*clr)[3];
                 ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
                 m_Global_Spaces += " ";
                 ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                 {
-                    if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
+                    if (tmp[0] != (*clr)[0] || tmp[1] != (*clr)[1] || tmp[2] != (*clr)[2] || tmp[3] != (*clr)[3])
                     {
                         Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
                         *clr = newValue;
@@ -1516,7 +1516,7 @@ void Editor::ParentArchetypeInspector(char* address, std::string parent, GameObj
                     ImGui::ColorPicker4(("##picker" + properties[i].name).c_str(), (float*)&tmp_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
                     if (Input::Instance().GetKeyUp(MOUSE_LEFT))
                     {
-                        if (tmp_color.x != clr->x || tmp_color.y != clr->y || tmp_color.z != clr->z || tmp_color.w != clr->w)
+                        if (tmp_color.x != (*clr)[0] || tmp_color.y != (*clr)[1] || tmp_color.z != (*clr)[2] || tmp_color.w != (*clr)[3])
                         {
                             Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                             *clr = newValue;
@@ -1616,7 +1616,7 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
     for (auto& prop : properties)
     {
         ImGui::Text("%s", prop.name.substr(prop.name.find_first_not_of("m_")).c_str());
-        ImGui::SameLine(/*ImGui::GetWindowContentRegionMax().x - 300*/);
+        ImGui::SameLine(/*ImGui::GetWindowContentRegionMax()[0] - 300*/);
 
         if (prop.type == typeid(std::string).name())
         {
@@ -1634,9 +1634,9 @@ void Editor::ParentInspector(char* address, std::string comp, std::string parent
         {
             ParentStructOptions(reinterpret_cast<Vector2*>(address + prop.offset), m_CurrentObject, comp);
         }
-        else if (prop.type == typeid(TVector2<int>).name())
+        else if (prop.type == typeid(iVector2).name())
         {
-            ParentStructOptions(reinterpret_cast<TVector2<int>*>(address + prop.offset), m_CurrentObject, comp);
+            ParentStructOptions(reinterpret_cast<iVector2*>(address + prop.offset), m_CurrentObject, comp);
         }
         else if (prop.type == typeid(float).name())
         {
@@ -1741,7 +1741,7 @@ void Editor::StructInspector(char* address, std::string comp)
             for (int i = 0; i < properties.size(); ++i)
             {
                 ImGui::Text("%s", properties[i].name.substr(properties[i].name.find_first_not_of("m_")).c_str());
-                ImGui::SameLine(/*ImGui::GetWindowContentRegionMax().x - 300*/);
+                ImGui::SameLine(/*ImGui::GetWindowContentRegionMax()[0] - 300*/);
 
                 // if else for each type
                 if (properties[i].type == typeid(std::string).name())
@@ -1756,9 +1756,9 @@ void Editor::StructInspector(char* address, std::string comp)
                 {
                     ParentStructOptions(reinterpret_cast<Vector2*>(address + properties[i].offset), m_CurrentObject, comp);
                 }
-                else if (properties[i].type == typeid(TVector2<int>).name())
+                else if (properties[i].type == typeid(iVector2).name())
                 {
-                    ParentStructOptions(reinterpret_cast<TVector2<int>*>(address + properties[i].offset), m_CurrentObject, comp);
+                    ParentStructOptions(reinterpret_cast<iVector2*>(address + properties[i].offset), m_CurrentObject, comp);
                 }
                 else if (properties[i].type == typeid(float).name())
                 {
@@ -1893,7 +1893,7 @@ void Editor::DrawTextEditor()
     ImVec2 winSz = ImVec2((float)Application::Instance().GetWindowWidth(), (float)Application::Instance().GetWindowHeight());
     ImGui::Text("Filename : %s", m_EditorFileName.c_str());
     ImGui::BeginChild("EditorText", ImVec2(-1, -1), false, ImGuiWindowFlags_AlwaysHorizontalScrollbar);
-    ImGui::InputTextMultiline("##source", m_EditorStringBuffer, IM_ARRAYSIZE(m_EditorStringBuffer), ImVec2(winSz.x, -1), ImGuiInputTextFlags_AllowTabInput);
+    ImGui::InputTextMultiline("##source", m_EditorStringBuffer, IM_ARRAYSIZE(m_EditorStringBuffer), ImVec2(winSz[0], -1), ImGuiInputTextFlags_AllowTabInput);
     ImGui::EndChild();
 }
 
@@ -2198,13 +2198,13 @@ void Editor::DrawFullScreenViewport()
         }
 
         ImVec2 windowSize = ImGui::GetWindowSize();
-        windowSize.y -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
+        windowSize[1] -= ImGuiStyleVar_FramePadding * 2 + ImGui::GetFontSize() + 13.0f;
 
 #ifdef USE_VULKAN
         ImGui::Image((ImTextureID)(g_Renderer->GetRenderAttachment()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 #else
-        Renderer::Instance().SetWindowSize(iVector2((int)windowSize.x, (int)windowSize.y));
-        Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize.x, (int)windowSize.y));
+        Renderer::Instance().SetWindowSize(iVector2((int)windowSize[0], (int)windowSize[1]));
+        Renderer::Instance().GetCurrentEditorLayer()->GetEditorCamera()->SetViewportSize(iVector2((int)windowSize[0], (int)windowSize[1]));
         ImGui::Image((ImTextureID)((__int64)Renderer::Instance().GetRenderTexture()), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 #endif  // USE_VULKAN
 
@@ -2742,10 +2742,10 @@ void Editor::PhysicsOptionsVector3(Vector3* v)
 {
     Vector3 tmp = *v;
     m_Global_Spaces += " ";
-    ImGui::InputFloat3(m_Global_Spaces.c_str(), &tmp.x);
+    ImGui::InputFloat3(m_Global_Spaces.c_str(), &tmp[0]);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp.x != v->x || tmp.y != v->y || tmp.z != v->z)
+        if (tmp[0] != (*v)[0] || tmp[1] != (*v)[1] || tmp[2] != (*v)[2])
         {
             Vector3 newValue = tmp;
             Vector3 oldValue = *v;
@@ -2830,13 +2830,13 @@ void Editor::Options(std::string* s)
 void Editor::Options(Vector2* vec2, GameObject* go, std::string c, std::string p)
 {
     float tmp[2];
-    tmp[0] = vec2->x;
-    tmp[1] = vec2->y;
+    tmp[0] = (*vec2)[0];
+    tmp[1] = (*vec2)[1];
     m_Global_Spaces += " ";
     ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != vec2->x || tmp[1] != vec2->y)
+        if (tmp[0] != (*vec2)[0] || tmp[1] != (*vec2)[1])
         {
             Vector2 newValue(tmp[0], tmp[1]);
             Vector2 oldValue = *vec2;
@@ -2851,14 +2851,14 @@ void Editor::Options(Vector2* vec2, GameObject* go, std::string c, std::string p
 void Editor::Options(Vector3* vec3, GameObject* go, std::string c, std::string p)
 {
     float tmp[3];
-    tmp[0] = vec3->x;
-    tmp[1] = vec3->y;
-    tmp[2] = vec3->z;
+    tmp[0] = (*vec3)[0];
+    tmp[1] = (*vec3)[1];
+    tmp[2] = (*vec3)[2];
     m_Global_Spaces += " ";
     ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != vec3->x || tmp[1] != vec3->y || tmp[2] != vec3->z)
+        if (tmp[0] != (*vec3)[0] || tmp[1] != (*vec3)[1] || tmp[2] != (*vec3)[2])
         {
             Vector3 newValue(tmp[0], tmp[1], tmp[2]);
             Vector3 oldValue = *vec3;
@@ -2925,16 +2925,16 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
     static ImVec4 tmp_color;
 
     float tmp[4];
-    tmp[0] = clr->x;
-    tmp[1] = clr->y;
-    tmp[2] = clr->z;
-    tmp[3] = clr->w;
+    tmp[0] = (*clr)[0];
+    tmp[1] = (*clr)[1];
+    tmp[2] = (*clr)[2];
+    tmp[3] = (*clr)[3];
     ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
     m_Global_Spaces += " ";
     ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
+        if (tmp[0] != (*clr)[0] || tmp[1] != (*clr)[1] || tmp[2] != (*clr)[2] || tmp[3] != (*clr)[3])
         {
             Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
             Color4 oldValue = *clr;
@@ -2960,7 +2960,7 @@ void Editor::Options(Color4* clr, GameObject* go, std::string c, std::string p)
         ImGui::ColorPicker4(("##picker" + p).c_str(), (float*)&tmp_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
         if (Input::Instance().GetKeyUp(MOUSE_LEFT))
         {
-            if (tmp_color.x != clr->x || tmp_color.y != clr->y || tmp_color.z != clr->z || tmp_color.w != clr->w)
+            if (tmp_color.x != (*clr)[0] || tmp_color.y != (*clr)[1] || tmp_color.z != (*clr)[2] || tmp_color.w != (*clr)[3])
             {
                 Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
                 Color4 oldValue = *clr;
@@ -3072,20 +3072,20 @@ void Editor::Options(HAnimationSet anim, GameObject* go, std::string c, std::str
     }
 }
 
-void Editor::Options(TVector2<int>* vec2, GameObject* go, std::string c, std::string p)
+void Editor::Options(iVector2* vec2, GameObject* go, std::string c, std::string p)
 {
     int tmp[2];
-    tmp[0] = vec2->x;
-    tmp[1] = vec2->y;
+    tmp[0] = (*vec2)[0];
+    tmp[1] = (*vec2)[1];
     m_Global_Spaces += " ";
     ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != vec2->x || tmp[1] != vec2->y)
+        if (tmp[0] != (*vec2)[0] || tmp[1] != (*vec2)[1])
         {
-            TVector2<int> newValue(tmp[0], tmp[1]);
-            TVector2<int> oldValue = *vec2;
-            ActionInput<TVector2<int>>* act = new ActionInput<TVector2<int>>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
+            iVector2 newValue(tmp[0], tmp[1]);
+            iVector2 oldValue = *vec2;
+            ActionInput<iVector2>* act = new ActionInput<iVector2>(oldValue, newValue, go->GetName(), c, p, m_CurrentLayer, m_CurrentObject);
             act->Execute();
             m_Undo.push_back(std::move(act));
             ClearRedo();
@@ -3222,13 +3222,13 @@ void Editor::ParentStructOptions(bool* b, GameObject*& go, std::string c)
 void Editor::ParentStructOptions(Vector2* vec2, GameObject*& go, std::string c)
 {
     float tmp[2];
-    tmp[0] = vec2->x;
-    tmp[1] = vec2->y;
+    tmp[0] = (*vec2)[0];
+    tmp[1] = (*vec2)[1];
     m_Global_Spaces += " ";
     ImGui::InputFloat2(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != vec2->x || tmp[1] != vec2->y)
+        if (tmp[0] != (*vec2)[0] || tmp[1] != (*vec2)[1])
         {
             Vector2 newValue(tmp[0], tmp[1]);
             ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
@@ -3244,14 +3244,14 @@ void Editor::ParentStructOptions(Vector2* vec2, GameObject*& go, std::string c)
 void Editor::ParentStructOptions(Vector3* vec3, GameObject*& go, std::string c)
 {
     float tmp[3];
-    tmp[0] = vec3->x;
-    tmp[1] = vec3->y;
-    tmp[2] = vec3->z;
+    tmp[0] = (*vec3)[0];
+    tmp[1] = (*vec3)[1];
+    tmp[2] = (*vec3)[2];
     m_Global_Spaces += " ";
     ImGui::InputFloat3(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != vec3->x || tmp[1] != vec3->y || tmp[2] != vec3->z)
+        if (tmp[0] != (*vec3)[0] || tmp[1] != (*vec3)[1] || tmp[2] != (*vec3)[2])
         {
             Vector3 newValue(tmp[0], tmp[1], tmp[2]);
             ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
@@ -3264,18 +3264,18 @@ void Editor::ParentStructOptions(Vector3* vec3, GameObject*& go, std::string c)
     }
 }
 
-void Editor::ParentStructOptions(TVector2<int>* vec2, GameObject*& go, std::string c)
+void Editor::ParentStructOptions(iVector2* vec2, GameObject*& go, std::string c)
 {
     int tmp[2];
-    tmp[0] = vec2->x;
-    tmp[1] = vec2->y;
+    tmp[0] = (*vec2)[0];
+    tmp[1] = (*vec2)[1];
     m_Global_Spaces += " ";
     ImGui::InputInt2(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != vec2->x || tmp[1] != vec2->y)
+        if (tmp[0] != (*vec2)[0] || tmp[1] != (*vec2)[1])
         {
-            TVector2<int> newValue(tmp[0], tmp[1]);
+            iVector2 newValue(tmp[0], tmp[1]);
             ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             *vec2 = newValue;
             go->UpdateComponents();
@@ -3293,16 +3293,16 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
     static ImVec4 tmp_color;
 
     float tmp[4];
-    tmp[0] = clr->x;
-    tmp[1] = clr->y;
-    tmp[2] = clr->z;
-    tmp[3] = clr->w;
+    tmp[0] = (*clr)[0];
+    tmp[1] = (*clr)[1];
+    tmp[2] = (*clr)[2];
+    tmp[3] = (*clr)[3];
     ImVec4 color = ImVec4(tmp[0], tmp[1], tmp[2], tmp[3]);
     m_Global_Spaces += " ";
     ImGui::InputFloat4(m_Global_Spaces.c_str(), tmp);
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-        if (tmp[0] != clr->x || tmp[1] != clr->y || tmp[2] != clr->z || tmp[3] != clr->w)
+        if (tmp[0] != (*clr)[0] || tmp[1] != (*clr)[1] || tmp[2] != (*clr)[2] || tmp[3] != (*clr)[3])
         {
             ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
             Color4 newValue(tmp[0], tmp[1], tmp[2], tmp[3]);
@@ -3329,7 +3329,7 @@ void Editor::ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, s
         ImGui::ColorPicker4(("##picker" + p).c_str(), (float*)&tmp_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
         if (Input::Instance().GetKeyUp(MOUSE_LEFT))
         {
-            if (tmp_color.x != clr->x || tmp_color.y != clr->y || tmp_color.z != clr->z || tmp_color.w != clr->w)
+            if (tmp_color.x != (*clr)[0] || tmp_color.y != (*clr)[1] || tmp_color.z != (*clr)[2] || tmp_color.w != (*clr)[3])
             {
                 ActionParentStructInput* act = new ActionParentStructInput(go, c, m_CurrentLayer);
                 Color4 newValue(tmp_color.x, tmp_color.y, tmp_color.z, tmp_color.w);
@@ -4746,7 +4746,7 @@ void Editor::DrawInspector()
                     for (int i = 0; i < properties.size(); ++i)
                     {
                         ImGui::Text("%s", properties[i].name.substr(properties[i].name.find_first_not_of("m_")).c_str());
-                        ImGui::SameLine(/*ImGui::GetWindowContentRegionMax().x - 300*/);
+                        ImGui::SameLine(/*ImGui::GetWindowContentRegionMax()[0] - 300*/);
 
                         // if else for each type
                         if (properties[i].type == typeid(std::string).name())
@@ -4761,9 +4761,9 @@ void Editor::DrawInspector()
                         {
                             Options(reinterpret_cast<Vector2*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
-                        else if (properties[i].type == typeid(TVector2<int>).name())
+                        else if (properties[i].type == typeid(iVector2).name())
                         {
-                            Options(reinterpret_cast<TVector2<int>*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
+                            Options(reinterpret_cast<iVector2*>(address + properties[i].offset), m_CurrentObject, comp->GetName(), properties[i].name);
                         }
                         else if (properties[i].type == typeid(Vector4).name())
                         {
@@ -4973,11 +4973,11 @@ void Editor::SetEditorMouse()
     ImGuiIO& io = ImGui::GetIO();
     // set up the imgui io
     Vector2 mousePos = GetInstance(Input).GetMousePosition();
-    io.MousePos = ImVec2(mousePos.x, io.DisplaySize.y - mousePos.y);
+    io.MousePos = ImVec2(mousePos[0], io.DisplaySize[1] - mousePos[1]);
     io.MouseDown[0] = GetInstance(Input).GetKeyDown(MOUSE_LEFT);
     io.MouseDown[1] = GetInstance(Input).GetKeyDown(MOUSE_RIGHT);
-    io.MouseClickedPos[0] = ImVec2(mousePos.x, io.DisplaySize.y - mousePos.y);
-    io.MouseClickedPos[1] = ImVec2(mousePos.x, io.DisplaySize.y - mousePos.y);
+    io.MouseClickedPos[0] = ImVec2(mousePos[0], io.DisplaySize[1] - mousePos[1]);
+    io.MouseClickedPos[1] = ImVec2(mousePos[0], io.DisplaySize[1] - mousePos[1]);
 }
 
 Editor::Editor(HWND hwnd, float x, float y)

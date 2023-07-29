@@ -18,7 +18,7 @@ PointLight::~PointLight()
 
 float PointLight::GetShadowDistance() const
 {
-    return 2.0f * std::sqrtf(4 * (256 * std::max({ m_LightColor.r, m_LightColor.g, m_LightColor.b }) * m_Intensity)) / 2.0f;
+    return 2.0f * std::sqrtf(4 * (256 * std::max({ m_LightColor[0], m_LightColor[1], m_LightColor[2] }) * m_Intensity)) / 2.0f;
 }
 
 void PointLight::BuildShadowMap()
@@ -57,7 +57,7 @@ std::vector<Matrix4> PointLight::GetLightViewProjMatricies()
     {
         // Setup directions
         Vector3 dir = directions[i];
-        Vector3 up = dir.y == 1 ? Vector3(0.0f, 0.0f, 1.0f) : dir.y == -1 ? Vector3(0.0f, 0.0f, -1.0f) : Vector3(0.0f, -1.0f, 0.0f);
+        Vector3 up = dir[1] == 1 ? Vector3(0.0f, 0.0f, 1.0f) : dir[1] == -1 ? Vector3(0.0f, 0.0f, -1.0f) : Vector3(0.0f, -1.0f, 0.0f);
 
         matrices.emplace_back(Matrix4::Perspective(90.0f, 1.0f, 0.1f, GetShadowDistance()) * Matrix4::LookAt(m_Transform->GetWorldPosition(), m_Transform->GetWorldPosition() + dir, up));
     }

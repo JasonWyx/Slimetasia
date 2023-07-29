@@ -97,7 +97,7 @@ class AttractorUpdater : public ParticleUpdater
 {
 protected:
 
-    std::vector<Attractor*> m_Attractors;  // .w is force
+    std::vector<Attractor*> m_Attractors;  // [3] is force
 public:
 
     virtual void update(float dt, ParticleData* p) override;

@@ -3,6 +3,18 @@
 #include "CorePrerequisites.h"
 #include "Mesh.h"
 
+struct UniformBufferObject
+{
+    Matrix4 ModelTransform;
+    Matrix4 NodeTransform;
+    Matrix4 ViewProjectionTransform;
+    Matrix4 BoneTransforms[RenderGBuffer::MAX_BONES];
+    Vector4 ClipPlane;
+    Vector4 MeshColor;
+    iVector4 TextureFlags;  // todo: maybe not needed? just initialze to some default color
+    uint32_t PickingID;
+};
+
 RenderGBuffer::RenderGBuffer(const RenderContext& renderContext)
     : RenderObject { renderContext }
 {
@@ -38,9 +50,12 @@ void RenderGBuffer::SetWindowExtent(const vk::Extent2D& extent) {}
 
 void RenderGBuffer::CreateDescriptors()
 {
+    // todo: can be optimized. currently is assuming non-instanced rendering.
     const std::vector<vk::DescriptorPoolSize> poolSizes {
-        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, m_Context.m_FramesInFlight * GBufferIndex::Count },
+        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, m_Context.m_FramesInFlight * MAX_OBJECTS * 4 }, // 4 different texture types
+        vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, m_Context.m_FramesInFlight * MAX_OBJECTS },
     };
+
     const vk::DescriptorPoolCreateInfo createInfo { {}, m_Context.m_FramesInFlight * GBufferIndex::Count, poolSizes };
 
     // note: Need 1 pool for each thread if doing threaded recording
@@ -82,6 +97,7 @@ void RenderGBuffer::CreateRenderPass()
 #endif
     };
 
+    // Depth attachment is the last slot
     const vk::AttachmentReference depthAttachmentRef { static_cast<uint32_t>(colorAttachmentRefs.size()), vk::ImageLayout::eDepthStencilAttachmentOptimal };
 
     const vk::SubpassDescription subpassDescription { {}, vk::PipelineBindPoint::eGraphics, {}, colorAttachmentRefs, {}, &depthAttachmentRef, {} };

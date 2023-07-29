@@ -136,31 +136,14 @@ namespace PE
         return reverse_wrapper<Container>(std::forward<Container>(cont));
     }
 
-    inline bool approxEqual(const float& a, const float& b, const float& epsilon = EPSILON)
-    {
-        return (std::fabs(a - b) < epsilon);
-    }
-
-    // Function to test if two vectors are (almost) equal
-    inline bool approxEqual(const Vector3& vec1, const Vector3& vec2, const float& epsilon)
-    {
-        return approxEqual(vec1.x, vec2.x, epsilon) && approxEqual(vec1.y, vec2.y, epsilon) && approxEqual(vec1.z, vec2.z, epsilon);
-    }
-
-    // Function to test if two vectors are (almost) equal
-    inline bool approxEqual(const Vector2& vec1, const Vector2& vec2, const float& epsilon)
-    {
-        return approxEqual(vec1.x, vec2.x, epsilon) && approxEqual(vec1.y, vec2.y, epsilon);
-    }
-
     template <typename T>
-    bool AreVectorsParallel(const TVector3<T>& lhs, const TVector3<T>& rhs)
+    bool AreVectorsParallel(const Vector<T, 3>& lhs, const Vector<T, 3>& rhs)
     {
         return lhs.Cross(rhs).SquareLength() < static_cast<T>(EPSILON);
     }
 
     template <typename T>
-    bool AreVectorsOrthogonal(const TVector3<T>& lhs, const TVector3<T>& rhs)
+    bool AreVectorsOrthogonal(const Vector<T, 3>& lhs, const Vector<T, 3>& rhs)
     {
         return std::abs(lhs.Dot(rhs)) < static_cast<T>(EPSILON);
     }
@@ -172,7 +155,7 @@ namespace PE
     }
 
     template <typename T>
-    TVector3<T> Clamp(const TVector3<T>& vec, const T& maxLength)
+    Vector<T, 3> Clamp(const Vector<T, 3>& vec, const T& maxLength)
     {
         if (vec.SquareLength() > maxLength * maxLength)
         {
@@ -286,7 +269,7 @@ namespace PE
         secondSegPt = secondSegFirstPt + d2 * t;
     }
 
-    // Compute the barycentric coordinates of a point w.r.t an input triangle.
+    // Compute the barycentric coordinates of a point
     inline void computeBarycentricCoordinatesInTriangle(const Vector3& a, const Vector3& b, const Vector3& c, const Vector3& p, float& u, float& v, float& w)
     {
         const Vector3 v0 = b - a;
@@ -321,8 +304,14 @@ namespace PE
         return t;
     }
 
+    // Project a point onto a plane that is given by a point and its unit length normal
+    inline Vector3 ProjectPointOnPlane(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint)
+    {
+        return point - planeNormal.Dot(point - planePoint) * planeNormal;
+    }
+
     // Compute the distance between a point and a line
-    inline float computePointToLineDistance(const Vector3& linePointA, const Vector3& linePointB, const Vector3& point)
+    inline float ComputeDistanceToLine(const Vector3& linePointA, const Vector3& linePointB, const Vector3& point)
     {
         float distAB = (linePointB - linePointA).Length();
 
@@ -334,14 +323,8 @@ namespace PE
         return ((point - linePointA).Cross(point - linePointB)).Length() / distAB;
     }
 
-    // Project a point onto a plane that is given by a point and its unit length normal
-    inline Vector3 projectPointOntoPlane(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint)
-    {
-        return point - planeNormal.Dot(point - planePoint) * planeNormal;
-    }
-
     // Return the distance between a point and a plane (the plane normal must be normalized)
-    inline float computePointToPlaneDistance(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint)
+    inline float ComputeDistanceToPlane(const Vector3& point, const Vector3& planeNormal, const Vector3& planePoint)
     {
         return planeNormal.Dot(point - planePoint);
     }

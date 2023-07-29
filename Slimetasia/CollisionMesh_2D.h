@@ -18,7 +18,7 @@ enum COLLISIONMESHTYPE_2D
 struct Edge_2D
 {
     Edge_2D() = default;
-    Edge_2D(const TVector2<float>& startpt, const TVector2<float>& endpt)
+    Edge_2D(const Vector2& startpt, const Vector2& endpt)
         : m_start_pt { startpt }
         , m_end_pt { endpt }
         , m_edge_vector { m_end_pt - m_start_pt }
@@ -27,12 +27,12 @@ struct Edge_2D
     }
 
     void ComputeNormal();
-    inline TVector2<float> GetEdgeVector() const;
+    inline Vector2 GetEdgeVector() const;
 
-    TVector2<float> m_normal;
-    TVector2<float> m_start_pt;
-    TVector2<float> m_end_pt;
-    TVector2<float> m_edge_vector;
+    Vector2 m_normal;
+    Vector2 m_start_pt;
+    Vector2 m_end_pt;
+    Vector2 m_edge_vector;
 };
 
 // Dependent on the object having a Transform Component.
@@ -64,17 +64,17 @@ public:
     virtual IntersectionData IsCollidingPolygonvsCircle(CollisionMesh_2D*& othermesh);
     virtual IntersectionData IsCollidingPolygonvsPolygon(CollisionMesh_2D*& othermesh);
 
-    virtual bool IsCollidingWithMouse(const TVector2<float>& mousepos);
-    virtual bool IsCollidingWithMouseAABB(const TVector2<float>& mousepos);
-    virtual bool IsCollidingWithMouseCircle(const TVector2<float>& mousepos);
-    virtual bool IsCollidingWithMousePolygon(const TVector2<float>& mousepos);
+    virtual bool IsCollidingWithMouse(const Vector2& mousepos);
+    virtual bool IsCollidingWithMouseAABB(const Vector2& mousepos);
+    virtual bool IsCollidingWithMouseCircle(const Vector2& mousepos);
+    virtual bool IsCollidingWithMousePolygon(const Vector2& mousepos);
 
     // getters
-    virtual TVector3<float> GetOffset() const { return m_offset; }
-    virtual TVector3<float> GetPosition() const { return m_OwnerObject->GetComponent<Transform>()->GetWorldPosition(); }
+    virtual Vector3 GetOffset() const { return m_offset; }
+    virtual Vector3 GetPosition() const { return m_OwnerObject->GetComponent<Transform>()->GetWorldPosition(); }
 
     // setters
-    virtual void SetOffset(const TVector3<float>& offset) { m_offset = offset; }
+    virtual void SetOffset(const Vector3& offset) { m_offset = offset; }
 
     // data
     COLLISIONMESHTYPE_2D m_mesh_type = CIRCLE;
@@ -83,7 +83,7 @@ public:
     REFLECT()
 protected:
 
-    TVector3<float> m_offset;
+    Vector3 m_offset;
 
 private:
 };

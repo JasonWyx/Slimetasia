@@ -19,7 +19,8 @@ EditorCamera::EditorCamera(GameObject* parentObject)
     , m_ZoomDampenFactor(1.0f)
     , m_Update(false)
 {
-    m_LookAtDirection = Vector3(0.0f, 0.0f, -1.0f).RotateX(m_Latitude).RotateY(m_Azimuth);
+    m_LookAtDirection = -Vector3::Base<2>;
+    m_LookAtDirection = m_LookAtDirection.RotateX(Math::ToRadians(m_Latitude)).RotateY(Math::ToRadians(m_Azimuth));
     m_SkyboxTexture = ResourceManager::Instance().GetResource<Texture>("Daylight Box");
     m_AmbientColor = Color3(0.5f);
 }
@@ -28,20 +29,23 @@ void EditorCamera::LookAt(GameObject* go)
 {
     Transform* other = go->GetComponent<Transform>();
     if (!other) return;
-    float scale = std::max(std::max(other->GetWorldScale().x, other->GetWorldScale().y), other->GetWorldScale().z);
+    float scale = std::max(std::max(other->GetWorldScale()[0], other->GetWorldScale()[1]), other->GetWorldScale()[2]);
     Vector3 tmp = other->GetWorldPosition();
-    tmp.z += scale + 5.f;
+    tmp[2] += scale + 5.f;
     m_Transform->SetWorldPosition(tmp);
-    m_Azimuth = m_Latitude = 0.f;
-    m_LookAtDirection = Vector3(0.0f, 0.0f, -1.0f).RotateX(m_Latitude).RotateY(m_Azimuth);
+
+    m_Azimuth = 0.f;
+    m_Latitude = 0.f;
+    m_LookAtDirection = -Vector3::Base<2>;
+    m_LookAtDirection = m_LookAtDirection.RotateX(Math::ToRadians(m_Latitude)).RotateY(Math::ToRadians(m_Azimuth));
 }
 
 void EditorCamera::OnUpdate(float dt)
 {
     if (!m_Update) return;
 
-    Vector3 right = m_LookAtDirection.Cross(m_CameraUp).Normalize();
-    Vector3 up = right.Cross(m_LookAtDirection).Normalize();
+    Vector3 right = m_LookAtDirection.Cross(m_CameraUp).Normalized();
+    Vector3 up = right.Cross(m_LookAtDirection).Normalized();
 
     if (Input::Instance().GetKeyDown(KEY_LALT))
     {
@@ -63,25 +67,26 @@ void EditorCamera::OnUpdate(float dt)
 
     if (m_IsRotating)
     {
-        m_Azimuth -= mouseDelta.x * 0.5f;
-        m_Latitude += mouseDelta.y * 0.5f;
+        m_Azimuth -= mouseDelta[0] * 0.5f;
+        m_Latitude += mouseDelta[1] * 0.5f;
 
         m_Azimuth = std::fmodf(m_Azimuth, 360.0f);
         m_Latitude = std::clamp(m_Latitude, -89.0f, 89.0f);
 
-        m_LookAtDirection = Vector3(0.0f, 0.0f, -1.0f).RotateX(m_Latitude).RotateY(m_Azimuth);
+        m_LookAtDirection = -Vector3::Base<2>;
+        m_LookAtDirection = m_LookAtDirection.RotateX(Math::ToRadians(m_Latitude)).RotateY(Math::ToRadians(m_Azimuth));
     }
 
     if (m_IsPanning)
     {
-        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() - right * mouseDelta.x * dt);
-        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() - up * mouseDelta.y * dt);
+        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() - right * mouseDelta[0] * dt);
+        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() - up * mouseDelta[1] * dt);
     }
 
     if (m_IsZooming)
     {
-        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() + m_LookAtDirection * mouseDelta.y / 100);
-        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() + m_LookAtDirection * mouseDelta.x / 100);
+        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() + m_LookAtDirection * mouseDelta[1] / 100);
+        m_Transform->SetWorldPosition(m_Transform->GetWorldPosition() + m_LookAtDirection * mouseDelta[0] / 100);
     }
 }
 

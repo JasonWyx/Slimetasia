@@ -81,8 +81,8 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_Framebuffer);
 
-    glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-    glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+    glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+    glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
     glClearColor(0, 0, 0, 0);
     glClearDepth(1.0f);
@@ -123,7 +123,7 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
                       {
                           Transform* transformA = a->GetTransform();
                           Transform* transformB = b->GetTransform();
-                          return transformA->m_WorldPosition.z < transformB->m_WorldPosition.z;
+                          return transformA->m_WorldPosition[2] < transformB->m_WorldPosition[2];
                       });
 
             glDisable(GL_CULL_FACE);
@@ -337,7 +337,7 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
                       {
                           Transform* transformA = a->m_Transform;
                           Transform* transformB = b->m_Transform;
-                          return transformA->m_WorldPosition.z < transformB->m_WorldPosition.z;
+                          return transformA->m_WorldPosition[2] < transformB->m_WorldPosition[2];
                       });
         }
         else
@@ -356,9 +356,9 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
 
             if (renderer->m_FaceCamera)
             {
-                Vector3 forward = (camera->GetTransform()->GetWorldPosition() - renderer->m_Transform->m_WorldPosition).Normalize();
-                Vector3 right = (Vector3(0.0f, 1.0f, 0.0f).Cross(forward)).Normalize();
-                Vector3 up = (forward.Cross(right)).Normalize();
+                Vector3 forward = (camera->GetTransform()->GetWorldPosition() - renderer->m_Transform->m_WorldPosition).Normalized();
+                Vector3 right = (Vector3(0.0f, 1.0f, 0.0f).Cross(forward)).Normalized();
+                Vector3 up = (forward.Cross(right)).Normalized();
 
                 lookAtMatrix.SetCol3(0, right);
                 lookAtMatrix.SetCol3(1, up);
@@ -454,36 +454,36 @@ void GeometryPass::BuildRenderTargets()
     glCreateTextures(GL_TEXTURE_2D, (int)GBuffer::Count, m_GBuffers.data());
     glCreateTextures(GL_TEXTURE_2D, 1, &m_DSBuffer);
 
-    glTextureStorage2D(m_DSBuffer, 1, GL_DEPTH24_STENCIL8, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_DSBuffer, 1, GL_DEPTH24_STENCIL8, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::Diffuse], 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::Diffuse], 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::Diffuse], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::Diffuse], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::Specular], 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::Specular], 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::Specular], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::Specular], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::Emissive], 1, GL_RGB16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::Emissive], 1, GL_RGB16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::Emissive], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::Emissive], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::WorldNormal], 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::WorldNormal], 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::WorldNormal], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::WorldNormal], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::WorldPosition], 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::WorldPosition], 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::WorldPosition], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::WorldPosition], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 #ifdef EDITOR
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::TexCoords], 1, GL_RG16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::TexCoords], 1, GL_RG16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::TexCoords], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::TexCoords], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_GBuffers[(int)GBuffer::PickingID], 1, GL_R32I, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_GBuffers[(int)GBuffer::PickingID], 1, GL_R32I, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_GBuffers[(int)GBuffer::PickingID], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_GBuffers[(int)GBuffer::PickingID], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 #endif
@@ -526,7 +526,7 @@ GLint GeometryPass::GetPickedID(iVector2 mousePosition) const
     glReadBuffer(GL_COLOR_ATTACHMENT6);
 
     GLint id = 0;
-    glReadPixels(mousePosition.x, mousePosition.y, 1, 1, GL_RED_INTEGER, GL_INT, &id);
+    glReadPixels(mousePosition[0], mousePosition[1], 1, 1, GL_RED_INTEGER, GL_INT, &id);
     GLenum error = glGetError();
 
     glReadBuffer(0);

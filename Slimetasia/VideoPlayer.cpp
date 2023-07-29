@@ -82,8 +82,8 @@ void VideoPlayer::OnUpdate(float dt)
         {
             m_FrameCount = static_cast<unsigned>(m_Video.get(cv::CAP_PROP_FRAME_COUNT));
             m_FrameTime = static_cast<float>(1.0 / m_Video.get(cv::CAP_PROP_FPS));
-            m_FrameSize.x = static_cast<int>(m_Video.get(cv::CAP_PROP_FRAME_WIDTH));
-            m_FrameSize.y = static_cast<int>(m_Video.get(cv::CAP_PROP_FRAME_HEIGHT));
+            m_FrameSize[0] = static_cast<int>(m_Video.get(cv::CAP_PROP_FRAME_WIDTH));
+            m_FrameSize[1] = static_cast<int>(m_Video.get(cv::CAP_PROP_FRAME_HEIGHT));
             m_Frames.resize(m_FrameCount);
             m_LoadingTeminate = false;
             m_LoadedCount = 1;
@@ -96,7 +96,7 @@ void VideoPlayer::OnUpdate(float dt)
 
             BuildFrameTexture();
 
-            glTextureSubImage2D(m_FrameTexture, 0, 0, 0, m_FrameSize.x, m_FrameSize.y, GL_RGB, GL_UNSIGNED_BYTE, m_Frames[0].data);
+            glTextureSubImage2D(m_FrameTexture, 0, 0, 0, m_FrameSize[0], m_FrameSize[1], GL_RGB, GL_UNSIGNED_BYTE, m_Frames[0].data);
 
             // Dispatch multithreaded loading of frame data
             m_LoadFuture = Application::Instance().GetThreadPool().enqueue(VideoPlayer::LoadFrames, std::ref(m_Video), std::ref(m_Frames), std::ref(m_LoadedCount), m_FrameCount,
@@ -138,7 +138,7 @@ void VideoPlayer::OnUpdate(float dt)
     // Copy current frame into texture
     if (m_FrameCount && m_CurrentFrame < m_LoadedCount)
     {
-        glTextureSubImage2D(m_FrameTexture, 0, 0, 0, m_FrameSize.x, m_FrameSize.y, GL_RGB, GL_UNSIGNED_BYTE, m_Frames[m_CurrentFrame].data);
+        glTextureSubImage2D(m_FrameTexture, 0, 0, 0, m_FrameSize[0], m_FrameSize[1], GL_RGB, GL_UNSIGNED_BYTE, m_Frames[m_CurrentFrame].data);
     }
 }
 
@@ -171,14 +171,14 @@ GLuint VideoPlayer::GetVideoFrameTexture() const
 
 float VideoPlayer::GetFrameRatio() const
 {
-    return static_cast<float>(m_FrameSize.x) / m_FrameSize.y;
+    return static_cast<float>(m_FrameSize[0]) / m_FrameSize[1];
 }
 
 void VideoPlayer::BuildFrameTexture()
 {
     glDeleteTextures(1, &m_FrameTexture);
     glCreateTextures(GL_TEXTURE_2D, 1, &m_FrameTexture);
-    glTextureStorage2D(m_FrameTexture, 1, GL_RGB8, m_FrameSize.x, m_FrameSize.y);
+    glTextureStorage2D(m_FrameTexture, 1, GL_RGB8, m_FrameSize[0], m_FrameSize[1]);
     glTextureParameteri(m_FrameTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(m_FrameTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(m_FrameTexture, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -69,14 +69,14 @@ void WaterSimulator::GenerateTextures(const iVector2& viewportSize)
         glDeleteTextures(1, &m_RefractionTexture);
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_ReflectionTexture);
-        glTextureStorage2D(m_ReflectionTexture, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+        glTextureStorage2D(m_ReflectionTexture, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
         glTextureParameteri(m_ReflectionTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(m_ReflectionTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(m_ReflectionTexture, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(m_ReflectionTexture, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RefractionTexture);
-        glTextureStorage2D(m_RefractionTexture, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+        glTextureStorage2D(m_RefractionTexture, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
         glTextureParameteri(m_RefractionTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(m_RefractionTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(m_RefractionTexture, GL_TEXTURE_WRAP_S, GL_REPEAT);

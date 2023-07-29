@@ -13,9 +13,9 @@ public:
     ~BoxCollider() override = default;
 
     // getters
-    float GetWidth() const { return m_HalfExtent.x * 2.f; }
-    float GetHeight() const { return m_HalfExtent.y * 2.f; }
-    float GetDepth() const { return m_HalfExtent.z * 2.f; }
+    float GetWidth() const { return m_HalfExtent[0] * 2.f; }
+    float GetHeight() const { return m_HalfExtent[1] * 2.f; }
+    float GetDepth() const { return m_HalfExtent[2] * 2.f; }
     Vector3 GetHalfExtent() const { return m_HalfExtent; }
     Vector3 GetVertexPosition(const uint& index) const;
     EdgeData::Vertex GetVertex(const uint& index) const;
@@ -25,9 +25,9 @@ public:
     uint GetEdgeCount() const { return 12u; }
 
     // setters
-    void SetWidth(const float& newWidth) { m_HalfExtent.x = newWidth / 2.f; }
-    void SetHeight(const float& newHeight) { m_HalfExtent.y = newHeight / 2.f; }
-    void SetDepth(const float& newDepth) { m_HalfExtent.z = newDepth / 2.f; }
+    void SetWidth(const float& newWidth) { m_HalfExtent[0] = newWidth / 2.f; }
+    void SetHeight(const float& newHeight) { m_HalfExtent[1] = newHeight / 2.f; }
+    void SetDepth(const float& newDepth) { m_HalfExtent[2] = newDepth / 2.f; }
     void SetHalfExtent(const Vector3& newHalf) { m_HalfExtent = newHalf; }
 
     // funcs

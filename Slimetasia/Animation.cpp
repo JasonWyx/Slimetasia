@@ -15,9 +15,9 @@ Vector3 ConvertAssimpVec3(aiVector3D const& value)
     return Vector3(value.x, value.y, value.z);
 }
 
-Quaternion ConvertAssimpQuat(aiQuaternion const& value)
+Quat ConvertAssimpQuat(aiQuaternion const& value)
 {
-    return Quaternion(value.x, value.y, value.z, value.w);
+    return Quat(value.x, value.y, value.z, value.w);
 }
 
 AnimationSet::AnimationSet(const std::string& resourceName, const std::filesystem::path& filepath)
@@ -325,7 +325,7 @@ Vector3 NodeAnimation::GetInterpolatedPosition(float tick) const
     return m_PositionKeys[0].m_Position;
 }
 
-Quaternion NodeAnimation::GetInterpolatedRotation(float tick) const
+Quat NodeAnimation::GetInterpolatedRotation(float tick) const
 {
     std::size_t size = m_RotationKeys.size();
 
@@ -336,7 +336,7 @@ Quaternion NodeAnimation::GetInterpolatedRotation(float tick) const
             // Calculate interpolant
             float t = (tick - m_RotationKeys[i].m_Tick) / (m_RotationKeys[(i + 1) % size].m_Tick - m_RotationKeys[i].m_Tick);
 
-            return Quaternion::Slerp(m_RotationKeys[i].m_Rotation, m_RotationKeys[(i + 1) % size].m_Rotation, t);
+            return Quat::Slerp(m_RotationKeys[i].m_Rotation, m_RotationKeys[(i + 1) % size].m_Rotation, t);
         }
     }
     // std::cout << "WARNING: Rotation for node animation " << m_NodeName

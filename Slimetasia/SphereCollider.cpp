@@ -143,8 +143,8 @@ void SphereCollider::ComputeBounds(Vector3& min, Vector3& max) const
 
     // auto len = sqrtf(m_radius * m_radius * 2.f);
 
-    min = Vector3(pos.x - m_radius, pos.y - m_radius, pos.z - m_radius);
-    max = Vector3(pos.x + m_radius, pos.y + m_radius, pos.z + m_radius);
+    min = Vector3(pos[0] - m_radius, pos[1] - m_radius, pos[2] - m_radius);
+    max = Vector3(pos[0] + m_radius, pos[1] + m_radius, pos[2] + m_radius);
 }
 
 REFLECT_INIT(SphereCollider)

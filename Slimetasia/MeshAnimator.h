@@ -51,7 +51,7 @@ private:
     struct Pose
     {
         Vector3 scaling;
-        Quaternion rotation;
+        Quat rotation;
         Vector3 translation;
     };
 

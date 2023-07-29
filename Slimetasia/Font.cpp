@@ -15,6 +15,8 @@ This file is the implementation file that handles font system
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "Font.h"
 
+#include <iostream>
+
 unsigned constexpr PADDING = 5;
 
 Font::Font(const std::string resourceName, const std::filesystem::path& filePath)

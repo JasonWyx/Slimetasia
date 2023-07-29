@@ -240,7 +240,7 @@ void MeshAnimator::UpdateBoneTransforms(std::vector<MeshNode> const& nodes, std:
 
             const Pose& transitionPose = m_TransitionPose[currNodeAnimIt->second];
             nextPose = { Math::Lerp(transitionPose.scaling, currNodeAnim.GetInterpolatedScale(m_CurrentAnimationTick), crossFadeFactor),
-                         Quaternion::Slerp(transitionPose.rotation, currNodeAnim.GetInterpolatedRotation(m_CurrentAnimationTick), crossFadeFactor),
+                         Quat::Slerp(transitionPose.rotation, currNodeAnim.GetInterpolatedRotation(m_CurrentAnimationTick), crossFadeFactor),
                          Math::Lerp(transitionPose.translation, currNodeAnim.GetInterpolatedPosition(m_CurrentAnimationTick), crossFadeFactor) };
         }
         else

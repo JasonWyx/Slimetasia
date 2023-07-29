@@ -56,7 +56,7 @@ std::vector<Matrix4> DirectionalLight::GetLightViewProjMatricies()
 {
     Vector3 pos = m_Transform->GetWorldPosition();
     Vector3 dirNorm = m_Direction.Normalized();
-    Vector3 up = dirNorm.y == 1 ? Vector3(0.0f, 0.0f, -1.0f) : dirNorm.y == -1 ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
+    Vector3 up = dirNorm[1] == 1 ? Vector3(0.0f, 0.0f, -1.0f) : dirNorm[1] == -1 ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
 
     return std::vector<Matrix4> { Matrix4::SetFrustumOrtho(-m_ShadowDistance, m_ShadowDistance, -m_ShadowDistance, m_ShadowDistance, -m_ShadowDistance, m_ShadowDistance) *
         Matrix4::LookAt(pos, pos + dirNorm, up) };

@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "QueueType.h"
-#include "ShaderModuleObject.h"
+import ShaderModuleObject;
 
 // Commonly used constructs
 struct RenderContext

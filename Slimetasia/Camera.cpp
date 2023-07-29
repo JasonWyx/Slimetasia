@@ -108,7 +108,7 @@ void Camera::SetViewportSize(iVector2 const& viewportSize, bool rebuildTextures)
             glDeleteTextures(1, &m_RenderTarget);
             glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderTarget);
 
-            glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+            glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
             glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         }
@@ -237,7 +237,7 @@ GLuint Camera::GetRenderTarget()
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderTarget);
 
-        glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+        glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
         glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 #endif  // USE_VULKAN
@@ -247,7 +247,7 @@ GLuint Camera::GetRenderTarget()
 
 Vector3 Camera::GetLookAtDirection() const
 {
-    return m_IsReflectionView ? Vector3(m_LookAtDirection.x, -m_LookAtDirection.y, m_LookAtDirection.z) : m_LookAtDirection;
+    return m_IsReflectionView ? Vector3(m_LookAtDirection[0], -m_LookAtDirection[1], m_LookAtDirection[2]) : m_LookAtDirection;
 }
 
 void Camera::SetLookAtDirection(Vector3 const& direction)
@@ -271,11 +271,11 @@ Vector2 Camera::WorldToScreen(Vector3 const& worldPosition)
     // transform world to clipping coordinates
 
     Vector4 clipPosition = viewProjectionMatrix * Vector4(worldPosition, 1.0f);
-    clipPosition /= clipPosition.w;
+    clipPosition /= clipPosition[3];
 
-    float winX = ((clipPosition.x + 1) / 2.0f) * m_ViewportSize.x;
+    float winX = ((clipPosition[0] + 1) / 2.0f) * m_ViewportSize[0];
     // we calculate -point3D.getY() because the screen Y axis is oriented top->down
-    float winY = ((clipPosition.y + 1) / 2.0f) * m_ViewportSize.y;
+    float winY = ((clipPosition[1] + 1) / 2.0f) * m_ViewportSize[1];
 
     return Vector2(winX, winY);
 }
@@ -288,14 +288,14 @@ Vector3 Camera::ScreenToWorld(Vector2 const& screenPosition)
 
     float t = tanf(Math::ToRadians(m_FieldOfView) / 2);
     float h = m_NearPlane * t;
-    float w = h * ((float)m_ViewportSize.y / m_ViewportSize.x);
+    float w = h * ((float)m_ViewportSize[1] / m_ViewportSize[0]);
 
-    Vector2 screenOffset = screenPosition / Vector2((float)m_ViewportSize.x, (float)m_ViewportSize.y);
+    Vector2 screenOffset = screenPosition / Vector2((float)m_ViewportSize[0], (float)m_ViewportSize[1]);
     screenOffset *= 2.0f;
     screenOffset -= Vector2(1.0f);
     screenOffset *= Vector2(w, h);
 
-    pointPlane += right * screenOffset.x + up * screenOffset.y;
+    pointPlane += right * screenOffset[0] + up * screenOffset[1];
 
     return pointPlane;
 }
@@ -307,7 +307,7 @@ std::vector<Vector3> Camera::GetFrustumPoints() const
     Vector3 zAxis = m_IsReflectionView ? m_LookAtDirection * Vector3(1, -1, 1) : m_LookAtDirection;
     zAxis.Normalize();
 
-    Vector3 cameraUp = zAxis.y >= 0.99999f ? Vector3(0.0f, 0.0f, -1.0f) : zAxis.y <= -0.99999f ? Vector3(0.0f, 0.0f, 1.0f) : m_CameraUp;
+    Vector3 cameraUp = zAxis[1] >= 0.99999f ? Vector3(0.0f, 0.0f, -1.0f) : zAxis[1] <= -0.99999f ? Vector3(0.0f, 0.0f, 1.0f) : m_CameraUp;
     Vector3 xAxis = zAxis.Cross(cameraUp).Normalized();
     Vector3 yAxis = xAxis.Cross(zAxis).Normalized();
 
@@ -315,7 +315,7 @@ std::vector<Vector3> Camera::GetFrustumPoints() const
     Vector3 camPosition = m_Transform->m_WorldPosition;
     if (m_IsReflectionView)
     {
-        camPosition.y = camPosition.y - 2 * (camPosition.y - m_ReflectionHeight);
+        camPosition[1] = camPosition[1] - 2 * (camPosition[1] - m_ReflectionHeight);
     }
 
     Vector3 nearCenter = camPosition + zAxis * m_NearPlane;
@@ -324,9 +324,9 @@ std::vector<Vector3> Camera::GetFrustumPoints() const
     // Get projected viewport extents on near/far planes
     float e = tanf(m_FieldOfView * 0.5f);
     float nearExtY = e * m_NearPlane;
-    float nearExtX = nearExtY * ((float)m_ViewportSize.x / m_ViewportSize.y);
+    float nearExtX = nearExtY * ((float)m_ViewportSize[0] / m_ViewportSize[1]);
     float farExtY = m_ProjectionMode == CameraProjectionMode::eCameraProjectionMode_Orthographic ? nearExtY : e * m_FarPlane;
-    float farExtX = m_ProjectionMode == CameraProjectionMode::eCameraProjectionMode_Orthographic ? nearExtX : farExtY * ((float)m_ViewportSize.x / m_ViewportSize.y);
+    float farExtX = m_ProjectionMode == CameraProjectionMode::eCameraProjectionMode_Orthographic ? nearExtX : farExtY * ((float)m_ViewportSize[0] / m_ViewportSize[1]);
 
     // Points are just offset from the center points along camera basis
     // lbn, rbn, rtn, ltn, lbf, rbf, rtf, ltf
@@ -352,9 +352,9 @@ Matrix4 Camera::GetViewTransform() const
     if (m_IsReflectionView)
     {
         Vector3 invertView = m_LookAtDirection;
-        invertView.y = -invertView.y;
+        invertView[1] = -invertView[1];
         Vector3 invertPosition = m_Transform->GetWorldPosition();
-        invertPosition.y += (m_ReflectionHeight - invertPosition.y) * 2;
+        invertPosition[1] += (m_ReflectionHeight - invertPosition[1]) * 2;
 
         return Matrix4::LookAt(invertPosition, invertPosition + invertView, m_CameraUp);
     }
@@ -366,7 +366,7 @@ Matrix4 Camera::GetViewTransform() const
 
 Matrix4 Camera::GetProjTransform() const
 {
-    float aspectRatio = static_cast<float>(m_ViewportSize.x) / m_ViewportSize.y;
+    float aspectRatio = static_cast<float>(m_ViewportSize[0]) / m_ViewportSize[1];
     switch (m_ProjectionMode)
     {
         case CameraProjectionMode::eCameraProjectionMode_Perspective:

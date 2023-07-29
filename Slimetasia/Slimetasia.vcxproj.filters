@@ -481,17 +481,29 @@
     <ClCompile Include="RenderImGui.cpp">
       <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderModuleObject.cpp">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderHelper.ixx">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderModuleObject.ixx">
+      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Math.ixx">
+      <Filter>Engine Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector.ixx">
+      <Filter>Engine Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix.ixx">
+      <Filter>Engine Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Quaternion.ixx">
+      <Filter>Engine Files\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Math.h">
-      <Filter>Engine Files\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix.h">
-      <Filter>Engine Files\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector.h">
-      <Filter>Engine Files\Math</Filter>
-    </ClInclude>
     <ClInclude Include="IComponent.h">
       <Filter>Engine Files\Core</Filter>
     </ClInclude>
@@ -575,9 +587,6 @@
     </ClInclude>
     <ClInclude Include="AudioResource.h">
       <Filter>Engine Files\Resource\ResourceTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Quaternion.h">
-      <Filter>Engine Files\Math</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
       <Filter>Engine Files\Utilities</Filter>
@@ -871,9 +880,6 @@
     <ClInclude Include="SwapchainHandler.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\Handlers</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderHelper.h">
-      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
-    </ClInclude>
     <ClInclude Include="RenderFinal.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
     </ClInclude>
@@ -900,9 +906,6 @@
     </ClInclude>
     <ClInclude Include="RenderImGui.h">
       <Filter>Engine Files\Core\Graphics\Vulkan\RenderPasses</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderModuleObject.h">
-      <Filter>Engine Files\Core\Graphics\Vulkan\Helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

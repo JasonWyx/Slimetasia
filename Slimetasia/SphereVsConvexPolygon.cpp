@@ -37,40 +37,40 @@ void SphereVsConvexPolygon::ComputeCollisionData(Manifold* manifold, RigidbodyCo
         Vector3 dist = boxPos - spherePos;
 
         Vector3 closestPt = dist;
-        closestPt.x = closestPt.x > boxHE.x ? boxHE.x : closestPt.x < negativeboxHE.x ? negativeboxHE.x : closestPt.x;
-        closestPt.y = closestPt.y > boxHE.y ? boxHE.y : closestPt.y < negativeboxHE.y ? negativeboxHE.y : closestPt.y;
-        closestPt.z = closestPt.z > boxHE.z ? boxHE.z : closestPt.z < negativeboxHE.z ? negativeboxHE.z : closestPt.z;
+        closestPt[0] = closestPt[0] > boxHE[0] ? boxHE[0] : closestPt[0] < negativeboxHE[0] ? negativeboxHE[0] : closestPt[0];
+        closestPt[1] = closestPt[1] > boxHE[1] ? boxHE[1] : closestPt[1] < negativeboxHE[1] ? negativeboxHE[1] : closestPt[1];
+        closestPt[2] = closestPt[2] > boxHE[2] ? boxHE[2] : closestPt[2] < negativeboxHE[2] ? negativeboxHE[2] : closestPt[2];
 
         bool isSphereInBox = false;
 
         if (dist == closestPt)
         {
             isSphereInBox = true;
-            float absX = fabsf(dist.x);
-            float absY = fabsf(dist.y);
-            float absZ = fabsf(dist.z);
+            float absX = fabsf(dist[0]);
+            float absY = fabsf(dist[1]);
+            float absZ = fabsf(dist[2]);
 
             // finding the closest axis
             if (absX < absY && absX < absZ)
             {
-                if (closestPt.x > 0.f)
-                    closestPt.x = boxHE.x;
+                if (closestPt[0] > 0.f)
+                    closestPt[0] = boxHE[0];
                 else
-                    closestPt.x = negativeboxHE.x;
+                    closestPt[0] = negativeboxHE[0];
             }
             else if (absY < absX && absY < absZ)
             {
-                if (closestPt.y > 0.f)
-                    closestPt.y = boxHE.y;
+                if (closestPt[1] > 0.f)
+                    closestPt[1] = boxHE[1];
                 else
-                    closestPt.y = negativeboxHE.y;
+                    closestPt[1] = negativeboxHE[1];
             }
             else
             {
-                if (closestPt.z > 0.f)
-                    closestPt.z = boxHE.z;
+                if (closestPt[2] > 0.f)
+                    closestPt[2] = boxHE[2];
                 else
-                    closestPt.z = negativeboxHE.z;
+                    closestPt[2] = negativeboxHE[2];
             }
         }
 
@@ -81,7 +81,7 @@ void SphereVsConvexPolygon::ComputeCollisionData(Manifold* manifold, RigidbodyCo
 
         normalSq = sqrtf(normalSq);
         manifold->m_ContactCount = 1;
-        float absX = fabs(normal.x), absY = fabs(normal.y), absZ = fabs(normal.z);
+        float absX = fabs(normal[0]), absY = fabs(normal[1]), absZ = fabs(normal[2]);
 
         manifold->m_PenetrationDepth = sphereRadius - normalSq;
         if (isSphereInBox)
@@ -93,21 +93,21 @@ void SphereVsConvexPolygon::ComputeCollisionData(Manifold* manifold, RigidbodyCo
         {
             /*if (absX > absY && absX > absZ)
             {
-                if (normal.x > 0.f)
+                if (normal[0] > 0.f)
                     manifold->m_Normal = Vector3{ 1.f, 0.f, 0.f };
                 else
                     manifold->m_Normal = Vector3{ -1.f, 0.f, 0.f };
             }
             else if (absY > absX && absY > absZ)
             {
-                if (normal.y > 0.f)
+                if (normal[1] > 0.f)
                     manifold->m_Normal = Vector3{ 0.f, 1.f, 0.f };
                 else
                     manifold->m_Normal = Vector3{ 0.f, -1.f, 0.f };
             }
             else
             {
-                if (normal.z > 0.f)
+                if (normal[2] > 0.f)
                     manifold->m_Normal = Vector3{ 0.f, 0.f, 1.f };
                 else
                     manifold->m_Normal = Vector3{ 0.f, 0.f, -1.f };
@@ -137,40 +137,40 @@ void SphereVsConvexPolygon::ComputeCollisionData(Manifold* manifold, RigidbodyCo
         Vector3 dist = spherePos - boxPos;
 
         Vector3 closestPt = dist;
-        closestPt.x = closestPt.x > boxHE.x ? boxHE.x : closestPt.x < negativeboxHE.x ? negativeboxHE.x : closestPt.x;
-        closestPt.y = closestPt.y > boxHE.y ? boxHE.y : closestPt.y < negativeboxHE.y ? negativeboxHE.y : closestPt.y;
-        closestPt.z = closestPt.z > boxHE.z ? boxHE.z : closestPt.z < negativeboxHE.z ? negativeboxHE.z : closestPt.z;
+        closestPt[0] = closestPt[0] > boxHE[0] ? boxHE[0] : closestPt[0] < negativeboxHE[0] ? negativeboxHE[0] : closestPt[0];
+        closestPt[1] = closestPt[1] > boxHE[1] ? boxHE[1] : closestPt[1] < negativeboxHE[1] ? negativeboxHE[1] : closestPt[1];
+        closestPt[2] = closestPt[2] > boxHE[2] ? boxHE[2] : closestPt[2] < negativeboxHE[2] ? negativeboxHE[2] : closestPt[2];
 
         bool isSphereInBox = false;
 
         if (dist == closestPt)
         {
             isSphereInBox = true;
-            float absX = fabsf(dist.x);
-            float absY = fabsf(dist.y);
-            float absZ = fabsf(dist.z);
+            float absX = fabsf(dist[0]);
+            float absY = fabsf(dist[1]);
+            float absZ = fabsf(dist[2]);
 
             // finding the closest axis
             if (absX < absY && absX < absZ)
             {
-                if (closestPt.x > 0.f)
-                    closestPt.x = boxHE.x;
+                if (closestPt[0] > 0.f)
+                    closestPt[0] = boxHE[0];
                 else
-                    closestPt.x = negativeboxHE.x;
+                    closestPt[0] = negativeboxHE[0];
             }
             else if (absY < absX && absY < absZ)
             {
-                if (closestPt.y > 0.f)
-                    closestPt.y = boxHE.y;
+                if (closestPt[1] > 0.f)
+                    closestPt[1] = boxHE[1];
                 else
-                    closestPt.y = negativeboxHE.y;
+                    closestPt[1] = negativeboxHE[1];
             }
             else
             {
-                if (closestPt.z > 0.f)
-                    closestPt.z = boxHE.z;
+                if (closestPt[2] > 0.f)
+                    closestPt[2] = boxHE[2];
                 else
-                    closestPt.z = negativeboxHE.z;
+                    closestPt[2] = negativeboxHE[2];
             }
         }
 
@@ -181,7 +181,7 @@ void SphereVsConvexPolygon::ComputeCollisionData(Manifold* manifold, RigidbodyCo
 
         normalSq = sqrtf(normalSq);
         manifold->m_ContactCount = 1;
-        float absX = fabs(normal.x), absY = fabs(normal.y), absZ = fabs(normal.z);
+        float absX = fabs(normal[0]), absY = fabs(normal[1]), absZ = fabs(normal[2]);
 
         manifold->m_PenetrationDepth = sphereRadius - normalSq;
 
@@ -194,21 +194,21 @@ void SphereVsConvexPolygon::ComputeCollisionData(Manifold* manifold, RigidbodyCo
         {
             /*if (absX > absY && absX > absZ)
             {
-                if (normal.x > 0.f)
+                if (normal[0] > 0.f)
                     manifold->m_Normal = Vector3{ 1.f, 0.f, 0.f };
                 else
                     manifold->m_Normal = Vector3{ -1.f, 0.f, 0.f };
             }
             else if (absY > absX && absY > absZ)
             {
-                if (normal.y > 0.f)
+                if (normal[1] > 0.f)
                     manifold->m_Normal = Vector3{ 0.f, 1.f, 0.f };
                 else
                     manifold->m_Normal = Vector3{ 0.f, -1.f, 0.f };
             }
             else
             {
-                if (normal.z > 0.f)
+                if (normal[2] > 0.f)
                     manifold->m_Normal = Vector3{ 0.f, 0.f, 1.f };
                 else
                     manifold->m_Normal = Vector3{ 0.f, 0.f, -1.f };

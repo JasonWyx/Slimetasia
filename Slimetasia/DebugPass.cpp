@@ -100,10 +100,10 @@ void DebugPass::Render(Camera& camera, GeometryPass& geomPass)
 
     int lineCount = static_cast<int>(camera.GetFarPlane()) / 2;
 
-    int xMin = static_cast<int>(floor(cameraPosition.x - lineCount));
-    int xMax = static_cast<int>(ceil(cameraPosition.x + lineCount));
-    int zMin = static_cast<int>(floor(cameraPosition.z - lineCount));
-    int zMax = static_cast<int>(ceil(cameraPosition.z + lineCount));
+    int xMin = static_cast<int>(floor(cameraPosition[0] - lineCount));
+    int xMax = static_cast<int>(ceil(cameraPosition[0] + lineCount));
+    int zMin = static_cast<int>(floor(cameraPosition[2] - lineCount));
+    int zMax = static_cast<int>(ceil(cameraPosition[2] + lineCount));
 
     int xCount = xMax - xMin;
     int zCount = zMax - zMin;
@@ -112,18 +112,18 @@ void DebugPass::Render(Camera& camera, GeometryPass& geomPass)
 
     for (int i = xMin; i + 1 < xMax; ++i)
     {
-        m_GridGeometry[(i - xMin) * 2].x = static_cast<float>(i);
-        m_GridGeometry[(i - xMin) * 2].z = static_cast<float>(zMin);
-        m_GridGeometry[(i - xMin) * 2 + 1].x = static_cast<float>(i);
-        m_GridGeometry[(i - xMin) * 2 + 1].z = static_cast<float>(zMax);
+        m_GridGeometry[(i - xMin) * 2][0] = static_cast<float>(i);
+        m_GridGeometry[(i - xMin) * 2][2] = static_cast<float>(zMin);
+        m_GridGeometry[(i - xMin) * 2 + 1][0] = static_cast<float>(i);
+        m_GridGeometry[(i - xMin) * 2 + 1][2] = static_cast<float>(zMax);
     }
 
     for (int i = zMin; i + 1 < zMax; ++i)
     {
-        m_GridGeometry[xCount * 2 + (i - zMin) * 2].x = static_cast<float>(xMin);
-        m_GridGeometry[xCount * 2 + (i - zMin) * 2].z = static_cast<float>(i);
-        m_GridGeometry[xCount * 2 + (i - zMin) * 2 + 1].x = static_cast<float>(xMax);
-        m_GridGeometry[xCount * 2 + (i - zMin) * 2 + 1].z = static_cast<float>(i);
+        m_GridGeometry[xCount * 2 + (i - zMin) * 2][0] = static_cast<float>(xMin);
+        m_GridGeometry[xCount * 2 + (i - zMin) * 2][2] = static_cast<float>(i);
+        m_GridGeometry[xCount * 2 + (i - zMin) * 2 + 1][0] = static_cast<float>(xMax);
+        m_GridGeometry[xCount * 2 + (i - zMin) * 2 + 1][2] = static_cast<float>(i);
     }
 
     if (!m_DebugLineShader->Enable()) return;
@@ -327,10 +327,10 @@ void DebugPass::DrawDebugBox(unsigned layerId, Color4 color)
 void DebugPass::DrawSelectionBox(float left, float right, float top, float bottom)
 {
     // NDC coordinates
-    float leftNDC = (left / m_ViewportSize.x) - 1;
-    float rightNDC = (right / m_ViewportSize.x) - 1;
-    float topNDC = (top / m_ViewportSize.y) - 1;
-    float bottomNDC = (bottom / m_ViewportSize.y) - 1;
+    float leftNDC = (left / m_ViewportSize[0]) - 1;
+    float rightNDC = (right / m_ViewportSize[0]) - 1;
+    float topNDC = (top / m_ViewportSize[1]) - 1;
+    float bottomNDC = (bottom / m_ViewportSize[1]) - 1;
 
     m_SelectionBoxGeometry[0] = Vector2(leftNDC, bottomNDC);
     m_SelectionBoxGeometry[1] = Vector2(rightNDC, bottomNDC);

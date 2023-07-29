@@ -244,7 +244,7 @@ void Mesh::Load()
                     // Matrix4 tmp;
                     // inFile.read((char*)&(tmp), sizeof(Matrix4));
                     inFile.read((char*)(&m_Nodes[i].m_Scaling), sizeof(Vector3));
-                    inFile.read((char*)(&m_Nodes[i].m_Rotation), sizeof(Quaternion));
+                    inFile.read((char*)(&m_Nodes[i].m_Rotation), sizeof(Quat));
                     inFile.read((char*)(&m_Nodes[i].m_Translation), sizeof(Vector3));
                 }
             }
@@ -372,14 +372,14 @@ void Mesh::Load()
 
     for (const Vector3& position : m_Vertices)
     {
-        if (position.x < min.x) min.x = position.x;
-        if (position.x > max.x) max.x = position.x;
+        if (position[0] < min[0]) min[0] = position[0];
+        if (position[0] > max[0]) max[0] = position[0];
 
-        if (position.y < min.y) min.y = position.y;
-        if (position.y > max.y) max.y = position.y;
+        if (position[1] < min[1]) min[1] = position[1];
+        if (position[1] > max[1]) max[1] = position[1];
 
-        if (position.z < min.z) min.z = position.z;
-        if (position.z > max.z) max.z = position.z;
+        if (position[2] < min[2]) min[2] = position[2];
+        if (position[2] > max[2]) max[2] = position[2];
     }
 
     m_AABB = AABB(min, max);
@@ -778,7 +778,7 @@ void Mesh::ImportFromAssimp(aiScene const* scene)
             outFile.write((char*)(&childCount), sizeof(childCount));
             outFile.write((char*)(m_Nodes[i].m_ChildrenNodes.data()), m_Nodes[i].m_ChildrenNodes.size() * sizeof(m_Nodes[i].m_ChildrenNodes[0]));
             outFile.write((char*)(&m_Nodes[i].m_Scaling), sizeof(Vector3));
-            outFile.write((char*)(&m_Nodes[i].m_Rotation), sizeof(Quaternion));
+            outFile.write((char*)(&m_Nodes[i].m_Rotation), sizeof(Quat));
             outFile.write((char*)(&m_Nodes[i].m_Translation), sizeof(Vector3));
         }
     }
@@ -816,14 +816,14 @@ void Mesh::ImportFromAssimp(aiScene const* scene)
 
     for (const Vector3& position : m_Vertices)
     {
-        if (position.x < min.x) min.x = position.x;
-        if (position.x > max.x) max.x = position.x;
+        if (position[0] < min[0]) min[0] = position[0];
+        if (position[0] > max[0]) max[0] = position[0];
 
-        if (position.y < min.y) min.y = position.y;
-        if (position.y > max.y) max.y = position.y;
+        if (position[1] < min[1]) min[1] = position[1];
+        if (position[1] > max[1]) max[1] = position[1];
 
-        if (position.z < min.z) min.z = position.z;
-        if (position.z > max.z) max.z = position.z;
+        if (position[2] < min[2]) min[2] = position[2];
+        if (position[2] > max[2]) max[2] = position[2];
     }
 
     m_AABB = AABB(min, max);
@@ -964,7 +964,7 @@ void Mesh::ParseNodes(aiNode* currNode)
         currNode->mTransformation.Decompose(scale, rotate, translate);
 
         newNode.m_Scaling = Vector3(scale.x, scale.y, scale.z);
-        newNode.m_Rotation = Quaternion(rotate.x, rotate.y, rotate.z, rotate.w);
+        newNode.m_Rotation = Quat(rotate.x, rotate.y, rotate.z, rotate.w);
         newNode.m_Translation = Vector3(translate.x, translate.y, translate.z);
 
         for (unsigned i = 0; i < currNode->mNumChildren; ++i)

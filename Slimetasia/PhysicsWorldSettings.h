@@ -39,7 +39,7 @@ struct PhysicsWorldSettings
     float m_DefaultSleepLinearVel = 0.025f;
 
     // any bodies with an angular vel less than this will enter sleep mode.
-    float m_DefaultSleepAngularVel = 3.0 * (PI) / 180.0f;
+    float m_DefaultSleepAngularVel = 3.0 * (RAD180) / 180.0f;
 
     // world gravity applied on all objects with the boolean turned on.
     Vector3 m_Gravity { 0.f, -30.f, 0.f };

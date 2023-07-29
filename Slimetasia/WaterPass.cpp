@@ -83,11 +83,11 @@ void WaterPass::Render(Camera* camera, const RenderLayer& renderLayer, GLuint ma
         glDisable(GL_SCISSOR_TEST);
         // Bind water pass framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, m_Framebuffer);
-        glViewport(0, 0, m_ViewportSize.x, m_ViewportSize.y);
+        glViewport(0, 0, m_ViewportSize[0], m_ViewportSize[1]);
 
         // Setup for rendering reflection texture
         camera->SetIsReflectionView(true);
-        camera->SetReflectionHeight(simulator->GetTransform()->GetWorldPosition().y);
+        camera->SetReflectionHeight(simulator->GetTransform()->GetWorldPosition()[1]);
 
         // Start threaded culling
         m_GeometryPass.StartMeshCulling(*camera, renderLayer);
@@ -99,11 +99,11 @@ void WaterPass::Render(Camera* camera, const RenderLayer& renderLayer, GLuint ma
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_CLIP_DISTANCE0);
-        m_GeometryPass.SetClipPlane(Vector4(0.0f, 1.0f, 0.0f, -waterPlanePosition.y + 0.5f));
+        m_GeometryPass.SetClipPlane(Vector4(0.0f, 1.0f, 0.0f, -waterPlanePosition[1] + 0.5f));
         m_GeometryPass.Render(camera, renderLayer);
         glDisable(GL_CLIP_DISTANCE0);
 
-        glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, 0, 0, m_ViewportSize.x, m_ViewportSize.y, 0, 0, m_ViewportSize.x, m_ViewportSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, 0, 0, m_ViewportSize[0], m_ViewportSize[1], 0, 0, m_ViewportSize[0], m_ViewportSize[1], GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
         m_LightPass.Render(*camera, renderLayer, m_GeometryPass.GetGBuffers(), m_Framebuffer, true);
         m_SkyboxPass.Render(*camera);
@@ -122,11 +122,11 @@ void WaterPass::Render(Camera* camera, const RenderLayer& renderLayer, GLuint ma
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_CLIP_DISTANCE0);
-        m_GeometryPass.SetClipPlane(Vector4(0.0f, -1.0f, 0.0f, waterPlanePosition.y + 0.5f));
+        m_GeometryPass.SetClipPlane(Vector4(0.0f, -1.0f, 0.0f, waterPlanePosition[1] + 0.5f));
         m_GeometryPass.Render(camera, renderLayer);
         glDisable(GL_CLIP_DISTANCE0);
 
-        glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, 0, 0, m_ViewportSize.x, m_ViewportSize.y, 0, 0, m_ViewportSize.x, m_ViewportSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, 0, 0, m_ViewportSize[0], m_ViewportSize[1], 0, 0, m_ViewportSize[0], m_ViewportSize[1], GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
         m_LightPass.Render(*camera, renderLayer, m_GeometryPass.GetGBuffers(), m_Framebuffer, true);
         m_SkyboxPass.Render(*camera);
@@ -143,8 +143,8 @@ void WaterPass::Render(Camera* camera, const RenderLayer& renderLayer, GLuint ma
 
         // Draw water plane to scene
         glBindFramebuffer(GL_FRAMEBUFFER, mainFramebuffer);
-        glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-        glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+        glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+        glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
         Matrix4 vp = camera->GetViewProjTransform();
         Matrix4 m = simulator->GetTransform()->GetWorldTransformMatrix() * Matrix4::Scale(simulator->m_PlaneSize);
@@ -207,7 +207,7 @@ void WaterPass::BuildRenderTargets()
 {
     glDeleteTextures(1, &m_DSBuffer);
     glCreateTextures(GL_TEXTURE_2D, 1, &m_DSBuffer);
-    glTextureStorage2D(m_DSBuffer, 1, GL_DEPTH24_STENCIL8, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_DSBuffer, 1, GL_DEPTH24_STENCIL8, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

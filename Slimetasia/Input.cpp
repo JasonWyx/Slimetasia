@@ -94,9 +94,9 @@ float CMouse::GetAxis()
     float val = 0.0f;
 
     if (axis_[1] == 'x')
-        val = Input::Instance().GetMouseDelta().x;
+        val = Input::Instance().GetMouseDelta()[0];
     else if (axis_[1] == 'y')
-        val = Input::Instance().GetMouseDelta().y;
+        val = Input::Instance().GetMouseDelta()[1];
 
     return (axis_[0] == '+') ? (val > 0.0f ? val : 0.0f) : (val < 0.0f ? -val : 0.0f);
 }
@@ -319,8 +319,8 @@ Vector2 Input::GetMouseDelta()
 
 void Input::SetMousePosition(unsigned x, unsigned y)
 {
-    CurrMousePos.x = static_cast<float>(x);
-    CurrMousePos.y = static_cast<float>(y);
+    CurrMousePos[0] = static_cast<float>(x);
+    CurrMousePos[1] = static_cast<float>(y);
 }
 
 bool Input::GetButtonDown(WORD button)
@@ -393,14 +393,14 @@ void Input::MouseWrap()
     else if (cx == 0)
     {
         SetCursorPos(x - 2, cy);
-        CurrMousePos.x = static_cast<float>(x - 2);
-        PrevMousePos.x = static_cast<float>(x - 1);
+        CurrMousePos[0] = static_cast<float>(x - 2);
+        PrevMousePos[0] = static_cast<float>(x - 1);
     }
     else if (cy == 0)
     {
         SetCursorPos(cx, y - 2);
-        CurrMousePos.y = 1.f;
-        PrevMousePos.y = 0.f;
+        CurrMousePos[1] = 1.f;
+        PrevMousePos[1] = 0.f;
     }
     else if (cx == (x - 1) && cy == (y - 1))
     {
@@ -411,14 +411,14 @@ void Input::MouseWrap()
     else if (cx == (x - 1))
     {
         SetCursorPos(1, cy);
-        CurrMousePos.x = 1.f;
-        PrevMousePos.x = 0.f;
+        CurrMousePos[0] = 1.f;
+        PrevMousePos[0] = 0.f;
     }
     else if (cy == (y - 1))
     {
         SetCursorPos(cx, 1);
-        CurrMousePos.y = static_cast<float>(y - 2);
-        PrevMousePos.y = static_cast<float>(y - 1);
+        CurrMousePos[1] = static_cast<float>(y - 2);
+        PrevMousePos[1] = static_cast<float>(y - 1);
     }
 }
 

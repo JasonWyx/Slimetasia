@@ -87,7 +87,7 @@ void ParticlePass::Render(Camera& camera)
 
     for (unsigned i = 0; i < data->m_CountAlive; ++i)
     {
-        Vector3 const& particlePosition = Vector3(data->m_Position[i].x, data->m_Position[i].y, data->m_Position[i].z);
+        Vector3 const& particlePosition = Vector3(data->m_Position[i][0], data->m_Position[i][1], data->m_Position[i][2]);
 
         // Check particle infront of camera
         if (camDirection.Dot(particlePosition - camPosition) < 0) continue;
@@ -236,7 +236,7 @@ void ParticlePass::SortParticleData(ParticlePass& particlePass, Camera& camera)
 
     for (unsigned i = 0; i < data->m_CountAlive; ++i)
     {
-        Vector3 const& particlePosition = Vector3(data->m_Position[i].x, data->m_Position[i].y, data->m_Position[i].z);
+        Vector3 const& particlePosition = Vector3(data->m_Position[i][0], data->m_Position[i][1], data->m_Position[i][2]);
 
         // Check particle infront of camera
         if (camDirection.Dot(particlePosition - camPosition) < 0) continue;
@@ -271,8 +271,8 @@ void ParticlePass::SortParticleData(ParticlePass& particlePass, Camera& camera)
         {
             for (std::size_t k = 0; k + 1 < positionIt->second.size(); ++k)
             {
-                Vector3 const& particlePosition1 = Vector3(positionIt->second[k].x, positionIt->second[k].y, positionIt->second[k].z);
-                Vector3 const& particlePosition2 = Vector3(positionIt->second[k + 1].x, positionIt->second[k + 1].y, positionIt->second[k + 1].z);
+                Vector3 const& particlePosition1 = Vector3(positionIt->second[k][0], positionIt->second[k][1], positionIt->second[k][2]);
+                Vector3 const& particlePosition2 = Vector3(positionIt->second[k + 1][0], positionIt->second[k + 1][1], positionIt->second[k + 1][2]);
 
                 float distance1 = camDirection.Dot(particlePosition1 - camPosition);
                 float distance2 = camDirection.Dot(particlePosition2 - camPosition);

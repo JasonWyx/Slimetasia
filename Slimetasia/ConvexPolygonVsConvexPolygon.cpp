@@ -35,9 +35,9 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
     Vector3 dist = secondPos - firstPos;
 
     // calculating the overlap on ALL axes.
-    float x_overlap = firstHE.x + secondHE.x - fabsf(dist.x);
-    float y_overlap = firstHE.y + secondHE.y - fabsf(dist.y);
-    float z_overlap = firstHE.z + secondHE.z - fabsf(dist.z);
+    float x_overlap = firstHE[0] + secondHE[0] - fabsf(dist[0]);
+    float y_overlap = firstHE[1] + secondHE[1] - fabsf(dist[1]);
+    float z_overlap = firstHE[2] + secondHE[2] - fabsf(dist[2]);
 
     // we have a collision IF all 3 axes overlap
     if (x_overlap > 0.f && y_overlap > 0.f && z_overlap > 0.f)
@@ -47,15 +47,15 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
         // if its x
         if (x_overlap < y_overlap && x_overlap < z_overlap)
         {
-            if (dist.x > 0.f)
+            if (dist[0] > 0.f)
             {
                 manifold->m_Normal = Vector3 { 1.f, 0.f, 0.f };
-                manifold->m_Contacts[0] = Vector3 { firstPos.x + x_overlap, firstPos.y, firstPos.z };
+                manifold->m_Contacts[0] = Vector3 { firstPos[0] + x_overlap, firstPos[1], firstPos[2] };
             }
             else
             {
                 manifold->m_Normal = Vector3 { -1.f, 0.f, 0.f };
-                manifold->m_Contacts[0] = Vector3 { firstPos.x - x_overlap, firstPos.y, firstPos.z };
+                manifold->m_Contacts[0] = Vector3 { firstPos[0] - x_overlap, firstPos[1], firstPos[2] };
             }
 
             manifold->m_PenetrationDepth = x_overlap;
@@ -66,15 +66,15 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
         // if its y
         if (y_overlap < x_overlap && y_overlap < z_overlap)
         {
-            if (dist.y > 0.f)
+            if (dist[1] > 0.f)
             {
                 manifold->m_Normal = Vector3 { 0.f, 1.f, 0.f };
-                manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y + y_overlap, firstPos.z };
+                manifold->m_Contacts[0] = Vector3 { firstPos[0], firstPos[1] + y_overlap, firstPos[2] };
             }
             else
             {
                 manifold->m_Normal = Vector3 { 0.f, -1.f, 0.f };
-                manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y - y_overlap, firstPos.z };
+                manifold->m_Contacts[0] = Vector3 { firstPos[0], firstPos[1] - y_overlap, firstPos[2] };
             }
 
             manifold->m_PenetrationDepth = y_overlap;
@@ -82,15 +82,15 @@ void ConvexPolygonVsConvexPolygon::ComputeCollisionData(Manifold* manifold, Rigi
         }
 
         // the only choice is z
-        if (dist.z > 0.f)
+        if (dist[2] > 0.f)
         {
             manifold->m_Normal = Vector3 { 0.f, 0.f, 1.f };
-            manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y, firstPos.z + z_overlap };
+            manifold->m_Contacts[0] = Vector3 { firstPos[0], firstPos[1], firstPos[2] + z_overlap };
         }
         else
         {
             manifold->m_Normal = Vector3 { 0.f, 0.f, -1.f };
-            manifold->m_Contacts[0] = Vector3 { firstPos.x, firstPos.y, firstPos.z - z_overlap };
+            manifold->m_Contacts[0] = Vector3 { firstPos[0], firstPos[1], firstPos[2] - z_overlap };
         }
 
         manifold->m_PenetrationDepth = z_overlap;

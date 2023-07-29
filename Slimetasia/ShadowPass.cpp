@@ -13,7 +13,7 @@ std::vector<Vector3> ShadowPass::GetShadowFrustumPoints(Vector3 direction, Vecto
 {
     std::vector<Vector3> results(8);
 
-    Vector3 cameraUp = direction.Normalized().y == 1.0f ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
+    Vector3 cameraUp = direction.Normalized()[1] == 1.0f ? Vector3(0.0f, 0.0f, 1.0f) : Vector3(0.0f, 1.0f, 0.0f);
 
     Vector3 zAxis = direction;
     zAxis.Normalize();

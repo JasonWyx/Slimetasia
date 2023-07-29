@@ -115,7 +115,7 @@ class Editor : public ISystem<Editor>
     void Options(HTexture texture, GameObject* go, std::string c, std::string p);
     void Options(HAnimationSet anim, GameObject* go, std::string c, std::string p);
     void Options(Vector2* vec2, GameObject* go, std::string c, std::string p);
-    void Options(TVector2<int>* vec2, GameObject* go, std::string c, std::string p);
+    void Options(iVector2* vec2, GameObject* go, std::string c, std::string p);
     void Options(HFont font, GameObject* go, std::string c, std::string p);
     void EnumOptions(int* i, std::string t, GameObject* go, std::string c, std::string p);
 
@@ -125,7 +125,7 @@ class Editor : public ISystem<Editor>
     void ParentStructOptions(int* i, GameObject*& go, std::string c);
     void ParentStructOptions(bool* b, GameObject*& go, std::string c);
     void ParentStructOptions(Vector3* vec3, GameObject*& go, std::string c);
-    void ParentStructOptions(TVector2<int>* vec2, GameObject*& go, std::string c);
+    void ParentStructOptions(iVector2* vec2, GameObject*& go, std::string c);
     void ParentStructOptions(Vector4* clr, GameObject*& go, std::string c, std::string p);
     void ParentStructOptions(HTexture* texture, GameObject*& go, std::string c);
     void ParentStructOptions(Vector2* vec2, GameObject*& go, std::string c);

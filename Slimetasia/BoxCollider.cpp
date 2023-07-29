@@ -8,7 +8,7 @@ BoxCollider::BoxCollider(GameObject* parentObject, const Vector3& halfExtent)
     : ConvexCollider { parentObject, "BoxCollider", eCollisionShapeType_CONVEX_POLY, eCollisionShape_BOX }
     , m_HalfExtent { halfExtent }
 {
-    assert(halfExtent.x >= 0.f && halfExtent.y >= 0.f && halfExtent.z >= 0.f);
+    assert(halfExtent[0] >= 0.f && halfExtent[1] >= 0.f && halfExtent[2] >= 0.f);
 
     // box has 8 verts, add all to
     m_EdgeData.AddVertex(0);
@@ -62,14 +62,14 @@ Vector3 BoxCollider::GetVertexPosition(const uint& index) const
 {
     switch (index)
     {
-        case 0: return Vector3 { -m_HalfExtent.x, m_HalfExtent.y, -m_HalfExtent.z };
-        case 1: return Vector3 { m_HalfExtent.x, m_HalfExtent.y, -m_HalfExtent.z };
-        case 2: return Vector3 { m_HalfExtent.x, -m_HalfExtent.y, -m_HalfExtent.z };
+        case 0: return Vector3 { -m_HalfExtent[0], m_HalfExtent[1], -m_HalfExtent[2] };
+        case 1: return Vector3 { m_HalfExtent[0], m_HalfExtent[1], -m_HalfExtent[2] };
+        case 2: return Vector3 { m_HalfExtent[0], -m_HalfExtent[1], -m_HalfExtent[2] };
         case 3: return Vector3 { -m_HalfExtent };
-        case 4: return Vector3 { -m_HalfExtent.x, m_HalfExtent.y, m_HalfExtent.z };
+        case 4: return Vector3 { -m_HalfExtent[0], m_HalfExtent[1], m_HalfExtent[2] };
         case 5: return Vector3 { m_HalfExtent };
-        case 6: return Vector3 { m_HalfExtent.x, -m_HalfExtent.y, m_HalfExtent.z };
-        case 7: return Vector3 { -m_HalfExtent.x, -m_HalfExtent.y, m_HalfExtent.z };
+        case 6: return Vector3 { m_HalfExtent[0], -m_HalfExtent[1], m_HalfExtent[2] };
+        case 7: return Vector3 { -m_HalfExtent[0], -m_HalfExtent[1], m_HalfExtent[2] };
         default: std::cout << "Index is out of range! BoxCollider::GetVertexPosition!\n"; assert(false);
     }
 
@@ -91,7 +91,7 @@ bool BoxCollider::ContainsPoint(const Vector3& pt)
     Vector3 max = GetPosition() + m_HalfExtent;
     Vector3 min = GetPosition() - m_HalfExtent;
 
-    return (pt.x >= min.x && pt.x <= max.x && pt.y >= min.y && pt.y <= max.y && pt.z >= min.z && pt.z <= max.z);
+    return (pt[0] >= min[0] && pt[0] <= max[0] && pt[1] >= min[1] && pt[1] <= max[1] && pt[2] >= min[2] && pt[2] <= max[2]);
 }
 
 void BoxCollider::ComputeBounds(Vector3& min, Vector3& max) const
@@ -140,44 +140,44 @@ void BoxCollider::DebugDraw()
     std::vector<Vector3> pts;
     Vector3 position = GetPosition() + m_offset;
 
-    Vector3 minPt(position.x - m_HalfExtent.x, position.y - m_HalfExtent.y, position.z - m_HalfExtent.z);
-    Vector3 maxPt(position.x + m_HalfExtent.x, position.y + m_HalfExtent.y, position.z + m_HalfExtent.z);
+    Vector3 minPt(position[0] - m_HalfExtent[0], position[1] - m_HalfExtent[1], position[2] - m_HalfExtent[2]);
+    Vector3 maxPt(position[0] + m_HalfExtent[0], position[1] + m_HalfExtent[1], position[2] + m_HalfExtent[2]);
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], maxPt[1], minPt[2] });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], maxPt[2] });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt[0], minPt[1], maxPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
-
-    pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], maxPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], minPt[2] });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], minPt[2] });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { minPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
-    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(minPt);
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], minPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], maxPt[2] });
+    pts.emplace_back(Vector3 { minPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], maxPt[2] });
+
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], maxPt[1], minPt[2] });
 
 #ifdef USE_VULKAN
 #else
@@ -188,9 +188,9 @@ void BoxCollider::DebugDraw()
 void BoxCollider::ComputeInertiaTensor(Matrix3& tensor, const float& mass) const
 {
     // float factor = 1.f / 3.f * mass;
-    // float xSq = m_HalfExtent.x * m_HalfExtent.x;
-    // float ySq = m_HalfExtent.y * m_HalfExtent.y;
-    // float zSq = m_HalfExtent.z * m_HalfExtent.z;
+    // float xSq = m_HalfExtent[0] * m_HalfExtent[0];
+    // float ySq = m_HalfExtent[1] * m_HalfExtent[1];
+    // float zSq = m_HalfExtent[2] * m_HalfExtent[2];
     //
     // tensor = Matrix3(factor * (ySq + zSq), 0.f, 0.f,
     //				 0.f, factor * (xSq + zSq), 0.f,
@@ -231,7 +231,7 @@ Vector3 BoxCollider::GetPointOnEdge(const Vector3& pt) const
     Vector3 pos = GetPosition();
 
     // return an arbitrary point on the edge if the point is on the centroid.
-    if (pos == pt) return Vector3 { pos.x + m_HalfWidth, pos.y, pos.z };
+    if (pos == pt) return Vector3 { pos[0] + m_HalfWidth, pos[1], pos[2] };
 
     return Vector3();
 }
@@ -242,20 +242,20 @@ bool BoxCollider::Raycast(const Ray& ray, RaycastData_tmp& data)
     Vector3 maxPt(pos + m_HalfExtent);
     Vector3 minPt(pos - m_HalfExtent);
     float t = 0.f;
-    Vector4 plane_l { 1.f, 0.f, 0.f, minPt.x }, plane_bo { 0.f, 1.f, 0.f, minPt.y }, plane_f { 0.f, 0.f, 1.f, minPt.z };
+    Vector4 plane_l { 1.f, 0.f, 0.f, minPt[0] }, plane_bo { 0.f, 1.f, 0.f, minPt[1] }, plane_f { 0.f, 0.f, 1.f, minPt[2] };
     auto denom = 0.f;
     t = 0.f;
     auto tmax = FLT_MAX, t1 = 0.f, t2 = 0.f;
     // checking for x axis
-    if (ray.m_dir.x == 0.f)
+    if (ray.m_dir[0] == 0.f)
     {
-        if (minPt.x > ray.m_start.x || maxPt.x < ray.m_start.x) return false;
+        if (minPt[0] > ray.m_start[0] || maxPt[0] < ray.m_start[0]) return false;
     }
     else
     {
-        denom = 1.f / ray.m_dir.x;
-        t1 = (minPt.x - ray.m_start.x) * denom;
-        t2 = (maxPt.x - ray.m_start.x) * denom;
+        denom = 1.f / ray.m_dir[0];
+        t1 = (minPt[0] - ray.m_start[0]) * denom;
+        t2 = (maxPt[0] - ray.m_start[0]) * denom;
         if (t1 > t2)
         {
             auto tmp = t2;
@@ -267,15 +267,15 @@ bool BoxCollider::Raycast(const Ray& ray, RaycastData_tmp& data)
         if (t > tmax) return false;
     }
     // checking for y axis
-    if (ray.m_dir.y == 0.f)
+    if (ray.m_dir[1] == 0.f)
     {
-        if (minPt.y > ray.m_start.y || maxPt.y < ray.m_start.y) return false;
+        if (minPt[1] > ray.m_start[1] || maxPt[1] < ray.m_start[1]) return false;
     }
     else
     {
-        denom = 1.f / ray.m_dir.y;
-        t1 = (minPt.y - ray.m_start.y) * denom;
-        t2 = (maxPt.y - ray.m_start.y) * denom;
+        denom = 1.f / ray.m_dir[1];
+        t1 = (minPt[1] - ray.m_start[1]) * denom;
+        t2 = (maxPt[1] - ray.m_start[1]) * denom;
         if (t1 > t2)
         {
             auto tmp = t2;
@@ -287,15 +287,15 @@ bool BoxCollider::Raycast(const Ray& ray, RaycastData_tmp& data)
         if (t > tmax) return false;
     }
     // checking for z axis
-    if (ray.m_dir.z == 0.f)
+    if (ray.m_dir[2] == 0.f)
     {
-        if (minPt.z > ray.m_start.z || maxPt.z < ray.m_start.z) return false;
+        if (minPt[2] > ray.m_start[2] || maxPt[2] < ray.m_start[2]) return false;
     }
     else
     {
-        denom = 1.f / ray.m_dir.z;
-        t1 = (minPt.z - ray.m_start.z) * denom;
-        t2 = (maxPt.z - ray.m_start.z) * denom;
+        denom = 1.f / ray.m_dir[2];
+        t1 = (minPt[2] - ray.m_start[2]) * denom;
+        t2 = (maxPt[2] - ray.m_start[2]) * denom;
         if (t1 > t2)
         {
             auto tmp = t2;

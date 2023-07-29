@@ -92,7 +92,7 @@ void TextRenderer::GenerateGeometryData()
         }
         else
         {
-            textWidth += m_Font->GetFontCharacterInfo(c).m_Advance.x;
+            textWidth += m_Font->GetFontCharacterInfo(c).m_Advance[0];
         }
     }
     maxTextWidth = std::max(textWidth, maxTextWidth);
@@ -104,53 +104,53 @@ void TextRenderer::GenerateGeometryData()
     {
         case TextAnchorPoint::eTextAnchorPoint_TopLeft:
         {
-            charPos.y = -(float)maxFontHeight;
+            charPos[1] = -(float)maxFontHeight;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_Top:
         {
-            charPos.y = -(float)maxFontHeight;
-            charPos.x = -maxTextWidth / 2;
+            charPos[1] = -(float)maxFontHeight;
+            charPos[0] = -maxTextWidth / 2;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_TopRight:
         {
-            charPos.y = -(float)maxFontHeight;
-            charPos.x = -maxTextWidth;
+            charPos[1] = -(float)maxFontHeight;
+            charPos[0] = -maxTextWidth;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_Left:
         {
-            charPos.y = -(float)maxFontHeight + textHeight / 2;
+            charPos[1] = -(float)maxFontHeight + textHeight / 2;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_Center:
         {
-            charPos.x = -maxTextWidth / 2;
-            charPos.y = -(float)maxFontHeight + textHeight / 2;
+            charPos[0] = -maxTextWidth / 2;
+            charPos[1] = -(float)maxFontHeight + textHeight / 2;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_Right:
         {
-            charPos.x = -maxTextWidth;
-            charPos.y = -(float)maxFontHeight + textHeight / 2;
+            charPos[0] = -maxTextWidth;
+            charPos[1] = -(float)maxFontHeight + textHeight / 2;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_BottomLeft:
         {
-            charPos.y = -(float)maxFontHeight + textHeight;
+            charPos[1] = -(float)maxFontHeight + textHeight;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_Bottom:
         {
-            charPos.x = -maxTextWidth / 2;
-            charPos.y = -(float)maxFontHeight + textHeight;
+            charPos[0] = -maxTextWidth / 2;
+            charPos[1] = -(float)maxFontHeight + textHeight;
             break;
         }
         case TextAnchorPoint::eTextAnchorPoint_BottomRight:
         {
-            charPos.x = -maxTextWidth;
-            charPos.y = -(float)maxFontHeight + textHeight;
+            charPos[0] = -maxTextWidth;
+            charPos[1] = -(float)maxFontHeight + textHeight;
             break;
         }
 
@@ -170,44 +170,44 @@ void TextRenderer::GenerateGeometryData()
     {
         if (c == '\n')
         {
-            charPos.y -= maxFontHeight;
+            charPos[1] -= maxFontHeight;
             switch (m_AnchorPoint)
             {
                 case TextAnchorPoint::eTextAnchorPoint_TopRight:
                 case TextAnchorPoint::eTextAnchorPoint_Right:
-                case TextAnchorPoint::eTextAnchorPoint_BottomRight: charPos.x = -maxTextWidth; break;
+                case TextAnchorPoint::eTextAnchorPoint_BottomRight: charPos[0] = -maxTextWidth; break;
                 case TextAnchorPoint::eTextAnchorPoint_Top:
                 case TextAnchorPoint::eTextAnchorPoint_Bottom:
-                case TextAnchorPoint::eTextAnchorPoint_Center: charPos.x = -maxTextWidth / 2; break;
+                case TextAnchorPoint::eTextAnchorPoint_Center: charPos[0] = -maxTextWidth / 2; break;
                 case TextAnchorPoint::eTextAnchorPoint_TopLeft:
                 case TextAnchorPoint::eTextAnchorPoint_Left:
-                case TextAnchorPoint::eTextAnchorPoint_BottomLeft: charPos.x = 0; break;
+                case TextAnchorPoint::eTextAnchorPoint_BottomLeft: charPos[0] = 0; break;
             }
         }
 
         const FontCharacter& charInfo = m_Font->GetFontCharacterInfo(c);
-        const float& charTop = charInfo.m_BitmapOffset.y;
-        const float& charLeft = charInfo.m_BitmapOffset.x;
-        const float& charWidth = charInfo.m_BitmapSize.x;
-        const float& charHeight = charInfo.m_BitmapSize.y;
+        const float& charTop = charInfo.m_BitmapOffset[1];
+        const float& charLeft = charInfo.m_BitmapOffset[0];
+        const float& charWidth = charInfo.m_BitmapSize[0];
+        const float& charHeight = charInfo.m_BitmapSize[1];
 
         float fltMaxFontHeight = static_cast<float>(maxFontHeight);
 
         // Top Left
         vertices.emplace_back(
-            TextVertex { Vector3(charPos.x + charLeft, charPos.y + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL.x, charInfo.m_TextureOffsetTL.y) });
+            TextVertex { Vector3(charPos[0] + charLeft, charPos[1] + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL[0], charInfo.m_TextureOffsetTL[1]) });
 
         // Bottom left
         vertices.emplace_back(
-            TextVertex { Vector3(charPos.x + charLeft, charPos.y + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL.x, charInfo.m_TextureOffsetBR.y) });
+            TextVertex { Vector3(charPos[0] + charLeft, charPos[1] + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetTL[0], charInfo.m_TextureOffsetBR[1]) });
 
         // Bottom right
-        vertices.emplace_back(TextVertex { Vector3(charPos.x + charLeft + charWidth, charPos.y + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize,
-                                           Vector2(charInfo.m_TextureOffsetBR.x, charInfo.m_TextureOffsetBR.y) });
+        vertices.emplace_back(TextVertex { Vector3(charPos[0] + charLeft + charWidth, charPos[1] + charTop - charHeight, 0.f) / fltMaxFontHeight * m_FontSize,
+                                           Vector2(charInfo.m_TextureOffsetBR[0], charInfo.m_TextureOffsetBR[1]) });
 
         // Top right
         vertices.emplace_back(
-            TextVertex { Vector3(charPos.x + charLeft + charWidth, charPos.y + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetBR.x, charInfo.m_TextureOffsetTL.y) });
+            TextVertex { Vector3(charPos[0] + charLeft + charWidth, charPos[1] + charTop, 0.f) / fltMaxFontHeight * m_FontSize, Vector2(charInfo.m_TextureOffsetBR[0], charInfo.m_TextureOffsetTL[1]) });
 
         indices.insert(indices.end(), {
                                           static_cast<unsigned>(charCount * 4 + 0),

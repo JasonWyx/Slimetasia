@@ -1,4 +1,4 @@
-#include "ShaderHelper.h"
+module;
 
 #include <Windows.h>
 #include <atlcomcli.h>
@@ -11,9 +11,10 @@
 
 #include "Logger.h"
 
+module ShaderHelper;
+
 namespace ShaderHelper
 {
-
     std::vector<char> CompileToSpirv(const std::filesystem::path& filePath)
     {
         HRESULT hres {};

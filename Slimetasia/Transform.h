@@ -1,13 +1,12 @@
 #pragma once
 #include "CorePrerequisites.h"
 #include "IComponent.h"
-#include "Quaternion.h"
 
 class Transform : public IComponent
 {
 public:
 
-    // Quaternion m_Orientation;
+    // Quat m_Orientation;
 
     Vector3 m_LocalPosition;
     // Vector3 m_LocalRotation;
@@ -44,7 +43,7 @@ public:
     // Vector3 GetLocalPosition() const;
     // Vector3 GetLocalRotation() const;
     // Vector3 GetLocalScale() const;
-    // Quaternion GetOrientation() const;
+    // Quat GetOrientation() const;
 
     Vector3 GetWorldPosition() const;
     Vector3 GetWorldRotation() const;
@@ -53,7 +52,7 @@ public:
     // void    SetLocalPosition(Vector3 const &position);
     // void    SetLocalRotation(Vector3 const &rotation);
     // void    SetLocalScale(Vector3 const &Scale);
-    // void	  SetOrientation(const Quaternion& orientation);
+    // void	  SetOrientation(const Quat& orientation);
     // void	  SetToIdentity();
     void SetWorldPosition(Vector3 const& position);
     void SetWorldRotation(Vector3 const& rotation);
@@ -78,8 +77,8 @@ public:
     Vector3 GetUpwardVector() const;
 
     // solely used by physics.
-    // void	GetInverse(Vector3& pos, Quaternion& orientation) const;
-    // Transform	GetTransformFromInverse(const Vector3& pos, const Quaternion& orientation) const;
+    // void	GetInverse(Vector3& pos, Quat& orientation) const;
+    // Transform	GetTransformFromInverse(const Vector3& pos, const Quat& orientation) const;
     // Vector3 operator*(const Vector3& vec)const;
     // Transform GetInverseTransform() const;
     // Transform operator*(const Transform& rhs) const;

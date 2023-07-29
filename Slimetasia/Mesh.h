@@ -46,7 +46,7 @@ struct MeshNode
     std::vector<unsigned> m_ChildrenNodes;
 
     Vector3 m_Scaling;
-    Quaternion m_Rotation;
+    Quat m_Rotation;
     Vector3 m_Translation;
 };
 

@@ -158,10 +158,10 @@ void ParticleSystem::Reset()
 Vector4 BoxParticleEmitter::linearRand(const Vector4& Min, const Vector4& Max) const
 {
     Vector4 tmp;
-    tmp.x = linearRand(Min.x, Max.x);
-    tmp.y = linearRand(Min.y, Max.y);
-    tmp.z = linearRand(Min.z, Max.z);
-    tmp.w = linearRand(Min.w, Max.w);
+    tmp[0] = linearRand(Min[0], Max[0]);
+    tmp[1] = linearRand(Min[1], Max[1]);
+    tmp[2] = linearRand(Min[2], Max[2]);
+    tmp[3] = linearRand(Min[3], Max[3]);
     return tmp;
 }
 
@@ -182,8 +182,8 @@ void BoxParticleEmitter::emit(float dt, ParticleData* p)
 
     m_ElapsedTime = fmodf(m_ElapsedTime, (1.0f / m_EmissionRate));
 
-    Vector4 posMin { m_Position.x - m_StartPositionOffset.x, m_Position.y - m_StartPositionOffset.y, m_Position.z - m_StartPositionOffset.z, 1.0 };
-    Vector4 posMax { m_Position.x + m_StartPositionOffset.x, m_Position.y + m_StartPositionOffset.y, m_Position.z + m_StartPositionOffset.z, 1.0 };
+    Vector4 posMin { m_Position[0] - m_StartPositionOffset[0], m_Position[1] - m_StartPositionOffset[1], m_Position[2] - m_StartPositionOffset[2], 1.0 };
+    Vector4 posMax { m_Position[0] + m_StartPositionOffset[0], m_Position[1] + m_StartPositionOffset[1], m_Position[2] + m_StartPositionOffset[2], 1.0 };
     Vector4 velMin { m_MinVelocity, 0.f };
     Vector4 velMax { m_MaxVelocity, 0.f };
 
@@ -204,10 +204,10 @@ void BoxParticleEmitter::emit(float dt, ParticleData* p)
 
     for (size_t i = startId; i < endId; ++i)
     {
-        p->m_Time[i].x = linearRand(m_MinTime, m_MaxTime);
-        p->m_Time[i].z = (float)0.0;
-        p->m_Time[i].w = (float)1.0 / p->m_Time[i].x;
-        p->m_Time[i].y = p->m_Time[i].x * m_TextureFade;
+        p->m_Time[i][0] = linearRand(m_MinTime, m_MaxTime);
+        p->m_Time[i][2] = (float)0.0;
+        p->m_Time[i][3] = (float)1.0 / p->m_Time[i][0];
+        p->m_Time[i][1] = p->m_Time[i][0] * m_TextureFade;
     }
 
     for (unsigned i = startId; i < endId; ++i)
@@ -276,7 +276,7 @@ void ColorUpdater::update(float dt, ParticleData* p)
 {
     const size_t endId = p->m_CountAlive;
     for (size_t i = 0; i < endId; ++i)
-        p->m_Color[i] = mix(p->m_StartColor[i], p->m_EndColor[i], p->m_Time[i].z);
+        p->m_Color[i] = mix(p->m_StartColor[i], p->m_EndColor[i], p->m_Time[i][2]);
 }
 
 void TimeUpdater::update(float dt, ParticleData* p)
@@ -286,13 +286,13 @@ void TimeUpdater::update(float dt, ParticleData* p)
 
     for (unsigned i = 0; i < endId; ++i)
     {
-        p->m_Time[i].x -= localDT;
-        p->m_Time[i].y -= localDT;
-        if (p->m_Time[i].y <= 0.f) p->m_TextureFade[i] -= localDT;
+        p->m_Time[i][0] -= localDT;
+        p->m_Time[i][1] -= localDT;
+        if (p->m_Time[i][1] <= 0.f) p->m_TextureFade[i] -= localDT;
         // interpolation: from 0 (start of life) till 1 (end of life)
-        p->m_Time[i].z = (float)1.0 - (p->m_Time[i].x * p->m_Time[i].w);  // .w is 1.0/max life time
+        p->m_Time[i][2] = (float)1.0 - (p->m_Time[i][0] * p->m_Time[i][3]);  // [3] is 1.0/max life time
 
-        if (p->m_Time[i].x < (float)0.0)
+        if (p->m_Time[i][0] < (float)0.0)
         {
             p->kill(i);
             endId = p->m_CountAlive < p->m_Count ? p->m_CountAlive : p->m_Count;
@@ -302,14 +302,14 @@ void TimeUpdater::update(float dt, ParticleData* p)
 
 void EulerUpdater::update(float dt, ParticleData* p)
 {
-    const Vector4 globalA { dt * m_GlobalAcceleration.x, dt * m_GlobalAcceleration.y, dt * m_GlobalAcceleration.z, 0.0 };
+    const Vector4 globalA { dt * m_GlobalAcceleration[0], dt * m_GlobalAcceleration[1], dt * m_GlobalAcceleration[2], 0.0 };
     const float localDT = (float)dt;
 
     const unsigned int endId = p->m_CountAlive;
     for (size_t i = 0; i < endId; ++i)
     {
         p->m_Acceleration[i] += globalA;
-        p->m_Acceleration[i].y += (p->m_Gravity[i] * dt);
+        p->m_Acceleration[i][1] += (p->m_Gravity[i] * dt);
     }
 
     for (size_t i = 0; i < endId; ++i)
@@ -327,7 +327,7 @@ void FloorUpdater::update(float dt, ParticleData* p)
     for (size_t i = 0; i < endId; ++i)
     {
         if (!p->m_IsAffectedByFloor[i]) continue;
-        if (p->m_Position[i].y < p->m_FloorHeight[i])
+        if (p->m_Position[i][1] < p->m_FloorHeight[i])
         {
             Vector4 force = p->m_Acceleration[i];
             float normalFactor = force.Dot(upVector);
@@ -362,9 +362,9 @@ void AttractorUpdater::update(float dt, ParticleData* p)
             {
                 unsigned attractorID = m_Attractors[a]->GetOwner()->GetParentLayer()->GetId();
                 if (attractorID != particleID) continue;
-                off.x = m_Attractors[a]->GetTransform()->GetWorldPosition().x - p->m_Position[i].x;
-                off.y = m_Attractors[a]->GetTransform()->GetWorldPosition().y - p->m_Position[i].y;
-                off.z = m_Attractors[a]->GetTransform()->GetWorldPosition().z - p->m_Position[i].z;
+                off[0] = m_Attractors[a]->GetTransform()->GetWorldPosition()[0] - p->m_Position[i][0];
+                off[1] = m_Attractors[a]->GetTransform()->GetWorldPosition()[1] - p->m_Position[i][1];
+                off[2] = m_Attractors[a]->GetTransform()->GetWorldPosition()[2] - p->m_Position[i][2];
                 dist = off.Dot(off);
 
                 if (fabs(dist) > 0.00001) dist = dist * m_Attractors[a]->GetForce();
@@ -381,9 +381,9 @@ void AttractorUpdater::update(float dt, ParticleData* p)
                 unsigned attractorRealID = m_Attractors[a]->GetOwner()->GetID();
                 auto iterator = std::find(attractors.begin(), attractors.end(), attractorRealID);
                 if (iterator == attractors.end()) continue;
-                off.x = m_Attractors[a]->GetTransform()->GetWorldPosition().x - p->m_Position[i].x;
-                off.y = m_Attractors[a]->GetTransform()->GetWorldPosition().y - p->m_Position[i].y;
-                off.z = m_Attractors[a]->GetTransform()->GetWorldPosition().z - p->m_Position[i].z;
+                off[0] = m_Attractors[a]->GetTransform()->GetWorldPosition()[0] - p->m_Position[i][0];
+                off[1] = m_Attractors[a]->GetTransform()->GetWorldPosition()[1] - p->m_Position[i][1];
+                off[2] = m_Attractors[a]->GetTransform()->GetWorldPosition()[2] - p->m_Position[i][2];
                 dist = off.Dot(off);
 
                 if (fabs(dist) > 0.00001) dist = dist * m_Attractors[a]->GetForce();
@@ -397,10 +397,10 @@ void AttractorUpdater::update(float dt, ParticleData* p)
 Vector4 CircleParticleEmitter::linearRand(const Vector4& Min, const Vector4& Max) const
 {
     Vector4 tmp;
-    tmp.x = linearRand(Min.x, Max.x);
-    tmp.y = linearRand(Min.y, Max.y);
-    tmp.z = linearRand(Min.z, Max.z);
-    tmp.w = linearRand(Min.w, Max.w);
+    tmp[0] = linearRand(Min[0], Max[0]);
+    tmp[1] = linearRand(Min[1], Max[1]);
+    tmp[2] = linearRand(Min[2], Max[2]);
+    tmp[3] = linearRand(Min[3], Max[3]);
     return tmp;
 }
 
@@ -427,7 +427,7 @@ void CircleParticleEmitter::emit(float dt, ParticleData* p)
     if (!trans)
         for (size_t i = startId; i < endId; ++i)
         {
-            double ang = linearRand(0.0, PI * 2.0);
+            double ang = linearRand(0.0, RAD180 * 2.0);
             float multiplier = linearRand(-1.0, 1.0);
             p->m_Position[i] = Vector4(m_Center, 0.f) + Vector4(m_RadiusX * sinf((float)ang), m_RadiusY * cosf((float)ang), m_RadiusZ * multiplier, 1.f);
         }
@@ -436,7 +436,7 @@ void CircleParticleEmitter::emit(float dt, ParticleData* p)
         Vector4 pos = Vector4(trans->GetWorldPosition(), 0.f);
         for (size_t i = startId; i < endId; ++i)
         {
-            double ang = linearRand(0.0, PI * 2.0);
+            double ang = linearRand(0.0, RAD180 * 2.0);
             float multiplier = linearRand(-1.0, 1.0);
             p->m_Position[i] = pos + Vector4(m_Center, 0.f) + Vector4(m_RadiusX * sinf((float)ang), m_RadiusY * cosf((float)ang), m_RadiusZ * multiplier, 1.f);
         }
@@ -454,10 +454,10 @@ void CircleParticleEmitter::emit(float dt, ParticleData* p)
 
     for (size_t i = startId; i < endId; ++i)
     {
-        p->m_Time[i].x = linearRand(m_MinTime, m_MaxTime);
-        p->m_Time[i].z = (float)0.0;
-        p->m_Time[i].w = (float)1.0 / p->m_Time[i].x;
-        p->m_Time[i].y = p->m_Time[i].x * m_TextureFade;
+        p->m_Time[i][0] = linearRand(m_MinTime, m_MaxTime);
+        p->m_Time[i][2] = (float)0.0;
+        p->m_Time[i][3] = (float)1.0 / p->m_Time[i][0];
+        p->m_Time[i][1] = p->m_Time[i][0] * m_TextureFade;
     }
 
     for (unsigned i = startId; i < endId; ++i)

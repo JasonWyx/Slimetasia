@@ -57,7 +57,7 @@ void Plane::DebugDraw(const float& x, const float& y, const unsigned int& parent
     std::vector<Vector3> pts;
 
     // WarnIf(ShowDebugDrawWarnings, "Assignment2: Required function un-implemented");
-    auto pt = Vector3 { m_Data.x * m_Data.w, m_Data.y * m_Data.w, m_Data.z * m_Data.w };
+    auto pt = Vector3 { m_Data[0] * m_Data[3], m_Data[1] * m_Data[3], m_Data[2] * m_Data[3] };
     auto v = Vector3 { 0.f, 0.f, 1.f }.Cross(pt);
     if (v.SquareLength() == 0.f) v = pt.Cross(Vector3 { 1.f, 0.f, 0.f });
     v = v.Normalized();
@@ -87,19 +87,19 @@ void Plane::Set(const Vector3& p0, const Vector3& p1, const Vector3& p2)
 {
     auto normal = (p1 - p0).Cross(p2 - p0);
     normal = normal.Normalized();
-    m_Data.x = normal.x;
-    m_Data.y = normal.y;
-    m_Data.z = normal.z;
-    m_Data.w = p0.Dot(normal);
+    m_Data[0] = normal[0];
+    m_Data[1] = normal[1];
+    m_Data[2] = normal[2];
+    m_Data[3] = p0.Dot(normal);
 }
 
 void Plane::Set(const Vector3& normal, const Vector3& point)
 {
     auto tmp = normal.Normalized();
-    m_Data.x = normal.x;
-    m_Data.y = normal.y;
-    m_Data.z = normal.z;
-    m_Data.w = point.Dot(normal);
+    m_Data[0] = normal[0];
+    m_Data[1] = normal[1];
+    m_Data[2] = normal[2];
+    m_Data[3] = point.Dot(normal);
 }
 
 Vector3 Plane::ProjectPointOnPlane(const Vector3& point, const Vector3& normal, float planeDistance)
@@ -110,23 +110,23 @@ Vector3 Plane::ProjectPointOnPlane(const Vector3& point, const Vector3& normal, 
 
 IntersectionType::Type Plane::PlaneSphere(const Vector4& plane, const Vector3& sphereCenter, float sphereRadius)
 {
-    auto norm = Vector3 { plane.x, plane.y, plane.z };
-    auto p_prime = Plane::ProjectPointOnPlane(sphereCenter, norm, plane.w);
+    auto norm = Vector3 { plane[0], plane[1], plane[2] };
+    auto p_prime = Plane::ProjectPointOnPlane(sphereCenter, norm, plane[3]);
     auto rad_sq = sphereRadius * sphereRadius;
     auto len = (sphereCenter - p_prime).SquareLength();
     if (len <= rad_sq) return IntersectionType::Overlaps;
-    auto dist = sphereCenter.Dot(norm) - plane.w;
+    auto dist = sphereCenter.Dot(norm) - plane[3];
     return dist < sphereRadius ? IntersectionType::Outside : IntersectionType::Inside;
 }
 
 IntersectionType::Type Plane::PlaneAabb(const Vector4& plane, const Vector3& aabbMin, const Vector3& aabbMax)
 {
-    Vector3 he { (aabbMax.x - aabbMin.x) / 2.f, (aabbMax.y - aabbMin.y) / 2.f, (aabbMax.z - aabbMin.z) / 2.f };
+    Vector3 he { (aabbMax[0] - aabbMin[0]) / 2.f, (aabbMax[1] - aabbMin[1]) / 2.f, (aabbMax[2] - aabbMin[2]) / 2.f };
     auto center = aabbMin + he;
-    he.x *= plane.x >= 0.f ? 1.f : -1.f;
-    he.y *= plane.y >= 0.f ? 1.f : -1.f;
-    he.z *= plane.z >= 0.f ? 1.f : -1.f;
-    auto d = Vector3 { plane.x, plane.y, plane.z }.Dot(he);
+    he[0] *= plane[0] >= 0.f ? 1.f : -1.f;
+    he[1] *= plane[1] >= 0.f ? 1.f : -1.f;
+    he[2] *= plane[2] >= 0.f ? 1.f : -1.f;
+    auto d = Vector3 { plane[0], plane[1], plane[2] }.Dot(he);
     d *= d < 0.f ? -1.f : 1.f;
     return Plane::PlaneSphere(plane, center, d);
 }

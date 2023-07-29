@@ -23,9 +23,9 @@ std::shared_ptr<Node> ConstructOctree(Vector3 center, float halfWidth, int depth
         for (int i = 0; i < 8; ++i)
         {
             pNode->m_Child[i] = nullptr;
-            offset.x = ((i & 1) ? subWidth : -subWidth);
-            offset.y = ((i & 2) ? subWidth : -subWidth);
-            offset.z = ((i & 4) ? subWidth : -subWidth);
+            offset[0] = ((i & 1) ? subWidth : -subWidth);
+            offset[1] = ((i & 2) ? subWidth : -subWidth);
+            offset[2] = ((i & 4) ? subWidth : -subWidth);
             pNode->m_Child[i] = ConstructOctree(center + offset, subWidth, depth - 1);
         }
         return pNode;

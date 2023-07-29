@@ -181,7 +181,7 @@ void LightPass::Render(Camera& camera, RenderLayer const& renderLayer, const GBu
             glUniform1i(positionTextureLoc, 0);
             glUniform1i(normalTextureLoc, 1);
             glUniform1i(textureNoiseLoc, 2);
-            glUniform2fv(noiseScaleLoc, 1, ValuePtrFloat(Vector2((float)m_ViewportSize.x, (float)m_ViewportSize.y) / 4.0f));
+            glUniform2fv(noiseScaleLoc, 1, ValuePtrFloat(Vector2((float)m_ViewportSize[0], (float)m_ViewportSize[1]) / 4.0f));
             glUniform3fv(samplesLoc, 64, ValuePtrFloat(m_SSAOKernel[0]));
             glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, ValuePtrFloat(camera.GetViewTransform()));
             glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, ValuePtrFloat(camera.GetProjTransform()));
@@ -689,7 +689,7 @@ void LightPass::BuildRenderTargets()
     glDeleteTextures(1, &m_EmissiveSecondPass);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &m_SSAORenderTarget);
-    glTextureStorage2D(m_SSAORenderTarget, 1, GL_R16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_SSAORenderTarget, 1, GL_R16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_SSAORenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_SSAORenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_SSAORenderTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -698,7 +698,7 @@ void LightPass::BuildRenderTargets()
     glNamedFramebufferTexture(m_SSAOFramebuffer, GL_COLOR_ATTACHMENT0, m_SSAORenderTarget, 0);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &m_SSAOBlurRenderTarget);
-    glTextureStorage2D(m_SSAOBlurRenderTarget, 1, GL_R16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_SSAOBlurRenderTarget, 1, GL_R16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_SSAOBlurRenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_SSAOBlurRenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_SSAOBlurRenderTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -707,14 +707,14 @@ void LightPass::BuildRenderTargets()
     glNamedFramebufferTexture(m_SSAOBlurFramebuffer, GL_COLOR_ATTACHMENT0, m_SSAOBlurRenderTarget, 0);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &m_EmissiveFirstPass);
-    glTextureStorage2D(m_EmissiveFirstPass, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_EmissiveFirstPass, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_EmissiveFirstPass, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_EmissiveFirstPass, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_EmissiveFirstPass, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_EmissiveFirstPass, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &m_EmissiveSecondPass);
-    glTextureStorage2D(m_EmissiveSecondPass, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_EmissiveSecondPass, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_EmissiveSecondPass, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_EmissiveSecondPass, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_EmissiveSecondPass, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

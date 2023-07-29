@@ -14,6 +14,9 @@ public:
 
     void SetWindowExtent(const vk::Extent2D& extent) override;
 
+    static constexpr size_t MAX_OBJECTS = 1000;
+    static constexpr size_t MAX_BONES = 32;
+
 protected:
 
     void CreateDescriptors() override;
@@ -23,6 +26,7 @@ protected:
     void CreatePipeline() override;
 
 private:
+
 
     // Copied from GeometryPass.h
     enum GBufferIndex

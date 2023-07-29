@@ -98,7 +98,7 @@ void FinalPass::BuildRenderTargets()
     glDeleteTextures(1, &m_RenderTarget);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &m_RenderTarget);
-    glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize.x, m_ViewportSize.y);
+    glTextureStorage2D(m_RenderTarget, 1, GL_RGBA16F, m_ViewportSize[0], m_ViewportSize[1]);
     glTextureParameteri(m_RenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(m_RenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_RenderTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

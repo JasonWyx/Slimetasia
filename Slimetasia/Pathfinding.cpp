@@ -22,8 +22,8 @@ bool Pathfinding::DestinationReach(int row, int col, const Vector3& dest)
 }
 void Pathfinding::ConvertToIndex(int& row, int& col, Vector3 pos)
 {
-    col = int((pos.x - AISystem::Instance().minPos.x) / 2);
-    row = int((pos.z - AISystem::Instance().minPos.y) / 2);
+    col = int((pos[0] - AISystem::Instance().minPos[0]) / 2);
+    row = int((pos[2] - AISystem::Instance().minPos[1]) / 2);
 }
 float Pathfinding::ComputeHValue(int row, int col, Vector3 pos)
 {
@@ -127,7 +127,7 @@ bool Pathfinding::AStarFindPath(const Vector3& end, bool splitPath)
         }
     }
 
-    // std::cout << "Starting pt: " << "Startpos: " << startPos.x << " " << startPos.z << "\n";
+    // std::cout << "Starting pt: " << "Startpos: " << startPos[0] << " " << startPos[2] << "\n";
     ConvertToIndex(rowtmp, coltmp, startPos);
     NodePath& startNode = localgrid[rowtmp][coltmp];
 
@@ -135,7 +135,7 @@ bool Pathfinding::AStarFindPath(const Vector3& end, bool splitPath)
     if (!CheckValidity(rowtmp, coltmp))
     {
         std::cout << "Starting pt is invalid!"
-                  << "Startpos: " << startPos.x << " " << startPos.z << "\n";
+                  << "Startpos: " << startPos[0] << " " << startPos[2] << "\n";
         return false;
     }
     if (DestinationReach(rowtmp, coltmp, end))

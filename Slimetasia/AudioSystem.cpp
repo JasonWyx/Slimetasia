@@ -400,9 +400,9 @@ Function to convert 3D position to FMOD position
 FMOD_VECTOR AudioSystem::VectorToFmod(const Vector3& position)
 {
     FMOD_VECTOR result;
-    result.x = position.x;
-    result.y = position.y;
-    result.z = position.z;
+    result.x = position[0];
+    result.y = position[1];
+    result.z = position[2];
     return result;
 }
 

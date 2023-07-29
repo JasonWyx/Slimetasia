@@ -8,7 +8,7 @@
 #include <ranges>
 #include <set>
 
-#include "ShaderHelper.h"
+import ShaderHelper;
 
 static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 

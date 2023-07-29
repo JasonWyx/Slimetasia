@@ -3,8 +3,8 @@
 
 #define discpoints 16u
 #define raylinesegments 8u
-#define discradincrement TWO_PI / static_cast<float>(discpoints)
-#define rayradincrement TWO_PI / static_cast<float>(raylinesegments)
+#define discradincrement RAD360 / static_cast<float>(discpoints)
+#define rayradincrement RAD360 / static_cast<float>(raylinesegments)
 
 struct Ray
 {

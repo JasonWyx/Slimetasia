@@ -11,8 +11,8 @@
 // Converts pos to i and j index
 void AISystem::Convert(int& row, int& col, Vector3 pos)
 {
-    col = int((pos.x - minPos.x) / 2);
-    row = int((pos.z - minPos.y) / 2);
+    col = int((pos[0] - minPos[0]) / 2);
+    row = int((pos[2] - minPos[1]) / 2);
 }
 
 Vector3 AISystem::RetrieveGridPos(Vector3 pos)
@@ -204,24 +204,24 @@ void AISystem::Init()
     {
         Vector3 pos1 = myObject.front()->GetComponent<Transform>()->GetWorldPosition();
         Vector3 scale1 = myObject.front()->GetComponent<Transform>()->GetWorldScale();
-        maxPos = Vector2(pos1.x + scale1.x / 2.f, pos1.z + scale1.z / 2.f);
-        minPos = Vector2(pos1.x - scale1.x / 2.f, pos1.z - scale1.z / 2.f);
+        maxPos = Vector2(pos1[0] + scale1[0] / 2.f, pos1[2] + scale1[2] / 2.f);
+        minPos = Vector2(pos1[0] - scale1[0] / 2.f, pos1[2] - scale1[2] / 2.f);
         // Find min, max of x and z
         for (auto& elem : myObject)
         {
             Vector3 posTemp = elem->GetComponent<Transform>()->GetWorldPosition();
             Vector3 scaleTemp = elem->GetComponent<Transform>()->GetWorldScale();
-            float maxtmpX = posTemp.x + scaleTemp.x / 2.f;
-            float maxtmpZ = posTemp.z + scaleTemp.z / 2.f;
-            float mintmpX = posTemp.x - scaleTemp.x / 2.f;
-            float mintmpZ = posTemp.z - scaleTemp.z / 2.f;
-            if (maxPos.x < maxtmpX) maxPos.x = maxtmpX;
-            if (maxPos.y < maxtmpZ) maxPos.y = maxtmpZ;
-            if (minPos.x > mintmpX) minPos.x = mintmpX;
-            if (minPos.y > mintmpZ) minPos.y = mintmpZ;
+            float maxtmpX = posTemp[0] + scaleTemp[0] / 2.f;
+            float maxtmpZ = posTemp[2] + scaleTemp[2] / 2.f;
+            float mintmpX = posTemp[0] - scaleTemp[0] / 2.f;
+            float mintmpZ = posTemp[2] - scaleTemp[2] / 2.f;
+            if (maxPos[0] < maxtmpX) maxPos[0] = maxtmpX;
+            if (maxPos[1] < maxtmpZ) maxPos[1] = maxtmpZ;
+            if (minPos[0] > mintmpX) minPos[0] = mintmpX;
+            if (minPos[1] > mintmpZ) minPos[1] = mintmpZ;
         }
-        d = maxPos.y - minPos.y;
-        w = maxPos.x - minPos.x;
+        d = maxPos[1] - minPos[1];
+        w = maxPos[0] - minPos[0];
 
         if (m_gridMap == nullptr)
         {
@@ -255,8 +255,8 @@ void AISystem::Init()
             }
         }
 
-        xStartPos = minPos.x + 1;
-        zStartPos = minPos.y + 1;
+        xStartPos = minPos[0] + 1;
+        zStartPos = minPos[1] + 1;
 
         Vector3 rayDir(0.f, -1.f, 0.f);
         // Make bigger grids - uses +=2
@@ -297,10 +297,10 @@ void AISystem::Init()
                     m_gridMap[row][col].valid = -1;
                 }
                 // y value of the grid
-                pos.y = firstHitObj->GetComponent<Transform>()->GetWorldPosition().y + firstHitObj->GetComponent<Transform>()->GetWorldScale().y / 2.f + 1.f;
+                pos[1] = firstHitObj->GetComponent<Transform>()->GetWorldPosition()[1] + firstHitObj->GetComponent<Transform>()->GetWorldScale()[1] / 2.f + 1.f;
                 if (firstHitObj->GetTag() == "Ground" || firstHitObj->GetName() == "Core" || firstHitObj->GetName() == "NoEntry")
                 {
-                    if (firstHitObj->GetName() == "Core") pos.y = firstHitObj->GetComponent<Transform>()->GetWorldPosition().y - firstHitObj->GetComponent<BoxCollider>()->GetHeight() / 2.f + 1.f;
+                    if (firstHitObj->GetName() == "Core") pos[1] = firstHitObj->GetComponent<Transform>()->GetWorldPosition()[1] - firstHitObj->GetComponent<BoxCollider>()->GetHeight() / 2.f + 1.f;
                     m_gridMap[row][col].valid = 1;
                     indexes.push_back(i);
                     indexes.push_back(j);

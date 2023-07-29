@@ -18,7 +18,7 @@
 #define PI_F static_cast<float>(PI)
 #define DITHER PI_F * 2.f / static_cast<float>(discpoints)*/
 
-float constexpr DITHER = PI * 2.f / static_cast<float>(discpoints);
+float constexpr DITHER = RAD180 * 2.f / static_cast<float>(discpoints);
 
 // struct OctreeData
 //{
@@ -76,7 +76,7 @@ public:
     virtual float GetRadius() const { return m_radius; }
 
     // setters
-    virtual void SetOffset(const TVector3<float>& offset) { m_offset = offset; }
+    virtual void SetOffset(const Vector3& offset) { m_offset = offset; }
     virtual void SetPosition(const Vector3& newPos);
 
     // funcs

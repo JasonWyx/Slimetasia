@@ -6,8 +6,8 @@
 
 void AppConsole::Draw()
 {
-    // SetNextWindowSize(ImVec2((GetIO().DisplaySize.x) / 4 * 3, 360.f));
-    // SetNextWindowPos(ImVec2((float)(0.f), GetIO().DisplaySize.y - 360.f));
+    // SetNextWindowSize(ImVec2((GetIO().DisplaySize[0]) / 4 * 3, 360.f));
+    // SetNextWindowPos(ImVec2((float)(0.f), GetIO().DisplaySize[1] - 360.f));
 
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoResize;
@@ -44,7 +44,7 @@ void AppConsole::Draw()
 
         ImGui::Separator();
 
-        const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+        const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing[1] + ImGui::GetFrameHeightWithSpacing();
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
         for (unsigned i = 0; i < m_Items.size(); i++)

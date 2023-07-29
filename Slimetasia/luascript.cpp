@@ -270,10 +270,10 @@ int LuaScript::lua_write(lua_State* L)
         else if (lua_isuserdata(L, i))
         {
             Vector3* vec3 = checkVector3(L, i, false);
-            if (vec3) buffer << "(x:" << vec3->x << " y:" << vec3->y << " z:" << vec3->z << ") ";
+            if (vec3) buffer << "(x:" << (*vec3)[0] << " y:" << (*vec3)[1] << " z:" << (*vec3)[2] << ") ";
 
             Vector4* color = checkColor(L, i, false);
-            if (color) buffer << "(r:" << color->r << " g:" << color->g << " b:" << color->b << " a:" << color->a << ") ";
+            if (color) buffer << "(r:" << (*color)[0] << " g:" << (*color)[1] << " b:" << (*color)[2] << " a:" << (*color)[3] << ") ";
 
             /// Wring user type
             if (!vec3 && !color)
@@ -1093,11 +1093,11 @@ int LuaScript::vector3_index(lua_State* L)
     std::string index = luaL_checkstring(L, 2);
 
     if (index == "x")
-        lua_pushnumber(L, vec3->x);
+        lua_pushnumber(L, (*vec3)[0]);
     else if (index == "y")
-        lua_pushnumber(L, vec3->y);
+        lua_pushnumber(L, (*vec3)[1]);
     else if (index == "z")
-        lua_pushnumber(L, vec3->z);
+        lua_pushnumber(L, (*vec3)[2]);
     else
         return 0;
     return 1;
@@ -1109,11 +1109,11 @@ int LuaScript::vector3_newindex(lua_State* L)
     std::string index = luaL_checkstring(L, 2);
     float value = static_cast<float>(luaL_checknumber(L, 3));
     if (index == "x")
-        vec3->x = value;
+        (*vec3)[0] = value;
     else if (index == "y")
-        vec3->y = value;
+        (*vec3)[1] = value;
     else if (index == "z")
-        vec3->z = value;
+        (*vec3)[2] = value;
 
     return 0;
 }
@@ -1171,7 +1171,7 @@ int LuaScript::vector3_eq(lua_State* L)
 int LuaScript::vector3_Normalize(lua_State* L)
 {
     Vector3* tmp = checkVector3(L, 1);
-    pushVector3(L, tmp->Normalize());
+    pushVector3(L, tmp->Normalized());
     return 1;
 }
 
@@ -1245,20 +1245,20 @@ int LuaScript::vector3_Rotate(lua_State* L)
     float value = static_cast<float>(luaL_checknumber(L, 3));
 
     if (index == "x")
-        return pushVector3(L, tmp->RotateX(value));
+        return pushVector3(L, tmp->RotateX(Math::ToRadians(value)));
     else if (index == "y")
-        return pushVector3(L, tmp->RotateY(value));
+        return pushVector3(L, tmp->RotateY(Math::ToRadians(value)));
     else if (index == "z")
-        return pushVector3(L, tmp->RotateZ(value));
+        return pushVector3(L, tmp->RotateZ(Math::ToRadians(value)));
     return 0;
 }
 
 int LuaScript::vector3_AngleFromWorldAxis(lua_State* L)
 {
-    Vector3* vec1 = checkVector3(L, 1);
+    Vector3* vec3 = checkVector3(L, 1);
 
-    float angleInRadians = std::atan2(vec1->x, vec1->z);
-    float result = (angleInRadians / PI) * 180.0f;
+    float angleInRadians = std::atan2((*vec3)[0], (*vec3)[2]);
+    float result = (angleInRadians / RAD180) * 180.0f;
 
     lua_pushnumber(L, 1 * result);
     return 1;
@@ -1267,28 +1267,28 @@ int LuaScript::vector3_AngleFromWorldAxis(lua_State* L)
 int LuaScript::vector3_X(lua_State* L)
 {
     Vector3* tmp = checkVector3(L, 1);
-    lua_pushnumber(L, tmp->x);
+    lua_pushnumber(L, (*tmp)[0]);
     return 1;
 }
 
 int LuaScript::vector3_Y(lua_State* L)
 {
     Vector3* tmp = checkVector3(L, 1);
-    lua_pushnumber(L, tmp->y);
+    lua_pushnumber(L, (*tmp)[1]);
     return 1;
 }
 
 int LuaScript::vector3_Z(lua_State* L)
 {
     Vector3* tmp = checkVector3(L, 1);
-    lua_pushnumber(L, tmp->z);
+    lua_pushnumber(L, (*tmp)[2]);
     return 1;
 }
 
 int LuaScript::vector3_polarAngle(lua_State* L)
 {
     Vector3* tmp = checkVector3(L, 1);
-    pushVector3(L, Vector3 { tmp->PolarAngles(), 0 });
+    pushVector3(L, Vector3 { tmp->PolarAngles() * RAD_TO_DEG, 0 });
     return 1;
 }
 
@@ -1338,13 +1338,13 @@ int LuaScript::color_index(lua_State* L)
     Vector4* c = checkColor(L, 1);
     std::string index = luaL_checkstring(L, 2);
     if (index == "r")
-        lua_pushnumber(L, c->x);
+        lua_pushnumber(L, (*c)[0]);
     else if (index == "g")
-        lua_pushnumber(L, c->y);
+        lua_pushnumber(L, (*c)[1]);
     else if (index == "b")
-        lua_pushnumber(L, c->z);
+        lua_pushnumber(L, (*c)[2]);
     else if (index == "a")
-        lua_pushnumber(L, c->w);
+        lua_pushnumber(L, (*c)[3]);
     else
         return 0;
     return 1;
@@ -1356,13 +1356,13 @@ int LuaScript::color_newindex(lua_State* L)
     std::string index = luaL_checkstring(L, 2);
     float value = static_cast<float>(luaL_checknumber(L, 3));
     if (index == "r")
-        c->x = value;
+        (*c)[0] = value;
     else if (index == "g")
-        c->y = value;
+        (*c)[1] = value;
     else if (index == "b")
-        c->z = value;
+        (*c)[2] = value;
     else if (index == "a")
-        c->w = value;
+        (*c)[3] = value;
     *c = clampColor(*c);
     return 0;
 }
@@ -1419,28 +1419,28 @@ int LuaScript::color_eq(lua_State* L)
 int LuaScript::color_R(lua_State* L)
 {
     Vector4* tmp = checkColor(L, 1);
-    lua_pushnumber(L, tmp->r);
+    lua_pushnumber(L, (*tmp)[0]);
     return 1;
 }
 
 int LuaScript::color_G(lua_State* L)
 {
     Vector4* tmp = checkColor(L, 1);
-    lua_pushnumber(L, tmp->g);
+    lua_pushnumber(L, (*tmp)[1]);
     return 1;
 }
 
 int LuaScript::color_B(lua_State* L)
 {
     Vector4* tmp = checkColor(L, 1);
-    lua_pushnumber(L, tmp->b);
+    lua_pushnumber(L, (*tmp)[2]);
     return 1;
 }
 
 int LuaScript::color_A(lua_State* L)
 {
     Vector4* tmp = checkColor(L, 1);
-    lua_pushnumber(L, tmp->a);
+    lua_pushnumber(L, (*tmp)[3]);
     return 1;
 }
 
@@ -2288,9 +2288,9 @@ int LuaScript::transform_GetWorldScale(lua_State* L)
 //    std::string index = luaL_checkstring(L, 2);
 //    float       value = static_cast<float>(luaL_checknumber(L, 3));
 //
-//    if (index == "x") tmp.x = value;
-//    else if (index == "y") tmp.y = value;
-//    else if (index == "z") tmp.z = value;
+//    if (index == "x") tmp[0] = value;
+//    else if (index == "y") tmp[1] = value;
+//    else if (index == "z") tmp[2] = value;
 //
 //    (*t)->SetLocalPosition(tmp);
 //  }
@@ -2314,9 +2314,9 @@ int LuaScript::transform_GetWorldScale(lua_State* L)
 //    std::string index = luaL_checkstring(L, 2);
 //    float       value = static_cast<float>(luaL_checknumber(L, 3));
 //
-//    if (index == "x") tmp.x = value;
-//    else if (index == "y") tmp.y = value;
-//    else if (index == "z") tmp.z = value;
+//    if (index == "x") tmp[0] = value;
+//    else if (index == "y") tmp[1] = value;
+//    else if (index == "z") tmp[2] = value;
 //
 //    (*t)->SetLocalRotation(tmp);
 //  }
@@ -2340,9 +2340,9 @@ int LuaScript::transform_GetWorldScale(lua_State* L)
 //    std::string index = luaL_checkstring(L, 2);
 //    float       value = static_cast<float>(luaL_checknumber(L, 3));
 //
-//    if (index == "x") tmp.x = value;
-//    else if (index == "y") tmp.y = value;
-//    else if (index == "z") tmp.z = value;
+//    if (index == "x") tmp[0] = value;
+//    else if (index == "y") tmp[1] = value;
+//    else if (index == "z") tmp[2] = value;
 //
 //    (*t)->SetLocalScale(tmp);
 //  }
@@ -2364,11 +2364,11 @@ int LuaScript::transform_SetWorldPosition(lua_State* L)
         float value = static_cast<float>(luaL_checknumber(L, 3));
 
         if (index == "x")
-            tmp.x = value;
+            tmp[0] = value;
         else if (index == "y")
-            tmp.y = value;
+            tmp[1] = value;
         else if (index == "z")
-            tmp.z = value;
+            tmp[2] = value;
 
         (*t)->SetWorldPosition(tmp);
     }
@@ -2390,11 +2390,11 @@ int LuaScript::transform_SetWorldRotation(lua_State* L)
         float value = static_cast<float>(luaL_checknumber(L, 3));
 
         if (index == "x")
-            tmp.x = value;
+            tmp[0] = value;
         else if (index == "y")
-            tmp.y = value;
+            tmp[1] = value;
         else if (index == "z")
-            tmp.z = value;
+            tmp[2] = value;
 
         (*t)->SetWorldRotation(tmp);
     }
@@ -2416,11 +2416,11 @@ int LuaScript::transform_SetWorldScale(lua_State* L)
         float value = static_cast<float>(luaL_checknumber(L, 3));
 
         if (index == "x")
-            tmp.x = value;
+            tmp[0] = value;
         else if (index == "y")
-            tmp.y = value;
+            tmp[1] = value;
         else if (index == "z")
-            tmp.z = value;
+            tmp[2] = value;
 
         (*t)->SetWorldScale(tmp);
     }
@@ -2490,14 +2490,14 @@ int LuaScript::transform_LookAt(lua_State* L)
     // Vector3 rotAxis = Transform::worldForward.Cross(forwardVector);
     // float   dot     = Transform::worldForward.Dot(forwardVector);
     //
-    // Quaternion q;
-    // q.x = rotAxis.x;
-    // q.y = rotAxis.y;
-    // q.z = rotAxis.z;
-    // q.w = dot + 1;
+    // Quat q;
+    // q[0] = rotAxis[0];
+    // q[1] = rotAxis[1];
+    // q[2] = rotAxis[2];
+    // q[3] = dot + 1;
     //
     // Vector4 rot = q.EulerTransform() *  Vector4 { 90, 0, 0, 0 };
-    //(*t1)->SetWorldRotation(Vector3{ rot.x, rot.y, rot.z });
+    //(*t1)->SetWorldRotation(Vector3{ rot[0], rot[1], rot[2] });
 
     return 0;
 }
@@ -2512,14 +2512,14 @@ int LuaScript::transform_LookAtV(lua_State* L)
     // Vector3 rotAxis       = Transform::worldForward.Cross(forwardVector);
     // float   dot           = Transform::worldForward.Dot  (forwardVector);
     //
-    // Quaternion q;
-    // q.x = rotAxis.x;
-    // q.y = rotAxis.z;
-    // q.z = rotAxis.y;
-    // q.w = dot + 1;
+    // Quat q;
+    // q[0] = rotAxis[0];
+    // q[1] = rotAxis[2];
+    // q[2] = rotAxis[1];
+    // q[3] = dot + 1;
     //
     // Vector4 rot = q.EulerTransform() *  Vector4 { 90, 0, 0, 0 };
-    //(*t)->SetWorldRotation(Vector3{ rot.x, rot.y, rot.z });
+    //(*t)->SetWorldRotation(Vector3{ rot[0], rot[1], rot[2] });
 
     return 0;
 }
@@ -2611,11 +2611,11 @@ int LuaScript::rigidbody_SetVelocity(lua_State* L)
         float value = static_cast<float>(luaL_checknumber(L, 3));
 
         if (index == "x")
-            tmp.x = value;
+            tmp[0] = value;
         else if (index == "y")
-            tmp.y = value;
+            tmp[1] = value;
         else if (index == "z")
-            tmp.z = value;
+            tmp[2] = value;
 
         (*t)->SetVelocity(tmp);
     }
@@ -2637,11 +2637,11 @@ int LuaScript::rigidbody_SetAcceleration(lua_State* L)
         float value = static_cast<float>(luaL_checknumber(L, 3));
 
         if (index == "x")
-            tmp.x = value;
+            tmp[0] = value;
         else if (index == "y")
-            tmp.y = value;
+            tmp[1] = value;
         else if (index == "z")
-            tmp.z = value;
+            tmp[2] = value;
 
         (*t)->SetAcceleration(tmp);
     }
@@ -2664,9 +2664,9 @@ int LuaScript::rigidbody_SetAcceleration(lua_State* L)
     std::string index = luaL_checkstring(L, 2);
     float       value = static_cast<float>(luaL_checknumber(L, 3));
 
-    if (index == "x") tmp.x = value;
-    else if (index == "y") tmp.y = value;
-    else if (index == "z") tmp.z = value;
+    if (index == "x") tmp[0] = value;
+    else if (index == "y") tmp[1] = value;
+    else if (index == "z") tmp[2] = value;
 
     (*t)->SetOffset(tmp);
   }
@@ -2689,9 +2689,9 @@ int LuaScript::rigidbody_SetAcceleration(lua_State* L)
 //    std::string index = luaL_checkstring(L, 2);
 //    float       value = static_cast<float>(luaL_checknumber(L, 3));
 //
-//    if (index == "x") tmp.x = value;
-//    else if (index == "y") tmp.y = value;
-//    else if (index == "z") tmp.z = value;
+//    if (index == "x") tmp[0] = value;
+//    else if (index == "y") tmp[1] = value;
+//    else if (index == "z") tmp[2] = value;
 //
 //    (*t)->SetAngularVelocity(tmp);
 //  }
@@ -3160,7 +3160,7 @@ int LuaScript::meshRenderer_SetEmissive(lua_State* L)
     MeshRenderer** m = checkMeshRenderer(L, 1);
     Vector4* c = checkColor(L, 2);
     (*m)->m_EmissiveEnabled = true;
-    (*m)->SetEmissiveColor(Color3(c->x, c->y, c->z));
+    (*m)->SetEmissiveColor(static_cast<Color3>(*c));
     return 0;
 }
 
@@ -3885,14 +3885,14 @@ int LuaScript::camera_GetViewportSize(lua_State* L)
 {
     Camera** t = checkCamera(L, 1);
     auto v = (*t)->GetViewportSize();
-    return pushVector3(L, Vector3(float(v.x), float(v.y), 0.0f));
+    return pushVector3(L, Vector3(float(v[0]), float(v[1]), 0.0f));
 }
 
 int LuaScript::camera_SetViewportSize(lua_State* L)
 {
     Camera** t = checkCamera(L, 1);
     Vector3 size = *checkVector3(L, 2);
-    (*t)->SetViewportSize(iVector2 { (int)size.x, (int)size.y });
+    (*t)->SetViewportSize(iVector2 { (int)size[0], (int)size[1] });
     return 0;
 }
 
@@ -3946,7 +3946,7 @@ int LuaScript::camera_SetColor(lua_State* L)
     Color4* col = checkColor(L, 2);
     if (light)
     {
-        light->SetLightColor(Color3(col->x, col->y, col->z));
+        light->SetLightColor(static_cast<Color3>(*col));
     }
     return 0;
 }
@@ -4651,14 +4651,14 @@ int LuaScript::Light_GetLightColor(lua_State* L)
 {
     LightBase** t = checkLightBase(L, 1);
     Color3 tCol = (*t)->GetLightColor();
-    pushColor(L, Color4 { tCol.x, tCol.y, tCol.z, 1 });
+    pushColor(L, Color4 { tCol[0], tCol[1], tCol[2], 1 });
     return 1;
 }
 int LuaScript::Light_SetLightColor(lua_State* L)
 {
     LightBase** t = checkLightBase(L, 1);
     Color4* col = checkColor(L, 2);
-    (*t)->SetLightColor(Color3(col->x, col->y, col->z));
+    (*t)->SetLightColor(static_cast<Color3>(*col));
     return 0;
 }
 int LuaScript::Light_IsCastShadows(lua_State* L)

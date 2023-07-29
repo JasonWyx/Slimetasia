@@ -5,7 +5,7 @@
 
 constexpr uint SPHERE_DEBUGDRAW_POINTS = 16;
 constexpr uint HALF_SPHERE_DEBUGDRAW_POINTS = SPHERE_DEBUGDRAW_POINTS / 2;
-constexpr float SPHERE_DEBUGDRAW_POINTS_GAP = TWO_PI / static_cast<float>(SPHERE_DEBUGDRAW_POINTS);
+constexpr float SPHERE_DEBUGDRAW_POINTS_GAP = RAD360 / static_cast<float>(SPHERE_DEBUGDRAW_POINTS);
 
 #define CollisionShapeType_List(m) m(CollisionShapeType, SPHERE) m(CollisionShapeType, CAPSULE) m(CollisionShapeType, CONVEX_POLY)
 

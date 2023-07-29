@@ -22,7 +22,7 @@ struct ScalingKey
 struct RotationKey
 {
     float m_Tick;
-    Quaternion m_Rotation;
+    Quat m_Rotation;
 };
 
 struct NodeAnimation
@@ -33,7 +33,7 @@ struct NodeAnimation
     std::vector<RotationKey> m_RotationKeys;
 
     Vector3 GetInterpolatedPosition(float tick) const;
-    Quaternion GetInterpolatedRotation(float tick) const;
+    Quat GetInterpolatedRotation(float tick) const;
     Vector3 GetInterpolatedScale(float tick) const;
 };
 

@@ -6,11 +6,11 @@ void Edge_2D::ComputeNormal()
 {
     auto dist = m_edge_vector;
     dist.Normalize();
-    m_normal.x = -dist.y;
-    m_normal.y = dist.x;
+    m_normal[0] = -dist[1];
+    m_normal[1] = dist[0];
 }
 
-inline TVector2<float> Edge_2D::GetEdgeVector() const
+inline Vector2 Edge_2D::GetEdgeVector() const
 {
     return m_edge_vector;
 }
@@ -77,18 +77,18 @@ IntersectionData CollisionMesh_2D::IsCollidingAABBvsAABB(CollisionMesh_2D*& othe
     auto firstmax = firstpos, firstmin = firstpos;
     auto secondmax = secondpos, secondmin = secondpos;
 
-    firstmax.x += first->GetWidth() / 2.f;
-    firstmax.y += first->GetHeight() / 2.f;
-    firstmin.x -= first->GetWidth() / 2.f;
-    firstmin.y -= first->GetHeight() / 2.f;
+    firstmax[0] += first->GetWidth() / 2.f;
+    firstmax[1] += first->GetHeight() / 2.f;
+    firstmin[0] -= first->GetWidth() / 2.f;
+    firstmin[1] -= first->GetHeight() / 2.f;
 
-    secondmax.x += second->GetWidth() / 2.f;
-    secondmax.y += second->GetHeight() / 2.f;
-    secondmin.x -= second->GetWidth() / 2.f;
-    secondmin.y -= second->GetHeight() / 2.f;
+    secondmax[0] += second->GetWidth() / 2.f;
+    secondmax[1] += second->GetHeight() / 2.f;
+    secondmin[0] -= second->GetWidth() / 2.f;
+    secondmin[1] -= second->GetHeight() / 2.f;
 
-    return IntersectionData { ((firstmax.x >= secondmin.x && firstmax.x <= secondmax.x && firstmax.y >= secondmin.y && firstmax.y <= secondmax.y) ||
-                               (firstmin.x >= secondmin.x && firstmin.x <= secondmax.x && firstmin.y >= secondmin.y && firstmin.y <= secondmax.y)),
+    return IntersectionData { ((firstmax[0] >= secondmin[0] && firstmax[0] <= secondmax[0] && firstmax[1] >= secondmin[1] && firstmax[1] <= secondmax[1]) ||
+                               (firstmin[0] >= secondmin[0] && firstmin[0] <= secondmax[0] && firstmin[1] >= secondmin[1] && firstmin[1] <= secondmax[1])),
                               0.f, firstpos - secondpos };
 }
 
@@ -100,14 +100,14 @@ IntersectionData CollisionMesh_2D::IsCollidingAABBvsCircle(CollisionMesh_2D*& ot
     const auto secondpos = second->GetPosition() + second->GetOffset();
     auto firstmax = firstpos, firstmin = firstpos;
 
-    firstmax.x += first->GetWidth() / 2.f;
-    firstmax.y += first->GetHeight() / 2.f;
-    firstmin.x -= first->GetWidth() / 2.f;
-    firstmin.y -= first->GetHeight() / 2.f;
+    firstmax[0] += first->GetWidth() / 2.f;
+    firstmax[1] += first->GetHeight() / 2.f;
+    firstmin[0] -= first->GetWidth() / 2.f;
+    firstmin[1] -= first->GetHeight() / 2.f;
 
     const auto nearestpt = second->GetClosestPointInSphere(firstpos);
 
-    return IntersectionData { nearestpt.x >= firstmin.x && nearestpt.x <= firstmax.x && nearestpt.y >= firstmin.y && nearestpt.y <= firstmax.y, 0.f, firstpos - secondpos };
+    return IntersectionData { nearestpt[0] >= firstmin[0] && nearestpt[0] <= firstmax[0] && nearestpt[1] >= firstmin[1] && nearestpt[1] <= firstmax[1], 0.f, firstpos - secondpos };
 }
 
 IntersectionData CollisionMesh_2D::IsCollidingAABBvsPolygon(CollisionMesh_2D*& othermesh)
@@ -125,14 +125,14 @@ IntersectionData CollisionMesh_2D::IsCollidingCirclevsAABB(CollisionMesh_2D*& ot
     const auto secondpos = second->GetPosition() + second->GetOffset();
     auto secondmax = secondpos, secondmin = secondpos;
 
-    secondmax.x += second->GetWidth() / 2.f;
-    secondmax.y += second->GetHeight() / 2.f;
-    secondmin.x -= second->GetWidth() / 2.f;
-    secondmin.y -= second->GetHeight() / 2.f;
+    secondmax[0] += second->GetWidth() / 2.f;
+    secondmax[1] += second->GetHeight() / 2.f;
+    secondmin[0] -= second->GetWidth() / 2.f;
+    secondmin[1] -= second->GetHeight() / 2.f;
 
     const auto nearestpt = first->GetClosestPointInSphere(secondpos);
 
-    return IntersectionData { nearestpt.x >= secondmin.x && nearestpt.x <= secondmax.x && nearestpt.y >= secondmin.y && nearestpt.y <= secondmax.y, 0.f, firstpos - secondpos };
+    return IntersectionData { nearestpt[0] >= secondmin[0] && nearestpt[0] <= secondmax[0] && nearestpt[1] >= secondmin[1] && nearestpt[1] <= secondmax[1], 0.f, firstpos - secondpos };
 }
 
 IntersectionData CollisionMesh_2D::IsCollidingCirclevsCircle(CollisionMesh_2D*& othermesh)
@@ -177,7 +177,7 @@ IntersectionData CollisionMesh_2D::IsCollidingPolygonvsPolygon(CollisionMesh_2D*
     return IntersectionData {};
 }
 
-bool CollisionMesh_2D::IsCollidingWithMouse(const TVector2<float>& mousepos)
+bool CollisionMesh_2D::IsCollidingWithMouse(const Vector2& mousepos)
 {
     switch (m_mesh_type)
     {
@@ -191,23 +191,23 @@ bool CollisionMesh_2D::IsCollidingWithMouse(const TVector2<float>& mousepos)
     }
 }
 
-bool CollisionMesh_2D::IsCollidingWithMouseAABB(const TVector2<float>& mousepos)
+bool CollisionMesh_2D::IsCollidingWithMouseAABB(const Vector2& mousepos)
 {
     auto tmp = dynamic_cast<AABBColliderMesh*>(this);
     auto pos = GetPosition() + GetOffset();
     auto max = pos, min = pos;
-    max.x += tmp->GetWidth() / 2.f;
-    max.y += tmp->GetHeight() / 2.f;
-    min.x -= tmp->GetWidth() / 2.f;
-    min.y -= tmp->GetHeight() / 2.f;
-    return mousepos.x >= min.x && mousepos.x <= max.x && mousepos.y >= min.y && mousepos.y <= max.y;
+    max[0] += tmp->GetWidth() / 2.f;
+    max[1] += tmp->GetHeight() / 2.f;
+    min[0] -= tmp->GetWidth() / 2.f;
+    min[1] -= tmp->GetHeight() / 2.f;
+    return mousepos[0] >= min[0] && mousepos[0] <= max[0] && mousepos[1] >= min[1] && mousepos[1] <= max[1];
 }
 
-bool CollisionMesh_2D::IsCollidingWithMouseCircle(const TVector2<float>& mousepos)
+bool CollisionMesh_2D::IsCollidingWithMouseCircle(const Vector2& mousepos)
 {
     auto tmp = dynamic_cast<CircleColliderMesh*>(this);
     auto pos = GetPosition() + GetOffset();
-    auto diff = TVector2<float> { pos.x - mousepos.x, pos.y - mousepos.y };
+    auto diff = Vector2 { pos[0] - mousepos[0], pos[1] - mousepos[1] };
     auto radsq = tmp->GetRadius();
     radsq *= radsq;
     auto len = diff.SquareLength();
@@ -215,7 +215,7 @@ bool CollisionMesh_2D::IsCollidingWithMouseCircle(const TVector2<float>& mousepo
     return len <= radsq;
 }
 
-bool CollisionMesh_2D::IsCollidingWithMousePolygon(const TVector2<float>& mousepos)
+bool CollisionMesh_2D::IsCollidingWithMousePolygon(const Vector2& mousepos)
 {
     // to be implemented.
     return false;
@@ -223,14 +223,12 @@ bool CollisionMesh_2D::IsCollidingWithMousePolygon(const TVector2<float>& mousep
 
 Vector2 CircleColliderMesh::GetClosestPointInSphere(const Vector2& pt) const
 {
-    auto pos = GetPosition();
-    return Vector2 { pos.x - pt.x, pos.y - pt.y }.Normalize() * m_radius;
+    return (static_cast<Vector2>(GetPosition()) - pt).Normalized() * m_radius;
 }
 
 Vector2 CircleColliderMesh::GetClosestPointInSphere(const Vector3& pt) const
 {
-    auto pos = GetPosition();
-    return Vector2 { pos.x - pt.x, pos.y - pt.y }.Normalize() * m_radius;
+    return (static_cast<Vector2>(GetPosition() - pt)).Normalized() * m_radius;
 }
 
 REFLECT_INIT(CollisionMesh_2D)

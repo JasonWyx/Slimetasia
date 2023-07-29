@@ -33,7 +33,7 @@ void LightBase::OnInactive()
 
 float LightBase::GetShadowDistance() const
 {
-    return std::sqrtf(4 * (256 * std::max({ m_LightColor.r, m_LightColor.g, m_LightColor.b }) * m_Intensity)) * 0.5f;
+    return std::sqrtf(4 * (256 * std::max({ m_LightColor[0], m_LightColor[1], m_LightColor[2] }) * m_Intensity)) * 0.5f;
 }
 
 #ifdef USE_VULKAN

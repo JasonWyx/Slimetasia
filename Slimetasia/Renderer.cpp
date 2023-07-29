@@ -80,16 +80,16 @@ void Renderer::BuildRenderTargets()
     glCreateTextures(GL_TEXTURE_2D, 1, &m_TempRenderTarget);
     glCreateTextures(GL_TEXTURE_2D, 1, &m_DSBuffer);
 
-    glTextureStorage2D(m_FinalRenderTarget, 1, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y);
+    glTextureStorage2D(m_FinalRenderTarget, 1, GL_RGBA16F, m_WindowSize[0], m_WindowSize[1]);
     glTextureParameteri(m_FinalRenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_FinalRenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glTextureStorage2D(m_TempRenderTarget, 1, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y);
+    glTextureStorage2D(m_TempRenderTarget, 1, GL_RGBA16F, m_WindowSize[0], m_WindowSize[1]);
     glTextureParameteri(m_TempRenderTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_TempRenderTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT0, m_TempRenderTarget, 0);
 
-    glTextureStorage2D(m_DSBuffer, 1, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
+    glTextureStorage2D(m_DSBuffer, 1, GL_DEPTH24_STENCIL8, m_WindowSize[0], m_WindowSize[1]);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_DSBuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glNamedFramebufferTexture(m_Framebuffer, GL_DEPTH_STENCIL_ATTACHMENT, m_DSBuffer, 0);
@@ -169,42 +169,42 @@ void Renderer::Update(float dt)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
             // Set render area for geometry pass
-            glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-            glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+            glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+            glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
             m_GeometryPass.Render(camera, renderLayer);
 
             // Copy depth buffer from geometry pass
-            glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, vpOffset.x, vpOffset.y, vpSize.x, vpSize.y, vpOffset.x, vpOffset.y, vpSize.x, vpSize.y, GL_DEPTH_BUFFER_BIT,
+            glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, vpOffset[0], vpOffset[1], vpSize[0], vpSize[1], vpOffset[0], vpOffset[1], vpSize[0], vpSize[1], GL_DEPTH_BUFFER_BIT,
                                    GL_NEAREST);
 
             // Change back to scene buffer
             glBindFramebuffer(GL_FRAMEBUFFER, m_Framebuffer);
             // Change viewport to screen space but retain scissor
-            glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-            glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+            glViewport(0, 0, m_WindowSize[0], m_WindowSize[1]);
+            glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
             if (camera->IsUICamera())
             {
                 if (m_IsDebugDrawOn)
                 {
-                    glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                    glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                    glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                    glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
                     m_DebugPass.Render(*camera, m_GeometryPass);
                 }
 
-                glCopyImageSubData(m_GeometryPass.GetGBuffers()[(int)GBuffer::Diffuse], GL_TEXTURE_2D, 0, vpOffset.x, vpOffset.y, 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize.x, vpSize.y,
+                glCopyImageSubData(m_GeometryPass.GetGBuffers()[(int)GBuffer::Diffuse], GL_TEXTURE_2D, 0, vpOffset[0], vpOffset[1], 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize[0], vpSize[1],
                                    1);
             }
             else
             {
-                glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-                glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                glViewport(0, 0, m_WindowSize[0], m_WindowSize[1]);
+                glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                 m_LightPass.Render(*camera, renderLayer, m_GeometryPass.GetGBuffers(), m_Framebuffer);
 
-                glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                 m_SkyboxPass.Render(*camera);
                 m_WaterPass.Render(camera, renderLayer, m_Framebuffer);
@@ -214,27 +214,27 @@ void Renderer::Update(float dt)
 
                 if (m_IsDebugDrawOn)
                 {
-                    glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                    glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                    glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                    glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
                     m_DebugPass.Render(*camera, m_GeometryPass);
                 }
 
                 // Setup viewport for post process pass
-                glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-                glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                glViewport(0, 0, m_WindowSize[0], m_WindowSize[1]);
+                glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                 m_PostProcessPass.Render(*camera, m_TempRenderTarget, m_Framebuffer);
                 m_FinalPass.Render(*camera, m_TempRenderTarget);
 
-                glCopyImageSubData(m_FinalPass.GetRenderTexture(), GL_TEXTURE_2D, 0, vpOffset.x, vpOffset.y, 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize.x, vpSize.y, 1);
+                glCopyImageSubData(m_FinalPass.GetRenderTexture(), GL_TEXTURE_2D, 0, vpOffset[0], vpOffset[1], 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize[0], vpSize[1], 1);
             }
 
             // Render layer to "screen" buffer
             glBindFramebuffer(GL_FRAMEBUFFER, m_Framebuffer);
             glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT0, m_FinalRenderTarget, 0);
 
-            glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-            glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+            glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+            glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
             if (m_SimpleDrawShader->Enable())
             {
@@ -303,42 +303,42 @@ void Renderer::Update(float dt)
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
                     // Set render area for geometry pass
-                    glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                    glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                    glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                    glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                     m_GeometryPass.Render(camera, renderLayer);
 
                     // Copy depth buffer from geometry pass
-                    glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, vpOffset.x, vpOffset.y, vpSize.x, vpSize.y, vpOffset.x, vpOffset.y, vpSize.x, vpSize.y, GL_DEPTH_BUFFER_BIT,
+                    glBlitNamedFramebuffer(m_GeometryPass.GetFramebuffer(), m_Framebuffer, vpOffset[0], vpOffset[1], vpSize[0], vpSize[1], vpOffset[0], vpOffset[1], vpSize[0], vpSize[1], GL_DEPTH_BUFFER_BIT,
                                            GL_NEAREST);
 
                     // Change back to scene buffer
                     glBindFramebuffer(GL_FRAMEBUFFER, m_Framebuffer);
                     // Change viewport to screen space but retain scissor
-                    glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-                    glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                    glViewport(0, 0, m_WindowSize[0], m_WindowSize[1]);
+                    glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                     if (camera->IsUICamera())
                     {
                         if (m_IsDebugDrawOn)
                         {
-                            glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                            glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                            glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                            glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
                             m_DebugPass.Render(*camera, m_GeometryPass);
                         }
 
-                        glCopyImageSubData(m_GeometryPass.GetGBuffers()[(int)GBuffer::Diffuse], GL_TEXTURE_2D, 0, vpOffset.x, vpOffset.y, 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize.x,
-                                           vpSize.y, 1);
+                        glCopyImageSubData(m_GeometryPass.GetGBuffers()[(int)GBuffer::Diffuse], GL_TEXTURE_2D, 0, vpOffset[0], vpOffset[1], 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize[0],
+                                           vpSize[1], 1);
                     }
                     else
                     {
-                        glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-                        glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                        glViewport(0, 0, m_WindowSize[0], m_WindowSize[1]);
+                        glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                         m_LightPass.Render(*camera, renderLayer, m_GeometryPass.GetGBuffers(), m_Framebuffer);
 
-                        glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                        glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                        glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                        glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                         m_SkyboxPass.Render(*camera);
                         m_WaterPass.Render(camera, renderLayer, m_Framebuffer);
@@ -348,27 +348,27 @@ void Renderer::Update(float dt)
 
                         if (m_IsDebugDrawOn)
                         {
-                            glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                            glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                            glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                            glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
                             m_DebugPass.Render(*camera, m_GeometryPass);
                         }
 
                         // Setup viewport for post process pass
-                        glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-                        glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                        glViewport(0, 0, m_WindowSize[0], m_WindowSize[1]);
+                        glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                         m_PostProcessPass.Render(*camera, m_TempRenderTarget, m_Framebuffer);
                         m_FinalPass.Render(*camera, m_TempRenderTarget);
 
-                        glCopyImageSubData(m_FinalPass.GetRenderTexture(), GL_TEXTURE_2D, 0, vpOffset.x, vpOffset.y, 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize.x, vpSize.y, 1);
+                        glCopyImageSubData(m_FinalPass.GetRenderTexture(), GL_TEXTURE_2D, 0, vpOffset[0], vpOffset[1], 0, cameraRenderTarget, GL_TEXTURE_2D, 0, 0, 0, 0, vpSize[0], vpSize[1], 1);
                     }
 
                     // Render layer to "screen" buffer
                     glBindFramebuffer(GL_FRAMEBUFFER, m_Framebuffer);
                     glNamedFramebufferTexture(m_Framebuffer, GL_COLOR_ATTACHMENT0, m_FinalRenderTarget, 0);
 
-                    glScissor(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
-                    glViewport(vpOffset.x, vpOffset.y, vpSize.x, vpSize.y);
+                    glScissor(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
+                    glViewport(vpOffset[0], vpOffset[1], vpSize[0], vpSize[1]);
 
                     if (m_SimpleDrawShader->Enable())
                     {
@@ -405,7 +405,7 @@ void Renderer::Update(float dt)
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glBlitNamedFramebuffer(m_Framebuffer, 0, 0, 0, m_WindowSize.x, m_WindowSize.y, 0, 0, m_WindowSize.x, m_WindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitNamedFramebuffer(m_Framebuffer, 0, 0, 0, m_WindowSize[0], m_WindowSize[1], 0, 0, m_WindowSize[0], m_WindowSize[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
 #endif
 }
 
@@ -434,43 +434,43 @@ void Renderer::DrawCube(float w, Vector3 pos)
     float halfWidth = w;
     float halfHeight = w;
     float halfDepth = w;
-    Vector3 minPt(pos.x - halfWidth, pos.y - halfHeight, pos.z - halfDepth);
-    Vector3 maxPt(pos.x + halfWidth, pos.y + halfHeight, pos.z + halfDepth);
+    Vector3 minPt(pos[0] - halfWidth, pos[1] - halfHeight, pos[2] - halfDepth);
+    Vector3 maxPt(pos[0] + halfWidth, pos[1] + halfHeight, pos[2] + halfDepth);
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
-
-    pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], maxPt[1], minPt[2] });
 
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(maxPt);
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt[0], minPt[1], maxPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { maxPt.x, minPt.y, minPt.z });
-
-    pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], maxPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], minPt[2] });
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], minPt[1], minPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
-    pts.emplace_back(Vector3 { minPt.x, minPt.y, maxPt.z });
+    pts.emplace_back(minPt);
+    pts.emplace_back(Vector3 { minPt[0], minPt[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, maxPt.z });
+    pts.emplace_back(minPt);
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], minPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, maxPt.y, minPt.z });
-    pts.emplace_back(Vector3 { maxPt.x, maxPt.y, minPt.z });
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], maxPt[2] });
+    pts.emplace_back(Vector3 { minPt[0], minPt[1], maxPt[2] });
+
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], maxPt[2] });
+
+    pts.emplace_back(Vector3 { minPt[0], maxPt[1], minPt[2] });
+    pts.emplace_back(Vector3 { maxPt[0], maxPt[1], minPt[2] });
 
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
 
@@ -485,18 +485,18 @@ void Renderer::Draw2DBox(float w, float h, Vector3 pos, Color4 col)
     std::vector<Vector3> pts;
     float halfWidth = w;
     float halfDepth = h;
-    Vector3 minPt(pos.x - halfWidth, pos.y, pos.z - halfDepth);
-    Vector3 maxPt(pos.x + halfWidth, pos.y, pos.z + halfDepth);
+    Vector3 minPt(pos[0] - halfWidth, pos[1], pos[2] - halfDepth);
+    Vector3 maxPt(pos[0] + halfWidth, pos[1], pos[2] + halfDepth);
     pts.emplace_back(maxPt);
-    pts.emplace_back(Vector3 { maxPt.x, pos.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], pos[1], minPt[2] });
 
-    pts.emplace_back(Vector3 { maxPt.x, pos.y, minPt.z });
+    pts.emplace_back(Vector3 { maxPt[0], pos[1], minPt[2] });
     pts.emplace_back(minPt);
 
     pts.emplace_back(minPt);
-    pts.emplace_back(Vector3 { minPt.x, pos.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt[0], pos[1], maxPt[2] });
 
-    pts.emplace_back(Vector3 { minPt.x, pos.y, maxPt.z });
+    pts.emplace_back(Vector3 { minPt[0], pos[1], maxPt[2] });
     pts.emplace_back(maxPt);
 
     auto currentLayerID = Renderer::Instance().GetCurrentEditorLayer()->GetId();
@@ -524,7 +524,7 @@ void Renderer::SetCurrentLayer(Layer* layer)
 
 void Renderer::SetWindowSize(iVector2 const& windowSize)
 {
-    if (windowSize.x <= 0 || windowSize.y <= 0 || windowSize.u <= 0 || windowSize.v <= 0) return;
+    if (windowSize[0] <= 0 || windowSize[1] <= 0 || windowSize.u <= 0 || windowSize.v <= 0) return;
     if (windowSize != m_WindowSize)
     {
         m_WindowSize = windowSize;

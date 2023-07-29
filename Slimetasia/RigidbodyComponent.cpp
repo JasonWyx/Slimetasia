@@ -127,7 +127,7 @@ void RigidbodyComponent::AddVelocity(const Vector3& vel)
 
 void RigidbodyComponent::SetYVelocity(const float& val)
 {
-    m_LinearVelocity.y = val;
+    m_LinearVelocity[1] = val;
 }
 
 void RigidbodyComponent::AddForce(const Vector3& force)

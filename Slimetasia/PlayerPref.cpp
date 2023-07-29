@@ -109,9 +109,9 @@ void PlayerPref::Serialize()
             {
                 Vector3 elem = dynamic_cast<Type<Vector3>*>(variable.second.get())->variable_;
                 // tinyxml2::XMLElement* entry = playerPrefXML_.NewElement("Value");
-                newElem->SetAttribute("x", elem.x);
-                newElem->SetAttribute("y", elem.y);
-                newElem->SetAttribute("z", elem.z);
+                newElem->SetAttribute("x", elem[0]);
+                newElem->SetAttribute("y", elem[1]);
+                newElem->SetAttribute("z", elem[2]);
 
                 // newElem->InsertEndChild(entry);
             }
@@ -152,9 +152,9 @@ void PlayerPref::Serialize()
                 for (const auto& elem : dynamic_cast<Type<std::vector<Vector3>>*>(variable.second.get())->variable_)
                 {
                     tinyxml2::XMLElement* entry = playerPrefXML_.NewElement(("Index" + std::to_string(i++)).c_str());
-                    entry->SetAttribute("x", elem.x);
-                    entry->SetAttribute("y", elem.y);
-                    entry->SetAttribute("z", elem.z);
+                    entry->SetAttribute("x", elem[0]);
+                    entry->SetAttribute("y", elem[1]);
+                    entry->SetAttribute("z", elem[2]);
 
                     newElem->InsertEndChild(entry);
                 }
@@ -236,9 +236,9 @@ void PlayerPref::Deserialize()
                 else if (strcmp("Vector3", variableType) == 0)
                 {
                     Vector3 value;
-                    curr->QueryFloatAttribute("x", &value.x);
-                    curr->QueryFloatAttribute("y", &value.y);
-                    curr->QueryFloatAttribute("z", &value.z);
+                    curr->QueryFloatAttribute("x", &value[0]);
+                    curr->QueryFloatAttribute("y", &value[1]);
+                    curr->QueryFloatAttribute("z", &value[2]);
                     SaveVariable<Vector3>(variableName, value, tableName);
                 }
 
@@ -293,9 +293,9 @@ void PlayerPref::Deserialize()
                     for (tinyxml2::XMLElement* currElem = curr->FirstChildElement(); currElem; currElem = currElem->NextSiblingElement())
                     {
                         Vector3 value;
-                        currElem->QueryFloatAttribute("x", &value.x);
-                        currElem->QueryFloatAttribute("y", &value.y);
-                        currElem->QueryFloatAttribute("z", &value.z);
+                        currElem->QueryFloatAttribute("x", &value[0]);
+                        currElem->QueryFloatAttribute("y", &value[1]);
+                        currElem->QueryFloatAttribute("z", &value[2]);
                         values.push_back(value);
                     }
                     SaveVariable<std::vector<Vector3>>(variableName, values, tableName);

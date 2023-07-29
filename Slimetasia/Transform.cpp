@@ -130,7 +130,7 @@ void Transform::OnUpdate(float dt)
         }
         change = true;
     }
-    static auto lambda = [](Vector3 a, Vector3 b) -> bool { return a.x == b.x && a.y == b.y && a.z == b.z; };
+    static auto lambda = [](Vector3 a, Vector3 b) -> bool { return a[0] == b[0] && a[1] == b[1] && a[2] == b[2]; };
     if (m_OwnerObject->GetParentObject())
     {
         auto pTrans = m_OwnerObject->GetParentLayer()->GetObjectById(m_OwnerObject->GetParentObject())->GetComponent<Transform>();
@@ -138,15 +138,15 @@ void Transform::OnUpdate(float dt)
         {
             auto mat = pTrans->GetWorldTransformMatrix();
             // std::cout << m_defaultPos[0] << " " << m_defaultPos[1] << " " << m_defaultPos[2] << std::endl;
-            Vector4 pos { m_defaultPos.x, m_defaultPos.y, m_defaultPos.z, 1 };
+            Vector4 pos { m_defaultPos[0], m_defaultPos[1], m_defaultPos[2], 1 };
             if (!lambda(pTrans->GetWorldPosition(), parentPos) || !lambda(pTrans->GetWorldRotation(), parentRot) || !lambda(pTrans->GetWorldScale(), parentScale))
             {
                 parentMat = mat;
                 Vector4 result = mat * pos;
                 parentPos = pTrans->GetWorldPosition();
-                m_WorldPosition.x = result.x;
-                m_WorldPosition.y = result.y;
-                m_WorldPosition.z = result.z;
+                m_WorldPosition[0] = result[0];
+                m_WorldPosition[1] = result[1];
+                m_WorldPosition[2] = result[2];
 
                 parentRot = pTrans->GetWorldRotation();
                 parentScale = pTrans->GetWorldScale();
@@ -154,19 +154,19 @@ void Transform::OnUpdate(float dt)
                 // std::cout << tmp[0] << " " << tmp[1] << " " << tmp[2] << " " << tmp[3]  << std::endl;
 
                 // Vector4 tmp = mat.Inverted() * result;
-                // m_defaultPos = Vector3{ pos.x, pos.y, pos.z };
+                // m_defaultPos = Vector3{ pos[0], pos[1], pos[2] };
             }
             else if (!lambda(m_WorldPosition, m_deltaPos))
             {
                 // Vector3 m_diff = m_WorldPosition - m_deltaPos;
-                Vector4 tmp { m_WorldPosition.x, m_WorldPosition.y, m_WorldPosition.z, 1 };
+                Vector4 tmp { m_WorldPosition[0], m_WorldPosition[1], m_WorldPosition[2], 1 };
                 auto r = mat.Invert() * tmp;
-                m_defaultPos.x = r.x;
-                m_defaultPos.y = r.y;
-                m_defaultPos.z = r.z;
+                m_defaultPos[0] = r[0];
+                m_defaultPos[1] = r[1];
+                m_defaultPos[2] = r[2];
             }
             // Vector4 tmp = mat.Inverted() * pos;
-            // defaultPos = Vector3{ tmp.x, tmp.y, tmp.z };
+            // defaultPos = Vector3{ tmp[0], tmp[1], tmp[2] };
         }
     }
     else
@@ -202,104 +202,104 @@ Matrix4 Transform::GetParentTransformMatrix()
 // Matrix4 Transform::GetLocalTransformMatrix()
 //{
 //  return  Matrix4::Translate(m_LocalPosition) *
-//          Matrix4::RotateZ(m_LocalRotation.z) *
-//          Matrix4::RotateY(m_LocalRotation.y) *
-//          Matrix4::RotateX(m_LocalRotation.x) *
+//          Matrix4::RotateZ(m_LocalRotation[2]) *
+//          Matrix4::RotateY(m_LocalRotation[1]) *
+//          Matrix4::RotateX(m_LocalRotation[0]) *
 //          Matrix4::Scale(m_LocalScale);
 //}
 
 Matrix4 Transform::GetWorldTransformMatrix()
 {
     return  // GetParentTransformMatrix() * GetLocalTransformMatrix();
-        Matrix4::Translate(m_WorldPosition) * Matrix4::RotateZ(m_WorldRotation.z) * Matrix4::RotateY(m_WorldRotation.y) * Matrix4::RotateX(m_WorldRotation.x) * Matrix4::Scale(m_WorldScale);
+        Matrix4::Translate(m_WorldPosition) * Matrix4::RotateZ(m_WorldRotation[2]) * Matrix4::RotateY(m_WorldRotation[1]) * Matrix4::RotateX(m_WorldRotation[0]) * Matrix4::Scale(m_WorldScale);
 }
 
 Vector3 Transform::GetForwardVector() const
 {
     Vector4 result { worldForward, 0 };
 
-    result = Matrix4::RotateX(m_WorldRotation.x) * result;
-    result = Matrix4::RotateY(m_WorldRotation.y) * result;
-    result = Matrix4::RotateZ(m_WorldRotation.z) * result;
+    result = Matrix4::RotateX(m_WorldRotation[0]) * result;
+    result = Matrix4::RotateY(m_WorldRotation[1]) * result;
+    result = Matrix4::RotateZ(m_WorldRotation[2]) * result;
 
-    return Vector3 { result.x, result.y, result.z }.Normalize();
+    return Vector3 { result[0], result[1], result[2] }.Normalized();
 }
 
 Vector3 Transform::GetRightVector() const
 {
     Vector4 result { worldRight, 0 };
 
-    result = Matrix4::RotateX(m_WorldRotation.x) * result;
-    result = Matrix4::RotateY(m_WorldRotation.y) * result;
-    result = Matrix4::RotateZ(m_WorldRotation.z) * result;
+    result = Matrix4::RotateX(m_WorldRotation[0]) * result;
+    result = Matrix4::RotateY(m_WorldRotation[1]) * result;
+    result = Matrix4::RotateZ(m_WorldRotation[2]) * result;
 
-    return Vector3 { result.x, result.y, result.z }.Normalize();
+    return Vector3 { result[0], result[1], result[2] }.Normalized();
 }
 
 Vector3 Transform::GetUpwardVector() const
 {
     Vector4 result { worldUpward, 0 };
 
-    result = Matrix4::RotateX(m_WorldRotation.x) * result;
-    result = Matrix4::RotateY(m_WorldRotation.y) * result;
-    result = Matrix4::RotateZ(m_WorldRotation.z) * result;
+    result = Matrix4::RotateX(m_WorldRotation[0]) * result;
+    result = Matrix4::RotateY(m_WorldRotation[1]) * result;
+    result = Matrix4::RotateZ(m_WorldRotation[2]) * result;
 
-    return Vector3 { result.x, result.y, result.z }.Normalize();
+    return Vector3 { result[0], result[1], result[2] }.Normalized();
 }
 
-// Quaternion Transform::GetOrientation() const
+// Quat Transform::GetOrientation() const
 //{
 //	return m_Orientation;
 //}
 //
-// void Transform::GetInverse(Vector3& pos, Quaternion& orientation) const
+// void Transform::GetInverse(Vector3& pos, Quat& orientation) const
 //{
 //	orientation = m_Orientation.GetInverse();
 //	pos = orientation.RotateVector(-m_WorldPosition);
 //}
 //
-// Transform Transform::GetTransformFromInverse(const Vector3 & pos, const Quaternion & orientation) const
+// Transform Transform::GetTransformFromInverse(const Vector3 & pos, const Quat & orientation) const
 //{
 //	Transform tmp(nullptr);
-//	const float productX = m_Orientation.w * pos.x + m_Orientation.y * pos.z - m_Orientation.z * pos.y;
-//	const float productY = m_Orientation.w * pos.y + m_Orientation.z * pos.x - m_Orientation.x * pos.z;
-//	const float productZ = m_Orientation.w * pos.z + m_Orientation.x * pos.y - m_Orientation.y * pos.x;
-//	const float productW = -m_Orientation.x * pos.x - m_Orientation.y * pos.y - m_Orientation.z * pos.z;
+//	const float productX = m_Orientation[3] * pos[0] + m_Orientation[1] * pos[2] - m_Orientation[2] * pos[1];
+//	const float productY = m_Orientation[3] * pos[1] + m_Orientation[2] * pos[0] - m_Orientation[0] * pos[2];
+//	const float productZ = m_Orientation[3] * pos[2] + m_Orientation[0] * pos[1] - m_Orientation[1] * pos[0];
+//	const float productW = -m_Orientation[0] * pos[0] - m_Orientation[1] * pos[1] - m_Orientation[2] * pos[2];
 //
-//	tmp.m_WorldPosition.x = m_WorldPosition.x + productX * m_Orientation.w -
-//												productY * m_Orientation.z +
-//												productZ * m_Orientation.y -
-//												productW * m_Orientation.x;
+//	tmp.m_WorldPosition[0] = m_WorldPosition[0] + productX * m_Orientation[3] -
+//												productY * m_Orientation[2] +
+//												productZ * m_Orientation[1] -
+//												productW * m_Orientation[0];
 //
-//	tmp.m_WorldPosition.y = m_WorldPosition.y + productY * m_Orientation.w -
-//												productZ * m_Orientation.x +
-//												productX * m_Orientation.z -
-//												productW * m_Orientation.y;
+//	tmp.m_WorldPosition[1] = m_WorldPosition[1] + productY * m_Orientation[3] -
+//												productZ * m_Orientation[0] +
+//												productX * m_Orientation[2] -
+//												productW * m_Orientation[1];
 //
-//	tmp.m_WorldPosition.z = m_WorldPosition.z + productZ * m_Orientation.w -
-//												productX * m_Orientation.y +
-//												productY * m_Orientation.x -
-//												productW * m_Orientation.x;
+//	tmp.m_WorldPosition[2] = m_WorldPosition[2] + productZ * m_Orientation[3] -
+//												productX * m_Orientation[1] +
+//												productY * m_Orientation[0] -
+//												productW * m_Orientation[0];
 //
-//	tmp.m_Orientation.x = m_Orientation.w * orientation.x +
-//						  m_Orientation.x * orientation.w +
-//						  m_Orientation.y * orientation.z +
-//						  m_Orientation.z * orientation.y;
+//	tmp.m_Orientation[0] = m_Orientation[3] * orientation[0] +
+//						  m_Orientation[0] * orientation[3] +
+//						  m_Orientation[1] * orientation[2] +
+//						  m_Orientation[2] * orientation[1];
 //
-//	tmp.m_Orientation.y = m_Orientation.w * orientation.y +
-//						  m_Orientation.x * orientation.w +
-//						  m_Orientation.y * orientation.x +
-//						  m_Orientation.z * orientation.z;
+//	tmp.m_Orientation[1] = m_Orientation[3] * orientation[1] +
+//						  m_Orientation[0] * orientation[3] +
+//						  m_Orientation[1] * orientation[0] +
+//						  m_Orientation[2] * orientation[2];
 //
-//	tmp.m_Orientation.z = m_Orientation.w * orientation.z +
-//						  m_Orientation.x * orientation.w +
-//						  m_Orientation.y * orientation.y +
-//						  m_Orientation.z * orientation.x;
+//	tmp.m_Orientation[2] = m_Orientation[3] * orientation[2] +
+//						  m_Orientation[0] * orientation[3] +
+//						  m_Orientation[1] * orientation[1] +
+//						  m_Orientation[2] * orientation[0];
 //
-//	tmp.m_Orientation.w = m_Orientation.w * orientation.w +
-//						  m_Orientation.x * orientation.x +
-//						  m_Orientation.y * orientation.y +
-//						  m_Orientation.z * orientation.z;
+//	tmp.m_Orientation[3] = m_Orientation[3] * orientation[3] +
+//						  m_Orientation[0] * orientation[0] +
+//						  m_Orientation[1] * orientation[1] +
+//						  m_Orientation[2] * orientation[2];
 //
 //	return tmp;
 //}
@@ -313,7 +313,7 @@ Vector3 Transform::GetUpwardVector() const
 //{
 //	Transform tmp(nullptr);
 //
-//	const Quaternion invQuat = m_Orientation.GetInverse();
+//	const Quat invQuat = m_Orientation.GetInverse();
 //
 //	tmp.m_WorldPosition = invQuat * -m_WorldPosition;
 //	tmp.m_Orientation = invQuat;
@@ -331,7 +331,7 @@ Vector3 Transform::GetUpwardVector() const
 //	return tmp;
 //}
 //
-// void Transform::SetOrientation(const Quaternion& orientation)
+// void Transform::SetOrientation(const Quat& orientation)
 //{
 //	m_Orientation = orientation;
 //}

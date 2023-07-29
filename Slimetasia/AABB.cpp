@@ -10,8 +10,8 @@
 AABB::AABB()
 {
     // set the aabb to an initial bad value (where the min is smaller than the max)
-    m_Min.x = m_Min.y = m_Min.z = MAX_FLOAT;
-    m_Max.x = m_Max.y = m_Max.z = MIN_FLOAT;
+    m_Min[0] = m_Min[1] = m_Min[2] = MAX_FLOAT;
+    m_Max[0] = m_Max[1] = m_Max[2] = MIN_FLOAT;
 }
 
 AABB::AABB(const Vector3& min, const Vector3& max)
@@ -35,9 +35,9 @@ float AABB::GetVolume() const
     /******Student:Assignment2******/
     // Return the aabb's volume
     // Warn("Assignment2: Required function un-implemented");
-    Vector3 u { m_Max.x - m_Min.x, 0.f, 0.f };
-    Vector3 v { 0.f, m_Max.y - m_Min.y, 0.f };
-    Vector3 w { 0.f, 0.f, m_Max.z - m_Min.z };
+    Vector3 u { m_Max[0] - m_Min[0], 0.f, 0.f };
+    Vector3 v { 0.f, m_Max[1] - m_Min[1], 0.f };
+    Vector3 w { 0.f, 0.f, m_Max[2] - m_Min[2] };
 
     return abs(u.Cross(v).Dot(w));
 }
@@ -49,7 +49,7 @@ float AABB::GetSurfaceArea() const
     // Warn("Assignment2: Required function un-implemented");
     Vector3 dimens(m_Max - m_Min);
 
-    return 2.f * (dimens.x * dimens.y + dimens.x * dimens.z + dimens.y * dimens.z);
+    return 2.f * (dimens[0] * dimens[1] + dimens[0] * dimens[2] + dimens[1] * dimens[2]);
 }
 
 bool AABB::Contains(const AABB& aabb) const
@@ -57,8 +57,8 @@ bool AABB::Contains(const AABB& aabb) const
     /******Student:Assignment2******/
     // Return if aabb is completely contained in this
     // Warn("Assignment2: Required function un-implemented");
-    return (aabb.m_Min.x <= m_Max.x && aabb.m_Min.x >= m_Min.x && aabb.m_Max.x <= m_Max.x && aabb.m_Max.x >= m_Min.x && aabb.m_Min.y <= m_Max.y && aabb.m_Min.y >= m_Min.y && aabb.m_Max.y <= m_Max.y &&
-        aabb.m_Max.y >= m_Min.y && aabb.m_Min.z <= m_Max.z && aabb.m_Min.z >= m_Min.z && aabb.m_Max.z <= m_Max.z && aabb.m_Max.z >= m_Min.z);
+    return (aabb.m_Min[0] <= m_Max[0] && aabb.m_Min[0] >= m_Min[0] && aabb.m_Max[0] <= m_Max[0] && aabb.m_Max[0] >= m_Min[0] && aabb.m_Min[1] <= m_Max[1] && aabb.m_Min[1] >= m_Min[1] && aabb.m_Max[1] <= m_Max[1] &&
+        aabb.m_Max[1] >= m_Min[1] && aabb.m_Min[2] <= m_Max[2] && aabb.m_Min[2] >= m_Min[2] && aabb.m_Max[2] <= m_Max[2] && aabb.m_Max[2] >= m_Min[2]);
 }
 
 void AABB::Expand(const Vector3& point)
@@ -94,12 +94,12 @@ void AABB::Transform(const Vector3& scale, const Matrix3& rotation, const Vector
     Vector3 center((m_Max + m_Min) / 2.f);
     Vector3 extent(m_Max - center);
     extent *= scale;
-    const Vector3 newextent(abs(rotation[0]) * extent.x + abs(rotation[1]) * extent.y + abs(rotation[2]) * extent.z,
-        abs(rotation[3]) * extent.x + abs(rotation[4]) * extent.y + abs(rotation[5]) * extent.z, abs(rotation[6]) * extent.x + abs(rotation[7]) * extent.y + abs(rotation[8]) * extent.z);
+    const Vector3 newextent(abs(rotation[0]) * extent[0] + abs(rotation[1]) * extent[1] + abs(rotation[2]) * extent[2],
+        abs(rotation[3]) * extent[0] + abs(rotation[4]) * extent[1] + abs(rotation[5]) * extent[2], abs(rotation[6]) * extent[0] + abs(rotation[7]) * extent[1] + abs(rotation[8]) * extent[2]);
 
     center *= scale;
-    Vector3 newcenter(rotation[0] * center.x + rotation[1] * center.y + rotation[2] * center.z, rotation[3] * center.x + rotation[4] * center.y + rotation[5] * center.z,
-        rotation[6] * center.x + rotation[7] * center.y + rotation[8] * center.z);
+    Vector3 newcenter(rotation[0] * center[0] + rotation[1] * center[1] + rotation[2] * center[2], rotation[3] * center[0] + rotation[4] * center[1] + rotation[5] * center[2],
+        rotation[6] * center[0] + rotation[7] * center[1] + rotation[8] * center[2]);
 
     newcenter += translation;
     m_Max = newcenter + newextent;
@@ -140,40 +140,40 @@ void AABB::DebugDraw(const unsigned int& parentID) const
     std::vector<Vector3> pts;
 
     pts.emplace_back(m_Max);
-    pts.emplace_back(m_Max.x, m_Max.y, m_Min.z);
+    pts.emplace_back(m_Max[0], m_Max[1], m_Min[2]);
 
     pts.emplace_back(m_Max);
-    pts.emplace_back(m_Max.x, m_Min.y, m_Max.z);
+    pts.emplace_back(m_Max[0], m_Min[1], m_Max[2]);
 
     pts.emplace_back(m_Max);
-    pts.emplace_back(m_Min.x, m_Max.y, m_Max.z);
+    pts.emplace_back(m_Min[0], m_Max[1], m_Max[2]);
 
-    pts.emplace_back(m_Min.x, m_Min.y, m_Max.z);
-    pts.emplace_back(m_Max.x, m_Min.y, m_Max.z);
+    pts.emplace_back(m_Min[0], m_Min[1], m_Max[2]);
+    pts.emplace_back(m_Max[0], m_Min[1], m_Max[2]);
 
-    pts.emplace_back(m_Max.x, m_Min.y, m_Min.z);
-    pts.emplace_back(m_Max.x, m_Min.y, m_Max.z);
+    pts.emplace_back(m_Max[0], m_Min[1], m_Min[2]);
+    pts.emplace_back(m_Max[0], m_Min[1], m_Max[2]);
 
-    pts.emplace_back(m_Max.x, m_Max.y, m_Min.z);
-    pts.emplace_back(m_Max.x, m_Min.y, m_Min.z);
-
-    pts.emplace_back(m_Min);
-    pts.emplace_back(m_Max.x, m_Min.y, m_Min.z);
+    pts.emplace_back(m_Max[0], m_Max[1], m_Min[2]);
+    pts.emplace_back(m_Max[0], m_Min[1], m_Min[2]);
 
     pts.emplace_back(m_Min);
-    pts.emplace_back(m_Min.x, m_Min.y, m_Max.z);
+    pts.emplace_back(m_Max[0], m_Min[1], m_Min[2]);
 
     pts.emplace_back(m_Min);
-    pts.emplace_back(m_Min.x, m_Max.y, m_Min.z);
+    pts.emplace_back(m_Min[0], m_Min[1], m_Max[2]);
 
-    pts.emplace_back(m_Min.x, m_Max.y, m_Max.z);
-    pts.emplace_back(m_Min.x, m_Min.y, m_Max.z);
+    pts.emplace_back(m_Min);
+    pts.emplace_back(m_Min[0], m_Max[1], m_Min[2]);
 
-    pts.emplace_back(m_Min.x, m_Max.y, m_Min.z);
-    pts.emplace_back(m_Min.x, m_Max.y, m_Max.z);
+    pts.emplace_back(m_Min[0], m_Max[1], m_Max[2]);
+    pts.emplace_back(m_Min[0], m_Min[1], m_Max[2]);
 
-    pts.emplace_back(m_Min.x, m_Max.y, m_Min.z);
-    pts.emplace_back(m_Max.x, m_Max.y, m_Min.z);
+    pts.emplace_back(m_Min[0], m_Max[1], m_Min[2]);
+    pts.emplace_back(m_Min[0], m_Max[1], m_Max[2]);
+
+    pts.emplace_back(m_Min[0], m_Max[1], m_Min[2]);
+    pts.emplace_back(m_Max[0], m_Max[1], m_Min[2]);
 
 #ifdef USE_VULKAN
 #else
@@ -185,25 +185,25 @@ void AABB::DebugDraw(const unsigned int& parentID) const
 
 bool AABB::AABBAABB(const Vector3& aabbMin0, const Vector3& aabbMax0, const Vector3& aabbMin1, const Vector3& aabbMax1)
 {
-    return !((aabbMin1.x > aabbMax0.x || aabbMin0.x > aabbMax1.x) || (aabbMin1.y > aabbMax0.y || aabbMin0.y > aabbMax1.y) || (aabbMin1.z > aabbMax0.z || aabbMin0.z > aabbMax1.z));
+    return !((aabbMin1[0] > aabbMax0[0] || aabbMin0[0] > aabbMax1[0]) || (aabbMin1[1] > aabbMax0[1] || aabbMin0[1] > aabbMax1[1]) || (aabbMin1[2] > aabbMax0[2] || aabbMin0[2] > aabbMax1[2]));
 }
 
 bool AABB::RayAabb(const Vector3& rayStart, const Vector3& rayDir, const Vector3& aabbMin, const Vector3& aabbMax, float& t)
 {
-    Vector4 plane_l { 1.f, 0.f, 0.f, aabbMin.x }, plane_bo { 0.f, 1.f, 0.f, aabbMin.y }, plane_f { 0.f, 0.f, 1.f, aabbMin.z };
+    Vector4 plane_l { 1.f, 0.f, 0.f, aabbMin[0] }, plane_bo { 0.f, 1.f, 0.f, aabbMin[1] }, plane_f { 0.f, 0.f, 1.f, aabbMin[2] };
     auto denom = 0.f;
     t = 0.f;
     auto tmax = FLT_MAX, t1 = 0.f, t2 = 0.f;
     // checking for x axis
-    if (rayDir.x == 0.f)
+    if (rayDir[0] == 0.f)
     {
-        if (aabbMin.x > rayStart.x || aabbMax.x < rayStart.x) return false;
+        if (aabbMin[0] > rayStart[0] || aabbMax[0] < rayStart[0]) return false;
     }
     else
     {
-        denom = 1.f / rayDir.x;
-        t1 = (aabbMin.x - rayStart.x) * denom;
-        t2 = (aabbMax.x - rayStart.x) * denom;
+        denom = 1.f / rayDir[0];
+        t1 = (aabbMin[0] - rayStart[0]) * denom;
+        t2 = (aabbMax[0] - rayStart[0]) * denom;
         if (t1 > t2)
         {
             auto tmp = t2;
@@ -215,15 +215,15 @@ bool AABB::RayAabb(const Vector3& rayStart, const Vector3& rayDir, const Vector3
         if (t > tmax) return false;
     }
     // checking for y axis
-    if (rayDir.y == 0.f)
+    if (rayDir[1] == 0.f)
     {
-        if (aabbMin.y > rayStart.y || aabbMax.y < rayStart.y) return false;
+        if (aabbMin[1] > rayStart[1] || aabbMax[1] < rayStart[1]) return false;
     }
     else
     {
-        denom = 1.f / rayDir.y;
-        t1 = (aabbMin.y - rayStart.y) * denom;
-        t2 = (aabbMax.y - rayStart.y) * denom;
+        denom = 1.f / rayDir[1];
+        t1 = (aabbMin[1] - rayStart[1]) * denom;
+        t2 = (aabbMax[1] - rayStart[1]) * denom;
         if (t1 > t2)
         {
             auto tmp = t2;
@@ -235,15 +235,15 @@ bool AABB::RayAabb(const Vector3& rayStart, const Vector3& rayDir, const Vector3
         if (t > tmax) return false;
     }
     // checking for z axis
-    if (rayDir.z == 0.f)
+    if (rayDir[2] == 0.f)
     {
-        if (aabbMin.z > rayStart.z || aabbMax.z < rayStart.z) return false;
+        if (aabbMin[2] > rayStart[2] || aabbMax[2] < rayStart[2]) return false;
     }
     else
     {
-        denom = 1.f / rayDir.z;
-        t1 = (aabbMin.z - rayStart.z) * denom;
-        t2 = (aabbMax.z - rayStart.z) * denom;
+        denom = 1.f / rayDir[2];
+        t1 = (aabbMin[2] - rayStart[2]) * denom;
+        t2 = (aabbMax[2] - rayStart[2]) * denom;
         if (t1 > t2)
         {
             auto tmp = t2;

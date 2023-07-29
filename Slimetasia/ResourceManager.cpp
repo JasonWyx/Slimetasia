@@ -359,9 +359,9 @@ void ResourceManager::SavePhysicsWorldSettings(std::string filename)
     root->SetAttribute("Default_Rolling_Resistance", PhysicsSystem::s_PhyWorldSettings.m_DefaultRollResis);
     root->SetAttribute("Sleeping_Enabled", PhysicsSystem::s_PhyWorldSettings.m_IsSleepingEnabled);
     root->SetAttribute("Default_Time_Before_Sleep", PhysicsSystem::s_PhyWorldSettings.m_DefaultTimeBeforeSleep);
-    root->SetAttribute("Gravity_x", PhysicsSystem::s_PhyWorldSettings.m_Gravity.x);
-    root->SetAttribute("Gravity_y", PhysicsSystem::s_PhyWorldSettings.m_Gravity.y);
-    root->SetAttribute("Gravity_z", PhysicsSystem::s_PhyWorldSettings.m_Gravity.z);
+    root->SetAttribute("Gravity_x", PhysicsSystem::s_PhyWorldSettings.m_Gravity[0]);
+    root->SetAttribute("Gravity_y", PhysicsSystem::s_PhyWorldSettings.m_Gravity[1]);
+    root->SetAttribute("Gravity_z", PhysicsSystem::s_PhyWorldSettings.m_Gravity[2]);
     m_PhysicsWorldSettingsXML.SaveFile(filename.c_str());
 }
 
@@ -404,9 +404,9 @@ void ResourceManager::LoadPhysicsWorldSettings(std::string filename)
         PhysicsSystem::s_PhyWorldSettings.m_DefaultRollResis = root->FloatAttribute("Default_Rolling_Resistance");
         PhysicsSystem::s_PhyWorldSettings.m_IsSleepingEnabled = root->FloatAttribute("Sleeping_Enabled");
         PhysicsSystem::s_PhyWorldSettings.m_DefaultTimeBeforeSleep = root->FloatAttribute("Default_Time_Before_Sleep");
-        PhysicsSystem::s_PhyWorldSettings.m_Gravity.x = root->FloatAttribute("Gravity_x");
-        PhysicsSystem::s_PhyWorldSettings.m_Gravity.y = root->FloatAttribute("Gravity_y");
-        PhysicsSystem::s_PhyWorldSettings.m_Gravity.z = root->FloatAttribute("Gravity_z");
+        PhysicsSystem::s_PhyWorldSettings.m_Gravity[0] = root->FloatAttribute("Gravity_x");
+        PhysicsSystem::s_PhyWorldSettings.m_Gravity[1] = root->FloatAttribute("Gravity_y");
+        PhysicsSystem::s_PhyWorldSettings.m_Gravity[2] = root->FloatAttribute("Gravity_z");
     }
 }
 

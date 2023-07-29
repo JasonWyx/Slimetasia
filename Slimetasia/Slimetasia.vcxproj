@@ -313,6 +313,7 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClCompile Include="Serializer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderHelper.cpp" />
+    <ClCompile Include="ShaderModuleObject.cpp" />
     <ClCompile Include="ShadowPass.cpp" />
     <ClCompile Include="SingleFrameAllocator.cpp" />
     <ClCompile Include="SkyboxPass.cpp" />
@@ -384,7 +385,9 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="ImageObject.h" />
     <ClInclude Include="MemoryHandler.h" />
-    <ClInclude Include="ShaderModuleObject.h" />
+    <ClCompile Include="ShaderModuleObject.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="QueueType.h" />
     <ClInclude Include="RenderGBuffer.h" />
     <ClInclude Include="RenderImGui.h" />
@@ -419,7 +422,9 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="RenderFinal.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceEntry.h" />
-    <ClInclude Include="ShaderHelper.h" />
+    <ClCompile Include="ShaderHelper.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="SingleFrameAllocator.h" />
     <ClInclude Include="SkyboxPass.h" />
@@ -448,12 +453,18 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="ISystem.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="Logger.h" />
-    <ClInclude Include="Math.h" />
-    <ClInclude Include="Matrix.h" />
+    <ClCompile Include="Math.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Matrix.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="PhysicsSystem.h" />
-    <ClInclude Include="Quaternion.h" />
+    <ClCompile Include="Quaternion.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="Ray.h" />
     <ClInclude Include="ReactiveComponent.h" />
     <ClInclude Include="Reflection.h" />
@@ -469,7 +480,9 @@ powershell Expand-Archive -Path "$(SolutionDir)Dependencies\assimp\lib\x64\assim
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Transform.h" />
-    <ClInclude Include="Vector.h" />
+    <ClCompile Include="Vector.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="VideoPlayer.h" />
     <ClInclude Include="WaterPass.h" />
   </ItemGroup>

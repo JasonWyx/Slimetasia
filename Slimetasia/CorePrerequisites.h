@@ -8,9 +8,14 @@
 #include "Logger.h"
 
 // Math includes
-#include "Math.h"
-#include "Matrix.h"
-#include "Vector.h"
+//#include "Math.h"
+//#include "Matrix.h"
+//#include "Vector.h"
+
+import Math;
+import Vector;
+import Matrix;
+import Quaternion;
 
 // Resource includes
 #include "Animation.h"
