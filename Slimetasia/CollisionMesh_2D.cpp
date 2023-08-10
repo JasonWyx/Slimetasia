@@ -223,12 +223,12 @@ bool CollisionMesh_2D::IsCollidingWithMousePolygon(const Vector2& mousepos)
 
 Vector2 CircleColliderMesh::GetClosestPointInSphere(const Vector2& pt) const
 {
-    return (static_cast<Vector2>(GetPosition()) - pt).Normalized() * m_radius;
+    return (Vector2 { GetPosition() } - pt).Normalized() * m_radius;
 }
 
 Vector2 CircleColliderMesh::GetClosestPointInSphere(const Vector3& pt) const
 {
-    return (static_cast<Vector2>(GetPosition() - pt)).Normalized() * m_radius;
+    return (Vector2 { GetPosition() - pt }).Normalized() * m_radius;
 }
 
 REFLECT_INIT(CollisionMesh_2D)

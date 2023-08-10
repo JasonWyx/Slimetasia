@@ -6,7 +6,6 @@ import Vector;
 import Matrix;
 import Quaternion;
 
-
 // Type definitions
 using Vector2 = Vector<float, 2>;
 using Vector3 = Vector<float, 3>;
@@ -19,8 +18,8 @@ using iVector3 = Vector<int, 3>;
 using iVector4 = Vector<int, 4>;
 using Quat = Quaternion<float>;
 using Quatd = Quaternion<double>;
-using Matrix3 = TMatrix3<float>;
-using Matrix4 = TMatrix4<float>;
+using Matrix3 = Matrix<float, 3, 3>;
+using Matrix4 = Matrix<float, 4, 4>;
 using Color3 = Vector<float, 3>;
 using Color4 = Vector<float, 4>;
 using UV = Vector<float, 2>;

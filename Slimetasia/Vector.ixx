@@ -28,6 +28,9 @@ class Vector
 {
 public:
 
+    /// <summary>
+    /// Construct from parameter pack of arbitrary arithmetic types
+    /// </summary>
     template <ArithmeticType... ArgTypes>
     explicit constexpr Vector(const ArgTypes... args)
         requires(Components >= sizeof...(ArgTypes))
@@ -35,10 +38,28 @@ public:
     {
     }
 
-    // Initialize from another vector of smaller or equal components with different base types
+    /// <summary>
+    ///  Construct from another vector of different type and dimension
+    /// </summary>
+    template <ArithmeticType OtherBaseType, unsigned OtherComponents>
+    explicit constexpr Vector(const Vector<OtherBaseType, OtherComponents>& other)
+        : values {}
+    {
+        constexpr unsigned MinComponents = std::min(Components, OtherComponents);
+
+        for (unsigned i = 0; i < MinComponents; ++i)
+        {
+            values[i] = static_cast<BaseType>(other[i]);
+        }
+    }
+
+    /// <summary>
+    /// Construct from another vector of different type and smaller dimension with literal fillers
+    /// </summary>
     template <ArithmeticType OtherBaseType, unsigned OtherComponents, ArithmeticType... ArgTypes>
     explicit constexpr Vector(const Vector<OtherBaseType, OtherComponents>& other, const ArgTypes... args)
-        requires(Components >= sizeof...(args) + OtherComponents)
+        requires(Components >= sizeof...(args) + OtherComponents && sizeof...(args) != 0)
+        : values {}
     {
         for (unsigned i = 0; i < OtherComponents; ++i)
         {
@@ -53,6 +74,12 @@ public:
         }
     }
 
+    template <unsigned Index>
+        requires(Index < Components)
+    static constexpr Vector Base = MakeBase<Index>();
+
+#pragma region BASE
+
     // Sets all values to be the same
     void Fill(const BaseType fillValue)
     {
@@ -61,6 +88,73 @@ public:
             value = value;
         }
     }
+
+    BaseType& operator[](const unsigned index) { return values[index]; }
+    constexpr BaseType operator[](const unsigned index) const { return values[index]; }
+
+    BaseType* GetData() { return values; }
+    constexpr BaseType* GetData() const { return values; }
+
+    constexpr bool operator==(const Vector& other) const
+    {
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            if (values[i] != other.values[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    constexpr bool operator!=(const Vector& other) const { return !((*this) == other); }
+    constexpr bool operator<(const Vector& other) const
+    {
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            if (!(values[i] < other.values[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    constexpr bool operator<=(const Vector& other) const
+    {
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            if (!(values[i] <= other.values[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    constexpr bool operator>(const Vector& other) const
+    {
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            if (!(values[i] > other.values[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    constexpr bool operator>=(const Vector& other) const
+    {
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            if (!(values[i] >= other.values[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+#pragma endregion BASE
+
+#pragma region MATH
 
     Vector& operator+=(const Vector& other)
     {
@@ -111,95 +205,16 @@ public:
         return *this;
     }
 
-    Vector operator-() const { return Vector {} -= *this; }
-    Vector operator+(const Vector& other) const { return Vector { *this } += other; }
-    Vector operator-(const Vector& other) const { return Vector { *this } -= other; }
-    Vector operator*(const Vector& other) const { return Vector { *this } *= other; }
-    Vector operator/(const Vector& other) const { return Vector { *this } /= other; }
-    Vector operator*(const BaseType value) const { return Vector { *this } *= value; }
-    Vector operator/(const BaseType value) const { return Vector { *this } /= value; }
-
-    bool operator==(const Vector& other) const
-    {
-        for (unsigned i = 0; i < Components; ++i)
-        {
-            if (values[i] != other[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    bool operator!=(const Vector& other) const { return !((*this) == other); }
-    bool operator<(Vector const& other) const
-    {
-        for (unsigned i = 0; i < Components; ++i)
-        {
-            if (!(values[i] < other[i]))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    bool operator<=(Vector const& other) const
-    {
-        for (unsigned i = 0; i < Components; ++i)
-        {
-            if (!(values[i] <= other[i]))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    bool operator>(Vector const& other) const
-    {
-        for (unsigned i = 0; i < Components; ++i)
-        {
-            if (!(values[i] > other[i]))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    bool operator>=(Vector const& other) const
-    {
-        for (unsigned i = 0; i < Components; ++i)
-        {
-            if (!(values[i] >= other[i]))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    BaseType& operator[](const unsigned index) { return values[index]; }
-    constexpr BaseType operator[](const unsigned index) const { return values[index]; }
-
-    BaseType* GetData() { return values; }
-    const BaseType* GetData() const { return values; }
-
-    // Conversion to other base types
-    template <typename OtherBaseType, unsigned OtherComponents = Components>
-    explicit constexpr operator Vector<OtherBaseType, OtherComponents>() const
-        requires(Components >= OtherComponents)
-    {
-        Vector<OtherBaseType, OtherComponents> converted;
-
-        for (unsigned i = 0; i < OtherComponents; ++i)
-        {
-            converted[i] = static_cast<OtherBaseType>(values[i]);
-        }
-
-        return converted;
-    }
+    constexpr Vector operator-() const { return Vector { *this } *= static_cast<BaseType>(-1); }
+    constexpr Vector operator+(const Vector& other) const { return Vector { *this } += other; }
+    constexpr Vector operator-(const Vector& other) const { return Vector { *this } -= other; }
+    constexpr Vector operator*(const Vector& other) const { return Vector { *this } *= other; }
+    constexpr Vector operator/(const Vector& other) const { return Vector { *this } /= other; }
+    constexpr Vector operator*(const BaseType value) const { return Vector { *this } *= value; }
+    constexpr Vector operator/(const BaseType value) const { return Vector { *this } /= value; }
 
     // Utilities
-    void Zero() { *this = Vector {}; }
-    BaseType Dot(const Vector& other) const
+    constexpr BaseType Dot(const Vector& other) const
     {
         BaseType result = static_cast<BaseType>(0);
         for (unsigned i = 0; i < Components; ++i)
@@ -208,21 +223,20 @@ public:
         }
         return result;
     }
-
-    BaseType SquareLength() const { return Dot(*this); }
-    BaseType Length() const
+    constexpr BaseType SquareLength() const { return Dot(*this); }
+    constexpr BaseType Length() const
         requires(std::is_floating_point_v<BaseType>)
     {
         return static_cast<BaseType>(std::sqrtf(SquareLength()));
     }
 
-    BaseType SquareDistance(const Vector& other) { return (other - *this).SquareLength(); }
-    BaseType Distance(const Vector& other) { return (other - *this).Length(); }
+    constexpr BaseType SquareDistance(const Vector& other) { return (other - *this).SquareLength(); }
+    constexpr BaseType Distance(const Vector& other) { return (other - *this).Length(); }
 
     void Normalize() { (*this) /= this->Length(); }
-    Vector Normalized() const { return Vector { *this } /= this->Length(); }
+    constexpr Vector Normalized() const { return Vector { *this } /= this->Length(); }
 
-    Vector Projection(const Vector& other) const
+    constexpr Vector Projection(const Vector& other) const
         requires(std::is_floating_point_v<BaseType>)
     {
         const Vector otherNormalized = other.Normalized();
@@ -230,30 +244,35 @@ public:
         return otherNormalized * length;
     }
 
-    // Components[2] Specifics
-    BaseType Angle() const
+#pragma endregion MATH
+
+#pragma region 2_COMPONENTS
+
+    constexpr BaseType Angle() const
         requires(std::is_floating_point_v<BaseType> && Components == 2)
     {
         return std::atan2f(-values[1], -values[0]) * RAD_TO_DEG + 180;
     }
 
-    Vector Rotate(const BaseType angle) const
+    constexpr Vector Rotate(const BaseType angle) const
         requires(std::is_floating_point_v<BaseType> && Components == 2)
     {
         return Vector { values[0] * std::cos(angle) - values[1] * std::sin(angle), values[0] * std::sin(angle) + values[1] * std::cos(angle) };
     }
 
-    // Components[3] Specifics
+#pragma endregion 2_COMPONENTS
 
-    Vector Cross(const Vector& other) const
+#pragma region 3_COMPONENTS
+
+    constexpr Vector Cross(const Vector& other) const
         requires(Components == 3)
     {
         return Vector { values[1] * other.values[2] - values[2] * other.values[1], values[2] * other.values[0] - values[0] * other.values[2],
             values[0] * other.values[1] - values[1] * other.values[0] };
     }
 
-    Vector<BaseType, 2> PolarAngles() const
-        requires(std::is_floating_point_v<BaseType> && Components == 3)
+    constexpr Vector<BaseType, 2> PolarAngles() const
+        requires(std::is_floating_point_v<BaseType> && Components >= 3)
     {
         Vector tmp = Normalized();
         Vector<BaseType, 2> result;
@@ -264,8 +283,8 @@ public:
         return result;
     }
 
-    Vector RotateX(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components == 3)
+    constexpr Vector RotateX(const BaseType angle) const
+        requires(std::is_floating_point_v<BaseType> && Components >= 3)
     {
         BaseType c = std::cosf(angle);
         BaseType s = std::sinf(angle);
@@ -273,8 +292,8 @@ public:
         return Vector { values[0], values[1] * c + -s * values[2], s * values[1] + c * values[2] };
     }
 
-    Vector RotateY(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components == 3)
+    constexpr Vector RotateY(const BaseType angle) const
+        requires(std::is_floating_point_v<BaseType> && Components >= 3)
     {
         BaseType c = std::cosf(angle);
         BaseType s = std::sinf(angle);
@@ -282,8 +301,8 @@ public:
         return Vector { c * values[0] + s * values[2], values[1], -s * values[0] + c * values[2] };
     }
 
-    Vector RotateZ(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components == 3)
+    constexpr Vector RotateZ(const BaseType angle) const
+        requires(std::is_floating_point_v<BaseType> && Components >= 3)
     {
         BaseType c = std::cosf(angle);
         BaseType s = std::sinf(angle);
@@ -291,11 +310,7 @@ public:
         return Vector { c * values[0] + -s * values[1], s * values[0] + c * values[1], values[2] };
     }
 
-    // Static Utilities
-
-    template <unsigned Index>
-        requires(Index < Components)
-    static constexpr Vector Base = MakeBase<Index>();
+#pragma region 3_COMPONENTS
 
 private:
 
@@ -303,20 +318,28 @@ private:
     static constexpr Vector MakeBase()
         requires(Index < Components)
     {
-        return MakeBase(MakeNumberPack<Index, 0> {});
+        return MakeBase(MakeNumberPack<Index, 0> {}, MakeNumberPack<Components - Index - 1, 0> {});
     }
 
-    template <int... PackNumbers>
-    static constexpr Vector MakeBase(const NumberPack<PackNumbers...>&)
+    // E.g. Expansion of this for Vector4 would be
+    // FrontPacking... = 0, 0
+    // BackPacking...  = 0
+    //
+    // Vector { 0, 0, 1, 0 }
+    //
+    template <int... FrontPacking, int... BackPacking>
+    static constexpr Vector MakeBase(const NumberPack<FrontPacking...>&, const NumberPack<BackPacking...>&)
     {
-        return Vector { PackNumbers..., static_cast<BaseType>(1) };
+        return Vector { static_cast<BaseType>(FrontPacking)..., static_cast<BaseType>(1), static_cast<BaseType>(BackPacking)... };
     }
+
+protected:
 
     BaseType values[Components];
 };
 
 export template <ArithmeticType BaseType, unsigned Components>
-Vector<BaseType, Components> operator*(BaseType value, const Vector<BaseType, Components>& other)
+constexpr Vector<BaseType, Components> operator*(const BaseType value, const Vector<BaseType, Components>& other)
 {
     return other * value;
 }

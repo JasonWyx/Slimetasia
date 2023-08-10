@@ -3,10 +3,6 @@
 #include "GameObject.h"
 #include "MeshRenderer.h"
 
-const Vector3 Transform::worldForward { 0, 0, 1 };
-const Vector3 Transform::worldUpward { 0, 1, 0 };
-const Vector3 Transform::worldRight { 1, 0, 0 };
-
 Transform::Transform(GameObject* parentObject)
     : IComponent(parentObject, "Transform")
     ,
@@ -116,7 +112,7 @@ void Transform::OnUpdate(float dt)
     if (!change)
     {
         m_deltaPos = m_WorldPosition;
-        parentMat = Matrix4 {}.Identity();
+        parentMat = Matrix4::Identity();
         if (m_OwnerObject->GetParentObject())
         {
             auto pTrans = m_OwnerObject->GetParentLayer()->GetObjectById(m_OwnerObject->GetParentObject())->GetComponent<Transform>();
@@ -160,7 +156,7 @@ void Transform::OnUpdate(float dt)
             {
                 // Vector3 m_diff = m_WorldPosition - m_deltaPos;
                 Vector4 tmp { m_WorldPosition[0], m_WorldPosition[1], m_WorldPosition[2], 1 };
-                auto r = mat.Invert() * tmp;
+                Vector4 r = mat.Inverted() * tmp;
                 m_defaultPos[0] = r[0];
                 m_defaultPos[1] = r[1];
                 m_defaultPos[2] = r[2];

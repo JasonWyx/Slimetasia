@@ -49,7 +49,7 @@ void RigidbodyComponent::SetBodytype(const Bodytype& bodytype)
 
         if (bodytype == eBodytype_STATIC)
         {
-            m_LinearVelocity.Zero();
+            m_LinearVelocity = Vector3 {};
             m_Mass = 0.f;
             m_InverseMass = 0.f;
         }
@@ -65,7 +65,7 @@ void RigidbodyComponent::SetBodytype(const int& bodytype)
 
         if (bodytype == eBodytype_STATIC)
         {
-            m_LinearVelocity.Zero();
+            m_LinearVelocity = Vector3 {};
             m_Mass = 0.f;
             m_InverseMass = 0.f;
         }

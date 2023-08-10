@@ -33,9 +33,9 @@ private:
 
 public:
 
-    static const Vector3 worldForward;
-    static const Vector3 worldUpward;
-    static const Vector3 worldRight;
+    static constexpr Vector3 worldForward = Vector3::Base<2>;
+    static constexpr Vector3 worldUpward = Vector3::Base<1>;
+    static constexpr Vector3 worldRight = Vector3::Base<0>;
 
     Transform(GameObject* parentObject);
     ~Transform() = default;

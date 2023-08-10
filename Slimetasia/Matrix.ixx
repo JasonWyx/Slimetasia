@@ -18,1167 +18,661 @@ module;
 
 #include <algorithm>
 #include <iostream>
-
-// #include "Vector.h"
+#include <limits>
 
 export module Matrix;
 
 import Math;
 import Vector;
 
-template <ArithmeticType BaseType, unsigned NumRows, unsigned NumColumns>
+export template <ArithmeticType BaseType, unsigned RowCount, unsigned ColumnCount>
 class Matrix
 {
+    // Helper traits
+    static constexpr unsigned TotalComponents = RowCount * ColumnCount;
+    static constexpr bool IsSquare = RowCount == ColumnCount;
+    static constexpr bool IsFloating = std::is_floating_point_v<BaseType>;
+    static constexpr bool IsIntegral = std::is_integral_v<BaseType>;
+    static constexpr BaseType BaseEpsilon = std::numeric_limits<BaseType>::epsilon();
+
 public:
+
+
+    template <ArithmeticType... ArgTypes>
+    explicit constexpr Matrix(const ArgTypes... args)
+        requires(TotalComponents >= sizeof...(ArgTypes))
+        : values { static_cast<BaseType>(args)... }
+    {
+    }
+
+    // Copy values flushed to the top left of the matrix
+    template <ArithmeticType OtherBaseType, unsigned OtherRowCount, unsigned OtherColumnCount>
+    explicit constexpr Matrix(const Matrix<OtherBaseType, OtherRowCount, OtherColumnCount>& other)
+        : Matrix {}
+    {
+        using OtherMatrixType = Matrix<OtherBaseType, OtherRowCount, OtherColumnCount>;
+
+        constexpr unsigned MinRowCount = std::min(RowCount, OtherRowCount);
+        constexpr unsigned MinColumnCount = std::min(ColumnCount, OtherColumnCount);
+
+        for (unsigned rowIndex = 0; rowIndex < MinColumnCount; ++rowIndex)
+        {
+            for (unsigned columnIndex = 0; columnIndex < MinRowCount; ++columnIndex)
+            {
+                const unsigned index = GetIndex(rowIndex, columnIndex);
+                const unsigned otherIndex = OtherMatrixType::GetIndex(rowIndex, columnIndex);
+
+                values[index] = other[otherIndex];
+            }
+        }
+    }
+
+#pragma region BASE
+
+    static constexpr Matrix Identity()
+    // requires(IsSquare)
+    {
+        constexpr unsigned TotalCount = RowCount * ColumnCount;
+        constexpr unsigned PaddingCount = RowCount + 1;
+
+        Matrix tmp {};
+        for (unsigned i = 0; i < TotalCount; i += PaddingCount)
+        {
+            tmp[i] = static_cast<BaseType>(1);
+        }
+        return tmp;
+    }
+
+    // Sets all values to be the same
+    void Fill(const BaseType fillValue)
+    {
+        for (BaseType& value : values)
+        {
+            value = fillValue;
+        }
+    }
+
+    BaseType* GetMatrix() { return values; }
+    BaseType& operator[](const unsigned index) { return values[index]; }
+    constexpr BaseType operator[](const unsigned index) const { return values[index]; }
+
+    constexpr Vector<BaseType, RowCount> GetColumn(const unsigned columnIndex) const
+    {
+        Vector<BaseType, RowCount> column;
+        const unsigned offset = columnIndex * RowCount;
+
+        for (unsigned i = 0; i < RowCount; ++i)
+        {
+            column[i] = values[offset + i];
+        }
+
+        return column;
+    }
+    constexpr Vector<BaseType, ColumnCount> GetRow(const unsigned rowIndex) const
+    {
+        Vector<BaseType, ColumnCount> row;
+
+        for (unsigned i = 0; i < ColumnCount; ++i)
+        {
+            row[i] = values[rowIndex + i * RowCount];
+        }
+
+        return row;
+    }
+
+    template <unsigned ComponentCount>
+    void SetColumn(const unsigned columnIndex, const Vector<BaseType, ComponentCount>& column)
+        requires(ComponentCount <= RowCount)
+    {
+        const unsigned offset = columnIndex * RowCount;
+
+        for (unsigned i = 0; i < RowCount; ++i)
+        {
+            values[offset + i] = column[i];
+        }
+    }
+
+    template <unsigned ComponentCount>
+    void SetRow(const unsigned rowIndex, const Vector<BaseType, ComponentCount>& row)
+        requires(ComponentCount <= ColumnCount)
+    {
+        for (unsigned i = 0; i < ColumnCount; ++i)
+        {
+            values[rowIndex + i * RowCount] = row[i];
+        }
+    }
+
+    void SwapRows(const unsigned rowIndexA, const unsigned rowIndexB)
+    {
+        const Vector<BaseType, ColumnCount>& rowA = GetRow(rowIndexA);
+        const Vector<BaseType, ColumnCount>& rowB = GetRow(rowIndexB);
+        SetRow(rowIndexB, rowA);
+        SetRow(rowIndexA, rowB);
+    }
+
+    void SwapColumns(const unsigned columnIndexA, const unsigned columnIndexB)
+    {
+        const Vector<BaseType, RowCount>& columnA = GetColumn(columnIndexA);
+        const Vector<BaseType, RowCount>& columnB = GetColumn(columnIndexB);
+        SetColumn(columnIndexB, columnA);
+        SetColumn(columnIndexA, columnB);
+    }
+
+    static constexpr unsigned GetIndex(const unsigned rowIndex, const unsigned columnIndex) { return columnIndex * RowCount + rowIndex; }
+
+    // Only square matrix can transpose in place
+    void Transpose()
+        requires(IsSquare)
+    {
+        for (unsigned rowIndex = 0; rowIndex < ColumnCount; ++rowIndex)
+        {
+            for (unsigned columnIndex = rowIndex + 1; columnIndex < RowCount; ++columnIndex)
+            {
+                std::swap(values[GetIndex(rowIndex, columnIndex)], values[GetIndex(columnIndex, rowIndex)]);
+            }
+        }
+    }
+
+    constexpr Matrix Transposed() const
+    {
+        Matrix tmp { *this };
+        tmp.Transpose();
+        return tmp;
+    }
+
+    constexpr Matrix<BaseType, ColumnCount, RowCount> Transposed() const
+        requires(RowCount != ColumnCount)
+    {
+        using OtherMatrixType = Matrix<BaseType, ColumnCount, RowCount>;
+        OtherMatrixType tmp {};
+
+        for (unsigned rowIndex = 0; rowIndex < ColumnCount; ++rowIndex)
+        {
+            for (unsigned columnIndex = 0; columnIndex < RowCount; ++columnIndex)
+            {
+                const unsigned index = GetIndex(rowIndex, columnIndex);
+                const unsigned otherIndex = OtherMatrixType::GetIndex(columnIndex, rowIndex);
+
+                tmp[otherIndex] = values[index];
+            }
+        }
+
+        return tmp;
+    }
+
+#pragma endregion BASE
+
+#pragma region MATH
+
+    Matrix& operator+=(const Matrix& other)
+    {
+        for (unsigned i = 0; i < TotalComponents; ++i)
+        {
+            values[i] += other.values[i];
+        }
+        return *this;
+    }
+    Matrix& operator-=(const Matrix& other)
+    {
+        for (unsigned i = 0; i < TotalComponents; ++i)
+        {
+            values[i] -= other.values[i];
+        }
+        return *this;
+    }
+    Matrix& operator*=(const BaseType value)
+    {
+        for (unsigned i = 0; i < TotalComponents; ++i)
+        {
+            values[i] *= value;
+        }
+        return *this;
+    }
+    Matrix& operator/=(const BaseType value)
+    {
+        for (unsigned i = 0; i < TotalComponents; ++i)
+        {
+            values[i] /= value;
+        }
+        return *this;
+    }
+
+    constexpr Matrix operator-() const { return Matrix { *this } *= static_cast<BaseType>(-1); }
+    constexpr Matrix operator+(const Matrix& other) const { return Matrix { *this } += other; }
+    constexpr Matrix operator-(const Matrix& other) const { return Matrix { *this } -= other; }
+    constexpr Matrix operator*(const BaseType value) const { return Matrix { *this } *= value; }
+    constexpr Matrix operator/(const BaseType value) const { return Matrix { *this } /= value; }
+
+    // Generic matrix multiplication
+    template <unsigned OtherRowCount, unsigned OtherColumnCount>
+    constexpr Matrix<BaseType, RowCount, OtherColumnCount> operator*(const Matrix<BaseType, OtherRowCount, OtherColumnCount>& other) const
+        requires(ColumnCount == OtherRowCount)
+    {
+        constexpr unsigned ResultComponents = RowCount * OtherColumnCount;
+
+        Matrix<BaseType, RowCount, OtherColumnCount> result {};
+
+        for (unsigned i = 0; i < ResultComponents; ++i)
+        {
+            const unsigned rowIndex = i % RowCount;
+            const unsigned columnIndex = i / OtherColumnCount;
+
+            result[i] = (this->GetRow(rowIndex)).Dot(other.GetColumn(columnIndex));
+        }
+        return result;
+    }
+
+    // Special case where multiplication of matrix with NxN dimensions
+    Matrix& operator*=(const Matrix& other)
+        requires(std::is_same_v<Matrix, decltype(*this * other)>)
+    {
+        *this = *this * other;
+        return *this;
+    }
+
+    constexpr Vector<BaseType, RowCount> operator*(const Vector<BaseType, ColumnCount>& vector)
+    {
+        Vector<BaseType, RowCount> tmp;
+
+        for (unsigned i = 0; i < RowCount; ++i)
+        {
+            tmp[i] = GetRow(i).Dot(vector);
+        }
+
+        return tmp;
+    }
+
+    constexpr BaseType Determinant() const
+        requires(IsSquare && IsFloating)
+    {
+        constexpr unsigned Dimension = RowCount;
+
+        // Compute row echelon form
+        Matrix tmp { *this };
+
+        for (unsigned i = 0; i < Dimension; ++i)
+        {
+            for (unsigned j = i + 1; j < Dimension; ++j)
+            {
+                const BaseType factor = tmp.values[GetIndex(i, j)] / tmp.values[GetIndex(i, i)];
+                for (unsigned k = i; k < Dimension; ++k)
+                {
+                    tmp.values[GetIndex(j, k)] -= factor * tmp.values[GetIndex(i, k)];
+                }
+            }
+        }
+
+        // Compute determinant by multipliation of diagonals
+        BaseType determinant = static_cast<BaseType>(1);
+        for (unsigned i = 0; i < Dimension; ++i)
+        {
+            determinant *= tmp.values[GetIndex(i, i)];
+        }
+
+        return determinant;
+    }
+
+    constexpr Matrix Inverted() const
+        requires(IsSquare && IsFloating /* && Invertible<decltype(*this)>*/)
+    {
+        Matrix tmp { *this };
+        tmp.Invert();
+        return tmp;
+    }
+
+    template <unsigned Components>
+    static constexpr Matrix Scale(const Vector<BaseType, Components>& vector)
+        requires(IsSquare)
+    {
+        constexpr unsigned MinCount = std::min(Components, RowCount);
+
+        Matrix tmp {};
+        for (unsigned i = 0; i < MinCount; ++i)
+        {
+            tmp.values[GetIndex(i, i)] = vector[i];
+        }
+        return tmp;
+    }
+
+    template <ArithmeticType... ArgTypes>
+    static constexpr Matrix Scale(const ArgTypes... args)
+        requires(IsSquare && sizeof...(ArgTypes) <= RowCount)
+    {
+        return Matrix::Scale(Vector { static_cast<BaseType>(args)... });
+    }
+
+#pragma endregion MATH
+
+#pragma region 2x2
+
+    void Invert()
+        requires(IsSquare && RowCount == 2 && IsFloating)
+    {
+        const BaseType determinant = Determinant();
+
+        if (std::abs(determinant) <= BaseEpsilon)
+        {
+            throw std::logic_error("Trying to invert a matrix with determinant close to 0");
+            return;
+        }
+
+        std::swap(values[0].values[3]);
+        values[1] = -values[1];
+        values[2] = -values[2];
+
+        *this /= determinant;
+    }
+
+    static constexpr Matrix Rotate(BaseType angle)
+        requires(IsSquare && RowCount == 2 && IsFloating)
+    {
+        return Matrix { std::cos(angle), std::sin(angle), -std::sin(angle), std::cos(angle) };
+    }
+
+#pragma endregion 2x2
+
+#pragma region 3x3
+
+    void Invert()
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        const BaseType determinant = Determinant();
+
+        if (std::abs(determinant) <= BaseEpsilon)
+        {
+            throw std::logic_error("Trying to invert a matrix with determinant close to 0");
+            return;
+        }
+
+        Matrix tmp {
+            values[4] * values[8] - values[5] * values[7],
+            values[7] * values[2] - values[8] * values[1],
+            values[1] * values[5] - values[2] * values[4],
+            values[5] * values[6] - values[3] * values[8],
+            values[0] * values[8] - values[2] * values[6],
+            values[2] * values[3] - values[0] * values[5],
+            values[3] * values[7] - values[4] * values[6],
+            values[6] * values[1] - values[7] * values[0],
+            values[0] * values[4] - values[1] * values[3],
+        };
+
+        *this = tmp / determinant;
+    }
+
+    static constexpr Matrix RotateX(const BaseType angle)
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        const BaseType c = std::cos(angle);
+        const BaseType s = std::sin(angle);
+
+        Matrix tmp {};
+
+        tmp[4] = c;
+        tmp[5] = s;
+        tmp[7] = -s;
+        tmp[8] = c;
+
+        return tmp;
+    }
+    static constexpr Matrix RotateY(const BaseType angle)
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        const BaseType c = std::cos(angle);
+        const BaseType s = std::sin(angle);
+
+        Matrix tmp {};
+
+        tmp[0] = c;
+        tmp[2] = -s;
+        tmp[6] = s;
+        tmp[8] = c;
+
+        return tmp;
+    }
+    static constexpr Matrix RotateZ(const BaseType angle)
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        const BaseType c = std::cos(angle);
+        const BaseType s = std::sin(angle);
+
+        Matrix tmp {};
+
+        tmp[0] = c;
+        tmp[1] = s;
+        tmp[3] = -s;
+        tmp[4] = c;
+
+        return tmp;
+    }
+    static constexpr Matrix Rotate(const Vector<BaseType, RowCount>& rotateAngles)
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        return RotateX(rotateAngles[0]) * RotateY(rotateAngles[1]) * RotateZ(rotateAngles[2]);
+    }
+    static constexpr Matrix Rotate(const BaseType pitch, const BaseType roll, const BaseType yaw)
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        return Matrix::Rotate(Vector<BaseType, RowCount> { pitch, roll, yaw });
+    }
+
+    static constexpr Matrix Rotate(const Vector<BaseType, RowCount>& axis, const BaseType angle)
+        requires(IsSquare && RowCount == 3 && IsFloating)
+    {
+        const BaseType c = std::cos(angle);                // cosine
+        const BaseType s = std::sin(angle);                // sine
+        const BaseType c1 = static_cast<BaseType>(1) - c;  // 1 - c
+
+        // build rotation matrix
+        return Matrix {
+            axis[0] * axis[0] * c1 + c,
+            axis[0] * axis[1] * c1 + axis[2] * s,
+            axis[0] * axis[2] * c1 - axis[1] * s,
+
+            axis[0] * axis[1] * c1 - axis[2] * s,
+            axis[1] * axis[1] * c1 + c,
+            axis[1] * axis[2] * c1 + axis[0] * s,
+
+            axis[0] * axis[2] * c1 + axis[1] * s,
+            axis[1] * axis[2] * c1 - axis[0] * s,
+            axis[2] * axis[2] * c1 + c,
+        };
+    }
+#pragma endregion 3x3
+
+#pragma region 4x4
+
+    constexpr BaseType GetCoFactor(BaseType m0, BaseType m1, BaseType m2, BaseType m3, BaseType m4, BaseType m5, BaseType m6, BaseType m7, BaseType m8) const
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return m0 * (m4 * m8 - m5 * m7) - m1 * (m3 * m8 - m5 * m6) + m2 * (m3 * m7 - m4 * m6);
+    }
+
+    void Invert()
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        const BaseType determinant = Determinant();
+
+        if (std::abs(determinant) <= BaseEpsilon)
+        {
+            throw std::logic_error("Trying to invert a matrix with determinant close to 0");
+            return;
+        }
+
+        // get cofactors of minor matrices
+        BaseType cofactor0 = GetCoFactor(values[5], values[6], values[7], values[9], values[10], values[11], values[13], values[14], values[15]);
+        BaseType cofactor1 = GetCoFactor(values[4], values[6], values[7], values[8], values[10], values[11], values[12], values[14], values[15]);
+        BaseType cofactor2 = GetCoFactor(values[4], values[5], values[7], values[8], values[9], values[11], values[12], values[13], values[15]);
+        BaseType cofactor3 = GetCoFactor(values[4], values[5], values[6], values[8], values[9], values[10], values[12], values[13], values[14]);
+
+        // get rest of cofactors for adj(M)
+        BaseType cofactor4 = GetCoFactor(values[1], values[2], values[3], values[9], values[10], values[11], values[13], values[14], values[15]);
+        BaseType cofactor5 = GetCoFactor(values[0], values[2], values[3], values[8], values[10], values[11], values[12], values[14], values[15]);
+        BaseType cofactor6 = GetCoFactor(values[0], values[1], values[3], values[8], values[9], values[11], values[12], values[13], values[15]);
+        BaseType cofactor7 = GetCoFactor(values[0], values[1], values[2], values[8], values[9], values[10], values[12], values[13], values[14]);
+
+        BaseType cofactor8 = GetCoFactor(values[1], values[2], values[3], values[5], values[6], values[7], values[13], values[14], values[15]);
+        BaseType cofactor9 = GetCoFactor(values[0], values[2], values[3], values[4], values[6], values[7], values[12], values[14], values[15]);
+        BaseType cofactor10 = GetCoFactor(values[0], values[1], values[3], values[4], values[5], values[7], values[12], values[13], values[15]);
+        BaseType cofactor11 = GetCoFactor(values[0], values[1], values[2], values[4], values[5], values[6], values[12], values[13], values[14]);
+
+        BaseType cofactor12 = GetCoFactor(values[1], values[2], values[3], values[5], values[6], values[7], values[9], values[10], values[11]);
+        BaseType cofactor13 = GetCoFactor(values[0], values[2], values[3], values[4], values[6], values[7], values[8], values[10], values[11]);
+        BaseType cofactor14 = GetCoFactor(values[0], values[1], values[3], values[4], values[5], values[7], values[8], values[9], values[11]);
+        BaseType cofactor15 = GetCoFactor(values[0], values[1], values[2], values[4], values[5], values[6], values[8], values[9], values[10]);
+
+        // build inverse matrix = adj(M) / det(M)
+        // adjugate of M is the transpose of the cofactor matrix of M
+        const BaseType invDeterminant = 1.0f / determinant;
+        values[0] = invDeterminant * cofactor0;
+        values[1] = -invDeterminant * cofactor4;
+        values[2] = invDeterminant * cofactor8;
+        values[3] = -invDeterminant * cofactor12;
+        values[4] = -invDeterminant * cofactor1;
+        values[5] = invDeterminant * cofactor5;
+        values[6] = -invDeterminant * cofactor9;
+        values[7] = invDeterminant * cofactor13;
+        values[8] = invDeterminant * cofactor2;
+        values[9] = -invDeterminant * cofactor6;
+        values[10] = invDeterminant * cofactor10;
+        values[11] = -invDeterminant * cofactor14;
+        values[12] = -invDeterminant * cofactor3;
+        values[13] = invDeterminant * cofactor7;
+        values[14] = -invDeterminant * cofactor11;
+        values[15] = invDeterminant * cofactor15;
+    }
+
+    void Decompose(Vector<BaseType, 3>& translate, Vector<BaseType, 3>& rotation, Vector<BaseType, 3>& scale) const
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        using ReturnVectorType = Vector<BaseType, 3>;
+
+        Matrix tmp { *this };
+
+        const ReturnVectorType column0 { GetColumn(0) };
+        const ReturnVectorType column1 { GetColumn(1) };
+        const ReturnVectorType column2 { GetColumn(2) };
+
+        scale[0] = column0.Length();
+        scale[1] = column1.Length();
+        scale[2] = column2.Length();
+
+        tmp.SetColumn(0, column0.Normalized());
+        tmp.SetColumn(1, column1.Normalized());
+        tmp.SetColumn(2, column2.Normalized());
+
+        rotation[0] = std::atan2(tmp[6], tmp[10]);
+        rotation[1] = std::atan2(-tmp[2], std::sqrt(tmp[6] * tmp[6] + tmp[10] * tmp[10]));
+        rotation[2] = std::atan2(tmp[1], tmp[0]);
+
+        translate[0] = tmp[12];
+        translate[1] = tmp[13];
+        translate[2] = tmp[14];
+    }
+
+    static constexpr Matrix Translate(const Vector<BaseType, 3>& translate)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        Matrix tmp {};
+        tmp.SetColumn(3, translate);
+        return tmp;
+    }
+
+    static constexpr Matrix Rotate(const Vector<BaseType, 3>& axis, const BaseType angle)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return Matrix { Matrix<BaseType, 3, 3>::Rotate(axis, angle) };
+    }
+
+    static constexpr Matrix RotateX(const BaseType angle)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return Matrix { Matrix<BaseType, 3, 3>::RotateX(angle) };
+    }
+    static constexpr Matrix RotateY(const BaseType angle)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return Matrix { Matrix<BaseType, 3, 3>::RotateY(angle) };
+    }
+    static constexpr Matrix RotateZ(const BaseType angle)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return Matrix { Matrix<BaseType, 3, 3>::RotateZ(angle) };
+    }
+    static constexpr Matrix FrustumPerspective(const BaseType left, const BaseType right, const BaseType bottom, const BaseType top, const BaseType near, const BaseType far)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return Matrix { 2 * near / (right - left), 0, 0, 0, 0, 2 * near / (top - bottom), 0, 0, (right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1, 0,
+            0, -(2 * far * near) / (far - near), 0 };
+    }
+
+    static constexpr Matrix FrustumOrthographic(const BaseType left, const BaseType right, const BaseType bottom, const BaseType top, const BaseType near, const BaseType far)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        return Matrix {
+            2 / (right - left),
+            0,
+            0,
+            0,
+            0,
+            2 / (top - bottom),
+            0,
+            0,
+            0,
+            0,
+            -2 / (far - near),
+            0,
+            -(right + left) / (right - left),
+            -(top + bottom) / (top - bottom),
+            -(far + near) / (far - near),
+            0,
+        };
+    }
+
+    static constexpr Matrix Perspective(const BaseType fov, const BaseType aspectRatio, const BaseType near, const BaseType far)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        const BaseType tanFov = std::tan(fov / 2);
+        const BaseType height = near * tanFov;
+        const BaseType width = height * aspectRatio;
+
+        return Matrix::FrustumOrthographic(-width, width, -height, height, near, far);
+    }
+
+    static constexpr Matrix LookAt(const Vector<BaseType, 3>& eye, const Vector<BaseType, 3>& center, const Vector<BaseType, 3>& worldUp)
+        requires(IsSquare && RowCount == 4 && IsFloating)
+    {
+        Vector<BaseType, 3> forward = eye - center;
+        forward.Normalize();
+        Vector<BaseType, 3> right = worldUp.Cross(forward);
+        right.Normalize();
+        Vector<BaseType, 3> up = forward.Cross(right);
+        up.Normalize();
+
+        Matrix transform;
+        transform.SetRow(0, right);
+        transform.SetRow(1, up);
+        transform.SetRow(2, forward);
+        transform *= Matrix::Translate(-eye);
+        return transform;
+    }
+
+#pragma endregion 4x4
+
+    friend std::ostream& operator<<(std::ostream& os, const Matrix& other);
+
 private:
 
-    Vector<BaseType, NumRows> values[NumColumns];
+    // Data is stored in column major
+    BaseType values[RowCount * ColumnCount];
 };
 
-export template <typename T>
-class TMatrix2
-{
-    float m[4];
-
-public:
-
-    explicit TMatrix2()
-        : m { 1, 0, 1, 0 }
-    {
-    }
-    explicit TMatrix2(T m0, T m1, T m2, T m3)
-        : m { m0, m1, m2, m3 }
-    {
-    }
-    explicit TMatrix2(T val)
-        : m { val, 0, val, 0 }
-    {
-    }
-
-    float GetDeterminant() const;
-    TMatrix2& Identity();
-    TMatrix2& Invert();
-    TMatrix2& Transpose();
-
-    TMatrix2& operator+=(TMatrix2 const& rhs);
-    TMatrix2& operator-=(TMatrix2 const& rhs);
-    TMatrix2& operator*=(TMatrix2 const& rhs);
-    TMatrix2 operator+(TMatrix2 const& rhs) const;
-    TMatrix2 operator-(TMatrix2 const& rhs) const;
-    TMatrix2 operator*(TMatrix2 const& rhs) const;
-    TMatrix2 operator*(T const& rhs) const;
-    TMatrix2 operator-() const;
-    Vector<T, 2> operator*(Vector<T, 2> const& rhs) const;
-
-    T operator[](unsigned index) const;
-    T& operator[](unsigned index);
-
-    friend std::ostream& operator<<(std::ostream& os, TMatrix2 const& rhs);
-
-    static TMatrix2<T> Scale(float scaleX, float scaleY);
-    static TMatrix2<T> Rotate(float angle);
-};
-
-export template <typename T>
-class TMatrix3
-{
-    float m[9];
-
-public:
-
-    explicit TMatrix3()
-        : m { 1, 0, 0, 0, 1, 0, 0, 0, 1 }
-    {
-    }
-    explicit TMatrix3(T val)
-        : m { val, 0, 0, 0, val, 0, 0, 0, val }
-    {
-    }
-    explicit TMatrix3(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8)
-        : m { m0, m1, m2, m3, m4, m5, m6, m7, m8 }
-    {
-    }
-
-    float GetDeterminant() const;
-    TMatrix3& Identity();
-    TMatrix3& Invert();
-    TMatrix3& Transpose();
-    void SetAllValues(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8);
-    void Zero();
-    TMatrix3 GetInverse() const;
-
-    TMatrix3& operator+=(TMatrix3 const& rhs);
-    TMatrix3& operator-=(TMatrix3 const& rhs);
-    TMatrix3& operator*=(TMatrix3 const& rhs);
-    TMatrix3& operator*=(T const& rhs);
-    TMatrix3 operator+(TMatrix3 const& rhs) const;
-    TMatrix3 operator-(TMatrix3 const& rhs) const;
-    TMatrix3 operator*(TMatrix3 const& rhs) const;
-    TMatrix3 operator*(T const& rhs) const;
-    TMatrix3 operator-() const;
-    Vector<T, 3> operator*(Vector<T, 3> const& rhs) const;
-    T operator[](unsigned index) const;
-    T& operator[](unsigned index);
-
-    void SetRow3(unsigned index, Vector<T, 3> const& v);
-    void SetCol3(unsigned index, Vector<T, 3> const& v);
-    Vector<T, 3> GetRow3(unsigned index) const;
-    Vector<T, 3> GetCol3(unsigned index) const;
-    static TMatrix3<T> Scale(float scaleX, float scaleY, float scaleZ);
-    static TMatrix3<T> Scale(Vector<T, 3> const& scale);
-    static TMatrix3<T> Rotate(float angleX, float angleY, float angleZ);
-    static TMatrix3<T> Rotate(Vector<T, 3> const& angles);
-    static TMatrix3<T> Rotate(Vector<T, 3> const& axis, Vector<T, 3> const& angles);
-    static TMatrix3<T> RotateX(float angle);
-    static TMatrix3<T> RotateY(float angle);
-    static TMatrix3<T> RotateZ(float angle);
-
-    friend std::ostream& operator<<(std::ostream& os, TMatrix3 const& rhs);
-};
-
-export template <typename T>
-class TMatrix4
-{
-    float m[16];
-
-public:
-
-    explicit TMatrix4()
-        : m { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
-    {
-    }
-    explicit TMatrix4(T val)
-        : m { val, 0, 0, 0, 0, val, 0, 0, 0, 0, val, 0, 0, 0, 0, val }
-    {
-    }
-    explicit TMatrix4(TMatrix3<T> _m)
-        : m { _m[0], _m[1], _m[2], 0, _m[3], _m[4], _m[5], 0, _m[6], _m[7], _m[8], 0, 0, 0, 0, 1 }
-    {
-    }
-    explicit TMatrix4(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8, T m9, T m10, T m11, T m12, T m13, T m14, T m15)
-        : m { m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15 }
-    {
-    }
-
-    float* GetMatrix() { return m; }
-    float GetCoFactor(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8) const;
-    float GetDeterminant() const;
-    TMatrix4& Identity();
-    TMatrix4& Invert();
-    TMatrix4 Inverted() const;
-    TMatrix4& Transpose();
-    TMatrix4 Transposed() const;
-
-    TMatrix4& operator+=(TMatrix4 const& rhs);
-    TMatrix4& operator-=(TMatrix4 const& rhs);
-    TMatrix4& operator*=(TMatrix4 const& rhs);
-    TMatrix4& operator*=(T scale);
-    TMatrix4& operator/=(T scale);
-    TMatrix4 operator+(TMatrix4 const& rhs) const;
-    TMatrix4 operator-(TMatrix4 const& rhs) const;
-    TMatrix4 operator*(TMatrix4 const& rhs) const;
-    TMatrix4 operator*(T scale) const;
-    TMatrix4 operator/(T scale) const;
-    TMatrix4 operator-() const;
-    Vector<T, 4> operator*(Vector<T, 4> const& rhs) const;
-    T operator[](unsigned index) const;
-    T& operator[](unsigned index);
-
-    void Decompose(Vector<T, 3>& translate, Vector<T, 3>& rotation, Vector<T, 3>& scale);
-    // void        Decompose(Vector<T, 3>& translate, TQuaternion<T>& orientation, Vector<T, 3>& scale);
-
-    void SetRow3(unsigned index, Vector<T, 3> const& v);
-    void SetCol3(unsigned index, Vector<T, 3> const& v);
-    void SetRow4(unsigned index, Vector<T, 4> const& v);
-    void SetCol4(unsigned index, Vector<T, 4> const& v);
-    Vector<T, 3> GetRow3(unsigned index) const;
-    Vector<T, 4> GetRow4(unsigned index) const;
-    Vector<T, 3> GetCol3(unsigned index) const;
-    Vector<T, 4> GetCol4(unsigned index) const;
-    TMatrix3<T> ToMat3() const;
-
-    friend std::ostream& operator<<(std::ostream& os, TMatrix4 const& rhs);
-
-    static TMatrix4<T> Translate(Vector<T, 3> const& v);
-    static TMatrix4<T> Rotate(T angle, Vector<T, 3> const& v);
-    static TMatrix4<T> RotateX(T angle);
-    static TMatrix4<T> RotateY(T angle);
-    static TMatrix4<T> RotateZ(T angle);
-    static TMatrix4<T> Scale(Vector<T, 3> const& v);
-    static TMatrix4<T> Scale(T scale);
-    static TMatrix4<T> SetFrustumPersp(float l, float r, float b, float t, float n, float f);
-    static TMatrix4<T> SetFrustumOrtho(float l, float r, float b, float t, float n, float f);
-    static TMatrix4<T> Perspective(float fov, float aspectRatio, float near, float far);
-    static TMatrix4<T> LookAt(Vector<T, 3> const& eye, Vector<T, 3> const& center, Vector<T, 3> const& up);
-};
-/******************************************************************************/
-/* TMatrix2<T> Definitions Start */
-
-template <typename T>
-float TMatrix2<T>::GetDeterminant() const
-{
-    return m[0] * m[3] - m[1] * m[2];
-}
-
-template <typename T>
-TMatrix2<T>& TMatrix2<T>::Identity()
-{
-    m[0] = 1;
-    m[1] = 0;
-    m[2] = 1;
-    m[3] = 0;
-    return *this;
-}
-
-template <typename T>
-TMatrix2<T>& TMatrix2<T>::Invert()
-{
-    float determinant = GetDeterminant();
-    float invDeterminant = 1.0f / determinant;
-
-    if (fabs(determinant) <= EPSILON) return Identity();
-
-    std::swap(m[0], m[3]);
-    m[0] *= invDeterminant;
-    m[1] *= -invDeterminant;
-    m[2] *= -invDeterminant;
-    m[3] *= invDeterminant;
-
-    return *this;
-}
-
-template <typename T>
-TMatrix2<T>& TMatrix2<T>::Transpose()
-{
-    std::swap(m[0], m[3]);
-    return *this;
-}
-
-template <typename T>
-TMatrix2<T>& TMatrix2<T>::operator+=(TMatrix2<T> const& rhs)
-{
-    for (int i = 0; i < sizeof(m); i++)
-        m[i] += rhs[i];
-    return *this;
-}
-
-template <typename T>
-TMatrix2<T>& TMatrix2<T>::operator-=(TMatrix2<T> const& rhs)
-{
-    for (int i = 0; i < sizeof(m); i++)
-        m[i] -= rhs[i];
-    return *this;
-}
-
-template <typename T>
-TMatrix2<T>& TMatrix2<T>::operator*=(TMatrix2<T> const& rhs)
-{
-    *this = *this * rhs;
-    return *this;
-}
-
-template <typename T>
-TMatrix2<T> TMatrix2<T>::operator+(TMatrix2<T> const& rhs) const
-{
-    return TMatrix2<T>(*this) += rhs;
-}
-
-template <typename T>
-TMatrix2<T> TMatrix2<T>::operator-(TMatrix2<T> const& rhs) const
-{
-    return TMatrix2<T>(*this) -= rhs;
-}
-
-template <typename T>
-TMatrix2<T> TMatrix2<T>::operator*(TMatrix2<T> const& rhs) const
-{
-    return TMatrix2<T>(m[0] * rhs[0] + m[2] * rhs[1], m[1] * rhs[0] + m[3] * rhs[1], m[0] * rhs[2] + m[2] * rhs[3], m[1] * rhs[2] + m[3] * rhs[3]);
-}
-
-template <typename T>
-TMatrix2<T> TMatrix2<T>::operator*(T const& rhs) const
-{
-    return TMatrix2<T> { m[0] * rhs, m[1] * rhs, m[2] * rhs, m[3] * rhs };
-}
-
-template <typename T>
-TMatrix2<T> TMatrix2<T>::operator-() const
-{
-    return TMatrix2<T>(-m[0], -m[1], -m[2], -m[3]);
-}
-
-template <typename T>
-Vector<T, 2> TMatrix2<T>::operator*(Vector<T, 2> const& rhs) const
-{
-    return Vector<T, 2>(m[0] * rhs[0] + m[2] * rhs[1], m[1] * rhs[0] + m[3] * rhs[1]);
-}
-
-template <typename T>
-T TMatrix2<T>::operator[](unsigned index) const
-{
-    return m[index];
-}
-
-template <typename T>
-T& TMatrix2<T>::operator[](unsigned index)
-{
-    return m[index];
-}
-
-template <typename T>
-inline TMatrix2<T> TMatrix2<T>::Scale(float scaleX, float scaleY)
-{
-    return TMatrix2<T>(scaleX, 0, scaleY, 0);
-}
-
-template <typename T>
-inline TMatrix2<T> TMatrix2<T>::Rotate(float angle)
-{
-    return TMatrix2<T>(cosf(angle), sinf(angle), -sinf(angle), cosf(angle));
-}
-
-export template <typename T>
-std::ostream& operator<<(std::ostream& os, TMatrix2<T> const& rhs)
-{
-    os << "Matrix2[" << rhs[0] << ", " << rhs[1] << ", " << std::endl;
-    os << rhs[2] << ", " << rhs[3] << "]" << std::endl;
-    return os;
-}
-
-/* TMatrix2<T> Definition End */
-/******************************************************************************/
-
-/******************************************************************************/
-/* TMatrix3<T> Definitions Start */
-template <typename T>
-float TMatrix3<T>::GetDeterminant() const
-{
-    return m[0] * m[3] - m[1] * m[2];
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::Identity()
-{
-    m[0] = 1;
-    m[3] = 0;
-    m[6] = 0;
-    m[1] = 0;
-    m[4] = 1;
-    m[7] = 0;
-    m[2] = 0;
-    m[5] = 0;
-    m[8] = 1;
-    return *this;
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::Invert()
-{
-    float determinant, invDeterminant;
-    float tmp[9];
-
-    tmp[0] = m[4] * m[8] - m[5] * m[7];
-    tmp[1] = m[7] * m[2] - m[8] * m[1];
-    tmp[2] = m[1] * m[5] - m[2] * m[4];
-    tmp[3] = m[5] * m[6] - m[3] * m[8];
-    tmp[4] = m[0] * m[8] - m[2] * m[6];
-    tmp[5] = m[2] * m[3] - m[0] * m[5];
-    tmp[6] = m[3] * m[7] - m[4] * m[6];
-    tmp[7] = m[6] * m[1] - m[7] * m[0];
-    tmp[8] = m[0] * m[4] - m[1] * m[3];
-
-    // check determinant if it is 0
-    determinant = m[0] * tmp[0] + m[1] * tmp[3] + m[2] * tmp[6];
-    if (fabs(determinant) <= EPSILON) return Identity();  // cannot inverse, make it idenety matrix
-
-    // divide by the determinant
-    invDeterminant = 1.0f / determinant;
-    m[0] = invDeterminant * tmp[0];
-    m[1] = invDeterminant * tmp[1];
-    m[2] = invDeterminant * tmp[2];
-    m[3] = invDeterminant * tmp[3];
-    m[4] = invDeterminant * tmp[4];
-    m[5] = invDeterminant * tmp[5];
-    m[6] = invDeterminant * tmp[6];
-    m[7] = invDeterminant * tmp[7];
-    m[8] = invDeterminant * tmp[8];
-
-    return *this;
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::Transpose()
-{
-    std::swap(m[1], m[3]);
-    std::swap(m[2], m[6]);
-    std::swap(m[5], m[7]);
-    return *this;
-}
-
-template <typename T>
-inline void TMatrix3<T>::SetAllValues(T m0, T m1, T m2, T m3, T m4, T m5, T m6, T m7, T m8)
-{
-    m[0] = m0;
-    m[1] = m1;
-    m[2] = m2;
-    m[3] = m3;
-    m[4] = m4;
-    m[5] = m5;
-    m[6] = m6;
-    m[7] = m7;
-    m[8] = m8;
-}
-
-template <typename T>
-void TMatrix3<T>::Zero()
-{
-    m[0] = static_cast<T>(0);
-    m[1] = static_cast<T>(0);
-    m[2] = static_cast<T>(0);
-    m[3] = static_cast<T>(0);
-    m[4] = static_cast<T>(0);
-    m[5] = static_cast<T>(0);
-    m[6] = static_cast<T>(0);
-    m[7] = static_cast<T>(0);
-    m[8] = static_cast<T>(0);
-}
-
-template <typename T>
-TMatrix3<T> TMatrix3<T>::GetInverse() const
-{
-    TMatrix3 tmp(*this);
-
-    return tmp.Invert();
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::operator+=(TMatrix3<T> const& rhs)
-{
-    for (int i = 0; i < sizeof(m); i++)
-        m[i] += rhs[i];
-    return *this;
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::operator-=(TMatrix3<T> const& rhs)
-{
-    for (int i = 0; i < sizeof(m); i++)
-        m[i] -= rhs[i];
-    return *this;
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::operator*=(TMatrix3<T> const& rhs)
-{
-    *this = *this * rhs;
-    return *this;
-}
-
-template <typename T>
-TMatrix3<T>& TMatrix3<T>::operator*=(T const& rhs)
-{
-    m[0] *= rhs;
-    m[1] *= rhs;
-    m[2] *= rhs;
-    m[3] *= rhs;
-    m[4] *= rhs;
-    m[5] *= rhs;
-    m[6] *= rhs;
-    m[7] *= rhs;
-    m[8] *= rhs;
-
-    return *this;
-}
-
-template <typename T>
-TMatrix3<T> TMatrix3<T>::operator+(TMatrix3<T> const& rhs) const
-{
-    return TMatrix3<T>(*this) += rhs;
-}
-
-template <typename T>
-TMatrix3<T> TMatrix3<T>::operator-(TMatrix3<T> const& rhs) const
-{
-    return TMatrix3<T>(*this) -= rhs;
-}
-
-template <typename T>
-TMatrix3<T> TMatrix3<T>::operator*(TMatrix3<T> const& rhs) const
-{
-    return TMatrix3<T>(m[0] * rhs[0] + m[3] * rhs[1] + m[6] * rhs[2], m[1] * rhs[0] + m[4] * rhs[1] + m[7] * rhs[2], m[2] * rhs[0] + m[5] * rhs[1] + m[8] * rhs[2],
-        m[0] * rhs[3] + m[3] * rhs[4] + m[6] * rhs[5], m[1] * rhs[3] + m[4] * rhs[4] + m[7] * rhs[5], m[2] * rhs[3] + m[5] * rhs[4] + m[8] * rhs[5], m[0] * rhs[6] + m[3] * rhs[7] + m[6] * rhs[8],
-        m[1] * rhs[6] + m[4] * rhs[7] + m[7] * rhs[8], m[2] * rhs[6] + m[5] * rhs[7] + m[8] * rhs[8]);
-}
-
-template <typename T>
-TMatrix3<T> TMatrix3<T>::operator*(T const& rhs) const
-{
-    return TMatrix3<T> { m[0] * rhs, m[1] * rhs, m[2] * rhs, m[3] * rhs, m[4] * rhs, m[5] * rhs, m[6] * rhs, m[7] * rhs, m[8] * rhs };
-}
-
-template <typename T>
-TMatrix3<T> TMatrix3<T>::operator-() const
-{
-    return TMatrix3<T>(-m[0], -m[1], -m[2], -m[3], -m[4], -m[5], -m[6], -m[7], -m[8]);
-}
-
-template <typename T>
-Vector<T, 3> TMatrix3<T>::operator*(Vector<T, 3> const& rhs) const
-{
-    return Vector<T, 3>(m[0] * rhs[0] + m[3] * rhs[1] + m[6] * rhs[2], m[1] * rhs[0] + m[4] * rhs[1] + m[7] * rhs[2], m[2] * rhs[0] + m[5] * rhs[1] + m[8] * rhs[2]);
-}
-
-template <typename T>
-T TMatrix3<T>::operator[](unsigned index) const
-{
-    return m[index];
-}
-
-template <typename T>
-T& TMatrix3<T>::operator[](unsigned index)
-{
-    return m[index];
-}
-
-template <typename T>
-inline void TMatrix3<T>::SetRow3(unsigned index, Vector<T, 3> const& v)
-{
-    m[index] = v[0];
-    m[index + 4] = v[1];
-    m[index + 8] = v[2];
-}
-
-template <typename T>
-inline void TMatrix3<T>::SetCol3(unsigned index, Vector<T, 3> const& v)
-{
-    index *= 4;
-    m[index] = v[0];
-    m[index + 1] = v[1];
-    m[index + 2] = v[2];
-}
-
-template <typename T>
-inline Vector<T, 3> TMatrix3<T>::GetRow3(unsigned index) const
-{
-    return Vector<T, 3>(m[index], m[index + 4], m[index + 8]);
-}
-
-template <typename T>
-inline Vector<T, 3> TMatrix3<T>::GetCol3(unsigned index) const
-{
-    index *= 4;
-    return Vector<T, 3>(m[index], m[index + 1], m[index + 2]);
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::Scale(float scaleX, float scaleY, float scaleZ)
-{
-    return TMatrix3<T>(scaleX, 0, 0, 0, scaleY, 0, 0, 0, scaleZ);
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::Scale(Vector<T, 3> const& scale)
-{
-    return TMatrix3<T>();
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::Rotate(float angleX, float angleY, float angleZ)
-{
-    return RotateX(angleX) * RotateY(angleY) * RotateZ(angleZ);
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::Rotate(Vector<T, 3> const& angles)
-{
-    return RotateX(angles[0]) * RotateY(angles[1]) * RotateZ(angles[2]);
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::Rotate(Vector<T, 3> const& axis, Vector<T, 3> const& angles)
-{
-    return TMatrix3<T>();
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::RotateX(float angle)
-{
-    float c = cosf(Math::ToRadians(angle));
-    float s = sinf(Math::ToRadians(angle));
-
-    TMatrix3<T> tmp(1.0f);
-
-    tmp[4] = c;
-    tmp[5] = s;
-    tmp[7] = -s;
-    tmp[8] = c;
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::RotateY(float angle)
-{
-    float c = cosf(Math::ToRadians(angle));
-    float s = sinf(Math::ToRadians(angle));
-
-    TMatrix3<T> tmp(1.0f);
-
-    tmp[0] = c;
-    tmp[2] = -s;
-    tmp[6] = s;
-    tmp[8] = c;
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix3<T>::RotateZ(float angle)
-{
-    float c = cosf(Math::ToRadians(angle));
-    float s = sinf(Math::ToRadians(angle));
-
-    TMatrix3<T> tmp(1.0f);
-
-    tmp[0] = c;
-    tmp[1] = s;
-    tmp[3] = -s;
-    tmp[4] = c;
-
-    return tmp;
-}
-
-export template <typename T>
-std::ostream& operator<<(std::ostream& os, TMatrix3<T> const& rhs)
-{
-    os << "Matrix3[" << rhs[0] << ", " << rhs[1] << ", " << rhs[2] << ", " << std::endl;
-    os << rhs[3] << ", " << rhs[4] << ", " << rhs[5] << ", " << std::endl;
-    os << rhs[6] << ", " << rhs[7] << ", " << rhs[8] << "]" << std::endl;
-    return os;
-}
-
-/* TMatrix3<T> Definition End */
-/******************************************************************************/
-
-/******************************************************************************/
-/* TMatrix4<T> Definition Begin */
-
-template <typename T>
-inline float TMatrix4<T>::GetCoFactor(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8) const
-{
-    return m0 * (m4 * m8 - m5 * m7) - m1 * (m3 * m8 - m5 * m6) + m2 * (m3 * m7 - m4 * m6);
-}
-
-template <typename T>
-inline float TMatrix4<T>::GetDeterminant() const
-{
-    return m[0] * GetCoFactor(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]) - m[1] * GetCoFactor(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]) +
-        m[2] * GetCoFactor(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]) - m[3] * GetCoFactor(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::Identity()
-{
-    *this = TMatrix4<T>(1.0f);
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::Invert()
-{
-    // get cofactors of minor matrices
-    float cofactor0 = GetCoFactor(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
-    float cofactor1 = GetCoFactor(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]);
-    float cofactor2 = GetCoFactor(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]);
-    float cofactor3 = GetCoFactor(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
-
-    // get determinant
-    float determinant = m[0] * cofactor0 - m[1] * cofactor1 + m[2] * cofactor2 - m[3] * cofactor3;
-    if (fabs(determinant) <= EPSILON)
-    {
-        return Identity();
-    }
-
-    // get rest of cofactors for adj(M)
-    float cofactor4 = GetCoFactor(m[1], m[2], m[3], m[9], m[10], m[11], m[13], m[14], m[15]);
-    float cofactor5 = GetCoFactor(m[0], m[2], m[3], m[8], m[10], m[11], m[12], m[14], m[15]);
-    float cofactor6 = GetCoFactor(m[0], m[1], m[3], m[8], m[9], m[11], m[12], m[13], m[15]);
-    float cofactor7 = GetCoFactor(m[0], m[1], m[2], m[8], m[9], m[10], m[12], m[13], m[14]);
-
-    float cofactor8 = GetCoFactor(m[1], m[2], m[3], m[5], m[6], m[7], m[13], m[14], m[15]);
-    float cofactor9 = GetCoFactor(m[0], m[2], m[3], m[4], m[6], m[7], m[12], m[14], m[15]);
-    float cofactor10 = GetCoFactor(m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]);
-    float cofactor11 = GetCoFactor(m[0], m[1], m[2], m[4], m[5], m[6], m[12], m[13], m[14]);
-
-    float cofactor12 = GetCoFactor(m[1], m[2], m[3], m[5], m[6], m[7], m[9], m[10], m[11]);
-    float cofactor13 = GetCoFactor(m[0], m[2], m[3], m[4], m[6], m[7], m[8], m[10], m[11]);
-    float cofactor14 = GetCoFactor(m[0], m[1], m[3], m[4], m[5], m[7], m[8], m[9], m[11]);
-    float cofactor15 = GetCoFactor(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
-
-    // build inverse matrix = adj(M) / det(M)
-    // adjugate of M is the transpose of the cofactor matrix of M
-    float invDeterminant = 1.0f / determinant;
-    m[0] = invDeterminant * cofactor0;
-    m[1] = -invDeterminant * cofactor4;
-    m[2] = invDeterminant * cofactor8;
-    m[3] = -invDeterminant * cofactor12;
-
-    m[4] = -invDeterminant * cofactor1;
-    m[5] = invDeterminant * cofactor5;
-    m[6] = -invDeterminant * cofactor9;
-    m[7] = invDeterminant * cofactor13;
-
-    m[8] = invDeterminant * cofactor2;
-    m[9] = -invDeterminant * cofactor6;
-    m[10] = invDeterminant * cofactor10;
-    m[11] = -invDeterminant * cofactor14;
-
-    m[12] = -invDeterminant * cofactor3;
-    m[13] = invDeterminant * cofactor7;
-    m[14] = -invDeterminant * cofactor11;
-    m[15] = invDeterminant * cofactor15;
-
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Inverted() const
-{
-    return TMatrix4<T>(*this).Invert();
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::Transpose()
-{
-    std::swap(m[1], m[4]);
-    std::swap(m[2], m[8]);
-    std::swap(m[3], m[12]);
-    std::swap(m[6], m[9]);
-    std::swap(m[7], m[13]);
-    std::swap(m[11], m[14]);
-
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Transposed() const
-{
-    return TMatrix4(*this).Transpose();
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::operator+=(TMatrix4<T> const& rhs)
-{
-    m[0] += rhs[0];
-    m[1] += rhs[1];
-    m[2] += rhs[2];
-    m[3] += rhs[3];
-    m[4] += rhs[4];
-    m[5] += rhs[5];
-    m[6] += rhs[6];
-    m[7] += rhs[7];
-    m[8] += rhs[8];
-    m[9] += rhs[9];
-    m[10] += rhs[10];
-    m[11] += rhs[11];
-    m[12] += rhs[12];
-    m[13] += rhs[13];
-    m[14] += rhs[14];
-    m[15] += rhs[15];
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::operator-=(TMatrix4<T> const& rhs)
-{
-    m[0] -= rhs[0];
-    m[1] -= rhs[1];
-    m[2] -= rhs[2];
-    m[3] -= rhs[3];
-    m[4] -= rhs[4];
-    m[5] -= rhs[5];
-    m[6] -= rhs[6];
-    m[7] -= rhs[7];
-    m[8] -= rhs[8];
-    m[9] -= rhs[9];
-    m[10] -= rhs[10];
-    m[11] -= rhs[11];
-    m[12] -= rhs[12];
-    m[13] -= rhs[13];
-    m[14] -= rhs[14];
-    m[15] -= rhs[15];
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::operator*=(TMatrix4 const& rhs)
-{
-    TMatrix4<T> tmp = *this;
-
-    m[0] = tmp[0] * rhs[0] + tmp[4] * rhs[1] + tmp[8] * rhs[2] + tmp[12] * rhs[3];
-    m[1] = tmp[1] * rhs[0] + tmp[5] * rhs[1] + tmp[9] * rhs[2] + tmp[13] * rhs[3];
-    m[2] = tmp[2] * rhs[0] + tmp[6] * rhs[1] + tmp[10] * rhs[2] + tmp[14] * rhs[3];
-    m[3] = tmp[3] * rhs[0] + tmp[7] * rhs[1] + tmp[11] * rhs[2] + tmp[15] * rhs[3];
-    m[4] = tmp[0] * rhs[4] + tmp[4] * rhs[5] + tmp[8] * rhs[6] + tmp[12] * rhs[7];
-    m[5] = tmp[1] * rhs[4] + tmp[5] * rhs[5] + tmp[9] * rhs[6] + tmp[13] * rhs[7];
-    m[6] = tmp[2] * rhs[4] + tmp[6] * rhs[5] + tmp[10] * rhs[6] + tmp[14] * rhs[7];
-    m[7] = tmp[3] * rhs[4] + tmp[7] * rhs[5] + tmp[11] * rhs[6] + tmp[15] * rhs[7];
-    m[8] = tmp[0] * rhs[8] + tmp[4] * rhs[9] + tmp[8] * rhs[10] + tmp[12] * rhs[11];
-    m[9] = tmp[1] * rhs[8] + tmp[5] * rhs[9] + tmp[9] * rhs[10] + tmp[13] * rhs[11];
-    m[10] = tmp[2] * rhs[8] + tmp[6] * rhs[9] + tmp[10] * rhs[10] + tmp[14] * rhs[11];
-    m[11] = tmp[3] * rhs[8] + tmp[7] * rhs[9] + tmp[11] * rhs[10] + tmp[15] * rhs[11];
-    m[12] = tmp[0] * rhs[12] + tmp[4] * rhs[13] + tmp[8] * rhs[14] + tmp[12] * rhs[15];
-    m[13] = tmp[1] * rhs[12] + tmp[5] * rhs[13] + tmp[9] * rhs[14] + tmp[13] * rhs[15];
-    m[14] = tmp[2] * rhs[12] + tmp[6] * rhs[13] + tmp[10] * rhs[14] + tmp[14] * rhs[15];
-    m[15] = tmp[3] * rhs[12] + tmp[7] * rhs[13] + tmp[11] * rhs[14] + tmp[15] * rhs[15];
-
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::operator*=(T scale)
-{
-    m[0] *= scale;
-    m[1] *= scale;
-    m[2] *= scale;
-    m[3] *= scale;
-    m[4] *= scale;
-    m[5] *= scale;
-    m[6] *= scale;
-    m[7] *= scale;
-    m[8] *= scale;
-    m[9] *= scale;
-    m[10] *= scale;
-    m[11] *= scale;
-    m[12] *= scale;
-    m[13] *= scale;
-    m[14] *= scale;
-    m[15] *= scale;
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T>& TMatrix4<T>::operator/=(T scale)
-{
-    m[0] /= scale;
-    m[1] /= scale;
-    m[2] /= scale;
-    m[3] /= scale;
-    m[4] /= scale;
-    m[5] /= scale;
-    m[6] /= scale;
-    m[7] /= scale;
-    m[8] /= scale;
-    m[9] /= scale;
-    m[10] /= scale;
-    m[11] /= scale;
-    m[12] /= scale;
-    m[13] /= scale;
-    m[14] /= scale;
-    m[15] /= scale;
-    return *this;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::operator+(TMatrix4<T> const& rhs) const
-{
-    return TMatrix4<T>(*this) += rhs;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::operator-(TMatrix4<T> const& rhs) const
-{
-    return TMatrix4<T>(*this) -= rhs;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::operator*(TMatrix4<T> const& rhs) const
-{
-    return TMatrix4<T>(*this) *= rhs;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::operator*(T scale) const
-{
-    return TMatrix4<T>(*this) *= scale;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::operator/(T scale) const
-{
-    return TMatrix4<T>(*this) /= scale;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::operator-() const
-{
-    return -TMatrix4<T>(*this);
-}
-
-template <typename T>
-inline Vector<T, 4> TMatrix4<T>::operator*(Vector<T, 4> const& rhs) const
-{
-    return Vector<T, 4>(m[0] * rhs[0] + m[4] * rhs[1] + m[8] * rhs[2] + m[12] * rhs[3], m[1] * rhs[0] + m[5] * rhs[1] + m[9] * rhs[2] + m[13] * rhs[3],
-        m[2] * rhs[0] + m[6] * rhs[1] + m[10] * rhs[2] + m[14] * rhs[3], m[3] * rhs[0] + m[7] * rhs[1] + m[11] * rhs[2] + m[15] * rhs[3]);
-}
-
-template <typename T>
-inline T TMatrix4<T>::operator[](unsigned index) const
-{
-    return m[index];
-}
-
-template <typename T>
-inline T& TMatrix4<T>::operator[](unsigned index)
-{
-    return m[index];
-}
-
-template <typename T>
-inline void TMatrix4<T>::Decompose(Vector<T, 3>& translate, Vector<T, 3>& rotation, Vector<T, 3>& scale)
-{
-    scale[0] = GetCol3(0).Length();
-    scale[1] = GetCol3(1).Length();
-    scale[2] = GetCol3(2).Length();
-
-    SetCol3(0, GetCol3(0).Normalized());
-    SetCol3(1, GetCol3(1).Normalized());
-    SetCol3(2, GetCol3(2).Normalized());
-
-    rotation[0] = Math::ToDegrees(atan2f(m[6], m[10]));
-    rotation[1] = Math::ToDegrees(atan2f(-m[2], sqrtf(m[6] * m[6] + m[10] * m[10])));
-    rotation[2] = Math::ToDegrees(atan2f(m[1], m[0]));
-
-    translate[0] = m[12];
-    translate[1] = m[13];
-    translate[2] = m[14];
-}
-
-template <typename T>
-inline void TMatrix4<T>::SetRow3(unsigned index, Vector<T, 3> const& v)
-{
-    m[index] = v[0];
-    m[index + 4] = v[1];
-    m[index + 8] = v[2];
-}
-
-template <typename T>
-inline void TMatrix4<T>::SetCol3(unsigned index, Vector<T, 3> const& v)
-{
-    index *= 4;
-    m[index] = v[0];
-    m[index + 1] = v[1];
-    m[index + 2] = v[2];
-}
-
-template <typename T>
-inline void TMatrix4<T>::SetRow4(unsigned index, Vector<T, 4> const& v)
-{
-    m[index] = v[0];
-    m[index + 4] = v[1];
-    m[index + 8] = v[2];
-    m[index + 12] = v[3];
-}
-
-template <typename T>
-inline void TMatrix4<T>::SetCol4(unsigned index, Vector<T, 4> const& v)
-{
-    index *= 4;
-    m[index] = v[0];
-    m[index + 1] = v[1];
-    m[index + 2] = v[2];
-    m[index + 3] = v[3];
-}
-
-template <typename T>
-inline Vector<T, 3> TMatrix4<T>::GetRow3(unsigned index) const
-{
-    return Vector<T, 3>(m[index], m[index + 4], m[index + 8]);
-}
-
-template <typename T>
-inline Vector<T, 4> TMatrix4<T>::GetRow4(unsigned index) const
-{
-    return Vector<T, 3>(m[index], m[index + 4], m[index + 8], m[index + 12]);
-}
-
-template <typename T>
-inline Vector<T, 3> TMatrix4<T>::GetCol3(unsigned index) const
-{
-    index *= 4;
-    return Vector<T, 3>(m[index], m[index + 1], m[index + 2]);
-}
-
-template <typename T>
-inline Vector<T, 4> TMatrix4<T>::GetCol4(unsigned index) const
-{
-    index *= 4;
-    return Vector<T, 3>(m[index], m[index + 1], m[index + 2], m[index + 3]);
-}
-
-template <typename T>
-inline TMatrix3<T> TMatrix4<T>::ToMat3() const
-{
-    return TMatrix3<T>(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Translate(Vector<T, 3> const& v)
-{
-    TMatrix4 tmp = TMatrix4();
-    tmp[12] = v[0];
-    tmp[13] = v[1];
-    tmp[14] = v[2];
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Rotate(T angle, Vector<T, 3> const& v)
-{
-    float c = cosf(Math::ToRadians(angle));  // cosine
-    float s = sinf(Math::ToRadians(angle));  // sine
-    float c1 = 1.0f - c;                     // 1 - c
-
-    // build rotation matrix
-    TMatrix4<T> tmp = TMatrix4<T>(v[0] * v[0] * c1 + c, v[0] * v[1] * c1 + v[2] * s, v[0] * v[2] * c1 - v[1] * s, 0, v[0] * v[1] * c1 - v[2] * s, v[1] * v[1] * c1 + c, v[1] * v[2] * c1 + v[0] * s, 0,
-        v[0] * v[2] * c1 + v[1] * s, v[1] * v[2] * c1 - v[0] * s, v[2] * v[2] * c1 + c, 0, 0, 0, 0, 1);
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::RotateX(T angle)
-{
-    float c = cosf(Math::ToRadians(angle));
-    float s = sinf(Math::ToRadians(angle));
-
-    TMatrix4<T> tmp(1.0f);
-
-    tmp[5] = c;
-    tmp[6] = s;
-    tmp[9] = -s;
-    tmp[10] = c;
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::RotateY(T angle)
-{
-    float c = cosf(Math::ToRadians(angle));
-    float s = sinf(Math::ToRadians(angle));
-
-    TMatrix4<T> tmp(1.0f);
-
-    tmp[0] = c;
-    tmp[2] = -s;
-    tmp[8] = s;
-    tmp[10] = c;
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::RotateZ(T angle)
-{
-    float c = cosf(Math::ToRadians(angle));
-    float s = sinf(Math::ToRadians(angle));
-
-    TMatrix4<T> tmp(1.0f);
-
-    tmp[0] = c;
-    tmp[1] = s;
-    tmp[4] = -s;
-    tmp[5] = c;
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Scale(Vector<T, 3> const& v)
-{
-    TMatrix4<T> tmp(1.0);
-
-    tmp[0] = v[0];
-    tmp[5] = v[1];
-    tmp[10] = v[2];
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Scale(T scale)
-{
-    TMatrix4<T> tmp(scale);
-
-    tmp[15] = 1.0;
-
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::SetFrustumPersp(float l, float r, float b, float t, float n, float f)
-{
-    TMatrix4<T> tmp(1.0f);
-    tmp[0] = 2 * n / (r - l);
-    tmp[5] = 2 * n / (t - b);
-    tmp[8] = (r + l) / (r - l);
-    tmp[9] = (t + b) / (t - b);
-    tmp[10] = -(f + n) / (f - n);
-    tmp[11] = -1;
-    tmp[14] = -(2 * f * n) / (f - n);
-    tmp[15] = 0;
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::SetFrustumOrtho(float l, float r, float b, float t, float n, float f)
-{
-    TMatrix4<T> tmp;
-    tmp[0] = 2 / (r - l);
-    tmp[5] = 2 / (t - b);
-    tmp[10] = -2 / (f - n);
-    tmp[12] = -(r + l) / (r - l);
-    tmp[13] = -(t + b) / (t - b);
-    tmp[14] = -(f + n) / (f - n);
-    return tmp;
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::Perspective(float fov, float aspectRatio, float n, float f)
-{
-    float t = tanf(Math::ToRadians(fov) / 2);
-    float h = n * t;
-    float w = h * aspectRatio;
-
-    return TMatrix4<T>::SetFrustumPersp(-w, w, -h, h, n, f);
-}
-
-template <typename T>
-inline TMatrix4<T> TMatrix4<T>::LookAt(Vector<T, 3> const& eye, Vector<T, 3> const& center, Vector<T, 3> const& worldUp)
-{
-    Vector<T, 3> forward = eye - center;
-    forward.Normalize();
-    Vector<T, 3> right = worldUp.Cross(forward);
-    right.Normalize();
-    Vector<T, 3> up = forward.Cross(right);
-    up.Normalize();
-
-    TMatrix4<T> transform;
-    transform.SetRow3(0, right);
-    transform.SetRow3(1, up);
-    transform.SetRow3(2, forward);
-    transform *= TMatrix4<T>::Translate(-eye);
-    return transform;
-}
-
-export template <typename T>
-std::ostream& operator<<(std::ostream& os, TMatrix4<T> const& rhs)
-{
-    os << "Matrix4[";
-    os << rhs[0] << ", " << rhs[4] << ", " << rhs[8] << ", " << rhs[12] << std::endl;
-    os << rhs[1] << ", " << rhs[5] << ", " << rhs[9] << ", " << rhs[13] << std::endl;
-    os << rhs[2] << ", " << rhs[6] << ", " << rhs[10] << ", " << rhs[14] << std::endl;
-    os << rhs[3] << ", " << rhs[7] << ", " << rhs[11] << ", " << rhs[15] << "]" << std::endl;
+export template <typename BaseType, unsigned RowCount, unsigned ColumnCount>
+std::ostream& operator<<(std::ostream& os, const Matrix<BaseType, RowCount, ColumnCount>& rhs)
+{
+    // os << "Matrix4[";
+    // os << rhs[0] << ", " << rhs[4] << ", " << rhs[8] << ", " << rhs[12] << std::endl;
+    // os << rhs[1] << ", " << rhs[5] << ", " << rhs[9] << ", " << rhs[13] << std::endl;
+    // os << rhs[2] << ", " << rhs[6] << ", " << rhs[10] << ", " << rhs[14] << std::endl;
+    // os << rhs[3] << ", " << rhs[7] << ", " << rhs[11] << ", " << rhs[15] << "]" << std::endl;
     return os;
 }

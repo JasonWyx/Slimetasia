@@ -110,7 +110,7 @@ void PhysicsSystem::Update(const float& dt)
                 m_Manifolds[i].PositionCorrection();
 
         for (auto i = 0u; i < m_RigidbodyList.size(); i++)
-            m_RigidbodyList[i]->m_Force.Zero();
+            m_RigidbodyList[i]->m_Force = Vector3 {};
 
         SendEvents();
     }

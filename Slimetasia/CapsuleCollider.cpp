@@ -81,7 +81,7 @@ bool CapsuleCollider::Raycast(const Ray& ray, RaycastData_tmp& data)
 
 void CapsuleCollider::ComputeInertiaTensor(Matrix3& tensor, const float& mass) const
 {
-    tensor.SetAllValues(0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+    tensor.Fill(0.f);
 }
 
 Vector3 CapsuleCollider::GetClosestPoint(const Vector3& inp) const

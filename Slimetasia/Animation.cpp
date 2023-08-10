@@ -17,7 +17,7 @@ Vector3 ConvertAssimpVec3(aiVector3D const& value)
 
 Quat ConvertAssimpQuat(aiQuaternion const& value)
 {
-    return Quat(value.x, value.y, value.z, value.w);
+    return Quat { value.x, value.y, value.z, value.w };
 }
 
 AnimationSet::AnimationSet(const std::string& resourceName, const std::filesystem::path& filepath)

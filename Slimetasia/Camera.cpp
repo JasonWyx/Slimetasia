@@ -378,7 +378,7 @@ Matrix4 Camera::GetProjTransform() const
         {
             float halfHeight = m_OrthoVerticalSize / 2;
             float halfWidth = halfHeight * aspectRatio;
-            return Matrix4::SetFrustumOrtho(-halfWidth, halfWidth, -halfHeight, halfHeight, m_NearPlane, m_FarPlane);
+            return Matrix4::FrustumPerspective(-halfWidth, halfWidth, -halfHeight, halfHeight, m_NearPlane, m_FarPlane);
         }
 
             // Should not reach here
