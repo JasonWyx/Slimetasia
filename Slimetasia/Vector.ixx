@@ -314,6 +314,9 @@ public:
 
 private:
 
+    /// <summary>
+    /// Trying to be funny, meta programming initialization of value 1
+    /// </summary>
     template <unsigned Index>
     static constexpr Vector MakeBase()
         requires(Index < Components)

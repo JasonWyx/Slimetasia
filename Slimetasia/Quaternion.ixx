@@ -12,7 +12,8 @@ import Matrix;
 export template <ArithmeticType BaseType>
 class Quaternion
 {
-    using VectorBase = Vector<float, 4>;
+    static constexpr unsigned Components = 4;
+    using VectorBase = Vector<float, Components>;
 
 public:
 
@@ -21,7 +22,7 @@ public:
     /// </summary>
     template <ArithmeticType... ArgTypes>
     explicit constexpr Quaternion(const ArgTypes... args)
-        requires(sizeof...(ArgTypes) <= 4)
+        requires(sizeof...(ArgTypes) <= Components)
         : values { static_cast<BaseType>(args)... }
     {
     }
@@ -31,10 +32,10 @@ public:
     /// </summary>
     template <ArithmeticType OtherBaseType, unsigned OtherComponents>
     explicit constexpr Quaternion(const Vector<OtherBaseType, OtherComponents>& other)
-        requires(OtherComponents <= 4)
+        requires(OtherComponents <= Components)
         : values {}
     {
-        constexpr unsigned MinComponents = std::min(4, OtherComponents);
+        constexpr unsigned MinComponents = std::min(Components, OtherComponents);
 
         for (unsigned i = 0; i < MinComponents; ++i)
         {
@@ -58,16 +59,18 @@ public:
         values[3] *= std::cosf(alpha);
     }
 
-    static constexpr Quaternion Identity() { return Quaternion { VectorBase::Base<3> }; }
+    /// Not sure why this doesn't work but i'm probably spending too much time trying to get it to work
+    // static constexpr Quaternion Identity() { return Quaternion { VectorBase::Base<3> }; }
+    static constexpr Quaternion Identity() { return Quaternion { 0, 0, 0, 1 }; }
 
 #pragma region BASE
 
-    template<unsigned OtherComponents>
+    template <unsigned OtherComponents>
     explicit constexpr operator Vector<BaseType, OtherComponents>() const
     {
         Vector<BaseType, OtherComponents> tmp {};
 
-        constexpr unsigned MinComponents = std::min(4, OtherComponents);
+        constexpr unsigned MinComponents = std::min(Components, OtherComponents);
 
         for (unsigned i = 0; i < MinComponents; ++i)
         {
@@ -94,7 +97,7 @@ public:
 
     constexpr bool operator==(const Quaternion& other) const
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             if (values[i] != other.values[i])
             {
@@ -106,7 +109,7 @@ public:
     constexpr bool operator!=(const Quaternion& other) const { return !((*this) == other); }
     constexpr bool operator<(const Quaternion& other) const
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             if (!(values[i] < other.values[i]))
             {
@@ -117,7 +120,7 @@ public:
     }
     constexpr bool operator<=(const Quaternion& other) const
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             if (!(values[i] <= other.values[i]))
             {
@@ -128,7 +131,7 @@ public:
     }
     constexpr bool operator>(const Quaternion& other) const
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             if (!(values[i] > other.values[i]))
             {
@@ -139,7 +142,7 @@ public:
     }
     constexpr bool operator>=(const Quaternion& other) const
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             if (!(values[i] >= other.values[i]))
             {
@@ -155,7 +158,7 @@ public:
 
     Quaternion& operator+=(const Quaternion& other)
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             values[i] += other.values[i];
         }
@@ -163,7 +166,7 @@ public:
     }
     Quaternion& operator-=(const Quaternion& other)
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             values[i] -= other.values[i];
         }
@@ -171,7 +174,7 @@ public:
     }
     Quaternion& operator/=(const Quaternion& other)
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             values[i] /= other.values[i];
         }
@@ -179,7 +182,7 @@ public:
     }
     Quaternion& operator*=(const BaseType value)
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             values[i] *= value;
         }
@@ -187,7 +190,7 @@ public:
     }
     Quaternion& operator/=(const BaseType value)
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             values[i] /= value;
         }
@@ -222,7 +225,7 @@ public:
     constexpr BaseType Dot(const Quaternion& other) const
     {
         BaseType result = static_cast<BaseType>(0);
-        for (unsigned i = 0; i < 4; ++i)
+        for (unsigned i = 0; i < Components; ++i)
         {
             result += values[i] * other.values[i];
         }
@@ -238,7 +241,6 @@ public:
     void Normalize() { (*this) /= this->Length(); }
     constexpr Quaternion Normalized() const { return Quaternion { *this } /= this->Length(); }
 
-
     // Rotate vector
     template <unsigned OtherComponents>
     constexpr Vector<BaseType, OtherComponents> operator*(const Vector<BaseType, OtherComponents>& other) const
@@ -249,7 +251,7 @@ public:
         const BaseType p2 = values[3] * other[2] + values[0] * other[1] - values[1] * other[0];
         const BaseType p3 = -values[0] * other[0] - values[1] * other[1] - values[2] * other[2];
 
-        return Vector<BaseType, 4> {
+        return Vector<BaseType, Components> {
             values[3] * p0 - p1 * values[2] + p2 * values[1] - p3 * values[0],
             values[3] * p1 - p2 * values[0] + p0 * values[2] - p3 * values[1],
             values[3] * p2 - p0 * values[1] + p1 * values[0] - p3 * values[2],
@@ -288,7 +290,7 @@ public:
         const BaseType a = tmp.Length();
         const BaseType c = std::cosf(a);
         const BaseType s = std::sinf(a) / a;
-        
+
         tmp *= s;
         tmp[3] = c;
 
@@ -309,9 +311,9 @@ public:
             std::atan2f(2 * (values[3] * values[2] + values[0] * values[1]), 1 - 2 * (values[1] * values[1] + values[2] * values[2])),
         };
     }
-    constexpr Matrix<BaseType, 4, 4> EulerTransform() const
+    constexpr Matrix<BaseType, Components, Components> EulerTransform() const
     {
-        return Matrix<BaseType, 4, 4> {
+        return Matrix<BaseType, Components, Components> {
             1 - 2 * (values[1] * values[1] + values[2] * values[2]),
             2 * (values[0] * values[1] + values[3] * values[2]),
             2 * (values[0] * values[2] - values[3] * values[1]),
@@ -400,5 +402,5 @@ public:
 
 private:
 
-    BaseType values[4];
+    BaseType values[Components];
 };

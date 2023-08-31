@@ -1,6 +1,6 @@
 module;
 
-#include <vulkan/vulkan.hpp>;
+#include <vulkan/vulkan.hpp>
 
 export module ShaderModuleObject;
 import <filesystem>;

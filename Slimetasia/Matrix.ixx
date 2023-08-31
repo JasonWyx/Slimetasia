@@ -37,7 +37,6 @@ class Matrix
 
 public:
 
-
     template <ArithmeticType... ArgTypes>
     explicit constexpr Matrix(const ArgTypes... args)
         requires(TotalComponents >= sizeof...(ArgTypes))
@@ -70,7 +69,7 @@ public:
 #pragma region BASE
 
     static constexpr Matrix Identity()
-    // requires(IsSquare)
+        requires(IsSquare)
     {
         constexpr unsigned TotalCount = RowCount * ColumnCount;
         constexpr unsigned PaddingCount = RowCount + 1;
