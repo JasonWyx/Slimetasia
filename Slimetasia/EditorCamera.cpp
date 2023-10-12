@@ -19,7 +19,7 @@ EditorCamera::EditorCamera(GameObject* parentObject)
     , m_ZoomDampenFactor(1.0f)
     , m_Update(false)
 {
-    m_LookAtDirection = -Vector3::Base<2>;
+    m_LookAtDirection = -Vector3::Base(2);
     m_LookAtDirection = m_LookAtDirection.RotateX(Math::ToRadians(m_Latitude)).RotateY(Math::ToRadians(m_Azimuth));
     m_SkyboxTexture = ResourceManager::Instance().GetResource<Texture>("Daylight Box");
     m_AmbientColor = Color3(0.5f);
@@ -36,7 +36,7 @@ void EditorCamera::LookAt(GameObject* go)
 
     m_Azimuth = 0.f;
     m_Latitude = 0.f;
-    m_LookAtDirection = -Vector3::Base<2>;
+    m_LookAtDirection = -Vector3::Base(2);
     m_LookAtDirection = m_LookAtDirection.RotateX(Math::ToRadians(m_Latitude)).RotateY(Math::ToRadians(m_Azimuth));
 }
 
@@ -73,7 +73,7 @@ void EditorCamera::OnUpdate(float dt)
         m_Azimuth = std::fmodf(m_Azimuth, 360.0f);
         m_Latitude = std::clamp(m_Latitude, -89.0f, 89.0f);
 
-        m_LookAtDirection = -Vector3::Base<2>;
+        m_LookAtDirection = -Vector3::Base(2);
         m_LookAtDirection = m_LookAtDirection.RotateX(Math::ToRadians(m_Latitude)).RotateY(Math::ToRadians(m_Azimuth));
     }
 

@@ -9,7 +9,7 @@
 #include "SpotLight.h"
 #include "Transform.h"
 
-Layer::Layer(Scene* parentScene, unsigned id, std::string const& layerName, bool createCamera, unsigned objectPoolSize)
+SceneLayer::SceneLayer(Scene* parentScene, unsigned id, std::string const& layerName, bool createCamera, unsigned objectPoolSize)
     : m_Id(id)
     , m_Name(layerName)
     , m_ParentScene(parentScene)
@@ -33,9 +33,9 @@ Layer::Layer(Scene* parentScene, unsigned id, std::string const& layerName, bool
     }
 }
 
-Layer::~Layer() {}
+SceneLayer::~SceneLayer() {}
 
-void Layer::Update(float dt)
+void SceneLayer::Update(float dt)
 {
     for (auto& go : m_ActiveObjects)
         go->Update(dt);
@@ -43,7 +43,7 @@ void Layer::Update(float dt)
     PostFrameUpdate();
 }
 
-void Layer::PostFrameUpdate()
+void SceneLayer::PostFrameUpdate()
 {
     // Reset game objects tagged for deletion
     for (GameObject& gameObject : m_GameObjects)
@@ -69,12 +69,12 @@ void Layer::PostFrameUpdate()
     }
 }
 
-void Layer::Destroy()
+void SceneLayer::Destroy()
 {
     m_IsFlaggedForDestroy = true;
 }
 
-void Layer::Clone(Layer* ly)
+void SceneLayer::Clone(SceneLayer* ly)
 {
     auto& gos = ly->m_GameObjects;
     auto& mygos = m_GameObjects;
@@ -90,7 +90,7 @@ void Layer::Clone(Layer* ly)
     }
 }
 
-GameObject* Layer::CreateObject(std::string const& objectName)
+GameObject* SceneLayer::CreateObject(std::string const& objectName)
 {
     for (GameObject& gameObject : m_GameObjects)
     {
@@ -111,7 +111,7 @@ GameObject* Layer::CreateObject(std::string const& objectName)
     return nullptr;
 }
 
-GameObject* Layer::CreateObjectAt(std::string const& objectName, Vector3 position)
+GameObject* SceneLayer::CreateObjectAt(std::string const& objectName, Vector3 position)
 {
     for (GameObject& gameObject : m_GameObjects)
     {
@@ -131,7 +131,7 @@ GameObject* Layer::CreateObjectAt(std::string const& objectName, Vector3 positio
     return nullptr;
 }
 
-GameObject* Layer::CreateObjectWithId(std::string const& objectName, unsigned id)
+GameObject* SceneLayer::CreateObjectWithId(std::string const& objectName, unsigned id)
 {
     GameObject& gameObject = m_GameObjects[id];
 
@@ -148,12 +148,12 @@ GameObject* Layer::CreateObjectWithId(std::string const& objectName, unsigned id
     return nullptr;
 }
 
-GameObjectList Layer::GetObjectsList()
+GameObjectList SceneLayer::GetObjectsList()
 {
     return m_ActiveObjects;
 }
 
-GameObjectList Layer::GetObjectsByName(std::string const& objectName)
+GameObjectList SceneLayer::GetObjectsByName(std::string const& objectName)
 {
     GameObjectList gameObjects;
 
@@ -165,7 +165,7 @@ GameObjectList Layer::GetObjectsByName(std::string const& objectName)
     return gameObjects;
 }
 
-GameObjectList Layer::GetObjectsById(std::vector<unsigned> const& objectIndices)
+GameObjectList SceneLayer::GetObjectsById(std::vector<unsigned> const& objectIndices)
 {
     GameObjectList gameObjects;
 
@@ -177,7 +177,7 @@ GameObjectList Layer::GetObjectsById(std::vector<unsigned> const& objectIndices)
     return gameObjects;
 }
 
-GameObject* Layer::GetObjectByName(std::string const& objectName)
+GameObject* SceneLayer::GetObjectByName(std::string const& objectName)
 {
     for (GameObject* gameObject : m_ActiveObjects)
     {
@@ -186,7 +186,7 @@ GameObject* Layer::GetObjectByName(std::string const& objectName)
     return nullptr;
 }
 
-GameObjectList Layer::GetObjectByStrMatch(std::string const& objectName, unsigned startpos)
+GameObjectList SceneLayer::GetObjectByStrMatch(std::string const& objectName, unsigned startpos)
 {
     GameObjectList gameObjects;
 
@@ -198,7 +198,7 @@ GameObjectList Layer::GetObjectByStrMatch(std::string const& objectName, unsigne
     return gameObjects;
 }
 
-std::vector<unsigned> Layer::GetObjectsByTag(std::string const& tag)
+std::vector<unsigned> SceneLayer::GetObjectsByTag(std::string const& tag)
 {
     std::vector<unsigned> gameObjects;
     for (GameObject* gameObject : m_ActiveObjects)
@@ -208,7 +208,7 @@ std::vector<unsigned> Layer::GetObjectsByTag(std::string const& tag)
     return gameObjects;
 }
 
-GameObjectList Layer::GetObjectListByTag(std::string const& tag)
+GameObjectList SceneLayer::GetObjectListByTag(std::string const& tag)
 {
     GameObjectList gameObjects;
     for (GameObject* gameObject : m_ActiveObjects)
@@ -218,38 +218,38 @@ GameObjectList Layer::GetObjectListByTag(std::string const& tag)
     return gameObjects;
 }
 
-GameObject* Layer::GetObjectById(unsigned id)
+GameObject* SceneLayer::GetObjectById(unsigned id)
 {
     if (id >= m_GameObjects.size()) return nullptr;
     return &m_GameObjects[id];
 }
 
-Scene* Layer::GetParentScene()
+Scene* SceneLayer::GetParentScene()
 {
     return m_ParentScene;
 }
 
-RenderLayer& Layer::GetRenderLayer()
+RenderLayer& SceneLayer::GetRenderLayer()
 {
     return m_RenderLayer;
 }
 
-unsigned Layer::GetId() const
+unsigned SceneLayer::GetId() const
 {
     return m_Id;
 }
 
-std::string const& Layer::GetName() const
+std::string const& SceneLayer::GetName() const
 {
     return m_Name;
 }
 
-void Layer::SetName(std::string const& name)
+void SceneLayer::SetName(std::string const& name)
 {
     m_Name = name;
 }
 
-EditorCamera* Layer::GetEditorCamera()
+EditorCamera* SceneLayer::GetEditorCamera()
 {
     return m_EditorCamera;
 }

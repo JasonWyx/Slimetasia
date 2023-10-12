@@ -228,7 +228,7 @@ void LightPass::Render(Camera& camera, RenderLayer const& renderLayer, const GBu
 #define USE_BOUNDING_VOLUMES
 
 #ifdef USE_BOUNDING_VOLUMES
-    glBindVertexArray(m_PointLightVolume.GetVAO());
+    glBindVertexArray(m_PointLightVolume.GetVertexArrayObject());
 #else
     glBindVertexArray(m_ScreenQuadVAO);
 #endif
@@ -353,7 +353,7 @@ void LightPass::Render(Camera& camera, RenderLayer const& renderLayer, const GBu
     }
 
 #ifdef USE_BOUNDING_VOLUMES
-    glBindVertexArray(m_PointLightVolume.GetVAO());
+    glBindVertexArray(m_PointLightVolume.GetVertexArrayObject());
 #else
     glBindVertexArray(m_ScreenQuadVAO);
 #endif

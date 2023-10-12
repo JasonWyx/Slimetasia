@@ -9,7 +9,7 @@
 #include "ParticleSystem.h"
 #include "ResourceManager.h"
 
-GameObject::GameObject(Layer* parentLayer, unsigned id)
+GameObject::GameObject(SceneLayer* parentLayer, unsigned id)
     : m_Name()
     , m_Id(id)
     , m_IsActive(false)
@@ -347,7 +347,7 @@ void GameObject::RemoveChild(unsigned childObject)
     m_ChildrenObjects.remove(childObject);
 }
 
-Layer* GameObject::GetParentLayer() const
+SceneLayer* GameObject::GetParentLayer() const
 {
     return m_ParentLayer;
 }

@@ -45,7 +45,7 @@ class Editor : public ISystem<Editor>
     bool m_WindowStates[static_cast<unsigned>(WindowType::Count)];
     std::map<std::string, GameObject*> m_Archetypes;
     std::map<std::string, GameObject*> m_UpdatedArchetypes;
-    Layer* m_CurrentLayer;
+    SceneLayer* m_CurrentLayer;
     ImVec4 m_SavedPalettes[32];
     ImVec4 m_MeshDragColor;
     char m_EditorStringBuffer[2 << 23];
@@ -54,7 +54,7 @@ class Editor : public ISystem<Editor>
     bool m_IsEditorInFocus;
     char* m_CurrentWorkingDirectory;
     float m_Timings[9];
-    std::list<Layer*> m_SavedLayers;
+    std::list<SceneLayer*> m_SavedLayers;
     std::vector<std::string> m_TextureNames;
     std::vector<ResourceGUID> m_TextureIDs;
     std::vector<std::string> m_MeshNames;
@@ -176,8 +176,8 @@ public:
     GameObject* MakeChangesArchetype(GameObject* go);
     GameObject* GetArchetype(std::string n);
     GameObject* CreateArchetypeObject(std::string n);
-    GameObject* LuaCreateArchetypeObject(std::string n, Layer* layer);
-    void SetLayer(Layer* ly);
+    GameObject* LuaCreateArchetypeObject(std::string n, SceneLayer* layer);
+    void SetLayer(SceneLayer* ly);
     void SystemTimer(float input, float phy, float Comps, float renderer, float editor, float audio, float anim, float particle, float ai);
     void SetCurrentObject(GameObject* go);
     GameObject* GetCurrentObject();

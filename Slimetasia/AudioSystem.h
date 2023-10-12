@@ -133,7 +133,7 @@ private:
 
     void MakeMainListener(AudioListener* listener);
     void FindNewListener(AudioListener* ignore = nullptr);
-    void SetListenerPosition(Vector3 pos = Vector3 {}, Vector3 vel = Vector3 {}, Vector3 forward = Transform::worldForward, Vector3 up = Transform::worldUpward);
+    void SetListenerPosition(Vector3 pos = Vector3 {}, Vector3 vel = Vector3 {}, Vector3 forward = Transform::WorldForward, Vector3 up = Transform::WorldUp);
 
     // Editor Functions
 public:

@@ -144,7 +144,7 @@ class LuaScript : public IComponent
     static int layer_getLayer(lua_State* L);
     static int layer_name(lua_State* L);
     static int layer_createObject(lua_State* L);
-    static Layer** checklayer(lua_State* L, int index = 1, bool assert = true);
+    static SceneLayer** checklayer(lua_State* L, int index = 1, bool assert = true);
     static void setlayer(lua_State* L, void* ly);
     static int layer_find(lua_State* L);
     static int layer_getObjects(lua_State* L);

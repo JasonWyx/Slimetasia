@@ -161,7 +161,7 @@ void Serializer::SaveScene(const Scene* sn)
     tinyxml2::XMLNode* pRoot = doc.NewElement(sn->GetName().c_str());
     doc.InsertEndChild(pRoot);
     // for every layer
-    for (Layer* ly : sn->GetLayers())
+    for (SceneLayer* ly : sn->GetLayers())
     {
         tinyxml2::XMLElement* pLayer = doc.NewElement(ly->GetName().c_str());
         pRoot->InsertEndChild(pLayer);
@@ -415,7 +415,7 @@ void Serializer::LoadScene()
         for (; pLayer; pLayer = pLayer->NextSiblingElement())
         {
             // std::cout << pLayer->Value() << std::endl;
-            Layer* Ly = Application::Instance().GetCurrentScene()->CreateLayerWithoutCamera(pLayer->Value());
+            SceneLayer* Ly = Application::Instance().GetCurrentScene()->CreateLayerWithoutCamera(pLayer->Value());
             tinyxml2::XMLElement* pGo = pLayer->FirstChildElement();
             // For each GameObject
             for (; pGo; pGo = pGo->NextSiblingElement())

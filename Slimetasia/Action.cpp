@@ -140,7 +140,7 @@ void ActionRemoveComponent::ParentRecurrsion(unsigned char* curr, unsigned char*
     }
 }
 // May have to do the whole recurrsion shit again
-ActionRemoveComponent::ActionRemoveComponent(GameObject* g, std::string c, Layer* l)
+ActionRemoveComponent::ActionRemoveComponent(GameObject* g, std::string c, SceneLayer* l)
     : go(g)
     , comp(c)
     , tmp(nullptr)
@@ -380,7 +380,7 @@ void ActionParentStructInput::ParentRecurrsion(unsigned char* curr, unsigned cha
     }
 }
 
-ActionParentStructInput::ActionParentStructInput(GameObject* g, std::string c, Layer* l)
+ActionParentStructInput::ActionParentStructInput(GameObject* g, std::string c, SceneLayer* l)
     : name()
     , comp(c)
     , oldObj(nullptr)
@@ -539,7 +539,7 @@ void ActionCreateLayer::Revert()
 
 void ActionDeleteObject::DuplicateChildren(GameObject* root)
 {
-    Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
+    SceneLayer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     if (root->GetChildrenObjects().empty()) return;
     for (auto& id : root->GetChildrenObjects())
     {
@@ -554,7 +554,7 @@ void ActionDeleteObject::DuplicateChildren(GameObject* root)
 
 void ActionDeleteObject::ReattachChildren(GameObject* root)
 {
-    Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
+    SceneLayer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     for (unsigned i = 0; i < childrens.size(); ++i)
     {
         auto tmp = m_CurrentLayer->CreateObject(std::string {});
@@ -894,7 +894,7 @@ void ActionMultiTransform::Revert()
 
 void ActionDuplicate::Duplicate()
 {
-    Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(layerName);
+    SceneLayer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(layerName);
     if (!m_CurrentLayer) return;
     for (auto& id : selectedObjects)
     {
@@ -906,7 +906,7 @@ void ActionDuplicate::Duplicate()
     }
 }
 
-void ActionDuplicate::ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* original, GameObject* Clone)
+void ActionDuplicate::ChildrenDuplicate(SceneLayer* m_CurrentLayer, GameObject* original, GameObject* Clone)
 {
     if (original->GetChildrenObjects().empty()) return;
     ChildrenList m_Childrens;
@@ -932,7 +932,7 @@ void ActionDuplicate::Execute()
 
 void ActionDuplicate::Revert()
 {
-    Layer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(layerName);
+    SceneLayer* m_CurrentLayer = Application::Instance().GetCurrentScene()->GetLayerByName(layerName);
     for (auto& id : duplicatedObjects)
     {
         m_CurrentLayer->GetObjectById(id)->Destroy();

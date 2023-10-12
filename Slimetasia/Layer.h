@@ -15,7 +15,7 @@ class PointLight;
 class SpotLight;
 class DirectionalLight;
 
-class Layer
+class SceneLayer
 {
     friend class GameObject;
 
@@ -34,14 +34,14 @@ class Layer
 
 public:
 
-    Layer(Scene* parentScene, unsigned id, std::string const& layerName, bool createCamera, unsigned objectPoolSize = 1 << 12);
-    ~Layer();
+    SceneLayer(Scene* parentScene, unsigned id, std::string const& layerName, bool createCamera, unsigned objectPoolSize = 1 << 12);
+    ~SceneLayer();
 
     void Update(float dt);
     void PostFrameUpdate();
     void Destroy();
 
-    void Clone(Layer* ly);
+    void Clone(SceneLayer* ly);
 
     // Creates an empty object
     GameObject* CreateObject(std::string const& objectName);

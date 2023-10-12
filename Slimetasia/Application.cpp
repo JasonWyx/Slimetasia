@@ -519,8 +519,6 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     AudioSystem::Initialize();
     PhysicsSystem::Initialize();
     AnimationSystem::Initialize();
-    ResourceManager::Initialize();
-    ResourceManager::Instance().RefreshResources();
     AISystem::Initialize();
 
 #if defined(USE_VULKAN)
@@ -533,6 +531,8 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     Input::Initialize();
     Editor::Initialize(m_Window, static_cast<float>(m_WindowWidth), static_cast<float>(m_WindowHeight));
     ParticleSystem ::Initialize(MAXCOUNT);
+    ResourceManager::Initialize();
+    ResourceManager::Instance().RefreshResources();
 }
 
 Application::~Application()
@@ -546,6 +546,8 @@ Application::~Application()
         delete m_CurrentSceneCopy;
     }
 
+    ResourceManager::Shutdown();
+    ParticleSystem ::Shutdown();
     Editor::Shutdown();
     Input::Shutdown();
 #ifdef USE_VULKAN
@@ -554,12 +556,10 @@ Application::~Application()
     Renderer::Shutdown();
 #endif  // USE_VULKAN
     AISystem::Shutdown();
-    ResourceManager::Shutdown();
     AnimationSystem::Shutdown();
     PhysicsSystem::Shutdown();
     AudioSystem::Shutdown();
     Factory::Shutdown();
-    ParticleSystem ::Shutdown();
 
 #ifndef USE_VULKAN
     wglDeleteContext(m_GLRenderContext);
@@ -633,7 +633,7 @@ void Application::RunMainLoop()
 {
 #ifdef EDITOR
     NewScene("NewScene");
-    Layer* layer = m_CurrentScene->CreateLayer("NewLayer");
+    SceneLayer* layer = m_CurrentScene->CreateLayer("NewLayer");
     // Renderer::Instance().SetCurrentLayer(layer);
     m_GameTimer.SetEditorPaused(true);
 #else

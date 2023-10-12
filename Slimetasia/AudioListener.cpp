@@ -78,7 +78,7 @@ Function to get the forward vector of the audio listener.
 Vector3 AudioListener::GetForwardVector() const
 {
     auto transformRef_ = m_OwnerObject->GetComponent<Transform>();
-    return transformRef_ ? transformRef_->GetForwardVector() : Transform::worldForward;
+    return transformRef_ ? transformRef_->GetForwardVector() : Transform::WorldForward;
 }
 
 /*
@@ -87,7 +87,7 @@ Function to get the upward vector of the audio listener
 Vector3 AudioListener::GetUpwardVector() const
 {
     auto transformRef_ = m_OwnerObject->GetComponent<Transform>();
-    return transformRef_ ? transformRef_->GetUpwardVector() : Transform::worldUpward;
+    return transformRef_ ? transformRef_->GetUpwardVector() : Transform::WorldUp;
 }
 
 /*

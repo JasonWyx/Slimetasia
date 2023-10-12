@@ -218,7 +218,7 @@ void DebugPass::Render(Camera& camera, GeometryPass& geomPass)
                             glUniform1i(isAnimatedLoc, 0);
                         }
 
-                        glBindVertexArray(mesh->GetVAO());
+                        glBindVertexArray(mesh->GetVertexArrayObject());
 
                         // Sub meshes in mesh
                         std::vector<MeshEntry> const& entries = mesh->GetMeshEntries();
@@ -280,7 +280,7 @@ void DebugPass::Render(Camera& camera, GeometryPass& geomPass)
                             glUniform1i(isAnimatedLoc, 0);
                         }
 
-                        glBindVertexArray(mesh->GetVAO());
+                        glBindVertexArray(mesh->GetVertexArrayObject());
 
                         // Sub meshes in mesh
                         std::vector<MeshEntry> const& entries = mesh->GetMeshEntries();

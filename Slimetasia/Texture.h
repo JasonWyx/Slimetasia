@@ -1,4 +1,6 @@
 #pragma once
+#ifndef USE_VULKAN
+
 #include <GL/glew.h>
 
 #include <string>
@@ -52,3 +54,5 @@ public:
 
     GLuint GetHandle() const;
 };
+
+#endif  // !USE_VULKAN

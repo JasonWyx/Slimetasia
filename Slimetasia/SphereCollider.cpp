@@ -51,7 +51,7 @@ void SphereCollider::DebugDraw()
 #ifdef USE_VULKAN
     auto cam = static_cast<Camera*>(nullptr); // todo
 #else
-    auto cam = const_cast<Layer*>(Renderer::Instance().GetCurrentEditorLayer())->GetEditorCamera();
+    auto cam = const_cast<SceneLayer*>(Renderer::Instance().GetCurrentEditorLayer())->GetEditorCamera();
 #endif  // USE_VULKAN
     if (cam)
     {

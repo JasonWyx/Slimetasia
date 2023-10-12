@@ -156,7 +156,7 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
                     glUniform1i(isAnimatedLoc, 0);
                 }
 
-                glBindVertexArray(mesh->GetVAO());
+                glBindVertexArray(mesh->GetVertexArrayObject());
                 glUniform4fv(meshColorLoc, 1, ValuePtrFloat(meshColor));
                 glUniform3fv(emissiveColorLoc, 1, ValuePtrFloat(renderer->GetEmissiveColor()));
                 glUniform1i(emissiveEnabledLoc, renderer->IsEmissiveEnabled());
@@ -249,7 +249,7 @@ void GeometryPass::Render(Camera* camera, const RenderLayer& renderLayer)
                     glUniform1i(isAnimatedLoc, 0);
                 }
 
-                glBindVertexArray(mesh->GetVAO());
+                glBindVertexArray(mesh->GetVertexArrayObject());
                 glUniform4fv(meshColorLoc, 1, ValuePtrFloat(meshColor));
                 glUniform1i(pickingIdLoc, renderer->GetOwner()->GetID());
                 glUniform3fv(emissiveColorLoc, 1, ValuePtrFloat(renderer->GetEmissiveColor()));

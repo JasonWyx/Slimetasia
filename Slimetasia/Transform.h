@@ -6,54 +6,17 @@ class Transform : public IComponent
 {
 public:
 
-    // Quat m_Orientation;
-
-    Vector3 m_LocalPosition;
-    // Vector3 m_LocalRotation;
-    // Vector3 m_LocalScale;
-
-    Vector3 m_WorldPosition;
-    Vector3 m_WorldRotation;
-    Vector3 m_WorldScale;
-
-private:
-
-    Vector3 m_defaultPos;
-    Vector3 m_deltaPos;
-
-    void CalculateWorldToLocal();
-    void CalculateLocalToWorld();
-
-    bool change;
-
-    Vector3 parentPos;
-    Vector3 parentRot;
-    Vector3 parentScale;
-    Matrix4 parentMat;
-
-public:
-
-    static constexpr Vector3 worldForward = Vector3::Base<2>;
-    static constexpr Vector3 worldUpward = Vector3::Base<1>;
-    static constexpr Vector3 worldRight = Vector3::Base<0>;
+    static constexpr Vector3 WorldRight = Vector3::Base(0);
+    static constexpr Vector3 WorldUp = Vector3::Base(1);
+    static constexpr Vector3 WorldForward = Vector3::Base(2);
 
     Transform(GameObject* parentObject);
     ~Transform() = default;
-
-    // Vector3 GetLocalPosition() const;
-    // Vector3 GetLocalRotation() const;
-    // Vector3 GetLocalScale() const;
-    // Quat GetOrientation() const;
 
     Vector3 GetWorldPosition() const;
     Vector3 GetWorldRotation() const;
     Vector3 GetWorldScale() const;
 
-    // void    SetLocalPosition(Vector3 const &position);
-    // void    SetLocalRotation(Vector3 const &rotation);
-    // void    SetLocalScale(Vector3 const &Scale);
-    // void	  SetOrientation(const Quat& orientation);
-    // void	  SetToIdentity();
     void SetWorldPosition(Vector3 const& position);
     void SetWorldRotation(Vector3 const& rotation);
     void SetWorldScale(Vector3 const& scale);
@@ -68,7 +31,6 @@ public:
 
     // For rendering purposes
     Matrix4 GetParentTransformMatrix();
-    // Matrix4 GetLocalTransformMatrix();
     Matrix4 GetWorldTransformMatrix();
 
     // Get vectors with respect to the object
@@ -76,12 +38,21 @@ public:
     Vector3 GetRightVector() const;
     Vector3 GetUpwardVector() const;
 
-    // solely used by physics.
-    // void	GetInverse(Vector3& pos, Quat& orientation) const;
-    // Transform	GetTransformFromInverse(const Vector3& pos, const Quat& orientation) const;
-    // Vector3 operator*(const Vector3& vec)const;
-    // Transform GetInverseTransform() const;
-    // Transform operator*(const Transform& rhs) const;
+    Vector3 m_WorldPosition;
+    Vector3 m_WorldRotation;
+    Vector3 m_WorldScale;
+
+private:
+
+    Vector3 m_DefaultPosition;
+    Vector3 m_DeltaPosition;
+
+    bool m_IsChanged;
+
+    Vector3 m_ParentPosition;
+    Vector3 m_ParentRotation;
+    Vector3 m_ParentScale;
+    Matrix4 m_ParentTransform;
 
     REFLECT()
 };

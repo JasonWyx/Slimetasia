@@ -26,10 +26,12 @@ End Header ------------------------------------------------------------------ */
 
 #include "CorePrerequisites.h"
 #include "Material.h"
+#include "RendererVk.h"
 #include "ResourceManager.h"
 
-auto ConvertAssimpMat4 = [](aiMatrix4x4 const& matrix)
-{ return Matrix4(matrix.a1, matrix.b1, matrix.c1, matrix.d1, matrix.a2, matrix.b2, matrix.c2, matrix.d2, matrix.a3, matrix.b3, matrix.c3, matrix.d3, matrix.a4, matrix.b4, matrix.c4, matrix.d4); };
+auto ConvertAssimpMat4 = [](aiMatrix4x4 const& matrix) {
+    return Matrix4 { matrix.a1, matrix.b1, matrix.c1, matrix.d1, matrix.a2, matrix.b2, matrix.c2, matrix.d2, matrix.a3, matrix.b3, matrix.c3, matrix.d3, matrix.a4, matrix.b4, matrix.c4, matrix.d4 };
+};
 
 Mesh::Mesh(const std::string& resourceName, const std::filesystem::path& filePath)
     : ResourceBase(resourceName, filePath)
@@ -44,21 +46,30 @@ Mesh::Mesh(const std::string& resourceName, const std::filesystem::path& filePat
     , m_JointWeights()
     , m_MeshEntries()
     , m_Materials()
+#ifdef USE_VULKAN
+#else
     , m_VertexArray(0)
     , m_VertexBuffers { 0 }
+#endif
     , m_GlobalInverseTransform()
     , m_Bones()
     , m_Nodes()
     , m_NodesIDMap()
 {
+#ifdef USE_VULKAN
+#else
     glCreateVertexArrays(1, &m_VertexArray);
     glCreateBuffers((int)MeshBufferID::Count, m_VertexBuffers);
+#endif
 }
 
 Mesh::~Mesh()
 {
+#ifdef USE_VULKAN
+#else
     glDeleteBuffers((int)MeshBufferID::Count, m_VertexBuffers);
     glDeleteVertexArrays(1, &m_VertexArray);
+#endif
 }
 
 void Mesh::Serialize(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* parentElem)
@@ -187,8 +198,6 @@ void Mesh::Load()
                     inFile.read((char*)&(m_MeshEntries[i].m_BaseVertex), sizeof(m_MeshEntries[i].m_BaseVertex));
                     inFile.read((char*)&(m_MeshEntries[i].m_BaseIndex), sizeof(m_MeshEntries[i].m_BaseIndex));
                     inFile.read((char*)&(m_MeshEntries[i].m_Size), sizeof(m_MeshEntries[i].m_Size));
-                    // GLuint dummy;
-                    // inFile.read((char*)&(dummy),          sizeof(m_MeshEntries[i].m_Size));
                     inFile.read((char*)&(m_MeshEntries[i].m_NodeTransform), sizeof(Matrix4));
                 }
             }
@@ -241,8 +250,6 @@ void Mesh::Load()
                     inFile.read((char*)&childCount, sizeof(childCount));
                     m_Nodes[i].m_ChildrenNodes.resize(childCount);
                     inFile.read((char*)(m_Nodes[i].m_ChildrenNodes.data()), m_Nodes[i].m_ChildrenNodes.size() * sizeof(m_Nodes[i].m_ChildrenNodes[0]));
-                    // Matrix4 tmp;
-                    // inFile.read((char*)&(tmp), sizeof(Matrix4));
                     inFile.read((char*)(&m_Nodes[i].m_Scaling), sizeof(Vector3));
                     inFile.read((char*)(&m_Nodes[i].m_Rotation), sizeof(Quat));
                     inFile.read((char*)(&m_Nodes[i].m_Translation), sizeof(Vector3));
@@ -278,79 +285,7 @@ void Mesh::Load()
 
     inFile.close();
 
-#ifndef USE_VULKAN
-    glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Index], m_Indices.size() * sizeof(m_Indices[0]), m_Indices.data(), 0);
-    glVertexArrayElementBuffer(m_VertexArray, m_VertexBuffers[(int)MeshBufferID::Index]);
-
-    glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Position], m_Vertices.size() * sizeof(m_Vertices[0]), m_Vertices.data(), 0);
-    glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Position, (int)MeshBufferID::Position);
-    glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Position, 3, GL_FLOAT, GL_FALSE, 0);
-    glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Position);
-    glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Position, m_VertexBuffers[(int)MeshBufferID::Position], 0, sizeof(m_Vertices[0]));
-
-    if (!m_Normals.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Normal], m_Normals.size() * sizeof(m_Normals[0]), m_Normals.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Normal, (int)MeshBufferID::Normal);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Normal, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Normal);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Normal, m_VertexBuffers[(int)MeshBufferID::Normal], 0, sizeof(m_Normals[0]));
-    }
-
-    if (!m_Tangents.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Tangent], m_Tangents.size() * sizeof(m_Tangents[0]), m_Tangents.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Tangent, (int)MeshBufferID::Tangent);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Tangent, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Tangent);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Tangent, m_VertexBuffers[(int)MeshBufferID::Tangent], 0, sizeof(m_Tangents[0]));
-    }
-
-    if (!m_Bitangents.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Bitangent], m_Bitangents.size() * sizeof(m_Bitangents[0]), m_Bitangents.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Bitangent, (int)MeshBufferID::Bitangent);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Bitangent, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Bitangent);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Bitangent, m_VertexBuffers[(int)MeshBufferID::Bitangent], 0, sizeof(m_Bitangents[0]));
-    }
-
-    if (!m_Colors.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Color], m_Colors.size() * sizeof(m_Colors[0]), m_Colors.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Color, (int)MeshBufferID::Color);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Color, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Color);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Color, m_VertexBuffers[(int)MeshBufferID::Color], 0, sizeof(m_Colors[0]));
-    }
-
-    if (!m_TexCoords.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::TexCoord], m_TexCoords.size() * sizeof(m_TexCoords[0]), m_TexCoords.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::TexCoord, (int)MeshBufferID::TexCoord);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::TexCoord, 2, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::TexCoord);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::TexCoord, m_VertexBuffers[(int)MeshBufferID::TexCoord], 0, sizeof(m_TexCoords[0]));
-    }
-
-    if (!m_JointIds.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::JointId], m_JointIds.size() * sizeof(m_JointIds[0]), m_JointIds.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::JointId, (int)MeshBufferID::JointId);
-        glVertexArrayAttribIFormat(m_VertexArray, (int)MeshBufferID::JointId, 4, GL_INT, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointId);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointId, m_VertexBuffers[(int)MeshBufferID::JointId], 0, sizeof(m_JointIds[0]));
-    }
-
-    if (!m_JointWeights.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::JointWeight], m_JointWeights.size() * sizeof(m_JointWeights[0]), m_JointWeights.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::JointWeight, (int)MeshBufferID::JointWeight);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::JointWeight, 4, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointWeight);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointWeight, m_VertexBuffers[(int)MeshBufferID::JointWeight], 0, sizeof(m_JointWeights[0]));
-    }
-#endif  // !USE_VULKAN
+    GL_OR_VK(UploadGPUData_GL(), UploadGPUData_VK());
 
 #ifndef EDITOR
 
@@ -372,14 +307,8 @@ void Mesh::Load()
 
     for (const Vector3& position : m_Vertices)
     {
-        if (position[0] < min[0]) min[0] = position[0];
-        if (position[0] > max[0]) max[0] = position[0];
-
-        if (position[1] < min[1]) min[1] = position[1];
-        if (position[1] > max[1]) max[1] = position[1];
-
-        if (position[2] < min[2]) min[2] = position[2];
-        if (position[2] > max[2]) max[2] = position[2];
+        min = min.Min(position);
+        max = max.Max(position);
     }
 
     m_AABB = AABB(min, max);
@@ -549,79 +478,7 @@ void Mesh::ImportFromAssimp(aiScene const* scene)
     ParseNodes(rootNode);
     ParseNodesChildren(rootNode);
 
-#ifndef USE_VULKAN
-    glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Index], m_Indices.size() * sizeof(m_Indices[0]), m_Indices.data(), 0);
-    glVertexArrayElementBuffer(m_VertexArray, m_VertexBuffers[(int)MeshBufferID::Index]);
-
-    glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Position], m_Vertices.size() * sizeof(m_Vertices[0]), m_Vertices.data(), 0);
-    glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Position, (int)MeshBufferID::Position);
-    glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Position, 3, GL_FLOAT, GL_FALSE, 0);
-    glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Position);
-    glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Position, m_VertexBuffers[(int)MeshBufferID::Position], 0, sizeof(m_Vertices[0]));
-
-    if (!m_Normals.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Normal], m_Normals.size() * sizeof(m_Normals[0]), m_Normals.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Normal, (int)MeshBufferID::Normal);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Normal, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Normal);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Normal, m_VertexBuffers[(int)MeshBufferID::Normal], 0, sizeof(m_Normals[0]));
-    }
-
-    if (!m_Tangents.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Tangent], m_Tangents.size() * sizeof(m_Tangents[0]), m_Tangents.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Tangent, (int)MeshBufferID::Tangent);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Tangent, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Tangent);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Tangent, m_VertexBuffers[(int)MeshBufferID::Tangent], 0, sizeof(m_Tangents[0]));
-    }
-
-    if (!m_Bitangents.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Bitangent], m_Bitangents.size() * sizeof(m_Bitangents[0]), m_Bitangents.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Bitangent, (int)MeshBufferID::Bitangent);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Bitangent, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Bitangent);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Bitangent, m_VertexBuffers[(int)MeshBufferID::Bitangent], 0, sizeof(m_Bitangents[0]));
-    }
-
-    if (!m_Colors.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Color], m_Colors.size() * sizeof(m_Colors[0]), m_Colors.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Color, (int)MeshBufferID::Color);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Color, 3, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Color);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Color, m_VertexBuffers[(int)MeshBufferID::Color], 0, sizeof(m_Colors[0]));
-    }
-
-    if (!m_TexCoords.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::TexCoord], m_TexCoords.size() * sizeof(m_TexCoords[0]), m_TexCoords.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::TexCoord, (int)MeshBufferID::TexCoord);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::TexCoord, 2, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::TexCoord);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::TexCoord, m_VertexBuffers[(int)MeshBufferID::TexCoord], 0, sizeof(m_TexCoords[0]));
-    }
-
-    if (!m_JointIds.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::JointId], m_JointIds.size() * sizeof(m_JointIds[0]), m_JointIds.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::JointId, (int)MeshBufferID::JointId);
-        glVertexArrayAttribIFormat(m_VertexArray, (int)MeshBufferID::JointId, 4, GL_INT, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointId);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointId, m_VertexBuffers[(int)MeshBufferID::JointId], 0, sizeof(m_JointIds[0]));
-    }
-
-    if (!m_JointWeights.empty())
-    {
-        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::JointWeight], m_JointWeights.size() * sizeof(m_JointWeights[0]), m_JointWeights.data(), 0);
-        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::JointWeight, (int)MeshBufferID::JointWeight);
-        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::JointWeight, 4, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointWeight);
-        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointWeight, m_VertexBuffers[(int)MeshBufferID::JointWeight], 0, sizeof(m_JointWeights[0]));
-    }
-#endif  // !USE_VULKAN
+    GL_OR_VK(UploadGPUData_GL(), UploadGPUData_VK());
 
     m_LoadStatus = ResourceStatus::Loaded;
 
@@ -816,14 +673,8 @@ void Mesh::ImportFromAssimp(aiScene const* scene)
 
     for (const Vector3& position : m_Vertices)
     {
-        if (position[0] < min[0]) min[0] = position[0];
-        if (position[0] > max[0]) max[0] = position[0];
-
-        if (position[1] < min[1]) min[1] = position[1];
-        if (position[1] > max[1]) max[1] = position[1];
-
-        if (position[2] < min[2]) min[2] = position[2];
-        if (position[2] > max[2]) max[2] = position[2];
+        min = min.Min(position);
+        max = max.Max(position);
     }
 
     m_AABB = AABB(min, max);
@@ -908,7 +759,7 @@ constexpr std::vector<vk::VertexInputAttributeDescription> Mesh::GetVertexAttrib
 
 #else
 
-GLuint Mesh::GetVAO() const
+GLuint Mesh::GetVertexArrayObject() const
 {
     return m_VertexArray;
 }
@@ -918,36 +769,6 @@ void Mesh::ParseNodes(aiNode* currNode)
 {
     if (currNode)
     {
-        // if (currNode->mNumMeshes)
-        //{
-        //  Matrix4 transform = ConvertAssimpMat4(currNode->mTransformation);
-        //
-        //  for (unsigned i = 0; i < currNode->mNumMeshes; ++i)
-        //  {
-        //    m_MeshEntries[currNode->mMeshes[i]].m_NodeTransform *= transform;
-        //  }
-        //}
-
-        // if (currNode->mNumMeshes)
-        //{
-        //  Matrix4 transform = ConvertAssimpMat4(currNode->mTransformation);
-        //
-        //  for (unsigned i = 0; i < currNode->mNumMeshes; ++i)
-        //  {
-        //    const MeshEntry& entry = m_MeshEntries[currNode->mMeshes[i]];
-        //    const unsigned meshEntryIndex = currNode->mMeshes[i];
-        //
-        //    unsigned numVertices = entry.m_BaseVertex + ((meshEntryIndex + 1) < m_MeshEntries.size() ?
-        //      m_MeshEntries[meshEntryIndex + 1].m_BaseVertex - m_MeshEntries[meshEntryIndex].m_BaseVertex :
-        //      m_Vertices.size() - m_MeshEntries[meshEntryIndex].m_BaseVertex);
-        //
-        //    for (unsigned j = entry.m_BaseVertex; j < numVertices; ++j)
-        //    {
-        //      m_Vertices[j] = (transform * Vector4(m_Vertices[j], 1.0f)).V3();
-        //    }
-        //  }
-        //}
-
         // Register node with node id map, assert if node already exist
         std::string nodeName = currNode->mName.C_Str();
         std::replace_if(
@@ -999,3 +820,86 @@ void Mesh::ParseNodesChildren(aiNode* currNode)
         }
     }
 }
+#ifdef USE_VULKAN
+void Mesh::UploadGPUData_VK()
+{
+    const vk::Device device = RendererVk::Instance().GetDevice();
+}
+
+#else
+
+void Mesh::UploadGPUData_GL()
+{
+    glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Index], m_Indices.size() * sizeof(m_Indices[0]), m_Indices.data(), 0);
+    glVertexArrayElementBuffer(m_VertexArray, m_VertexBuffers[(int)MeshBufferID::Index]);
+
+    glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Position], m_Vertices.size() * sizeof(m_Vertices[0]), m_Vertices.data(), 0);
+    glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Position, (int)MeshBufferID::Position);
+    glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Position, 3, GL_FLOAT, GL_FALSE, 0);
+    glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Position);
+    glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Position, m_VertexBuffers[(int)MeshBufferID::Position], 0, sizeof(m_Vertices[0]));
+
+    if (!m_Normals.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Normal], m_Normals.size() * sizeof(m_Normals[0]), m_Normals.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Normal, (int)MeshBufferID::Normal);
+        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Normal, 3, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Normal);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Normal, m_VertexBuffers[(int)MeshBufferID::Normal], 0, sizeof(m_Normals[0]));
+    }
+
+    if (!m_Tangents.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Tangent], m_Tangents.size() * sizeof(m_Tangents[0]), m_Tangents.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Tangent, (int)MeshBufferID::Tangent);
+        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Tangent, 3, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Tangent);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Tangent, m_VertexBuffers[(int)MeshBufferID::Tangent], 0, sizeof(m_Tangents[0]));
+    }
+
+    if (!m_Bitangents.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Bitangent], m_Bitangents.size() * sizeof(m_Bitangents[0]), m_Bitangents.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Bitangent, (int)MeshBufferID::Bitangent);
+        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Bitangent, 3, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Bitangent);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Bitangent, m_VertexBuffers[(int)MeshBufferID::Bitangent], 0, sizeof(m_Bitangents[0]));
+    }
+
+    if (!m_Colors.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::Color], m_Colors.size() * sizeof(m_Colors[0]), m_Colors.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::Color, (int)MeshBufferID::Color);
+        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::Color, 3, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::Color);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::Color, m_VertexBuffers[(int)MeshBufferID::Color], 0, sizeof(m_Colors[0]));
+    }
+
+    if (!m_TexCoords.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::TexCoord], m_TexCoords.size() * sizeof(m_TexCoords[0]), m_TexCoords.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::TexCoord, (int)MeshBufferID::TexCoord);
+        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::TexCoord, 2, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::TexCoord);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::TexCoord, m_VertexBuffers[(int)MeshBufferID::TexCoord], 0, sizeof(m_TexCoords[0]));
+    }
+
+    if (!m_JointIds.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::JointId], m_JointIds.size() * sizeof(m_JointIds[0]), m_JointIds.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::JointId, (int)MeshBufferID::JointId);
+        glVertexArrayAttribIFormat(m_VertexArray, (int)MeshBufferID::JointId, 4, GL_INT, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointId);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointId, m_VertexBuffers[(int)MeshBufferID::JointId], 0, sizeof(m_JointIds[0]));
+    }
+
+    if (!m_JointWeights.empty())
+    {
+        glNamedBufferStorage(m_VertexBuffers[(int)MeshBufferID::JointWeight], m_JointWeights.size() * sizeof(m_JointWeights[0]), m_JointWeights.data(), 0);
+        glVertexArrayAttribBinding(m_VertexArray, (int)MeshBufferID::JointWeight, (int)MeshBufferID::JointWeight);
+        glVertexArrayAttribFormat(m_VertexArray, (int)MeshBufferID::JointWeight, 4, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_VertexArray, (int)MeshBufferID::JointWeight);
+        glVertexArrayVertexBuffer(m_VertexArray, (int)MeshBufferID::JointWeight, m_VertexBuffers[(int)MeshBufferID::JointWeight], 0, sizeof(m_JointWeights[0]));
+    }
+}
+#endif  // USE_VULKAN

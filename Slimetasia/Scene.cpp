@@ -11,34 +11,34 @@ Scene::Scene(char const* sceneName)
 
 /*Scene::Scene(Scene const & otherScene)
 {
-  for (Layer *layer : otherScene.m_Layers)
+  for (SceneLayer *layer : otherScene.m_Layers)
   {
     // TODO: Layer copy
-    //Layer *copyLayer = CreateLayer(layer->GetName());
+    //SceneLayer *copyLayer = CreateLayer(layer->GetName());
   }
 }*/
 
 Scene::~Scene()
 {
-    for (Layer* layer : m_Layers)
+    for (SceneLayer* layer : m_Layers)
         delete layer;
 }
 
 void Scene::Update(float dt)
 {
-    for (Layer* layer : m_Layers)
+    for (SceneLayer* layer : m_Layers)
         layer->Update(dt);
 }
 
 void Scene::PostFrameUpdate()
 {
-    // for (Layer *layer : m_Layers)
+    // for (SceneLayer *layer : m_Layers)
     //  layer->PostFrameUpdate();
 }
 
-Layer* Scene::CreateLayer(std::string const& layerName)
+SceneLayer* Scene::CreateLayer(std::string const& layerName)
 {
-    for (Layer* layer : m_Layers)
+    for (SceneLayer* layer : m_Layers)
     {
         if (layer->GetName() == layerName)
         {
@@ -47,14 +47,14 @@ Layer* Scene::CreateLayer(std::string const& layerName)
         }
     }
 
-    Layer* newLayer = new Layer(this, ++m_LayerCount, layerName, true);
+    SceneLayer* newLayer = new SceneLayer(this, ++m_LayerCount, layerName, true);
     m_Layers.push_back(newLayer);
     return newLayer;
 }
 
-Layer* Scene::CreateLayerWithoutCamera(std::string const& layerName)
+SceneLayer* Scene::CreateLayerWithoutCamera(std::string const& layerName)
 {
-    for (Layer* layer : m_Layers)
+    for (SceneLayer* layer : m_Layers)
     {
         if (layer->GetName() == layerName)
         {
@@ -63,14 +63,14 @@ Layer* Scene::CreateLayerWithoutCamera(std::string const& layerName)
         }
     }
 
-    Layer* newLayer = new Layer(this, ++m_LayerCount, layerName, false);
+    SceneLayer* newLayer = new SceneLayer(this, ++m_LayerCount, layerName, false);
     m_Layers.push_back(newLayer);
     return newLayer;
 }
 
-Layer* Scene::GetLayerByName(std::string const& layerName) const
+SceneLayer* Scene::GetLayerByName(std::string const& layerName) const
 {
-    for (Layer* layer : m_Layers)
+    for (SceneLayer* layer : m_Layers)
     {
         if (layer->GetName() == layerName)
         {

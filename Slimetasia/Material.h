@@ -1,7 +1,11 @@
 #pragma once
 #include "ResourceBase.h"
 #include "ResourceHandle.h"
+#ifdef USE_VULKAN
+#include "Texture_Vulkan.h"
+#else
 #include "Texture.h"
+#endif // USE_VULKAN
 
 using HTexture = ResourceHandle<Texture>;
 

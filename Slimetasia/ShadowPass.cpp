@@ -123,7 +123,7 @@ void ShadowPass::Render(RenderLayer const& renderLayer)
                         glUniformMatrix4fv(modelTransformLoc, 1, GL_FALSE, ValuePtrFloat(modelTransform));
 
                         std::vector<MeshEntry> const& meshEntries = mesh->GetMeshEntries();
-                        glBindVertexArray(mesh->GetVAO());
+                        glBindVertexArray(mesh->GetVertexArrayObject());
 
                         MeshAnimator* meshAnimator = meshRenderer->GetOwner()->GetComponent<MeshAnimator>();
 
@@ -210,7 +210,7 @@ void ShadowPass::Render(RenderLayer const& renderLayer)
                         glUniform1i(diffuseEnabledLoc, diffuseTexture);
 
                         std::vector<MeshEntry> const& meshEntries = mesh->GetMeshEntries();
-                        glBindVertexArray(mesh->GetVAO());
+                        glBindVertexArray(mesh->GetVertexArrayObject());
 
                         // Draw objects
                         for (MeshEntry const& entry : meshEntries)
@@ -255,7 +255,7 @@ void ShadowPass::Render(RenderLayer const& renderLayer)
                         glUniformMatrix4fv(modelTransformLoc, 1, GL_FALSE, ValuePtrFloat(mvp));
 
                         std::vector<MeshEntry> const& meshEntries = mesh->GetMeshEntries();
-                        glBindVertexArray(mesh->GetVAO());
+                        glBindVertexArray(mesh->GetVertexArrayObject());
 
                         MeshAnimator* meshAnimator = meshRenderer->GetOwner()->GetComponent<MeshAnimator>();
 

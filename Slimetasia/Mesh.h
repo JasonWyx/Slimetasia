@@ -53,9 +53,9 @@ struct MeshNode
 struct MeshEntry
 {
     std::string m_MeshEntryName;
-    GLuint m_BaseVertex;
-    GLuint m_BaseIndex;
-    GLuint m_Size;
+    unsigned m_BaseVertex;
+    unsigned m_BaseIndex;
+    unsigned m_Size;
     Matrix4 m_NodeTransform;
 };
 
@@ -87,7 +87,7 @@ public:
 
     void ImportFromAssimp(aiScene const* scene);
 
-    std::vector<GLuint> const& GetIndices() const;
+    std::vector<unsigned> const& GetIndices() const;
     std::vector<Vector3> const& GetVertices() const;
     std::vector<Vector3> const& GetNormals() const;
     std::vector<Vector3> const& GetColors() const;
@@ -106,14 +106,22 @@ public:
     static constexpr vk::VertexInputBindingDescription GetVertexBindingDescription();
     static constexpr std::vector<vk::VertexInputAttributeDescription> GetVertexAttributeDescriptions();
 #else
-    GLuint GetVAO() const;
+    GLuint GetVertexArrayObject() const;
 #endif  // USE_VULKAN
 
-        private :
+private:
 
-        // todo: data stored on CPU for debug only? should remove in engine build
-        std::vector<GLuint>
-            m_Indices;
+    void ParseNodes(aiNode* currNode);
+    void ParseNodesChildren(aiNode* currNode);
+
+#ifdef USE_VULKAN
+    void UploadGPUData_VK();
+#else
+    void UploadGPUData_GL();
+#endif  // USE_VULKAN
+
+    // todo: data stored on CPU for debug only? should remove in engine build
+    std::vector<unsigned> m_Indices;
     std::vector<Vector3> m_Vertices;
     std::vector<Vector3> m_Normals;
     std::vector<Vector3> m_Tangents;
@@ -126,8 +134,11 @@ public:
     std::vector<MeshEntry> m_MeshEntries;
     std::vector<HMaterial> m_Materials;
 
+#ifdef USE_VULKAN
+#else
     GLuint m_VertexArray;
     GLuint m_VertexBuffers[(int)MeshBufferID::Count];
+#endif
 
     Matrix4 m_GlobalInverseTransform;
     std::vector<MeshBone> m_Bones;
@@ -136,9 +147,6 @@ public:
     std::map<std::string, unsigned> m_NodesIDMap;
 
     AABB m_AABB;
-
-    void ParseNodes(aiNode* currNode);
-    void ParseNodesChildren(aiNode* currNode);
 };
 
 using HMesh = ResourceHandle<Mesh>;

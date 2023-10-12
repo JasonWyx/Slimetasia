@@ -1,3 +1,4 @@
+#ifndef USE_VULKAN
 #include "Texture.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -321,3 +322,5 @@ GLuint Texture::GetHandle() const
 {
     return m_TextureHandle;
 }
+
+#endif // !USE_VULKAN

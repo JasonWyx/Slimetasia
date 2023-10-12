@@ -442,7 +442,7 @@ void Editor::DrawViewport()
             auto layers = scene->GetLayers();
             for (auto& ly : layers)
             {
-                auto l = new Layer(nullptr, ly->GetId(), ly->GetName(), false);
+                auto l = new SceneLayer(nullptr, ly->GetId(), ly->GetName(), false);
                 m_SavedLayers.emplace_back(l);
                 ly->Clone(m_SavedLayers.back());
             }
@@ -1019,7 +1019,7 @@ void Editor::DrawArchetype()
         ImGui::SameLine();
         if (ImGui::Button("Create Archetype"))
         {
-            Layer* ly = m_CurrentLayer;
+            SceneLayer* ly = m_CurrentLayer;
             ActionCreateObjectArchetype* act = new ActionCreateObjectArchetype(ly, currentArchetype->GetName(), currentArchetype->GetName());
             act->Execute();
             m_Undo.push_back(std::move(act));
@@ -4415,7 +4415,7 @@ GameObject* Editor::CreateArchetypeObject(std::string n)
     }
 }
 
-GameObject* Editor::LuaCreateArchetypeObject(std::string n, Layer* layer)
+GameObject* Editor::LuaCreateArchetypeObject(std::string n, SceneLayer* layer)
 {
     try
     {
@@ -4431,7 +4431,7 @@ GameObject* Editor::LuaCreateArchetypeObject(std::string n, Layer* layer)
     }
 }
 
-void Editor::SetLayer(Layer* layer)
+void Editor::SetLayer(SceneLayer* layer)
 {
     m_CurrentLayer = layer;
 #ifdef USE_VULKAN

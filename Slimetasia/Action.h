@@ -27,13 +27,13 @@ class ActionChangeName : public Action
 {
     std::string oldValue;
     std::string newValue;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     unsigned id;
 
 public:
 
-    ActionChangeName(std::string pv, std::string nv, Layer* l, GameObject* g)
+    ActionChangeName(std::string pv, std::string nv, SceneLayer* l, GameObject* g)
         : oldValue(pv)
         , newValue(nv)
         , ly(l)
@@ -53,13 +53,13 @@ class ActionInput : public Action
     std::string prop;
     T oldValue;
     T newValue;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     unsigned id;
 
 public:
 
-    ActionInput(T pv, T nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
+    ActionInput(T pv, T nv, std::string o, std::string c, std::string p, SceneLayer* l, GameObject* g)
         : name(o)
         , oldValue(pv)
         , newValue(nv)
@@ -136,13 +136,13 @@ class ActionInput<std::string> : public Action
     std::string prop;
     std::string oldValue;
     std::string newValue;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     unsigned id;
 
 public:
 
-    ActionInput(std::string pv, std::string nv, std::string o, std::string c, std::string p, Layer* l, GameObject* g)
+    ActionInput(std::string pv, std::string nv, std::string o, std::string c, std::string p, SceneLayer* l, GameObject* g)
         : name(o)
         , oldValue(pv)
         , newValue(nv)
@@ -201,7 +201,7 @@ public:
 
 class ActionCreate : public Action
 {
-    Layer* layer;
+    SceneLayer* layer;
     GameObject* obj;
     std::string name;
     unsigned id;
@@ -211,7 +211,7 @@ class ActionCreate : public Action
 
 public:
 
-    ActionCreate(Layer* ly, std::string n)
+    ActionCreate(SceneLayer* ly, std::string n)
         : layer(ly)
         , obj(nullptr)
         , name(n)
@@ -242,14 +242,14 @@ class ActionAddComponent : public Action
     GameObject* go;
     std::string comp;
     std::string script_name;
-    Layer* l;
+    SceneLayer* l;
     std::string l_name;
     std::string name;
     unsigned id;
 
 public:
 
-    ActionAddComponent(GameObject* g, std::string c, Layer* ly)
+    ActionAddComponent(GameObject* g, std::string c, SceneLayer* ly)
         : go(g)
         , comp(c)
         , script_name {}
@@ -268,7 +268,7 @@ class ActionRemoveComponent : public Action
     GameObject* go;
     std::string comp;
     GameObject* tmp;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     std::string name;
     unsigned id;
@@ -277,7 +277,7 @@ class ActionRemoveComponent : public Action
 
 public:
 
-    ActionRemoveComponent(GameObject* g, std::string c, Layer* l);
+    ActionRemoveComponent(GameObject* g, std::string c, SceneLayer* l);
     void Execute() override;
     void Revert() override;
     ~ActionRemoveComponent();
@@ -337,7 +337,7 @@ public:
 
 class ActionCreateObjectArchetype : public Action
 {
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     GameObject* go;
     std::string archetype;
@@ -346,7 +346,7 @@ class ActionCreateObjectArchetype : public Action
 
 public:
 
-    ActionCreateObjectArchetype(Layer* l, std::string a, std::string n)
+    ActionCreateObjectArchetype(SceneLayer* l, std::string a, std::string n)
         : ly(l)
         , archetype(a)
         , name(n)
@@ -363,14 +363,14 @@ class ActionRevertScript : public Action
 {
     std::string script;
     GameObject* go;
-    Layer* l;
+    SceneLayer* l;
     std::string l_name;
     std::string name;
     unsigned id;
 
 public:
 
-    ActionRevertScript(GameObject* g, std::string s, Layer* ly)
+    ActionRevertScript(GameObject* g, std::string s, SceneLayer* ly)
         : go(g)
         , script(s)
         , l(ly)
@@ -388,7 +388,7 @@ class ActionParentStructInput : public Action
     std::string comp;
     GameObject* oldObj;
     GameObject* newObj;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     unsigned id;
     void StructRecurrsion(unsigned char* curr, unsigned char* tmp, std::string prop);
@@ -396,7 +396,7 @@ class ActionParentStructInput : public Action
 
 public:
 
-    ActionParentStructInput(GameObject* g, std::string c, Layer* l);
+    ActionParentStructInput(GameObject* g, std::string c, SceneLayer* l);
     void Execute() override;
     void Revert() override;
     void SetNew(GameObject*& go);
@@ -409,13 +409,13 @@ class ActionMeshInput : public Action
     ResourceGUID newIndex;
     std::string name;
     std::string comp;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     unsigned id;
 
 public:
 
-    ActionMeshInput(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
+    ActionMeshInput(GameObject* g, std::string c, SceneLayer* l, ResourceGUID o, ResourceGUID n)
         : oldIndex(o)
         , newIndex(n)
         , ly(l)
@@ -440,7 +440,7 @@ class ActionInputFont : public Action
 
 public:
 
-    ActionInputFont(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n)
+    ActionInputFont(GameObject* g, std::string c, SceneLayer* l, ResourceGUID o, ResourceGUID n)
         : oldIndex(o)
         , newIndex(n)
         , comp(c)
@@ -456,11 +456,11 @@ public:
 class ActionCreateLayer : public Action
 {
     std::string name;
-    Layer* p;
+    SceneLayer* p;
 
 public:
 
-    ActionCreateLayer(std::string n, Layer* l)
+    ActionCreateLayer(std::string n, SceneLayer* l)
         : name(n)
         , p(l)
     {
@@ -474,14 +474,14 @@ class ActionDeleteObject : public Action
     std::list<GameObject> childrens;
     GameObject* go;
     unsigned id;
-    Layer* ly;
+    SceneLayer* ly;
     std::string l_name;
     void DuplicateChildren(GameObject* root);
     void ReattachChildren(GameObject* root);
 
 public:
 
-    ActionDeleteObject(GameObject* g, Layer* l)
+    ActionDeleteObject(GameObject* g, SceneLayer* l)
         : ly(l)
     {
         go = new GameObject(nullptr, 0);
@@ -521,13 +521,13 @@ public:
 
 class ActionDeleteLayer : public Action
 {
-    Layer* ly;
+    SceneLayer* ly;
 
 public:
 
-    ActionDeleteLayer(Layer* l)
+    ActionDeleteLayer(SceneLayer* l)
     {
-        ly = new Layer(nullptr, 0, l->GetName(), false);
+        ly = new SceneLayer(nullptr, 0, l->GetName(), false);
         l->Clone(ly);
     }
     void Execute() override;
@@ -541,14 +541,14 @@ class ActionInputTexture : public Action
     ResourceGUID newIndex;
     std::string name;
     std::string comp;
-    Layer* ly;
+    SceneLayer* ly;
     unsigned id;
     std::string type;
     std::string l_name;
 
 public:
 
-    ActionInputTexture(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
+    ActionInputTexture(GameObject* g, std::string c, SceneLayer* l, ResourceGUID o, ResourceGUID n, std::string t)
         : oldIndex(o)
         , newIndex(n)
         , ly(l)
@@ -569,14 +569,14 @@ class ActionInputAnimation : public Action
     ResourceGUID newIndex;
     std::string name;
     std::string comp;
-    Layer* ly;
+    SceneLayer* ly;
     unsigned id;
     std::string type;
     std::string l_name;
 
 public:
 
-    ActionInputAnimation(GameObject* g, std::string c, Layer* l, ResourceGUID o, ResourceGUID n, std::string t)
+    ActionInputAnimation(GameObject* g, std::string c, SceneLayer* l, ResourceGUID o, ResourceGUID n, std::string t)
         : oldIndex(o)
         , newIndex(n)
         , ly(l)
@@ -620,7 +620,7 @@ public:
 template <typename T>
 inline void ActionInputScript<T>::Execute()
 {
-    Layer* ly = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
+    SceneLayer* ly = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     GameObject* g = ly->GetObjectById(id);
     g->GetScript(script)->set(var, newValue);
 }
@@ -628,7 +628,7 @@ inline void ActionInputScript<T>::Execute()
 template <typename T>
 inline void ActionInputScript<T>::Revert()
 {
-    Layer* ly = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
+    SceneLayer* ly = Application::Instance().GetCurrentScene()->GetLayerByName(l_name);
     GameObject* g = ly->GetObjectById(id);
     g->GetScript(script)->set(var, oldValue);
 }
@@ -740,7 +740,7 @@ class ActionMultiTransform : public Action
 
 public:
 
-    ActionMultiTransform(Vector3 d, std::vector<unsigned> id, std::string c, std::string v, Layer* ly)
+    ActionMultiTransform(Vector3 d, std::vector<unsigned> id, std::string c, std::string v, SceneLayer* ly)
         : component(c)
         , variable(v)
         , displacement(d)
@@ -758,11 +758,11 @@ class ActionDuplicate : public Action
     std::vector<unsigned> selectedObjects;
     std::vector<unsigned> duplicatedObjects;
     void Duplicate();
-    void ChildrenDuplicate(Layer* m_CurrentLayer, GameObject* original, GameObject* Clone);
+    void ChildrenDuplicate(SceneLayer* m_CurrentLayer, GameObject* original, GameObject* Clone);
 
 public:
 
-    ActionDuplicate(Layer* ly, std::vector<GameObject*> selected)
+    ActionDuplicate(SceneLayer* ly, std::vector<GameObject*> selected)
     {
         layerName = ly->GetName();
         for (auto& go : selected)

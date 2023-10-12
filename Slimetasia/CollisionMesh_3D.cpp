@@ -539,7 +539,7 @@ void CollisionMesh_3D::ComputeInertiaTensor(Matrix3& tensor, const float& mass) 
 //    pts.emplace_back(mypos + m_radius * (u * cosf(j * DITHER) + v * sinf(j * DITHER)));
 //    pts.emplace_back(mypos + m_radius * (u * cosf(i * DITHER) + v * sinf(i * DITHER)));
 //  }
-//  auto cam = const_cast<Layer*>(Renderer::Instance().GetCurrentEditorLayer())->GetEditorCamera();
+//  auto cam = const_cast<SceneLayer*>(Renderer::Instance().GetCurrentEditorLayer())->GetEditorCamera();
 //  if (cam)
 //  {
 //    const auto eye = cam->GetTransform()->GetWorldPosition();

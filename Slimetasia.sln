@@ -7,20 +7,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Slimetasia", "Slimetasia\Sl
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Release with Asserts|x64 = Release with Asserts|x64
-		Release without Editor|x64 = Release without Editor|x64
-		Release|x64 = Release|x64
+		Editor - Debug|x64 = Editor - Debug|x64
+		Editor - Release|x64 = Editor - Release|x64
+		Shipping|x64 = Shipping|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Debug|x64.ActiveCfg = Debug|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Debug|x64.Build.0 = Debug|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release with Asserts|x64.ActiveCfg = Release with Asserts|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release with Asserts|x64.Build.0 = Release with Asserts|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release without Editor|x64.ActiveCfg = Release without Editor|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release without Editor|x64.Build.0 = Release without Editor|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release|x64.ActiveCfg = Release|x64
-		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Release|x64.Build.0 = Release|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Editor - Debug|x64.ActiveCfg = Editor - Debug|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Editor - Debug|x64.Build.0 = Editor - Debug|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Editor - Release|x64.ActiveCfg = Editor - Release|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Editor - Release|x64.Build.0 = Editor - Release|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Shipping|x64.ActiveCfg = Shipping|x64
+		{2DCF08CA-AD31-4574-9616-C2F0FBE30CC2}.Shipping|x64.Build.0 = Shipping|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -855,7 +855,7 @@ int LuaScript::lua_EnableScript(lua_State* L)
 int LuaScript::layer_metatable(lua_State* L)
 {
     // New version
-    luaL_newmetatable(L, "Layer");
+    luaL_newmetatable(L, "SceneLayer");
     luaL_setfuncs(L, layerlib, 0);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
@@ -874,7 +874,7 @@ int LuaScript::layer_currentLayer(lua_State* L)
 {
     if (Application::InstancePtr())
     {
-        Layer* ly = Application::Instance().GetCurrentScene()->GetLayers().front();
+        SceneLayer* ly = Application::Instance().GetCurrentScene()->GetLayers().front();
         setlayer(L, (void*)ly);
         return 1;
     }
@@ -899,36 +899,36 @@ int LuaScript::layer_getLayer(lua_State* L)
 
 int LuaScript::layer_name(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     lua_pushstring(L, (*ly)->GetName().c_str());
     return 1;
 }
 
 int LuaScript::layer_createObject(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     std::string name = luaL_checkstring(L, 2);
     GameObject* go = (*ly)->CreateObject(name);
     pushGameObject(L, (void*)go);
     return 1;
 }
 
-Layer** LuaScript::checklayer(lua_State* L, int index, bool assert)
+SceneLayer** LuaScript::checklayer(lua_State* L, int index, bool assert)
 {
-    return check<Layer**>("Layer", L, index, assert);
+    return check<SceneLayer**>("SceneLayer", L, index, assert);
 }
 
 void LuaScript::setlayer(lua_State* L, void* ly)
 {
-    Layer** tmp = (Layer**)lua_newuserdata(L, sizeof(Layer*));
-    *tmp = (Layer*)ly;
-    luaL_getmetatable(L, "Layer");
+    SceneLayer** tmp = (SceneLayer**)lua_newuserdata(L, sizeof(SceneLayer*));
+    *tmp = (SceneLayer*)ly;
+    luaL_getmetatable(L, "SceneLayer");
     lua_setmetatable(L, -2);
 }
 
 int LuaScript::layer_find(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     std::string name = luaL_checkstring(L, 2);
     GameObject* go = (*ly)->GetObjectByName(name);
     if (!go)
@@ -940,7 +940,7 @@ int LuaScript::layer_find(lua_State* L)
 
 int LuaScript::layer_getObjects(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     auto Gos = (*ly)->GetObjectsList();
     auto GoIT = Gos.begin();
     lua_createtable(L, (int)Gos.size(), 0);
@@ -959,7 +959,7 @@ int LuaScript::layer_getObjects(lua_State* L)
 
 int LuaScript::layer_getObjectsByName(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     std::string name = luaL_checkstring(L, 2);
     auto Gos = (*ly)->GetObjectsByName(name);
     auto GoIT = Gos.begin();
@@ -980,7 +980,7 @@ int LuaScript::layer_getObjectsByName(lua_State* L)
 
 int LuaScript::layer_getObjectsBySubName(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     std::string name = luaL_checkstring(L, 2);
     auto Gos = (*ly)->GetObjectByStrMatch(name);
     auto GoIT = Gos.begin();
@@ -1001,7 +1001,7 @@ int LuaScript::layer_getObjectsBySubName(lua_State* L)
 
 int LuaScript::layer_getObjectByID(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     unsigned id = static_cast<unsigned>(luaL_checkinteger(L, 2));
     auto GO = (*ly)->GetObjectById(id);
     if (GO)
@@ -1014,7 +1014,7 @@ int LuaScript::layer_getObjectByID(lua_State* L)
 
 int LuaScript::layer_getObjectsByTag(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     std::string tag = luaL_checkstring(L, 2);
 
     auto Gos = (*ly)->GetObjectListByTag(tag);
@@ -1049,7 +1049,7 @@ int LuaScript::create_Layer(lua_State* L)
 
 int LuaScript::layer_DestroyAllObjectsWithTag(lua_State* L)
 {
-    Layer** ly = checklayer(L);
+    SceneLayer** ly = checklayer(L);
     std::string tag { luaL_checkstring(L, 2) };
     auto Gos = (*ly)->GetObjectListByTag(tag);
     for (auto& c : Gos)
@@ -2077,7 +2077,7 @@ int LuaScript::addGameObjectComponent(lua_State* L)
 int LuaScript::getGameObjectLayer(lua_State* L)
 {
     GameObject** go = checkGameObject(L);
-    Layer* ly = (*go)->GetParentLayer();
+    SceneLayer* ly = (*go)->GetParentLayer();
     setlayer(L, (void*)ly);
     return 1;
 }
@@ -2105,7 +2105,7 @@ int LuaScript::gameObject_SetParent(lua_State* L)
         (*go)->SetParentObject(parentId);
         (*go)->SetIsChildren(true);
 
-        Layer* ly = (*go)->GetParentLayer();
+        SceneLayer* ly = (*go)->GetParentLayer();
         GameObject* parent = ly->GetObjectById(parentId);
         ChildrenList childrens = parent->GetChildrenObjects();
         childrens.push_back((*go)->GetID());
@@ -2129,7 +2129,7 @@ int LuaScript::gameObject_UnParent(lua_State* L)
     unsigned parentId = (*go)->GetParentObject();
     if (parentId)
     {
-        Layer* ly = (*go)->GetParentLayer();
+        SceneLayer* ly = (*go)->GetParentLayer();
         GameObject* parent = (ly)->GetObjectById(parentId);
         if (parent != nullptr)
         {

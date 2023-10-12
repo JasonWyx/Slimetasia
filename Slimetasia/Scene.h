@@ -24,9 +24,9 @@ public:
     void Update(float dt);
     void PostFrameUpdate();
 
-    Layer* CreateLayer(std::string const& layerName);
-    Layer* CreateLayerWithoutCamera(std::string const& layerName);
-    Layer* GetLayerByName(std::string const& layerName) const;
+    SceneLayer* CreateLayer(std::string const& layerName);
+    SceneLayer* CreateLayerWithoutCamera(std::string const& layerName);
+    SceneLayer* GetLayerByName(std::string const& layerName) const;
     LayerList GetLayers() const;
     std::string GetName() const;
     void DeleteLayer(std::string const& layerName);

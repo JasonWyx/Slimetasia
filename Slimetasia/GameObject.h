@@ -5,14 +5,14 @@
 #include "luascript.h"
 
 class IComponent;
-class Layer;
+class SceneLayer;
 
 using GameObjectList = std::list<GameObject*>;
 using ChildrenList = std::list<unsigned>;
 
 class GameObject
 {
-    friend class Layer;
+    friend class SceneLayer;
 
     std::string m_Name;
     std::string m_Archetype;
@@ -23,7 +23,7 @@ class GameObject
     bool m_IsInitialized;
     bool m_IsFlaggedForDestroy;
     bool m_IsChildren;
-    Layer* m_ParentLayer;
+    SceneLayer* m_ParentLayer;
     unsigned m_ParentObject;
     ChildrenList m_ChildrenObjects;
     IComponentList m_ActiveComponents;
@@ -39,7 +39,7 @@ public:
     // For storing a list of objects in the same node for octree
     GameObject* m_NextObj;
 
-    GameObject(Layer* parentLayer, unsigned id);
+    GameObject(SceneLayer* parentLayer, unsigned id);
     ~GameObject();
 
     void Update(float dt);
@@ -62,7 +62,7 @@ public:
     void SetParentObject(unsigned p) { m_ParentObject = p; }
     void AttachChild(unsigned childObject);
     void RemoveChild(unsigned childObject);
-    Layer* GetParentLayer() const;
+    SceneLayer* GetParentLayer() const;
     unsigned GetParentObject() const;
     unsigned GetChildObjectByName(std::string const& objectName) const;
     unsigned GetChildObjectByNameCascade(std::string const& objectName) const;
