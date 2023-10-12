@@ -26,6 +26,8 @@ export template <ArithmeticType BaseType, unsigned Components>
     requires(Components > 1)
 class Vector
 {
+    static constexpr bool IsBaseTypeFloat = std::is_floating_point_v<BaseType>;
+
 public:
 
     /// <summary>
@@ -74,9 +76,12 @@ public:
         }
     }
 
-    template <unsigned Index>
-        requires(Index < Components)
-    static constexpr Vector Base = MakeBase<Index>();
+    static consteval Vector Base(const unsigned index)
+    {
+        Vector result {};
+        result.values[index] = static_cast<BaseType>(1);
+        return result;
+    }
 
 #pragma region BASE
 
@@ -225,54 +230,79 @@ public:
     }
     constexpr BaseType SquareLength() const { return Dot(*this); }
     constexpr BaseType Length() const
-        requires(std::is_floating_point_v<BaseType>)
+        requires(IsBaseTypeFloat)
     {
         return static_cast<BaseType>(std::sqrtf(SquareLength()));
     }
-
     constexpr BaseType SquareDistance(const Vector& other) { return (other - *this).SquareLength(); }
-    constexpr BaseType Distance(const Vector& other) { return (other - *this).Length(); }
+    constexpr BaseType Distance(const Vector& other)
+        requires(IsBaseTypeFloat)
+    {
+        return (other - *this).Length();
+    }
 
     void Normalize() { (*this) /= this->Length(); }
     constexpr Vector Normalized() const { return Vector { *this } /= this->Length(); }
 
     constexpr Vector Projection(const Vector& other) const
-        requires(std::is_floating_point_v<BaseType>)
+        requires(IsBaseTypeFloat)
     {
         const Vector otherNormalized = other.Normalized();
         const BaseType length = Dot(otherNormalized);
         return otherNormalized * length;
     }
 
+    constexpr Vector Min(const Vector& other) const
+    {
+        Vector result {};
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            result.values[i] = std::min(values[i], other.values[i]);
+        }
+        return result;
+    }
+    constexpr Vector Max(const Vector& other) const
+    {
+        Vector result {};
+        for (unsigned i = 0; i < Components; ++i)
+        {
+            result.values[i] = std::max(values[i], other.values[i]);
+        }
+        return result;
+    }
+
 #pragma endregion MATH
 
-#pragma region 2_COMPONENTS
+#pragma region VECTOR2
 
     constexpr BaseType Angle() const
-        requires(std::is_floating_point_v<BaseType> && Components == 2)
+        requires(Components == 2 && std ::is_floating_point_v<BaseType>)
     {
         return std::atan2f(-values[1], -values[0]) * RAD_TO_DEG + 180;
     }
 
     constexpr Vector Rotate(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components == 2)
+        requires(Components == 2 && std ::is_floating_point_v<BaseType>)
     {
         return Vector { values[0] * std::cos(angle) - values[1] * std::sin(angle), values[0] * std::sin(angle) + values[1] * std::cos(angle) };
     }
 
-#pragma endregion 2_COMPONENTS
+#pragma endregion VECTOR2
 
-#pragma region 3_COMPONENTS
+#pragma region VECTOR3
 
     constexpr Vector Cross(const Vector& other) const
         requires(Components == 3)
     {
-        return Vector { values[1] * other.values[2] - values[2] * other.values[1], values[2] * other.values[0] - values[0] * other.values[2],
-            values[0] * other.values[1] - values[1] * other.values[0] };
+        return Vector {
+            values[1] * other.values[2] - values[2] * other.values[1],
+            values[2] * other.values[0] - values[0] * other.values[2],
+            values[0] * other.values[1] - values[1] * other.values[0],
+        };
     }
 
     constexpr Vector<BaseType, 2> PolarAngles() const
-        requires(std::is_floating_point_v<BaseType> && Components >= 3)
+        requires(Components >= 3 && IsBaseTypeFloat)
     {
         Vector tmp = Normalized();
         Vector<BaseType, 2> result;
@@ -284,7 +314,7 @@ public:
     }
 
     constexpr Vector RotateX(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components >= 3)
+        requires(Components >= 3 && std ::is_floating_point_v<BaseType>)
     {
         BaseType c = std::cosf(angle);
         BaseType s = std::sinf(angle);
@@ -293,7 +323,7 @@ public:
     }
 
     constexpr Vector RotateY(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components >= 3)
+        requires(Components >= 3 && std ::is_floating_point_v<BaseType>)
     {
         BaseType c = std::cosf(angle);
         BaseType s = std::sinf(angle);
@@ -302,7 +332,7 @@ public:
     }
 
     constexpr Vector RotateZ(const BaseType angle) const
-        requires(std::is_floating_point_v<BaseType> && Components >= 3)
+        requires(Components >= 3 && IsBaseTypeFloat)
     {
         BaseType c = std::cosf(angle);
         BaseType s = std::sinf(angle);
@@ -310,31 +340,7 @@ public:
         return Vector { c * values[0] + -s * values[1], s * values[0] + c * values[1], values[2] };
     }
 
-#pragma region 3_COMPONENTS
-
-private:
-
-    /// <summary>
-    /// Trying to be funny, meta programming initialization of value 1
-    /// </summary>
-    template <unsigned Index>
-    static constexpr Vector MakeBase()
-        requires(Index < Components)
-    {
-        return MakeBase(MakeNumberPack<Index, 0> {}, MakeNumberPack<Components - Index - 1, 0> {});
-    }
-
-    // E.g. Expansion of this for Vector4 would be
-    // FrontPacking... = 0, 0
-    // BackPacking...  = 0
-    //
-    // Vector { 0, 0, 1, 0 }
-    //
-    template <int... FrontPacking, int... BackPacking>
-    static constexpr Vector MakeBase(const NumberPack<FrontPacking...>&, const NumberPack<BackPacking...>&)
-    {
-        return Vector { static_cast<BaseType>(FrontPacking)..., static_cast<BaseType>(1), static_cast<BaseType>(BackPacking)... };
-    }
+#pragma region VECTOR3
 
 protected:
 

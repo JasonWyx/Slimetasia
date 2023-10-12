@@ -30,9 +30,9 @@ class Matrix
 {
     // Helper traits
     static constexpr unsigned TotalComponents = RowCount * ColumnCount;
-    static constexpr bool IsSquare = RowCount == ColumnCount;
-    static constexpr bool IsFloating = std::is_floating_point_v<BaseType>;
-    static constexpr bool IsIntegral = std::is_integral_v<BaseType>;
+    static constexpr bool IsMatrixSquare = RowCount == ColumnCount;
+    static constexpr bool IsBaseTypeFloat = std::is_floating_point_v<BaseType>;
+    static constexpr bool IsBaseTypeIntegral = std::is_integral_v<BaseType>;
     static constexpr BaseType BaseEpsilon = std::numeric_limits<BaseType>::epsilon();
 
 public:
@@ -69,7 +69,7 @@ public:
 #pragma region BASE
 
     static constexpr Matrix Identity()
-        requires(IsSquare)
+        requires(IsMatrixSquare)
     {
         constexpr unsigned TotalCount = RowCount * ColumnCount;
         constexpr unsigned PaddingCount = RowCount + 1;
@@ -161,7 +161,7 @@ public:
 
     // Only square matrix can transpose in place
     void Transpose()
-        requires(IsSquare)
+        requires(IsMatrixSquare)
     {
         for (unsigned rowIndex = 0; rowIndex < ColumnCount; ++rowIndex)
         {
@@ -263,7 +263,7 @@ public:
 
     // Special case where multiplication of matrix with NxN dimensions
     Matrix& operator*=(const Matrix& other)
-        requires(std::is_same_v<Matrix, decltype(*this * other)>)
+        requires(ColumnCount == RowCount)
     {
         *this = *this * other;
         return *this;
@@ -272,17 +272,15 @@ public:
     constexpr Vector<BaseType, RowCount> operator*(const Vector<BaseType, ColumnCount>& vector)
     {
         Vector<BaseType, RowCount> tmp;
-
         for (unsigned i = 0; i < RowCount; ++i)
         {
             tmp[i] = GetRow(i).Dot(vector);
         }
-
         return tmp;
     }
 
     constexpr BaseType Determinant() const
-        requires(IsSquare && IsFloating)
+        requires(IsMatrixSquare && IsBaseTypeFloat)
     {
         constexpr unsigned Dimension = RowCount;
 
@@ -312,7 +310,7 @@ public:
     }
 
     constexpr Matrix Inverted() const
-        requires(IsSquare && IsFloating /* && Invertible<decltype(*this)>*/)
+        requires(IsMatrixSquare && IsBaseTypeFloat)
     {
         Matrix tmp { *this };
         tmp.Invert();
@@ -321,7 +319,7 @@ public:
 
     template <unsigned Components>
     static constexpr Matrix Scale(const Vector<BaseType, Components>& vector)
-        requires(IsSquare)
+        requires(IsMatrixSquare)
     {
         constexpr unsigned MinCount = std::min(Components, RowCount);
 
@@ -335,17 +333,17 @@ public:
 
     template <ArithmeticType... ArgTypes>
     static constexpr Matrix Scale(const ArgTypes... args)
-        requires(IsSquare && sizeof...(ArgTypes) <= RowCount)
+        requires(IsMatrixSquare && sizeof...(ArgTypes) <= RowCount)
     {
         return Matrix::Scale(Vector { static_cast<BaseType>(args)... });
     }
 
 #pragma endregion MATH
 
-#pragma region 2x2
+#pragma region MATRIX2x2
 
     void Invert()
-        requires(IsSquare && RowCount == 2 && IsFloating)
+        requires(RowCount == 2 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType determinant = Determinant();
 
@@ -353,7 +351,7 @@ public:
         {
             throw std::logic_error("Trying to invert a matrix with determinant close to 0");
             return;
-        }
+        } 
 
         std::swap(values[0].values[3]);
         values[1] = -values[1];
@@ -363,17 +361,17 @@ public:
     }
 
     static constexpr Matrix Rotate(BaseType angle)
-        requires(IsSquare && RowCount == 2 && IsFloating)
+        requires(RowCount == 2 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix { std::cos(angle), std::sin(angle), -std::sin(angle), std::cos(angle) };
     }
 
-#pragma endregion 2x2
+#pragma endregion MATRIX2x2
 
-#pragma region 3x3
+#pragma region MATRIX3x3
 
     void Invert()
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType determinant = Determinant();
 
@@ -399,7 +397,7 @@ public:
     }
 
     static constexpr Matrix RotateX(const BaseType angle)
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType c = std::cos(angle);
         const BaseType s = std::sin(angle);
@@ -414,7 +412,7 @@ public:
         return tmp;
     }
     static constexpr Matrix RotateY(const BaseType angle)
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType c = std::cos(angle);
         const BaseType s = std::sin(angle);
@@ -429,7 +427,7 @@ public:
         return tmp;
     }
     static constexpr Matrix RotateZ(const BaseType angle)
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType c = std::cos(angle);
         const BaseType s = std::sin(angle);
@@ -444,18 +442,18 @@ public:
         return tmp;
     }
     static constexpr Matrix Rotate(const Vector<BaseType, RowCount>& rotateAngles)
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return RotateX(rotateAngles[0]) * RotateY(rotateAngles[1]) * RotateZ(rotateAngles[2]);
     }
     static constexpr Matrix Rotate(const BaseType pitch, const BaseType roll, const BaseType yaw)
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix::Rotate(Vector<BaseType, RowCount> { pitch, roll, yaw });
     }
 
     static constexpr Matrix Rotate(const Vector<BaseType, RowCount>& axis, const BaseType angle)
-        requires(IsSquare && RowCount == 3 && IsFloating)
+        requires(RowCount == 3 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType c = std::cos(angle);                // cosine
         const BaseType s = std::sin(angle);                // sine
@@ -476,18 +474,18 @@ public:
             axis[2] * axis[2] * c1 + c,
         };
     }
-#pragma endregion 3x3
+#pragma endregion MATRIX3x3
 
-#pragma region 4x4
+#pragma region MATRIX4x4
 
     constexpr BaseType GetCoFactor(BaseType m0, BaseType m1, BaseType m2, BaseType m3, BaseType m4, BaseType m5, BaseType m6, BaseType m7, BaseType m8) const
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return m0 * (m4 * m8 - m5 * m7) - m1 * (m3 * m8 - m5 * m6) + m2 * (m3 * m7 - m4 * m6);
     }
 
     void Invert()
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType determinant = Determinant();
 
@@ -541,7 +539,7 @@ public:
     }
 
     void Decompose(Vector<BaseType, 3>& translate, Vector<BaseType, 3>& rotation, Vector<BaseType, 3>& scale) const
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         using ReturnVectorType = Vector<BaseType, 3>;
 
@@ -569,7 +567,7 @@ public:
     }
 
     static constexpr Matrix Translate(const Vector<BaseType, 3>& translate)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         Matrix tmp {};
         tmp.SetColumn(3, translate);
@@ -577,35 +575,35 @@ public:
     }
 
     static constexpr Matrix Rotate(const Vector<BaseType, 3>& axis, const BaseType angle)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix { Matrix<BaseType, 3, 3>::Rotate(axis, angle) };
     }
 
     static constexpr Matrix RotateX(const BaseType angle)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix { Matrix<BaseType, 3, 3>::RotateX(angle) };
     }
     static constexpr Matrix RotateY(const BaseType angle)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix { Matrix<BaseType, 3, 3>::RotateY(angle) };
     }
     static constexpr Matrix RotateZ(const BaseType angle)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix { Matrix<BaseType, 3, 3>::RotateZ(angle) };
     }
     static constexpr Matrix FrustumPerspective(const BaseType left, const BaseType right, const BaseType bottom, const BaseType top, const BaseType near, const BaseType far)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix { 2 * near / (right - left), 0, 0, 0, 0, 2 * near / (top - bottom), 0, 0, (right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1, 0,
             0, -(2 * far * near) / (far - near), 0 };
     }
 
     static constexpr Matrix FrustumOrthographic(const BaseType left, const BaseType right, const BaseType bottom, const BaseType top, const BaseType near, const BaseType far)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         return Matrix {
             2 / (right - left),
@@ -628,7 +626,7 @@ public:
     }
 
     static constexpr Matrix Perspective(const BaseType fov, const BaseType aspectRatio, const BaseType near, const BaseType far)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         const BaseType tanFov = std::tan(fov / 2);
         const BaseType height = near * tanFov;
@@ -638,7 +636,7 @@ public:
     }
 
     static constexpr Matrix LookAt(const Vector<BaseType, 3>& eye, const Vector<BaseType, 3>& center, const Vector<BaseType, 3>& worldUp)
-        requires(IsSquare && RowCount == 4 && IsFloating)
+        requires(RowCount == 4 && IsMatrixSquare && IsBaseTypeFloat)
     {
         Vector<BaseType, 3> forward = eye - center;
         forward.Normalize();
@@ -655,7 +653,7 @@ public:
         return transform;
     }
 
-#pragma endregion 4x4
+#pragma endregion MATRIX4x4
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& other);
 

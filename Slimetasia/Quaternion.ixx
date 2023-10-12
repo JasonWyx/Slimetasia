@@ -9,11 +9,13 @@ import Math;
 import Vector;
 import Matrix;
 
-export template <ArithmeticType BaseType>
+// export template <std::floating_point BaseType> // Why doesn't this work?!
+export template <typename BaseType>
+    requires(std::is_floating_point_v<BaseType>)
 class Quaternion
 {
     static constexpr unsigned Components = 4;
-    using VectorBase = Vector<float, Components>;
+    using VectorBase = typename Vector<BaseType, Components>;
 
 public:
 
@@ -61,7 +63,7 @@ public:
 
     /// Not sure why this doesn't work but i'm probably spending too much time trying to get it to work
     // static constexpr Quaternion Identity() { return Quaternion { VectorBase::Base<3> }; }
-    static constexpr Quaternion Identity() { return Quaternion { 0, 0, 0, 1 }; }
+    static consteval Quaternion Identity() { return Quaternion { VectorBase::Base(3) }; }
 
 #pragma region BASE
 
@@ -232,11 +234,7 @@ public:
         return result;
     }
     constexpr BaseType SquareLength() const { return Dot(*this); }
-    constexpr BaseType Length() const
-        requires(std::is_floating_point_v<BaseType>)
-    {
-        return static_cast<BaseType>(std::sqrtf(SquareLength()));
-    }
+    constexpr BaseType Length() const { return static_cast<BaseType>(std::sqrtf(SquareLength())); }
 
     void Normalize() { (*this) /= this->Length(); }
     constexpr Quaternion Normalized() const { return Quaternion { *this } /= this->Length(); }
@@ -269,7 +267,6 @@ public:
             values[3],
         };
     }
-
     constexpr Quaternion Integrate(const Vector<BaseType, 3>& vector, BaseType scalar)
     {
         Quaternion q { vector * scalar };
