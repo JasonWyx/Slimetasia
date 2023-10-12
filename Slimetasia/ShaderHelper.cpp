@@ -1,8 +1,8 @@
 module;
 
-#include <Windows.h>
-#include <atlcomcli.h>
+#include <windows.h>
 #include <dxc/dxcapi.h>
+#include <winrt/base.h>
 
 #include <filesystem>
 #include <string>
@@ -19,21 +19,21 @@ namespace ShaderHelper
     {
         HRESULT hres {};
 
-        CComPtr<IDxcLibrary> library {};
+        winrt::com_ptr<IDxcLibrary> library {};
         hres = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
         ASSERT(!FAILED(hres));
 
-        CComPtr<IDxcCompiler3> compiler {};
+        winrt::com_ptr<IDxcCompiler3> compiler {};
         hres = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
         ASSERT(!FAILED(hres));
 
-        CComPtr<IDxcUtils> utils {};
+        winrt::com_ptr<IDxcUtils> utils {};
         hres = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
         ASSERT(!FAILED(hres));
 
         uint32_t codePage = DXC_CP_ACP;
-        CComPtr<IDxcBlobEncoding> sourceBlob {};
-        hres = utils->LoadFile(filePath.c_str(), &codePage, &sourceBlob);
+        winrt::com_ptr<IDxcBlobEncoding> sourceBlob {};
+        hres = utils->LoadFile(filePath.c_str(), &codePage, sourceBlob.put());
         ASSERT(!FAILED(hres));
 
         LPCWSTR targetProfile {};
@@ -66,7 +66,7 @@ namespace ShaderHelper
         buffer.Ptr = sourceBlob->GetBufferPointer();
         buffer.Size = sourceBlob->GetBufferSize();
 
-        CComPtr<IDxcResult> result {};
+        winrt::com_ptr<IDxcResult> result {};
         hres = compiler->Compile(&buffer, args.data(), static_cast<uint32_t>(args.size()), nullptr, IID_PPV_ARGS(&result));
         ASSERT(!FAILED(hres));
 
@@ -76,8 +76,8 @@ namespace ShaderHelper
 
         if (FAILED(hres) && result)
         {
-            CComPtr<IDxcBlobEncoding> errorBlob {};
-            hres = result->GetErrorBuffer(&errorBlob);
+            winrt::com_ptr<IDxcBlobEncoding> errorBlob {};
+            hres = result->GetErrorBuffer(errorBlob.put());
             if (SUCCEEDED(hres) && errorBlob)
             {
                 std::cerr << "Shader compilation failed:\n\n" << static_cast<const char*>(errorBlob->GetBufferPointer());
@@ -85,8 +85,8 @@ namespace ShaderHelper
         }
         else
         {
-            CComPtr<IDxcBlob> code {};
-            result->GetResult(&code);
+            winrt::com_ptr<IDxcBlob> code {};
+            result->GetResult(code.put());
             const char* codeBufferPointer = static_cast<char*>(code->GetBufferPointer());
             spirvCode = std::vector<char>(codeBufferPointer, codeBufferPointer + code->GetBufferSize());
         }
