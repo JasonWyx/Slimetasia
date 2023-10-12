@@ -82,7 +82,7 @@ void RendererVk::Update(const float deltaTime)
     std::vector<vk::Semaphore> waitRenderSemaphores { m_ImageAvailableSemaphores[m_CurrentFrame] };
     std::vector<vk::Semaphore> waitPresentSemaphores {};
 
-    const FrameInfo& frameInfo { m_CurrentFrame, imageIndex };
+    const FrameInfo frameInfo { m_CurrentFrame, imageIndex };
 
 #ifdef EDITOR
     const RenderOutputs& renderFinalOutputs = m_RenderFinal->Render(frameInfo, {}, {});
@@ -326,9 +326,7 @@ vk::CommandBuffer RendererVk::CreateOneShotCommandBuffer()
     ASSERT(m_Device);
 
     const vk::CommandBufferAllocateInfo allocateInfo { m_OneShotCommandPool, {}, 1 };
-
-    vk::CommandBuffer commandBuffer = m_Device.allocateCommandBuffers(allocateInfo).front();
-
+    const vk::CommandBuffer commandBuffer = m_Device.allocateCommandBuffers(allocateInfo).front();
     const vk::CommandBufferBeginInfo beginInfo { vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
 
     commandBuffer.begin(beginInfo);
@@ -346,7 +344,7 @@ void RendererVk::SubmitOneShotCommandBuffer(const vk::CommandBuffer commandBuffe
     queue.submit(submitInfo, signalFence);
 
     m_Device.waitIdle();
-    m_Device.freeCommandBuffers(m_OneShotCommandPool, { commandBuffer });
+    m_Device.freeCommandBuffers(m_OneShotCommandPool, commandBuffer);
 }
 
 VkDescriptorSet RendererVk::GetRenderAttachment() const

@@ -40,11 +40,11 @@ public:
 
     VkDescriptorSet GetRenderAttachment() const;
 
-    // void SetCurrentLayer(Layer* layer);
+    // void SetCurrentLayer(SceneLayer* layer);
     // void SetWindowSize(iVector2 const& windowSize);
     // iVector2 GetWindowSize() const;
 
-    // Layer* GetCurrentEditorLayer() const { return m_CurrentLayer; }
+    // SceneLayer* GetCurrentEditorLayer() const { return m_CurrentLayer; }
     // GLuint GetRenderTexture() const;
     // GLuint GetPickedObject(iVector2 mousePosition) const;
     // void SetSelectedObjects(std::vector<unsigned> const& selectedObjects);

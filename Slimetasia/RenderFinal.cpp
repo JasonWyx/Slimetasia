@@ -30,7 +30,8 @@ RenderOutputs RenderFinal::Render(const FrameInfo& frameInfo, const std::vector<
     commandBuffer.begin(beginInfo);
 
     const vk::ClearValue clearColor { vk::ClearColorValue {} };
-    const vk::RenderPassBeginInfo renderPassBeginInfo { m_RenderPass, m_Framebuffers[frameInfo.m_SwapchainIndex], vk::Rect2D { {}, m_Context.m_WindowExtent }, clearColor };
+    const uint32_t framebufferIndex = m_Context.m_IsRenderToTarget ? frameInfo.m_FrameIndex : frameInfo.m_SwapchainIndex;
+    const vk::RenderPassBeginInfo renderPassBeginInfo { m_RenderPass, m_Framebuffers[framebufferIndex], vk::Rect2D { {}, m_Context.m_WindowExtent }, clearColor };
 
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);

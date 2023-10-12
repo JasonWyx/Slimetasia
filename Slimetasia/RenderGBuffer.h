@@ -27,7 +27,6 @@ protected:
 
 private:
 
-
     // Copied from GeometryPass.h
     enum GBufferIndex
     {
@@ -42,6 +41,8 @@ private:
 #endif
         Count
     };
+
+    void RenderScene(const vk::CommandBuffer& commandBuffer);
 
     std::vector<std::vector<ImageObject*>> m_GBufferImages;
 };

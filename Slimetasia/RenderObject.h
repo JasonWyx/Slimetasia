@@ -22,7 +22,7 @@ struct RenderContext
 struct RenderOutputs
 {
     vk::Semaphore m_SignaledSemaphore {};
-    vk::Fence m_SignaledFence {};
+    vk::Fence m_SignaledFence {}; // not really used yet, usually synchronization on cpu is external
     std::vector<vk::ImageView> m_OutputImages {};
     std::vector<vk::BufferView> m_OutputBuffers {};
 };

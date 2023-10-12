@@ -1,7 +1,13 @@
 #include "RenderGBuffer.h"
 
+#include "Application.h"
+#include "Camera.h"
 #include "CorePrerequisites.h"
+#include "Layer.h"
 #include "Mesh.h"
+#include "RenderLayer.h"
+#include "Scene.h"
+#include "MeshRenderer.h"
 
 struct UniformBufferObject
 {
@@ -41,9 +47,29 @@ RenderOutputs RenderGBuffer::Render(const FrameInfo& frameInfo, const std::vecto
     commandBuffer.begin(beginInfo);
 
     const std::vector<vk::ClearValue> clearValues { GBufferIndex::Count + 1 };  // +1 for depth buffer
-
     const vk::RenderPassBeginInfo renderPassBeginInfo { m_RenderPass, m_Framebuffers[frameInfo.m_FrameIndex], vk::Rect2D { {}, m_Context.m_RenderExtent }, clearValues };
-    return {};
+
+    commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
+
+    const vk::Viewport viewport { 0, 0, static_cast<float>(m_Context.m_RenderExtent.width), static_cast<float>(m_Context.m_RenderExtent.height) };
+    const vk::Rect2D scissor { {}, m_Context.m_RenderExtent };
+
+    commandBuffer.setViewport(0, viewport);
+    commandBuffer.setScissor(0, scissor);
+
+    RenderScene(commandBuffer);
+
+    commandBuffer.endRenderPass();
+    commandBuffer.end();
+
+    const vk::Semaphore& signalSemaphore = m_SignalSemaphores[frameInfo.m_FrameIndex];
+    const std::vector<vk::PipelineStageFlags> waitStages { waitSemaphores.size(), vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    const vk::SubmitInfo commandSubmitInfo { waitSemaphores, waitStages, commandBuffer, signalSemaphore };
+
+    m_Context.m_Queues[QueueType::Graphics].submit(commandSubmitInfo, signalFence);
+
+    return RenderOutputs { signalSemaphore };
 }
 
 void RenderGBuffer::SetWindowExtent(const vk::Extent2D& extent) {}
@@ -52,7 +78,7 @@ void RenderGBuffer::CreateDescriptors()
 {
     // todo: can be optimized. currently is assuming non-instanced rendering.
     const std::vector<vk::DescriptorPoolSize> poolSizes {
-        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, m_Context.m_FramesInFlight * MAX_OBJECTS * 4 }, // 4 different texture types
+        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, m_Context.m_FramesInFlight * MAX_OBJECTS * 4 },  // 4 different texture types
         vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, m_Context.m_FramesInFlight * MAX_OBJECTS },
     };
 
@@ -76,6 +102,7 @@ void RenderGBuffer::CreateRenderPass()
         vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
             vk::ImageLayout::eColorAttachmentOptimal },
 #ifdef EDITOR
+        // todo: Check if still need debug texture coordinates and picking ID
         vk::AttachmentDescription { {}, vk::Format::eR16G16B16A16Sfloat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
             vk::ImageLayout::eColorAttachmentOptimal },
         vk::AttachmentDescription { {}, vk::Format::eR32Uint, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, vk::ImageLayout::eUndefined,
@@ -243,4 +270,41 @@ void RenderGBuffer::CreatePipeline()
     ASSERT(resultValue.result == vk::Result::eSuccess);
 
     m_Pipeline = resultValue.value;
+}
+
+void RenderGBuffer::RenderScene(const vk::CommandBuffer& commandBuffer)
+{
+    Scene* scene = Application::Instance().GetCurrentScene();
+    if (scene == nullptr)
+    {
+        return;
+    }
+
+    const std::list<SceneLayer*>& layers = scene->GetLayers();
+
+    // Render for each layer
+    for (SceneLayer* layer : layers)
+    {
+        const RenderLayer& renderLayer = layer->GetRenderLayer();
+
+        // todo: Just get first main camera for now
+        const std::vector<Camera*>& cameras = renderLayer.GetCameras();
+        const Camera* camera = nullptr;
+        for (const Camera* currCamera : cameras)
+        {
+            if (currCamera != nullptr && currCamera->IsMainCamera())
+            {
+                camera = currCamera;
+                break;
+            }
+        }
+
+        // No main camera, do nothing
+        if (camera == nullptr)
+        {
+            continue;
+        }
+
+        const std::vector<MeshRenderer*>& meshes = renderLayer.GetMeshRenderers();
+    }
 }

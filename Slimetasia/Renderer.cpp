@@ -262,7 +262,7 @@ void Renderer::Update(float dt)
     {
         LayerList activeLayers = Application::Instance().GetCurrentScene()->GetLayers();
 
-        for (Layer* currLayer : activeLayers)
+        for (SceneLayer* currLayer : activeLayers)
         {
             const RenderLayer& renderLayer = currLayer->GetRenderLayer();
             const std::vector<Camera*>& cameras = renderLayer.GetCameras();
@@ -517,7 +517,7 @@ void Renderer::DrawSelectionBox(float left, float right, float top, float bottom
     m_DebugPass.DrawSelectionBox(left, right, top, bottom);
 }
 
-void Renderer::SetCurrentLayer(Layer* layer)
+void Renderer::SetCurrentLayer(SceneLayer* layer)
 {
     m_CurrentLayer = layer;
 }
